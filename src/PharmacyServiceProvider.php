@@ -86,6 +86,7 @@ class PharmacyServiceProvider extends ServiceProvider
     protected function registerRoutes()
     {
         Route::group($this->routeConfiguration(), function () {
+
             $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         });
     }
@@ -93,8 +94,8 @@ class PharmacyServiceProvider extends ServiceProvider
     protected function routeConfiguration(): array
     {
         return [
-            'prefix' => config('ams.prefix'),
-            'middleware' => config('ams.middleware'),
+            'prefix' => config('pharmacy.prefix'),
+            'middleware' => config('pharmacy.middleware'),
         ];
     }
 

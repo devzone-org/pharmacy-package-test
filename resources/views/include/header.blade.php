@@ -13,7 +13,7 @@
                 </div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
-                        @include('ams::include.header-links')
+                        @include('pharmacy::include.header-links')
                     </div>
                 </div>
             </div>
@@ -58,7 +58,7 @@
     <!-- Mobile menu, show/hide based on menu state. -->
     <div class="md:hidden" id="mobile-menu" x-show="menu">
         <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-        @include('ams::include.header-links-mobile')
+        @include('pharmacy::include.header-links-mobile')
         </div>
         <div class="pt-4 pb-3 border-t border-gray-700">
             <div class="flex items-center px-5">

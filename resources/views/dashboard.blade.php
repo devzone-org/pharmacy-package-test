@@ -1,4 +1,4 @@
-@extends('ams::layouts.master')
+@extends('pharmacy::layouts.master')
 
 @section('title') Dashboard @endsection
 
