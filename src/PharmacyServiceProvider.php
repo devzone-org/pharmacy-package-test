@@ -2,6 +2,7 @@
 
 namespace Devzone\Pharmacy;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class PharmacyServiceProvider extends ServiceProvider
@@ -13,11 +14,12 @@ class PharmacyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'devzone');
-        // $this->loadViewsFrom(__DIR__.'/../resources/views', 'devzone');
-        // $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        // $this->loadRoutesFrom(__DIR__.'/routes.php');
+        // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'pharmacy');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'pharmacy');
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->registerRoutes();
 
+        $this->registerLivewireComponent();
         // Publishing is only necessary when using the CLI.
         if ($this->app->runningInConsole()) {
             $this->bootForConsole();
@@ -62,14 +64,14 @@ class PharmacyServiceProvider extends ServiceProvider
         ], 'pharmacy.config');
 
         // Publishing the views.
-        /*$this->publishes([
-            __DIR__.'/../resources/views' => base_path('resources/views/vendor/devzone'),
-        ], 'pharmacy.views');*/
+        $this->publishes([
+            __DIR__.'/../resources/views' => base_path('resources/views/vendor/pharmacy'),
+        ], 'pharmacy.views');
 
         // Publishing assets.
-        /*$this->publishes([
-            __DIR__.'/../resources/assets' => public_path('vendor/devzone'),
-        ], 'pharmacy.views');*/
+        $this->publishes([
+            __DIR__.'/../resources/assets' => public_path('pharmacy'),
+        ], 'pharmacy.assets');
 
         // Publishing the translation files.
         /*$this->publishes([
@@ -78,5 +80,26 @@ class PharmacyServiceProvider extends ServiceProvider
 
         // Registering package commands.
         // $this->commands([]);
+    }
+
+
+    protected function registerRoutes()
+    {
+        Route::group($this->routeConfiguration(), function () {
+            $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        });
+    }
+
+    protected function routeConfiguration(): array
+    {
+        return [
+            'prefix' => config('ams.prefix'),
+            'middleware' => config('ams.middleware'),
+        ];
+    }
+
+
+    private function registerLivewireComponent(){
+        //Livewire::component('chart-of-accounts.listing',Listing::class);
     }
 }
