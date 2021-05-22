@@ -2,8 +2,12 @@
 
 namespace Devzone\Pharmacy;
 
+use Devzone\Pharmacy\Http\Livewire\MasterData\Category;
+use Devzone\Pharmacy\Http\Livewire\MasterData\Manufacture;
+use Devzone\Pharmacy\Http\Livewire\MasterData\Racks;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
 class PharmacyServiceProvider extends ServiceProvider
 {
@@ -15,8 +19,8 @@ class PharmacyServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'pharmacy');
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'pharmacy');
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'pharmacy');
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->registerRoutes();
 
         $this->registerLivewireComponent();
@@ -26,6 +30,60 @@ class PharmacyServiceProvider extends ServiceProvider
         }
     }
 
+    protected function registerRoutes()
+    {
+        Route::group($this->routeConfiguration(), function () {
+
+            $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+        });
+    }
+
+    protected function routeConfiguration(): array
+    {
+        return [
+            'prefix' => config('pharmacy.prefix'),
+            'middleware' => config('pharmacy.middleware'),
+        ];
+    }
+
+    private function registerLivewireComponent()
+    {
+        Livewire::component('master-data.manufacture', Manufacture::class);
+        Livewire::component('master-data.category', Category::class);
+        Livewire::component('master-data.racks', Racks::class);
+    }
+
+    /**
+     * Console-specific booting.
+     *
+     * @return void
+     */
+    protected function bootForConsole(): void
+    {
+        // Publishing the configuration file.
+        $this->publishes([
+            __DIR__ . '/../config/pharmacy.php' => config_path('pharmacy.php'),
+        ], 'pharmacy.config');
+
+        // Publishing the views.
+        $this->publishes([
+            __DIR__ . '/../resources/views' => base_path('resources/views/vendor/pharmacy'),
+        ], 'pharmacy.views');
+
+        // Publishing assets.
+        $this->publishes([
+            __DIR__ . '/../resources/assets' => public_path('pharmacy'),
+        ], 'pharmacy.assets');
+
+        // Publishing the translation files.
+        /*$this->publishes([
+            __DIR__.'/../resources/lang' => resource_path('lang/vendor/devzone'),
+        ], 'pharmacy.views');*/
+
+        // Registering package commands.
+        // $this->commands([]);
+    }
+
     /**
      * Register any package services.
      *
@@ -33,7 +91,7 @@ class PharmacyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/pharmacy.php', 'pharmacy');
+        $this->mergeConfigFrom(__DIR__ . '/../config/pharmacy.php', 'pharmacy');
 
         // Register the service the package provides.
         $this->app->singleton('pharmacy', function ($app) {
@@ -49,58 +107,5 @@ class PharmacyServiceProvider extends ServiceProvider
     public function provides()
     {
         return ['pharmacy'];
-    }
-
-    /**
-     * Console-specific booting.
-     *
-     * @return void
-     */
-    protected function bootForConsole(): void
-    {
-        // Publishing the configuration file.
-        $this->publishes([
-            __DIR__.'/../config/pharmacy.php' => config_path('pharmacy.php'),
-        ], 'pharmacy.config');
-
-        // Publishing the views.
-        $this->publishes([
-            __DIR__.'/../resources/views' => base_path('resources/views/vendor/pharmacy'),
-        ], 'pharmacy.views');
-
-        // Publishing assets.
-        $this->publishes([
-            __DIR__.'/../resources/assets' => public_path('pharmacy'),
-        ], 'pharmacy.assets');
-
-        // Publishing the translation files.
-        /*$this->publishes([
-            __DIR__.'/../resources/lang' => resource_path('lang/vendor/devzone'),
-        ], 'pharmacy.views');*/
-
-        // Registering package commands.
-        // $this->commands([]);
-    }
-
-
-    protected function registerRoutes()
-    {
-        Route::group($this->routeConfiguration(), function () {
-
-            $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
-        });
-    }
-
-    protected function routeConfiguration(): array
-    {
-        return [
-            'prefix' => config('pharmacy.prefix'),
-            'middleware' => config('pharmacy.middleware'),
-        ];
-    }
-
-
-    private function registerLivewireComponent(){
-        //Livewire::component('chart-of-accounts.listing',Listing::class);
     }
 }
