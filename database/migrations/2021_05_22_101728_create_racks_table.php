@@ -15,7 +15,7 @@ class CreateRacksTable extends Migration
     {
         Schema::create('racks', function (Blueprint $table) {
             $table->id();
-            $table->string('location',100);
+
             $table->string('name',100);
             $table->string('tier',100)->nullable();
             $table->char('status',1)->default('f');

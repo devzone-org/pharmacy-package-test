@@ -8,7 +8,7 @@ use Livewire\Component;
 class Racks extends Component
 {
     public $add = [
-        'location' => '',
+
         'name' => '',
         'status' => 't',
         'tier' => ''
@@ -16,7 +16,7 @@ class Racks extends Component
 
     public $edit = [
         'id' => '',
-        'location' => '',
+
         'name' => '',
         'status' => 't',
         'tier' => ''
@@ -29,7 +29,6 @@ class Racks extends Component
         'add.name' => 'required|string',
         'add.status' => 'required|in:t,f',
         'add.tier' => 'nullable|string',
-        'add.location' => 'required|string'
     ];
 
 
@@ -37,7 +36,7 @@ class Racks extends Component
         'add.name' => 'name',
         'add.tier' => 'tier',
         'add.status' => 'status',
-        'add.location' => 'location',
+
     ];
 
 
@@ -51,14 +50,14 @@ class Racks extends Component
     {
         $this->validate();
 
-        if (Rack::where('name', $this->add['name'])->where('location', $this->add['location'])
+        if (Rack::where('name', $this->add['name'])->where('tier', $this->add['tier'])
             ->exists()) {
-            $this->addError('name', 'The name already exists against location.');
+            $this->addError('name', 'The name already exists against tier.');
             return;
         }
         Rack::create([
             'name' => $this->add['name'],
-            'location' => $this->add['location'],
+
             'status' => $this->add['status'],
             'tier' => !empty($this->add['tier']) ? $this->add['tier'] : null
         ]);
@@ -84,16 +83,16 @@ class Racks extends Component
         }
 
 
-        if (Rack::where('name', $this->edit['name'])->where('location', $this->edit['location'])
+        if (Rack::where('name', $this->edit['name'])->where('tier', $this->edit['tier'])
             ->where('id', '!=', $this->edit['id'])->exists()) {
-            $this->error = 'The name already exists against location.';
+            $this->error = 'The name already exists against tier.';
             return;
         }
 
 
         Rack::find($this->edit['id'])->update([
             'name' => $this->edit['name'],
-            'location' => $this->edit['location'],
+
             'status' => $this->edit['status'],
             'tier' => !empty($this->edit['tier']) ? $this->edit['tier'] : null
         ]);

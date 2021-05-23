@@ -1,4 +1,18 @@
 <div>
+
+    <div class="pb-5 border-gray-200">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 flex items-center">
+            <a href="{{ url('pharmacy/master-data') }}" class="p-3 bg-gray-200 border-2 rounded-md  border-gray-400 cursor-pointer hover:bg-gray-300 ">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path
+                        fill-rule="evenodd"
+                        d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                        clip-rule="evenodd"></path></svg>
+            </a>
+            <span class="ml-4">Master Data</span>
+        </h3>
+    </div>
+
+
     <form wire:submit.prevent="create">
         <div class="shadow sm:rounded-md sm:overflow-hidden">
             <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
@@ -146,6 +160,9 @@
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                                     Address
                                 </th>
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                    Status
+                                </th>
                                 <th scope="col" class="relative px-3 py-3">
                                     <span class="sr-only">Edit</span>
                                 </th>
@@ -153,7 +170,7 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($manufacture as $m)
-                            <tr class="{{ $m->status =='f' ? 'bg-red-100' : '' }}">
+                            <tr class="">
                                 <td class="px-3 py-3   text-sm font-medium text-gray-500">
                                     {{ $loop->iteration }}
                                 </td>
@@ -165,6 +182,17 @@
                                 </td>
                                 <td class="px-3 py-3   text-sm text-gray-500">
                                     {{ $m->address }}
+                                </td>
+                                <td class="px-3 py-3   text-sm text-gray-500">
+                                    @if($m->status == 't')
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+  Active
+</span>
+                                        @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+  Inactive
+</span>
+                                    @endif
                                 </td>
                                 <td class="px-3 py-3   text-right text-sm font-medium">
                                     <a href="#" wire:click="openEditModel('{{ $m->id }}')" class="text-indigo-600 hover:text-indigo-900">Edit</a>

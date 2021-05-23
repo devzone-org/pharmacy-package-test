@@ -4,6 +4,9 @@ namespace Devzone\Pharmacy;
 
 use Devzone\Pharmacy\Http\Livewire\MasterData\Category;
 use Devzone\Pharmacy\Http\Livewire\MasterData\Manufacture;
+use Devzone\Pharmacy\Http\Livewire\MasterData\ProductsAdd;
+use Devzone\Pharmacy\Http\Livewire\MasterData\ProductsEdit;
+use Devzone\Pharmacy\Http\Livewire\MasterData\ProductsList;
 use Devzone\Pharmacy\Http\Livewire\MasterData\Racks;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -51,6 +54,9 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('master-data.manufacture', Manufacture::class);
         Livewire::component('master-data.category', Category::class);
         Livewire::component('master-data.racks', Racks::class);
+        Livewire::component('master-data.products-add', ProductsAdd::class);
+        Livewire::component('master-data.products-edit', ProductsEdit::class);
+        Livewire::component('master-data.products-list', ProductsList::class);
     }
 
     /**

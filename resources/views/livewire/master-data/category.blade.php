@@ -1,4 +1,15 @@
 <div>
+    <div class="pb-5 border-gray-200">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 flex items-center">
+            <a href="{{ url('pharmacy/master-data') }}" class="p-3 bg-gray-200 border-2 rounded-md  border-gray-400 cursor-pointer hover:bg-gray-300 ">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path
+                        fill-rule="evenodd"
+                        d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                        clip-rule="evenodd"></path></svg>
+            </a>
+            <span class="ml-4">Master Data</span>
+        </h3>
+    </div>
     <form wire:submit.prevent="create">
         <div class="shadow sm:rounded-md sm:overflow-hidden">
             <div class="bg-white py-6 px-4 space-y-6 sm:p-6">

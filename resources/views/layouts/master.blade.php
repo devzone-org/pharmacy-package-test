@@ -24,6 +24,9 @@
     </style>
     @livewireScripts
     <script src="{{ asset('pharmacy/js/app.js') }}"></script>
+    <script>
+
+    </script>
 </head>
 <body class="bg-gray-200">
 <div x-data="{menu:false,dropdown:false,activeIndex:-1}">

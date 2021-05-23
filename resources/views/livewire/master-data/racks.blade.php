@@ -1,4 +1,18 @@
 <div>
+
+    <div class="pb-5 border-gray-200">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 flex items-center">
+            <a href="{{ url('pharmacy/master-data') }}" class="p-3 bg-gray-200 border-2 rounded-md  border-gray-400 cursor-pointer hover:bg-gray-300 ">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path
+                        fill-rule="evenodd"
+                        d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                        clip-rule="evenodd"></path></svg>
+            </a>
+            <span class="ml-4">Master Data</span>
+        </h3>
+    </div>
+
+
     <form wire:submit.prevent="create">
         <div class="shadow sm:rounded-md sm:overflow-hidden">
             <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
@@ -80,27 +94,26 @@
 
                 <div class="grid grid-cols-6 gap-6">
 
-                    <div class="col-span-6 sm:col-span-2">
-                        <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
-                        <input wire:model="add.location" type="text" autocomplete="off" class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" id="contact">
-                    </div>
-
 
                     <div class="col-span-6 sm:col-span-2">
                         <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-                        <input wire:model="add.name" type="text" autocomplete="off" class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" id="name">
+                        <input wire:model="add.name" type="text" autocomplete="off"
+                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                               id="name">
                     </div>
 
                     <div class="col-span-6 sm:col-span-2">
                         <label for="tier" class="block text-sm font-medium text-gray-700">Tier</label>
-                        <input wire:model="add.tier" type="text" autocomplete="off" class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" id="name">
+                        <input wire:model="add.tier" type="text" autocomplete="off"
+                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                               id="name">
                     </div>
-
 
 
                     <div class="col-span-6 sm:col-span-2">
                         <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                        <select  wire:model="add.status" id="status" class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <select wire:model="add.status" id="status"
+                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                             <option value="t">Active</option>
                             <option value="f">Inactive</option>
                         </select>
@@ -141,14 +154,16 @@
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                                     #
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                                    Location
-                                </th>
+
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                                     Name
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                                     Tier
+                                </th>
+
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                    Status
                                 </th>
                                 <th scope="col" class="relative px-3 py-3">
                                     <span class="sr-only">Edit</span>
@@ -157,23 +172,36 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($racks as $m)
-                            <tr class="{{ $m->status =='f' ? 'bg-red-100' : '' }}">
-                                <td class="px-3 py-3   text-sm font-medium text-gray-500">
-                                    {{ $loop->iteration }}
-                                </td>
-                                <td class="px-3 py-3   text-sm text-gray-500">
-                                    {{ $m->location }}
-                                </td>
-                                <td class="px-3 py-3   text-sm text-gray-500">
-                                    {{ $m->name }}
-                                </td>
-                                <td class="px-3 py-3   text-sm text-gray-500">
-                                    {{ $m->tier }}
-                                </td>
-                                <td class="px-3 py-3   text-right text-sm font-medium">
-                                    <a href="#" wire:click="openEditModel('{{ $m->id }}')" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                </td>
-                            </tr>
+                                <tr>
+                                    <td class="px-3 py-3   text-sm font-medium text-gray-500">
+                                        {{ $loop->iteration }}
+                                    </td>
+
+                                    <td class="px-3 py-3   text-sm text-gray-500">
+                                        {{ $m->name }}
+                                    </td>
+                                    <td class="px-3 py-3   text-sm text-gray-500">
+                                        {{ $m->tier }}
+                                    </td>
+                                    <td class="px-3 py-3   text-sm text-gray-500">
+                                        @if($m->status == 't')
+                                            <span
+                                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+  Active
+</span>
+                                        @else
+                                            <span
+                                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+  Inactive
+</span>
+                                        @endif
+                                    </td>
+
+                                    <td class="px-3 py-3   text-right text-sm font-medium">
+                                        <a href="#" wire:click="openEditModel('{{ $m->id }}')"
+                                           class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                    </td>
+                                </tr>
                             @endforeach
                             </tbody>
                         </table>
@@ -278,27 +306,26 @@
                     @endif
                     <div class="grid grid-cols-6 gap-6">
 
-                        <div class="col-span-6 sm:col-span-2">
-                            <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
-                            <input wire:model="edit.location" type="text" autocomplete="off" class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" id="contact">
-                        </div>
-
 
                         <div class="col-span-6 sm:col-span-2">
                             <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-                            <input wire:model="edit.name" type="text" autocomplete="off" class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" id="name">
+                            <input wire:model="edit.name" type="text" autocomplete="off"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                   id="name">
                         </div>
 
                         <div class="col-span-6 sm:col-span-2">
                             <label for="tier" class="block text-sm font-medium text-gray-700">Tier</label>
-                            <input wire:model="edit.tier" type="text" autocomplete="off" class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" id="name">
+                            <input wire:model="edit.tier" type="text" autocomplete="off"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                   id="name">
                         </div>
-
 
 
                         <div class="col-span-6 sm:col-span-2">
                             <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                            <select  wire:model="edit.status" id="status" class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <select wire:model="edit.status" id="status"
+                                    class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 <option value="t">Active</option>
                                 <option value="f">Inactive</option>
                             </select>
@@ -308,12 +335,12 @@
                     </div>
 
                     <div class="  py-3   text-right  ">
-                        <button type="button" wire:click="updateManufacture"  class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
+                        <button type="button" wire:click="updateManufacture"
+                                class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
                             Update
                         </button>
                     </div>
                 </div>
-
 
 
             </div>
