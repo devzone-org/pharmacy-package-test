@@ -21,9 +21,9 @@
 
                         <div class="bg-white py-6 px-4 space-y-6 sm:p-6 ">
                             <div class="flex justify-between items-center">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900">Product List</h3>
-                                <a href="{{ url('pharmacy/master-data/products/add') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    Add new Product
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">Supplier List</h3>
+                                <a href="{{ url('pharmacy/master-data/suppliers/add') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Add new Supplier
                                 </a>
                             </div>
 
@@ -42,32 +42,17 @@
                                     Name
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                                    Generic
+                                    Phone
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                                   Pieces in Packing
+                                    Address
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Barcode
-                                </th>
-
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Supplier Cost
+                                    Primary Contact Person Name
                                 </th>
 
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Retail Price
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Manufacture
-                                </th>
-
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Category
-                                </th>
-
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Rack
+                                    Primary Contact Person Phone
                                 </th>
 
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
@@ -79,7 +64,7 @@
                             </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($products as $m)
+                            @foreach($suppliers as $m)
                                 <tr>
                                     <td class="px-3 py-3   text-sm font-medium text-gray-500">
                                         {{ $loop->iteration }}
@@ -88,32 +73,22 @@
                                         {{ $m->name }}
                                     </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{ $m->salt }}
+                                        {{ $m->phone }}
                                     </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{ $m->packing }}
+                                        {{ $m->address }}
                                     </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{ $m->barcode }}
+                                        {{ $m->contact_name }}
                                     </td>
 
-                                    <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{ number_format($m->cost_of_price,2) }}
-                                    </td>
+
 
                                     <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{ number_format($m->retail_price,2) }}
-                                    </td>
-                                    <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{ $m->m_name }}
+                                        {{ $m->contact_phone }}
                                     </td>
 
-                                    <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{ $m->c_name }}
-                                    </td>
-                                    <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{ $m->r_name }} - {{ $m->tier }}
-                                    </td>
+
 
 
 
@@ -133,7 +108,7 @@
 
 
                                     <td class="px-3 py-3   text-right text-sm font-medium">
-                                        <a href="{{ url('pharmacy/master-data/products/edit/') }}/{{$m->id}}"
+                                        <a href="{{ url('pharmacy/master-data/suppliers/edit/') }}/{{$m->id}}"
                                            class="text-indigo-600 hover:text-indigo-900">Edit</a>
                                     </td>
                                 </tr>
@@ -142,9 +117,9 @@
                         </table>
 
 
-                        @if($products->hasPages())
+                        @if($suppliers->hasPages())
                         <div class="bg-white p-3 border-t">
-                            {{ $products->links() }}
+                            {{ $suppliers->links() }}
                         </div>
                             @endif
                     </div>

@@ -20,6 +20,7 @@ class ProductsList extends Component
             ->leftJoin('categories as c', 'c.id', '=', 'p.category_id')
             ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
             ->select('p.*', 'm.name as m_name', 'c.name as c_name', 'r.name as r_name', 'r.tier')
+            ->orderBy('p.id','desc')
             ->paginate(20);
 
         return view('pharmacy::livewire.master-data.products-list', ['products' => $products]);

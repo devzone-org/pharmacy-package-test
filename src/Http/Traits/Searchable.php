@@ -6,7 +6,10 @@ namespace Devzone\Pharmacy\Http\Traits;
 
 use Devzone\Pharmacy\Models\Category;
 use Devzone\Pharmacy\Models\Manufacture;
+use Devzone\Pharmacy\Models\Product;
 use Devzone\Pharmacy\Models\Rack;
+use Devzone\Pharmacy\Models\Supplier;
+use Illuminate\Support\Facades\DB;
 
 trait Searchable
 {
@@ -20,7 +23,9 @@ trait Searchable
     public $searchable_column = [
         'manufacture' => ['name', 'contact', 'address'],
         'rack' => ['name', 'tier'],
-        'category' => ['name']
+        'category' => ['name'],
+        'product' => ['name', 'generic', 'category', 'rack'],
+        'supplier'  => ['name','address']
     ];
 
 
@@ -76,6 +81,7 @@ trait Searchable
     public function updatedSearchableQuery($value)
     {
         if (strlen($value) > 1) {
+            $this->highlight_index = 0;
             if ($this->searchable_type == 'manufacture') {
                 $search = Manufacture::where('status', 't')->where('name', 'LIKE', '%' . $value . '%')->get();
                 if ($search->isNotEmpty()) {
@@ -85,8 +91,32 @@ trait Searchable
                 }
             }
 
+            if ($this->searchable_type == 'product') {
+                $search = Product::from('products as p')
+                    ->leftJoin('categories as c', 'c.id', '=', 'p.category_id')
+                    ->where('p.name', 'LIKE', '%' . $value . '%')
+                    ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
+                    ->select('p.id','p.name', 'p.salt as generic', 'c.name as category',
+                        DB::raw("CONCAT(COALESCE(`r.name`,''),' ',COALESCE(`r.tier`,'')) AS rack")
+                    )->get();
+                if ($search->isNotEmpty()) {
+                    $this->searchable_data = $search->toArray();
+                } else {
+                    $this->searchable_data = [];
+                }
+            }
+
             if ($this->searchable_type == 'category') {
                 $search = Category::where('status', 't')->where('name', 'LIKE', '%' . $value . '%')->get();
+                if ($search->isNotEmpty()) {
+                    $this->searchable_data = $search->toArray();
+                } else {
+                    $this->searchable_data = [];
+                }
+            }
+
+            if ($this->searchable_type == 'supplier') {
+                $search = Supplier::where('status', 't')->where('name', 'LIKE', '%' . $value . '%')->get();
                 if ($search->isNotEmpty()) {
                     $this->searchable_data = $search->toArray();
                 } else {

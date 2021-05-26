@@ -8,6 +8,11 @@ use Devzone\Pharmacy\Http\Livewire\MasterData\ProductsAdd;
 use Devzone\Pharmacy\Http\Livewire\MasterData\ProductsEdit;
 use Devzone\Pharmacy\Http\Livewire\MasterData\ProductsList;
 use Devzone\Pharmacy\Http\Livewire\MasterData\Racks;
+use Devzone\Pharmacy\Http\Livewire\MasterData\SupplierAdd;
+use Devzone\Pharmacy\Http\Livewire\MasterData\SupplierEdit;
+use Devzone\Pharmacy\Http\Livewire\MasterData\SupplierList;
+use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseAdd;
+use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseList;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -57,6 +62,14 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('master-data.products-add', ProductsAdd::class);
         Livewire::component('master-data.products-edit', ProductsEdit::class);
         Livewire::component('master-data.products-list', ProductsList::class);
+
+        Livewire::component('master-data.supplier-add', SupplierAdd::class);
+        Livewire::component('master-data.supplier-edit', SupplierEdit::class);
+        Livewire::component('master-data.supplier-list', SupplierList::class);
+
+
+        Livewire::component('purchases.purchase-list', PurchaseList::class);
+        Livewire::component('purchases.purchase-add', PurchaseAdd::class);
     }
 
     /**
