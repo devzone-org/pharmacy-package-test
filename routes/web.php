@@ -51,3 +51,7 @@ Route::get('purchases/edit/{id}', function ($id) {
     return view('pharmacy::purchases.purchase-edit',compact('id'));
 });
 
+Route::get('purchases/receive/{id}', function ($id) {
+    return view('pharmacy::purchases.purchase-receive',compact('id'));
+});
+
