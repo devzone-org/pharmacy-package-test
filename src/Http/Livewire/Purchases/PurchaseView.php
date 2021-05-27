@@ -5,22 +5,26 @@ namespace Devzone\Pharmacy\Http\Livewire\Purchases;
 
 
 use Devzone\Pharmacy\Models\Purchase;
+use Devzone\Pharmacy\Models\PurchaseOrder;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Livewire\Component;
-use Livewire\WithPagination;
 
-class PurchaseList extends Component
+class PurchaseView extends Component
 {
-    use WithPagination;
+    public $purchase_id;
+
+    public function mount($purchase_id)
+    {
+        $this->purchase_id = $purchase_id;
+    }
 
     public function render()
     {
         $purchase = Purchase::from('purchases as p')
-            ->join('purchase_orders as po', 'po.purchase_id', '=', 'p.id')
             ->join('suppliers as s', 's.id', '=', 'p.supplier_id')
             ->join('users as c', 'c.id', '=', 'p.created_by')
             ->leftJoin('users as a', 'a.id', '=', 'p.approved_by')
+            ->where('p.id', $this->purchase_id)
             ->select(
                 'p.id',
                 'p.supplier_id',
@@ -32,13 +36,20 @@ class PurchaseList extends Component
                 'c.name as created_by',
                 'a.name as approved_by',
                 'p.approved_at',
-                'c.created_at',
-                DB::raw('SUM(po.total_cost) as cost_before_receiving')
-            )->groupBy('p.id')->orderBy('p.id', 'desc')->paginate(20);
+                'c.created_at'
+            )->orderBy('p.id', 'desc')->first();
+
+        $details = PurchaseOrder::from('purchase_orders as po')
+            ->join('products as p', 'p.id', '=', 'po.product_id')
+            ->where('po.purchase_id', $this->purchase_id)
+            ->select('po.*', 'p.name', 'p.salt')
+            ->get();
 
 
-        return view('pharmacy::livewire.purchases.purchase-list', ['purchase' => $purchase]);
+        return view('pharmacy::livewire.purchases.purchase-view', ['purchase' => $purchase,'details'=>$details]);
     }
+
+
 
     public function markAsApproved($id)
     {
@@ -52,4 +63,6 @@ class PurchaseList extends Component
         }
 
     }
+
+
 }

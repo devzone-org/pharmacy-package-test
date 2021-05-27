@@ -44,3 +44,10 @@ Route::get('purchases', function () {
 Route::get('purchases/add', function () {
     return view('pharmacy::purchases.purchase-add');
 });
+Route::get('purchases/view/{id}', function ($id) {
+    return view('pharmacy::purchases.purchase-view',compact('id'));
+});
+Route::get('purchases/edit/{id}', function ($id) {
+    return view('pharmacy::purchases.purchase-edit',compact('id'));
+});
+

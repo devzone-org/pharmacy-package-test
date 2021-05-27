@@ -20,6 +20,7 @@ class CreatePurchaseOrdersTable extends Migration
             $table->integer('qty');
             $table->decimal('cost_of_price');
             $table->decimal('retail_price');
+            $table->decimal('total_cost');
             $table->timestamps();
         });
     }

@@ -8,11 +8,11 @@ use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Product;
 use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\PurchaseOrder;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use mysql_xdevapi\Exception;
 
-class PurchaseAdd extends Component
+class PurchaseEdit extends Component
 {
     use Searchable;
 
@@ -24,7 +24,8 @@ class PurchaseAdd extends Component
     public $search_products;
     public $product_data = [];
     public $order_list = [];
-
+    public $purchase_id;
+    public $deleted = [];
     public $success;
 
     protected $rules = [
@@ -40,9 +41,45 @@ class PurchaseAdd extends Component
         'supplier_id' => 'supplier'
     ];
 
+    public function mount($purchase_id)
+    {
+        $this->purchase_id = $purchase_id;
+
+        $purchase = Purchase::from('purchases as p')
+            ->join('suppliers as s', 's.id', '=', 'p.supplier_id')
+            ->join('users as c', 'c.id', '=', 'p.created_by')
+            ->leftJoin('users as a', 'a.id', '=', 'p.approved_by')
+            ->where('p.id', $this->purchase_id)
+            ->select(
+                'p.id',
+                'p.supplier_id',
+                's.name as supplier_name',
+                'p.supplier_invoice',
+                'p.grn_no',
+                'p.delivery_date',
+                'p.status',
+                'c.name as created_by',
+                'a.name as approved_by',
+                'p.approved_at',
+                'c.created_at'
+            )->orderBy('p.id', 'desc')->first();
+        $this->supplier_invoice = $purchase->supplier_invoice;
+        $this->supplier_id = $purchase->supplier_id;
+        $this->supplier_name = $purchase->supplier_name;
+        $this->delivery_date = $purchase->delivery_date;
+
+        $details = PurchaseOrder::from('purchase_orders as po')
+            ->join('products as p', 'p.id', '=', 'po.product_id')
+            ->where('po.purchase_id', $this->purchase_id)
+            ->select('po.id as purchase_order_id', 'p.id', 'po.qty', 'po.cost_of_price', 'po.retail_price', 'po.total_cost', 'p.name', 'p.salt')
+            ->get();
+
+        $this->order_list = $details->toArray();
+    }
+
     public function render()
     {
-        return view('pharmacy::livewire.purchases.purchase-add');
+        return view('pharmacy::livewire.purchases.purchase-edit');
     }
 
     public function openProductModal()
@@ -53,6 +90,11 @@ class PurchaseAdd extends Component
 
     public function removeProduct($key)
     {
+
+        $data = ($this->order_list[$key]);
+        if (isset($data['purchase_order_id']) && !empty($data['purchase_order_id'])) {
+            $this->deleted[] = $data['purchase_order_id'];
+        }
         unset($this->order_list[$key]);
     }
 
@@ -129,28 +171,45 @@ class PurchaseAdd extends Component
     {
         $this->validate();
         try {
+
             DB::beginTransaction();
-            $purchase_id = Purchase::create([
+            if (!Purchase::whereNull('approved_by')->where('id', $this->purchase_id)->exists()) {
+                throw new \Exception('Unable to edit purchase order because this order already has been approved.');
+            }
+            Purchase::where('id', $this->purchase_id)->update([
                 'supplier_id' => $this->supplier_id,
                 'supplier_invoice' => $this->supplier_invoice,
                 'delivery_date' => $this->delivery_date,
-                'created_by' => Auth::user()->id,
-                'status' => 'approval-awaiting'
-            ])->id;
+
+            ]);
+
+            if(!empty($this->deleted)){
+                PurchaseOrder::whereIn('id',$this->deleted)->delete();
+            }
 
             foreach ($this->order_list as $o) {
-                PurchaseOrder::create([
-                    'purchase_id' => $purchase_id,
-                    'product_id' => $o['id'],
-                    'qty' => $o['qty'],
-                    'cost_of_price' => $o['cost_of_price'],
-                    'retail_price' => $o['retail_price'],
-                    'total_cost' => $o['cost_of_price'] * $o['qty'],
-                ]);
+                if(!empty($o['purchase_order_id'])){
+                    PurchaseOrder::find($o['purchase_order_id'])->update([
+                        'qty' => $o['qty'],
+                        'cost_of_price' => $o['cost_of_price'],
+                        'retail_price' => $o['retail_price'],
+                        'total_cost' => $o['cost_of_price'] * $o['qty'],
+                    ]);
+                } else {
+                    PurchaseOrder::create([
+                        'purchase_id' => $this->purchase_id,
+                        'product_id' => $o['id'],
+                        'qty' => $o['qty'],
+                        'cost_of_price' => $o['cost_of_price'],
+                        'retail_price' => $o['retail_price'],
+                        'total_cost' => $o['cost_of_price'] * $o['qty'],
+                    ]);
+                }
+
             }
             DB::commit();
-            $this->success = 'Purchase order has been created and awaiting for approval.';
-            $this->reset(['order_list', 'supplier_id', 'supplier_name', 'supplier_invoice', 'delivery_date']);
+            $this->success = 'Purchase order has been updated.';
+
         } catch (\Exception $e) {
             $this->addError('supplier_name', $e->getMessage());
             DB::rollBack();
