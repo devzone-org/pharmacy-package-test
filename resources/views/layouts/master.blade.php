@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title') - {{ config('app.name') }}</title>
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-    <link href="{{ asset('pharmacy/css/app.css') }}" rel="stylesheet">
+    <link href="{{ asset('pharma/css/app.css') }}" rel="stylesheet">
     @livewireStyles
     <style>
         [x-cloak] {
@@ -23,7 +23,7 @@
         }
     </style>
     @livewireScripts
-    <script src="{{ asset('pharmacy/js/app.js') }}"></script>
+    <script src="{{ asset('pharma/js/app.js') }}"></script>
     <script>
 
     </script>

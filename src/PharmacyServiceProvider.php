@@ -95,7 +95,7 @@ class PharmacyServiceProvider extends ServiceProvider
 
         // Publishing assets.
         $this->publishes([
-            __DIR__ . '/../resources/assets' => public_path('pharmacy'),
+            __DIR__ . '/../resources/assets' => public_path('pharma'),
         ], 'pharmacy.assets');
 
         // Publishing the translation files.
