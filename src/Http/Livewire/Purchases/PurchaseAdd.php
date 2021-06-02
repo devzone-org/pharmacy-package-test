@@ -130,6 +130,7 @@ class PurchaseAdd extends Component
         $this->validate();
         try {
             DB::beginTransaction();
+
             $purchase_id = Purchase::create([
                 'supplier_id' => $this->supplier_id,
                 'supplier_invoice' => $this->supplier_invoice,
@@ -139,6 +140,7 @@ class PurchaseAdd extends Component
             ])->id;
 
             foreach ($this->order_list as $o) {
+
                 PurchaseOrder::create([
                     'purchase_id' => $purchase_id,
                     'product_id' => $o['id'],

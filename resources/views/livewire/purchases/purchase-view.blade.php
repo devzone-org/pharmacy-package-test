@@ -47,14 +47,31 @@
                      role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                     <div class="py-1" role="none">
 
-
+                        <button  wire:click="openBasicInfo"
+                           class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                           role="menuitem" tabindex="-1">Edit Basic Info</button>
                         @if(empty($purchase->approved_by))
                             <a href="#" wire:click="markAsApproved('{{ $purchase_id }}')"
-                                    class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                    role="menuitem" tabindex="-1" >Mark as Approve
+                               class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                               role="menuitem" tabindex="-1">Mark as Approve
                             </a>
-                            <a href="{{ url('pharmacy/purchases/edit') }}/{{$purchase_id}}" class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                               role="menuitem" tabindex="-1" >Edit Order</a>
+                            <a href="{{ url('pharmacy/purchases/edit') }}/{{$purchase_id}}"
+                               class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                               role="menuitem" tabindex="-1">Edit Order</a>
+
+                            <a href="#" wire:click="removePurchase('{{ $purchase_id }}')"
+                               class="text-red-700 block w-full text-left px-4 py-2 text-sm hover:bg-red-200"
+                               role="menuitem" tabindex="-1">Remove Order</a>
+                        @else
+                            @if($purchase->status == 'awaiting-delivery')
+                                <a href="{{ url('pharmacy/purchases/receive/') }}/{{$purchase_id}}"
+                                   class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                   role="menuitem" tabindex="-1">Receive Order</a>
+                            @else
+                                <a href="{{ url('pharmacy/purchases/compare/') }}/{{$purchase_id}}"
+                                   class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                   role="menuitem" tabindex="-1">Order Comparison Report</a>
+                            @endif
                         @endif
 
 
@@ -63,7 +80,7 @@
             </div>
         </div>
         <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
-            <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+            <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-3">
                 <div class="sm:col-span-1">
                     <dt class="text-sm font-medium text-gray-500">
                         Supplier Name
@@ -78,6 +95,14 @@
                     </dt>
                     <dd class="mt-1 text-sm text-gray-900">
                         {{ $purchase->supplier_invoice ?? '-' }}
+                    </dd>
+                </div>
+                <div class="sm:col-span-1">
+                    <dt class="text-sm font-medium text-gray-500">
+                        GRN #
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {{ $purchase->grn_no ?? '-' }}
                     </dd>
                 </div>
                 <div class="sm:col-span-1">
@@ -107,12 +132,32 @@
                                 class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
                                Awaiting Delivery
                             </span>
+                        @elseif($purchase->status == 'receiving')
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                              Order Received
+                            </span>
+                            <br>
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                               Approval Pending
+                            </span>
+                        @elseif($purchase->status == 'received')
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                             Order  Received
+                            </span>
+                            <br>
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                               Invoice Unpaid
+                            </span>
                         @endif
                     </dd>
                 </div>
                 <div class="sm:col-span-1">
                     <dt class="text-sm font-medium text-gray-500">
-                        Created By
+                        PO Created By
                     </dt>
                     <dd class="mt-1 text-sm text-gray-900">
                         {{ $purchase->created_by }} <br>
@@ -122,7 +167,7 @@
 
                 <div class="sm:col-span-1">
                     <dt class="text-sm font-medium text-gray-500">
-                        Approved By
+                        PO Approved By
                     </dt>
                     <dd class="mt-1 text-sm text-gray-900">
                         @if(!empty($purchase->approved_by))
@@ -153,17 +198,17 @@
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                     Generic
                 </th>
-                <th scope="col" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500   ">
                     Qty
                 </th>
-                <th scope="col" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500   ">
                     Supplier Cost
                 </th>
-                <th scope="col" class="px-3 py-3 text-right text-sm font-medium text-gray-500    ">
+                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
                     Retail Price
                 </th>
 
-                <th scope="col" class="px-3 py-3 text-right text-sm font-medium text-gray-500    ">
+                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
                     Total Cost
                 </th>
 
@@ -181,19 +226,19 @@
                     <td class="px-3 py-3   text-sm text-gray-500">
                         {{ $m->salt }}
                     </td>
-                    <td class="px-3 py-3 text-right  text-sm text-gray-500">
+                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
                         {{ $m->qty }}
                     </td>
-                    <td class="px-3 py-3 text-right  text-sm text-gray-500">
+                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
                         {{ number_format($m->cost_of_price,2) }}
 
                     </td>
-                    <td class="px-3 py-3  text-right text-sm text-gray-500">
+                    <td class="px-3 py-3  text-center text-sm text-gray-500">
                         {{ number_format($m->retail_price,2) }}
                     </td>
 
 
-                    <td class="px-3 py-3 text-right  text-sm text-gray-500">
+                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
                         {{ number_format($m->total_cost,2) }}
                     </td>
 
@@ -207,20 +252,20 @@
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
 
                 </th>
-                <th scope="col" class="px-3 py-3 text-left text-md font-medium text-gray-500   ">
+                <th scope="col" class="px-3 py-3  text-md font-medium text-gray-500   ">
                     Total
                 </th>
-                <th scope="col" class="px-3 py-3 text-right text-md font-medium text-gray-500   ">
+                <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500   ">
                     {{ number_format($details->sum('qty'),2) }}
                 </th>
-                <th scope="col" class="px-3 py-3 text-right text-md font-medium text-gray-500   ">
+                <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500   ">
                     {{ number_format($details->sum('cost_of_price'),2) }}
                 </th>
-                <th scope="col" class="px-3 py-3 text-right text-md font-medium text-gray-500    ">
+                <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500    ">
                     {{ number_format($details->sum('retail_price'),2) }}
                 </th>
 
-                <th scope="col" class="px-3 py-3 text-right text-md font-medium text-gray-500    ">
+                <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500    ">
                     {{ number_format($details->sum('total_cost'),2) }}
                 </th>
 
@@ -230,6 +275,6 @@
 
     </div>
 
-
+    @include('pharmacy::include.po-basic-info')
 </div>
 

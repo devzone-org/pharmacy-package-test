@@ -55,3 +55,7 @@ Route::get('purchases/receive/{id}', function ($id) {
     return view('pharmacy::purchases.purchase-receive',compact('id'));
 });
 
+Route::get('purchases/compare/{id}',function($id){
+    return view('pharmacy::purchases.purchase-compare',compact('id'));
+});
+

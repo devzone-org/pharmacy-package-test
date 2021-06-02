@@ -10,9 +10,8 @@ use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\PurchaseOrder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
-use mysql_xdevapi\Exception;
 
-class PurchaseEdit extends Component
+class PurchaseReceive extends Component
 {
     use Searchable;
 
@@ -24,15 +23,18 @@ class PurchaseEdit extends Component
     public $search_products;
     public $product_data = [];
     public $order_list = [];
+    public $grn_no;
     public $purchase_id;
     public $deleted = [];
     public $success;
 
     protected $rules = [
         'supplier_id' => 'required|integer',
-        'delivery_date' => 'nullable|date',
+        'delivery_date' => 'required|date',
         'supplier_invoice' => 'nullable|string',
         'order_list.*.qty' => 'required|integer',
+        'order_list.*.bonus' => 'nullable|integer',
+        'order_list.*.disc' => 'nullable|numeric',
         'order_list.*.cost_of_price' => 'required|numeric',
         'order_list.*.retail_price' => 'required|numeric'
     ];
@@ -44,7 +46,9 @@ class PurchaseEdit extends Component
     public function mount($purchase_id)
     {
         $this->purchase_id = $purchase_id;
-
+        if (\Devzone\Pharmacy\Models\PurchaseReceive::where('purchase_id', $purchase_id)->exists()) {
+            return redirect()->to('pharmacy/purchases/compare/' . $purchase_id);
+        }
         $purchase = Purchase::from('purchases as p')
             ->join('suppliers as s', 's.id', '=', 'p.supplier_id')
             ->join('users as c', 'c.id', '=', 'p.created_by')
@@ -71,15 +75,30 @@ class PurchaseEdit extends Component
         $details = PurchaseOrder::from('purchase_orders as po')
             ->join('products as p', 'p.id', '=', 'po.product_id')
             ->where('po.purchase_id', $this->purchase_id)
-            ->select('po.id as purchase_order_id', 'p.id', 'po.qty', 'po.cost_of_price', 'po.retail_price', 'po.total_cost', 'p.name', 'p.salt')
+            ->select('po.id as purchase_order_id', 'p.id', 'po.qty', 'po.cost_of_price', 'po.retail_price', 'po.total_cost', 'p.name', 'p.salt', 'p.packing')
             ->get();
 
-        $this->order_list = $details->toArray();
+
+        foreach ($details as $data) {
+            $this->order_list[] = [
+                'id' => $data['id'],
+                'name' => $data['name'],
+                'qty' => $data['qty'],
+                'bonus' => 0,
+                'disc' => 0,
+                'cost_of_price' => $data['cost_of_price'],
+                'after_disc_cost' => $data['cost_of_price'],
+                'retail_price' => $data['retail_price'],
+                'salt' => $data['salt'],
+                'total_cost' => $data['cost_of_price'],
+                'packing' => $data['packing'],
+            ];
+        }
     }
 
     public function render()
     {
-        return view('pharmacy::livewire.purchases.purchase-edit');
+        return view('pharmacy::livewire.purchases.purchase-receive');
     }
 
     public function openProductModal()
@@ -105,8 +124,24 @@ class PurchaseEdit extends Component
             if (empty($value) || !is_numeric($value)) {
                 $this->order_list[$array[1]][$array[2]] = 0;
             }
-            if (in_array($array[2], ['qty', 'cost_of_price'])) {
-                $this->order_list[$array[1]]['total_cost'] = round($this->order_list[$array[1]]['qty'] * $this->order_list[$array[1]]['cost_of_price'], 2);
+            if ($array[2] == 'qty') {
+                $this->order_list[$array[1]]['total_cost'] = round($this->order_list[$array[1]]['qty'] * $this->order_list[$array[1]]['after_disc_cost'], 2);
+            }
+
+            if ($array[2] == 'cost_of_price' || $array[2] == 'disc') {
+                $disc = $this->order_list[$array[1]]['disc'];
+                $cost_of_price = $this->order_list[$array[1]]['cost_of_price'];
+                if (empty($disc) || !is_numeric($disc)) {
+                    $disc = 0;
+                }
+
+                if (empty($cost_of_price) || !is_numeric($cost_of_price)) {
+                    $cost_of_price = 0;
+                }
+                $discount_value = $cost_of_price * $disc / 100;
+                $this->order_list[$array[1]]['after_disc_cost'] = round($cost_of_price - $discount_value, 2);
+                $this->order_list[$array[1]]['total_cost'] = round($this->order_list[$array[1]]['qty'] * $this->order_list[$array[1]]['after_disc_cost'], 2);
+
             }
         }
     }
@@ -153,7 +188,11 @@ class PurchaseEdit extends Component
                     'cost_of_price' => $data['cost_of_price'],
                     'retail_price' => $data['retail_price'],
                     'salt' => $data['salt'],
-                    'total_cost' => $data['cost_of_price']
+                    'total_cost' => $data['cost_of_price'],
+                    'packing' => $data['packing'],
+                    'after_disc_cost' => $data['cost_of_price'],
+                    'disc' => 0,
+                    'bonus' => 0
                 ];
             } else {
                 $key = array_keys($existing)[0];
@@ -173,42 +212,31 @@ class PurchaseEdit extends Component
         try {
 
             DB::beginTransaction();
-            if (!Purchase::whereNull('approved_by')->where('id', $this->purchase_id)->exists()) {
-                throw new \Exception('Unable to edit purchase order because this order already has been approved.');
-            }
+
             Purchase::where('id', $this->purchase_id)->update([
                 'supplier_id' => $this->supplier_id,
                 'supplier_invoice' => $this->supplier_invoice,
                 'delivery_date' => $this->delivery_date,
-
+                'status' => 'receiving',
+                'grn_no' => $this->grn_no
             ]);
 
-            if(!empty($this->deleted)){
-                PurchaseOrder::whereIn('id',$this->deleted)->delete();
-            }
 
             foreach ($this->order_list as $o) {
-                if(!empty($o['purchase_order_id'])){
-                    PurchaseOrder::find($o['purchase_order_id'])->update([
-                        'qty' => $o['qty'],
-                        'cost_of_price' => $o['cost_of_price'],
-                        'retail_price' => $o['retail_price'],
-                        'total_cost' => $o['cost_of_price'] * $o['qty'],
-                    ]);
-                } else {
-                    PurchaseOrder::create([
-                        'purchase_id' => $this->purchase_id,
-                        'product_id' => $o['id'],
-                        'qty' => $o['qty'],
-                        'cost_of_price' => $o['cost_of_price'],
-                        'retail_price' => $o['retail_price'],
-                        'total_cost' => $o['cost_of_price'] * $o['qty'],
-                    ]);
-                }
-
+                \Devzone\Pharmacy\Models\PurchaseReceive::create([
+                    'purchase_id' => $this->purchase_id,
+                    'product_id' => $o['id'],
+                    'qty' => $o['qty'],
+                    'bonus' => $o['bonus'] ?? 0,
+                    'discount' => $o['disc'] ?? 0,
+                    'cost_of_price' => $o['cost_of_price'],
+                    'after_disc_cost' => $o['after_disc_cost'],
+                    'retail_price' => $o['retail_price'],
+                    'total_cost' => $o['after_disc_cost'] * $o['qty'],
+                ]);
             }
             DB::commit();
-            $this->success = 'Purchase order has been updated.';
+            return redirect()->to('pharmacy/purchases/compare/' . $this->purchase_id);
 
         } catch (\Exception $e) {
             $this->addError('supplier_name', $e->getMessage());

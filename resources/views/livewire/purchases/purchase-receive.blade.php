@@ -17,7 +17,7 @@
         <div class="shadow sm:rounded-md sm:overflow-hidden">
             <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
                 <div>
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Purchase Order</h3>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Receive Purchase Order</h3>
 
                 </div>
 
@@ -95,7 +95,7 @@
                 <div class="grid grid-cols-6 gap-6">
                     <div class="col-span-6 sm:col-span-2">
                         <label for="name" class="block text-sm font-medium text-gray-700">Supplier</label>
-                        <input wire:model="supplier_name" readonly
+                        <input wire:model.lazy="supplier_name" readonly
                                wire:click="searchableOpenModal('supplier_id','supplier_name','supplier')" type="text"
                                autocomplete="off"
                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
@@ -105,7 +105,7 @@
 
                     <div class="col-span-6 sm:col-span-2">
                         <label for="date" class="block text-sm font-medium text-gray-700">Delivery Date</label>
-                        <input wire:model="delivery_date" type="date" autocomplete="off"
+                        <input wire:model.lazy="delivery_date" type="date" autocomplete="off"
                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                id="date">
                     </div>
@@ -114,9 +114,16 @@
                     <div class="col-span-6 sm:col-span-2">
                         <label for="supplier_invoice" class="block text-sm font-medium text-gray-700">Supplier
                             Invoice</label>
-                        <input wire:model="supplier_invoice" type="text" autocomplete="off"
+                        <input wire:model.lazy="supplier_invoice" type="text" autocomplete="off"
                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                id="supplier_invoice">
+                    </div>
+
+                    <div class="col-span-6 sm:col-span-2">
+                        <label for="grn_no" class="block text-sm font-medium text-gray-700">GRN #</label>
+                        <input wire:model.lazy="grn_no" type="text" autocomplete="off"
+                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                               id="grn_no">
                     </div>
 
 
@@ -137,20 +144,35 @@
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Name
                     </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                        Generic
+                    <th scope="col" class="w-16 border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        Packing Pieces
                     </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col" class="w-16  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Qty
                     </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                        Supplier Cost
+                    <th scope="col" class="w-16 border  text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        Bonus
                     </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                    <th scope="col" class="w-16  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        Total Qty
+                    </th>
+                    <th scope="col" class="w-28  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        Supply Price
+                    </th>
+                    <th scope="col" class="w-16  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        Disc (%)
+                    </th>
+
+                    <th scope="col" class="w-28 border  text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        SP After Disc
+                    </th>
+
+
+                    <th scope="col" class="w-28 border  text-center px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                         Retail Price
                     </th>
 
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                    <th scope="col" class="w-28 border  text-center px-3 py-3 text-left text-md font-medium text-gray-500    ">
                         Total Cost
                     </th>
                     <th scope="col" class="relative px-3 py-3">
@@ -161,59 +183,100 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                 @foreach($order_list as $key => $m)
                     <tr>
-                        <td class="px-3 py-3   text-sm font-medium text-gray-500">
+                        <td class="px-3 py-3  border text-sm font-medium text-gray-500">
                             {{ $loop->iteration }}
                         </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
+                        <td class="px-3 py-3  border text-sm text-gray-500">
                             {{ $m['name'] }}
                         </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
-                            {{ $m['salt'] }}
+                        <td class="px-3 py-3 bg-gray-50 border text-sm text-gray-500">
+                            {{ $m['packing'] }}
                         </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
-                            <input type="text" class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" wire:model="order_list.{{$key}}.qty">
+                        <td class="p-0  border text-sm text-gray-500">
+                            <input type="text"
+                                   class="p-0 focus:ring-0 block w-full text-center  text-sm border-0 "
+                                   wire:model.lazy="order_list.{{$key}}.qty">
                         </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
-                            <input type="text" class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" wire:model="order_list.{{$key}}.cost_of_price">
+                        <td class="p-0  border text-sm text-gray-500">
+                            <input type="text"
+                                   class="p-0 focus:ring-0 block w-full text-center text-sm border-0 "
+                                   wire:model.lazy="order_list.{{$key}}.bonus">
+                        </td>
+
+                        <td class="px-3   bg-gray-50 border text-sm  text-center text-gray-500">
+                            {{ number_format($m['qty'] + ($m['bonus']?? 0),2) }}
+                        </td>
+                        <td class="p-0 border  text-sm text-gray-500">
+                            <input type="text"
+                                   class=" p-0 focus:ring-0 block w-full text-center  text-sm border-0 "
+                                   wire:model.lazy="order_list.{{$key}}.cost_of_price">
 
                         </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
-                            <input type="text" class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" wire:model="order_list.{{$key}}.retail_price">
 
+                        <td class="p-0 border  text-sm text-gray-500">
+                            <input type="text"
+                                   class=" p-0 focus:ring-0 block w-full text-center text-sm border-0 "
+                                   wire:model.lazy="order_list.{{$key}}.disc">
+                        </td>
+
+                        <td class="p-0 border bg-gray-50 text-center text-sm text-gray-500">
+
+                            {{ number_format($m['after_disc_cost'],2) }}
+                        </td>
+                        <td class="p-0  border text-sm text-gray-500">
+                            <input type="text"
+                                   class=" p-0 focus:ring-0 block w-full text-center text-sm border-0 "
+                                   wire:model.lazy="order_list.{{$key}}.retail_price">
                         </td>
 
 
-                        <td class="px-3 py-3   text-sm text-gray-500">
+                        <td class="px-3 py-3 border bg-gray-50 text-md text-center text-gray-500">
                             {{ number_format($m['total_cost'],2) }}
                         </td>
 
 
-                        <td class="px-3 py-3 w-7   text-right text-sm font-medium">
-                            <svg wire:click="removeProduct('{{ $key }}')" class="w-6 h-6 text-red-600 cursor-pointer hover:text-red-800" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                        <td class="px-3 py-3 w-7  border text-right text-sm   font-medium">
+                            <svg wire:click="removeProduct('{{ $key }}')"
+                                 class="w-6 h-6 text-red-600 cursor-pointer hover:text-red-800" fill="currentColor"
+                                 viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd"
+                                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                      clip-rule="evenodd"></path>
+                            </svg>
                         </td>
                     </tr>
                 @endforeach
                 <tr class="bg-gray-50 border-b">
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+
+                    <th scope="col" colspan="2" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
 
                     </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-
+                    <th scope="col" class="px-3 py-3 text-left text-md font-medium text-gray-500   ">
+                        Total
                     </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Total
-                    </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col" class="px-3 py-3 border text-center text-md font-medium text-gray-500   ">
                         {{ number_format(collect($order_list)->sum('qty'),2) }}
                     </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                        {{ number_format(collect($order_list)->sum('cost_of_price'),2) }}
-                    </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                        {{ number_format(collect($order_list)->sum('retail_price'),2) }}
+                    <th scope="col" class="px-3 py-3 border  text-center text-md font-medium text-gray-500   ">
+                        {{ number_format(collect($order_list)->sum('bonus'),2) }}
                     </th>
 
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                    <th scope="col" class="px-3 py-3 border  text-center text-md font-medium text-gray-500   ">
+                        {{ number_format(collect($order_list)->sum('qty') + collect($order_list)->sum('bonus'),2) }}
+                    </th>
+                    <th scope="col" class="px-3 py-3  border text-center text-md font-medium text-gray-500   ">
+                        {{ number_format(collect($order_list)->sum('cost_of_price'),2) }}
+                    </th>
+                    <th scope="col" class="px-3 py-3  border  text-center text-md font-medium text-gray-500   ">
+
+                    </th>
+                    <th scope="col" class="px-3 py-3 border  text-center text-md font-medium text-gray-500   ">
+
+                    </th>
+                    <th scope="col" class="px-3 py-3  border text-center text-md font-medium text-gray-500    ">
+                        {{ number_format(collect($order_list)->sum('retail_price'),2) }}
+                    </th>
+                    <th scope="col" class="px-3 py-3  border text-center text-md font-medium text-gray-500    ">
                         {{ number_format(collect($order_list)->sum('total_cost'),2) }}
                     </th>
                     <th scope="col" class="relative px-3 py-3">
@@ -225,7 +288,7 @@
             <div class="px-4 py-3 bg-gray-50 text-right sm:px-6 border-t">
                 <button type="submit"
                         class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
-                    Update
+                    Receive Order
                 </button>
             </div>
         </div>

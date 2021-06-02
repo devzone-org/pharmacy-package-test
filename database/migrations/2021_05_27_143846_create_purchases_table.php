@@ -24,6 +24,7 @@ class CreatePurchasesTable extends Migration
             $table->integer('approved_by')->nullable();
             $table->dateTime('approved_at')->nullable();
             $table->string('status',20);
+            $table->char('is_paid',1)->default('f');
             $table->timestamps();
         });
     }

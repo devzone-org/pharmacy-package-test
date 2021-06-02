@@ -11,6 +11,42 @@
         </h3>
     </div>
 
+    <div class="mb-5 shadow sm:rounded-md sm:overflow-hidden">
+        <!-- This example requires Tailwind CSS v2.0+ -->
+        <div class="flex flex-col">
+            <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                    <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+                        <div class="bg-white py-6 px-4 space-y-6 sm:p-6 ">
+                            <div class="grid grid-cols-8 gap-6">
+                                <div class="col-span-8 sm:col-span-2">
+                                    <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                                    <input type="text" wire:model.defer="name" name="name" id="name" autocomplete="off" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                </div>
+
+                                <div class="col-span-8 sm:col-span-2">
+                                    <label for="salt" class="block text-sm font-medium text-gray-700">Generic</label>
+                                    <input type="text" wire:model.defer="salt"  id="salt" autocomplete="off" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                </div>
+
+                                <div class="col-span-8 sm:col-span-2">
+                                    <button type="button" wire:click="search" class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        Search
+                                    </button>
+
+                                    <button type="button" wire:click="resetSearch"  class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm" >
+                                        Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
 
     <div class=" shadow sm:rounded-md sm:overflow-hidden">
         <!-- This example requires Tailwind CSS v2.0+ -->
@@ -154,9 +190,6 @@
 
 
     </div>
-
-
-
 
 </div>
 
