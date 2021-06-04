@@ -1,5 +1,4 @@
 <div>
-
     <div class="mb-5 shadow sm:rounded-md sm:overflow-hidden">
         <!-- This example requires Tailwind CSS v2.0+ -->
         <div class="flex flex-col">
@@ -9,43 +8,36 @@
                         <div class="bg-white py-6 px-4 space-y-6 sm:p-6 ">
                             <div class="grid grid-cols-8 gap-6">
                                 <div class="col-span-8 sm:col-span-2">
-                                    <label for="name" class="block text-sm font-medium text-gray-700">Supplier
-                                        Name</label>
+                                    <label for="name" class="block text-sm font-medium text-gray-700">Supplier Name</label>
                                     <input type="text" wire:model.defer="supplier_name" readonly
                                            wire:click="searchableOpenModal('supplier_id','supplier_name','supplier')"
-                                           name="name" id="name" autocomplete="off"
-                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                           name="name" id="name" autocomplete="off" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 </div>
 
                                 <div class="col-span-8 sm:col-span-2">
-                                    <label for="salt" class="block text-sm font-medium text-gray-700">Supplier
-                                        Invoice</label>
-                                    <input type="text" wire:model.defer="supplier_invoice" id="salt" autocomplete="off"
-                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <label for="salt" class="block text-sm font-medium text-gray-700">Pay From</label>
+                                    <input type="text" wire:model.defer="pay_from_name"
+                                           wire:click="searchableOpenModal('pay_from','pay_from_name','pay_from')"
+                                           id="salt" autocomplete="off" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 </div>
 
                                 <div class="col-span-8 sm:col-span-2">
                                     <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                                    <select wire:model.defer="status"
-                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                            id="status">
+                                    <select wire:model.defer="status" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" id="status">
                                         <option value=""></option>
-                                        <option value="approval-awaiting">Approval Awaiting</option>
-                                        <option value="awaiting-delivery">Awaiting Delivery</option>
-                                        <option value="receiving">Order Received Not Approved</option>
-                                        <option value="received">Order Received</option>
-                                        <option value="complete">Order Complete</option>
+                                        <option value="app">Approved</option>
+
+                                        <option value="not-app">Not Approved</option>
+
                                     </select>
                                 </div>
 
                                 <div class="col-span-8 sm:col-span-2">
-                                    <button type="button" wire:click="search"
-                                            class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    <button type="button" wire:click="search" class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                         Search
                                     </button>
 
-                                    <button type="button" wire:click="resetSearch"
-                                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+                                    <button type="button" wire:click="resetSearch"  class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm" >
                                         Reset
                                     </button>
                                 </div>
@@ -59,14 +51,15 @@
 
     </div>
 
+
     <div class="shadow  rounded-b-md ">
         <div class="bg-white py-6 px-4 space-y-6 sm:p-6  rounded-t-md">
             <div class="flex items-center justify-between">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Purchase Orders</h3>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Supplier Payments</h3>
 
-                <a href="{{ url('pharmacy/purchases/add') }}"
+                <a href="{{ url('pharmacy/purchases/payments/add') }}"
                    class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
-                    Make Purchase Order
+                    Make New Payment
                 </a>
             </div>
 
@@ -149,106 +142,59 @@
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                     #
                 </th>
+
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Order #
+                    Supplier Name
                 </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Supplier
+                    Description
                 </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Supplier Invoice #
-                </th>
-                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Delivery Date
+                    Pay From
                 </th>
 
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Total Amount
+                    Payable Amount
+                </th>
+
+
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                    Created By
                 </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                    Status
+                    Approved By
                 </th>
 
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                    PO Created By
+
                 </th>
-                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                    PO Approved By
-                </th>
-                <th scope="col" class="relative px-3 py-3">
-                    <span class="sr-only">Edit</span>
-                </th>
+
             </tr>
             </thead>
             <tbody class="   bg-white divide-y divide-gray-200 ">
-            @foreach($purchase as $key => $m)
+            @foreach($payments as $key => $m)
                 <tr class="">
                     <td class="px-3 py-3   text-sm font-medium text-gray-500">
                         {{ $loop->iteration }}
                     </td>
-                    <td class="px-3 py-3   text-sm text-gray-500">
-                        {{ $m->id }}
-                    </td>
+
                     <td class="px-3 py-3   text-sm text-gray-500">
                         {{ $m->supplier_name }}
                     </td>
                     <td class="px-3 py-3   text-sm text-gray-500">
-                        {{ $m->supplier_invoice }}
+                        {{ $m->description }}
                     </td>
 
                     <td class="px-3 py-3   text-sm text-gray-500">
-                        @if(!empty($m->delivery_date))
-                            {{ date('d M Y',strtotime($m->delivery_date)) }}
-                        @endif
+                        {{ $m->account_name }}
                     </td>
-
-
                     <td class="px-3 py-3   text-sm text-gray-500">
-                        {{ number_format($m->cost_before_receiving,2) }}
+                        {{ number_format($m->total_cost,2) }}
                     </td>
 
-                    <td class="px-3 py-3   text-sm text-gray-500">
-                        @if($m->status == 'approval-awaiting')
-                            <span
-                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                              Approval Awaiting
-                            </span>
-                        @elseif($m->status == 'awaiting-delivery')
-                            <span
-                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                               Awaiting Delivery
-                            </span>
-                        @elseif($m->status == 'receiving')
-                            <span
-                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                               Order Received
-                            </span>
-                            <br>
-                            <span
-                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                               Approval Pending
-                            </span>
 
-                        @elseif($m->status == 'received')
-                            <span
-                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                             Order  Received
-                            </span>
-                            <br>
-                            @if($m->is_paid=='f')
-                                <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                               Invoice Unpaid
-                            </span>
-                            @else
-                                <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                             Invoice Paid
-                            </span>
-                                @endif
 
-                        @endif
-                    </td>
+
 
                     <td class="px-3 py-3   text-sm text-gray-500">
                         {{ $m->created_by }} <br>
@@ -264,9 +210,7 @@
                     </td>
 
 
-                    <td class="px-3 py-3 w-7   text-right text-sm font-medium">
-
-
+                    <td class="px-3 py-3   text-sm text-gray-500">
                         <div class="relative inline-block text-left" x-data="{open:false}">
                             <div>
                                 <button type="button" x-on:click="open=true;" @click.away="open=false;"
@@ -287,41 +231,31 @@
                                  class="origin-top-right absolute right-0 mt-2 w-56 z-10 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
                                  role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                                 <div class="py-1" role="none">
-                                    <a href="{{ url('pharmacy/purchases/view') }}/{{$m->id}}"
+                                    <a href="{{ url('pharmacy/purchases/payments/view') }}/{{$m->id}}"
                                        class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                       role="menuitem" tabindex="-1">View Order</a>
+                                       role="menuitem" tabindex="-1">View</a>
 
                                     @if(empty($m->approved_by))
                                         <a href="#" wire:click="markAsApproved('{{ $m->id }}')"
                                            class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                            role="menuitem" tabindex="-1">Mark as Approve
                                         </a>
-                                        <a href="{{ url('pharmacy/purchases/edit') }}/{{$m->id}}"
+
+                                        <a href="{{ url('pharmacy/purchases/payments/edit') }}/{{$m->id}}"
                                            class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                           role="menuitem" tabindex="-1">Edit Order</a>
+                                           role="menuitem" tabindex="-1">Edit</a>
 
                                         <a href="#" wire:click="removePurchase('{{ $m->id }}')"
                                            class="text-red-700 block w-full text-left px-4 py-2 text-sm hover:bg-red-200"
-                                           role="menuitem" tabindex="-1">Remove Order</a>
-                                    @else
-                                        @if($m->status == 'awaiting-delivery' )
-                                            <a href="{{ url('pharmacy/purchases/receive/') }}/{{$m->id}}"
-                                               class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                               role="menuitem" tabindex="-1">Receive Order</a>
-                                        @else
-                                            <a href="{{ url('pharmacy/purchases/compare/') }}/{{$m->id}}"
-                                               class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                               role="menuitem" tabindex="-1">Order Comparison Report</a>
-                                        @endif
-
+                                           role="menuitem" tabindex="-1">Remove</a>
                                     @endif
 
 
                                 </div>
                             </div>
                         </div>
-
                     </td>
+
                 </tr>
             @endforeach
 
@@ -330,7 +264,7 @@
 
 
         <div class="bg-white p-3 border-t rounded-b-md  ">
-            {{ $purchase->links() }}
+
         </div>
 
     </div>

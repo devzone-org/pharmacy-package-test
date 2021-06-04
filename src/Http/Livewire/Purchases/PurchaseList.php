@@ -44,6 +44,7 @@ class PurchaseList extends Component
                 's.name as supplier_name',
                 'p.supplier_invoice',
                 'p.grn_no',
+                'p.is_paid',
                 'p.delivery_date',
                 'p.status',
                 'c.name as created_by',

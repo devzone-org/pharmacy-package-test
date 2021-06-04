@@ -4,12 +4,14 @@
 namespace Devzone\Pharmacy\Http\Traits;
 
 
+use Devzone\Ams\Models\ChartOfAccount;
 use Devzone\Pharmacy\Models\Category;
 use Devzone\Pharmacy\Models\Manufacture;
 use Devzone\Pharmacy\Models\Product;
 use Devzone\Pharmacy\Models\Rack;
 use Devzone\Pharmacy\Models\Supplier;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 trait Searchable
 {
@@ -25,7 +27,8 @@ trait Searchable
         'rack' => ['name', 'tier'],
         'category' => ['name'],
         'product' => ['name', 'generic', 'category', 'rack'],
-        'supplier'  => ['name','address']
+        'supplier' => ['name', 'address', 'phone'],
+        'pay_from' => ['name', 'code']
     ];
 
 
@@ -64,6 +67,7 @@ trait Searchable
         $data = $this->searchable_data[$this->highlight_index] ?? null;
         $this->{$this->searchable_id} = $data['id'];
         $this->{$this->searchable_name} = $data['name'];
+        $this->emitSelf(Str::camel('emit_'.$this->searchable_id));
         $this->searchableReset();
     }
 
@@ -91,12 +95,25 @@ trait Searchable
                 }
             }
 
+            if ($this->searchable_type == 'pay_from') {
+                $search = ChartOfAccount::where('status', 't')->where('type', 'Assets')
+                    ->whereIn('sub_account', [11, 12])->where('name', 'LIKE', '%' . $value . '%')->get();
+
+                if ($search->isNotEmpty()) {
+                    $this->searchable_data = $search->toArray();
+                } else {
+                    $this->searchable_data = [];
+                }
+
+
+            }
+
             if ($this->searchable_type == 'product') {
                 $search = Product::from('products as p')
                     ->leftJoin('categories as c', 'c.id', '=', 'p.category_id')
                     ->where('p.name', 'LIKE', '%' . $value . '%')
                     ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
-                    ->select('p.id','p.name', 'p.salt as generic', 'c.name as category',
+                    ->select('p.id', 'p.name', 'p.salt as generic', 'c.name as category',
                         DB::raw("CONCAT(COALESCE(`r.name`,''),' ',COALESCE(`r.tier`,'')) AS rack")
                     )->get();
                 if ($search->isNotEmpty()) {

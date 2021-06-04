@@ -26,7 +26,7 @@ Route::get('master-data/products/add', function () {
     return view('pharmacy::master_data.products-add');
 });
 Route::get('master-data/products/edit/{id}', function ($id) {
-    return view('pharmacy::master_data.products-edit',compact('id'));
+    return view('pharmacy::master_data.products-edit', compact('id'));
 });
 Route::get('master-data/suppliers', function () {
     return view('pharmacy::master_data.supplier-list');
@@ -35,7 +35,7 @@ Route::get('master-data/suppliers/add', function () {
     return view('pharmacy::master_data.supplier-add');
 });
 Route::get('master-data/suppliers/edit/{id}', function ($id) {
-    return view('pharmacy::master_data.supplier-edit',compact('id'));
+    return view('pharmacy::master_data.supplier-edit', compact('id'));
 });
 
 Route::get('purchases', function () {
@@ -45,17 +45,32 @@ Route::get('purchases/add', function () {
     return view('pharmacy::purchases.purchase-add');
 });
 Route::get('purchases/view/{id}', function ($id) {
-    return view('pharmacy::purchases.purchase-view',compact('id'));
+    return view('pharmacy::purchases.purchase-view', compact('id'));
 });
 Route::get('purchases/edit/{id}', function ($id) {
-    return view('pharmacy::purchases.purchase-edit',compact('id'));
+    return view('pharmacy::purchases.purchase-edit', compact('id'));
 });
 
 Route::get('purchases/receive/{id}', function ($id) {
-    return view('pharmacy::purchases.purchase-receive',compact('id'));
+    return view('pharmacy::purchases.purchase-receive', compact('id'));
 });
 
-Route::get('purchases/compare/{id}',function($id){
-    return view('pharmacy::purchases.purchase-compare',compact('id'));
+Route::get('purchases/compare/{id}', function ($id) {
+    return view('pharmacy::purchases.purchase-compare', compact('id'));
 });
 
+Route::get('purchases/payments', function () {
+    return view('pharmacy::payments.supplier.list');
+});
+
+Route::get('purchases/payments/add', function () {
+    return view('pharmacy::payments.supplier.add');
+});
+
+Route::get('purchases/payments/edit/{id}', function ($id) {
+    return view('pharmacy::payments.supplier.edit', compact('id'));
+});
+
+Route::get('purchases/payments/view/{id}', function ($id) {
+    return view('pharmacy::payments.supplier.view', compact('id'));
+});

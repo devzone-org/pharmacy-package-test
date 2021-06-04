@@ -26,7 +26,7 @@
 
                 <div class="">
                     <label for="status"
-                           class="block text-sm font-medium text-gray-600">Search {{ ucwords($searchable_type) }}</label>
+                           class="block text-sm font-medium text-gray-600">Search {{ ucwords(str_replace('_', ' ', $searchable_type))  }}</label>
                     <input type="text"
                            wire:model.debounce.500ms="searchable_query"
                            wire:keydown.arrow-up="decrementHighlight"

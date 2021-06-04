@@ -11,7 +11,7 @@
                     <img class="h-8 w-8" src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg" alt="Workflow">
                 </div>
                 <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4">
+                    <div class="ml-10 flex  space-x-4">
                         @include('pharmacy::include.header-links')
                     </div>
                 </div>
@@ -87,3 +87,4 @@
 {{--        </h1>--}}
 {{--    </div>--}}
 {{--</header>--}}
+
