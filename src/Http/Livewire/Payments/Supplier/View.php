@@ -2,6 +2,7 @@
 
 namespace Devzone\Pharmacy\Http\Livewire\Payments\Supplier;
 
+use App\Models\User;
 use Devzone\Ams\Models\ChartOfAccount;
 use Devzone\Pharmacy\Models\Payments\SupplierPayment;
 use Devzone\Pharmacy\Models\Payments\SupplierPaymentDetail;
@@ -23,7 +24,10 @@ class View extends Component
     public $success;
     public $purchase_orders = [];
     public $selected_orders = [];
+    public $payment_details = [];
     public $payment_id;
+    public $created_by;
+    public $approved_by;
     protected $listeners = ['emitSupplierId'];
     protected $rules = [
         'supplier_id' => 'required|integer',
@@ -45,6 +49,11 @@ class View extends Component
         $this->pay_from_name = $coa->name;
         $this->description = $payment->description;
         $this->payment_date = $payment->payment_date;
+        $this->payment_details = $payment->toArray();
+        $this->created_by = User::find($payment['added_by']);
+        if (!empty($payment['approved_by'])) {
+            $this->approved_by = User::find($payment['approved_by']);
+        }
 
         $this->selected_orders = ($payment_details->pluck('order_id')->toArray());
         $this->emitSupplierId();
@@ -57,7 +66,7 @@ class View extends Component
             ->join('purchase_receives as pr', 'pr.purchase_id', '=', 'p.id')
             ->where('p.supplier_id', $this->supplier_id)
             ->where('p.status', 'received')
-            ->whereIn('p.id',$this->selected_orders)
+            ->whereIn('p.id', $this->selected_orders)
             ->where('p.is_paid', 't')
             ->select(
                 'p.id', 'p.supplier_invoice', 'p.grn_no', 'p.delivery_date', DB::raw('sum(total_cost) as total_cost')

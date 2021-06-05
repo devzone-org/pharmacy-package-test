@@ -24,49 +24,91 @@
                 </div>
 
 
-                <div class="grid grid-cols-6 gap-6">
-                    <div class="col-span-6 sm:col-span-2">
-                        <label for="supplier_name" class="block text-sm font-medium text-gray-700">Supplier Name</label>
-                        <input wire:model.defer="supplier_name"
-                                readonly
-                               type="text" autocomplete="off"
-                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                               id="supplier_name">
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Supplier Name
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {{ $supplier_name }}
+                        </dd>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Pay From
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {{ $pay_from_name }}
+                        </dd>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Payment Date
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            @if(!empty($payment_date))
+                                {{ date('d M, Y',strtotime($payment_date)) }}
+                            @endif
+                        </dd>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Status
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+
+                            @if(!empty($payment_details['approved_at']))
+                                <span
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-green-100 text-green-800">
+                                  Approved
+                                </span>
+                            @else
+                                <span
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-red-100 text-red-800">
+  Not Approved
+</span>
+                            @endif
+                        </dd>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Description
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {{ $payment_details['description'] ?? '-' }}
+                        </dd>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Created By
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {{ $created_by->name }} <br>
+                            @if(!empty($payment_date))
+                                {{ date('d M, Y H:i A',strtotime($payment_details['created_at'])) }}
+                            @endif
+                        </dd>
                     </div>
 
-
-                    <div class="col-span-6 sm:col-span-2">
-                        <label for="pay_from" class="block text-sm font-medium text-gray-700">Pay From</label>
-                        <input wire:model.defer="pay_from_name"
-                                readonly
-                               type="text" autocomplete="off"
-                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                               id="pay_from">
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">
+                            Approved By
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            @if(!empty($approved_by))
+                                {{ $approved_by->name }} <br>
+                                @if(!empty($payment_date))
+                                    {{ date('d M, Y H:i A',strtotime($payment_details['approved_at'])) }}
+                                @endif
+                            @endif
+                        </dd>
                     </div>
-
-
-                    <div class="col-span-6 sm:col-span-2">
-                        <label for="payment_date" class="block text-sm font-medium text-gray-700">Payment Date</label>
-                        <input wire:model.defer="payment_date" type="date" autocomplete="off"
-                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                               id="payment_date">
-                    </div>
-
-
-                    <div class="col-span-6 ">
-                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                        <textarea
-                            class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                            id="description" cols="30" wire:model.defer="description" rows="4"></textarea>
-                    </div>
-
-                </div>
+                </dl>
             </div>
 
             <table class="min-w-full divide-y divide-gray-200 rounded-md ">
                 <thead class="bg-gray-50">
                 <tr>
-
 
 
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
