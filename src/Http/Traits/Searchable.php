@@ -28,7 +28,8 @@ trait Searchable
         'category' => ['name'],
         'product' => ['name', 'generic', 'category', 'rack'],
         'supplier' => ['name', 'address', 'phone'],
-        'pay_from' => ['name', 'code']
+        'pay_from' => ['name', 'code'],
+        'receiving_account' =>  ['name', 'code'],
     ];
 
 
@@ -95,7 +96,7 @@ trait Searchable
                 }
             }
 
-            if ($this->searchable_type == 'pay_from') {
+            if ($this->searchable_type == 'pay_from' || $this->searchable_type == 'receiving_account') {
                 $search = ChartOfAccount::where('status', 't')->where('type', 'Assets')
                     ->whereIn('sub_account', [11, 12])->where('name', 'LIKE', '%' . $value . '%')->get();
 

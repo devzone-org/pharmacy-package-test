@@ -74,3 +74,19 @@ Route::get('purchases/payments/edit/{id}', function ($id) {
 Route::get('purchases/payments/view/{id}', function ($id) {
     return view('pharmacy::payments.supplier.view', compact('id'));
 });
+
+Route::get('purchases/refund', function () {
+    return view('pharmacy::refunds.supplier.list');
+});
+
+Route::get('purchases/refund/add', function () {
+    return view('pharmacy::refunds.supplier.add');
+});
+
+Route::get('purchases/refund/edit/{id}', function ($id) {
+    return view('pharmacy::refunds.supplier.edit', compact('id'));
+});
+
+Route::get('purchases/refund/view/{id}', function ($id) {
+    return view('pharmacy::refunds.supplier.view', compact('id'));
+});

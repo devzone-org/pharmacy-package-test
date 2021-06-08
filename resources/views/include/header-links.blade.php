@@ -43,11 +43,7 @@
 
                 <a href="{{ url('pharmacy/purchases/payments') }}"
                    class="-m-3 p-3 flex items-center rounded-lg hover:bg-gray-100 {{ Request::segment(2)=='purchases' && (Request::segment(3) == 'payments')  ? 'bg-gray-100' : ''}} ">
-
                     <svg class="flex-shrink-0 h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-
-
-
 
                     <div class="ml-4">
                         <p class="text-base font-medium text-gray-900">
@@ -55,6 +51,21 @@
                         </p>
                         <p class="mt-1 text-sm text-gray-500">
                             Make supplier payments.
+                        </p>
+                    </div>
+                </a>
+
+
+                <a href="{{ url('pharmacy/purchases/refund') }}"
+                   class="-m-3 p-3 flex items-center rounded-lg hover:bg-gray-100 {{ Request::segment(2)=='purchases' && (Request::segment(3) == 'refund')  ? 'bg-gray-100' : ''}} ">
+
+                    <svg class="flex-shrink-0 h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"></path></svg>
+                    <div class="ml-4">
+                        <p class="text-base font-medium text-gray-900">
+                            Refunds
+                        </p>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Here you can refund items to suppliers.
                         </p>
                     </div>
                 </a>

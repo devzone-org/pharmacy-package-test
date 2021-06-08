@@ -8,27 +8,22 @@
                         <div class="bg-white py-6 px-4 space-y-6 sm:p-6 ">
                             <div class="grid grid-cols-8 gap-6">
                                 <div class="col-span-8 sm:col-span-2">
-                                    <label for="name" class="block text-sm font-medium text-gray-700">Supplier
-                                        Name</label>
+                                    <label for="name" class="block text-sm font-medium text-gray-700">Supplier Name</label>
                                     <input type="text" wire:model.defer="supplier_name" readonly
                                            wire:click="searchableOpenModal('supplier_id','supplier_name','supplier')"
-                                           name="name" id="name" autocomplete="off"
-                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                           name="name" id="name" autocomplete="off" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 </div>
 
                                 <div class="col-span-8 sm:col-span-2">
                                     <label for="salt" class="block text-sm font-medium text-gray-700">Pay From</label>
                                     <input type="text" wire:model.defer="pay_from_name"
                                            wire:click="searchableOpenModal('pay_from','pay_from_name','pay_from')"
-                                           id="salt" autocomplete="off"
-                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                           id="salt" autocomplete="off" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 </div>
 
                                 <div class="col-span-8 sm:col-span-2">
                                     <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                                    <select wire:model.defer="status"
-                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                            id="status">
+                                    <select wire:model.defer="status" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" id="status">
                                         <option value=""></option>
                                         <option value="app">Approved</option>
 
@@ -38,13 +33,11 @@
                                 </div>
 
                                 <div class="col-span-8 sm:col-span-2">
-                                    <button type="button" wire:click="search"
-                                            class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    <button type="button" wire:click="search" class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                         Search
                                     </button>
 
-                                    <button type="button" wire:click="resetSearch"
-                                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+                                    <button type="button" wire:click="resetSearch"  class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm" >
                                         Reset
                                     </button>
                                 </div>
@@ -64,9 +57,9 @@
             <div class="flex items-center justify-between">
                 <h3 class="text-lg leading-6 font-medium text-gray-900">Supplier Payments</h3>
 
-                <a href="{{ url('pharmacy/purchases/payments/add') }}"
+                <a href="{{ url('pharmacy/purchases/refund/add') }}"
                    class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
-                    Make New Payment
+                    Add New Refund
                 </a>
             </div>
 
@@ -157,12 +150,17 @@
                     Description
                 </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Pay From
+                    Receive In
                 </th>
 
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Payable Amount
+                    Refund Amount
                 </th>
+
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    Status
+                </th>
+
 
 
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
@@ -200,6 +198,21 @@
                     </td>
 
 
+<td  class="px-3 py-3   text-sm text-gray-500">
+    @if($m->is_receive=='t')
+      <span
+          class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800">
+  Received
+</span>
+    @else
+        <span
+            class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-red-100 text-red-800">
+ Not Received
+</span>
+        @endif
+</td>
+
+
                     <td class="px-3 py-3   text-sm text-gray-500">
                         {{ $m->created_by }} <br>
                         {{ date('d M Y h:i A',strtotime($m->created_at)) }}
@@ -235,24 +248,29 @@
                                  class="origin-top-right absolute right-0 mt-2 w-56 z-10 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
                                  role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                                 <div class="py-1" role="none">
-                                    <a href="{{ url('pharmacy/purchases/payments/view') }}/{{$m->id}}"
+                                    <a href="{{ url('pharmacy/purchases/refund/view') }}/{{$m->id}}"
                                        class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                        role="menuitem" tabindex="-1">View</a>
 
                                     @if(empty($m->approved_by))
-                                        <a href="#" wire:click="markAsApproved('{{ $m->id }}','{{ $m->payment_date }}')"
+                                        <a href="#" wire:click="markAsApproved('{{ $m->id }}')"
                                            class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                            role="menuitem" tabindex="-1">Mark as Approve
                                         </a>
 
-                                        <a href="{{ url('pharmacy/purchases/payments/edit') }}/{{$m->id}}"
+                                        <a href="{{ url('pharmacy/purchases/refund/edit') }}/{{$m->id}}"
                                            class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                            role="menuitem" tabindex="-1">Edit</a>
 
                                         <a href="#" wire:click="removePurchase('{{ $m->id }}')"
                                            class="text-red-700 block w-full text-left px-4 py-2 text-sm hover:bg-red-200"
                                            role="menuitem" tabindex="-1">Remove</a>
+                                    @else
+                                        <a href="#" wire:click="openConfirmation('{{ $m->id }}','{{ $m->receiving_date }}')"
+                                           class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                           role="menuitem" tabindex="-1">Refund Received</a>
                                     @endif
+
 
 
                                 </div>
@@ -302,13 +320,13 @@
                 <div class="  px-2 pt-2 pb-2">
 
                     <div class="">
-                        <label for="date" class="block text-sm font-medium text-gray-700">Payment Date</label>
-                        <input type="date" wire:model="payment_date"
+                        <label for="date" class="block text-sm font-medium text-gray-700">Refund Receiving Date</label>
+                        <input type="date" wire:model="receive_date"
 
                                id="date" autocomplete="off"
                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
-                    @error('payment_date')
+                    @error('receive_date')
                     <p class="mt-2 text-sm text-red-600" id="">{{ $message }}</p>
                     @enderror
 
@@ -325,7 +343,6 @@
             </div>
         </div>
     </div>
-
 </div>
 
 <script>

@@ -23,11 +23,13 @@ class PaymentList extends Component
     public $supplier_id;
     public $supplier_id_s;
     public $supplier_name;
-
+    public $confirm_dialog = false;
     public $pay_from;
     public $pay_from_s;
     public $pay_from_name;
     public $status;
+    public $payment_date;
+    public $primary_id;
 
 
     public function render()
@@ -54,19 +56,40 @@ class PaymentList extends Component
                 }
 
             })
-            ->select('s.name as supplier_name', 'sp.id', 'sp.description', 'coa.name as account_name',
+            ->select('s.name as supplier_name', 'sp.id', 'sp.description', 'coa.name as account_name', 'sp.payment_date',
                 DB::raw('sum(pr.total_cost) as total_cost'), 'sp.created_at', 'c.name as created_by',
                 'a.name as approved_by', 'sp.approved_at', 'spd.order_id')
             ->groupBy('spd.supplier_payment_id')
-            ->orderBy('sp.id','desc')
+            ->orderBy('sp.id', 'desc')
             ->paginate(20);
         return view('pharmacy::livewire.payments.supplier.payment-list', ['payments' => $payments]);
     }
 
+    public function markAsApproved($id, $date)
+    {
+        $this->confirm_dialog = true;
+        $this->payment_date = $date;
+        $this->primary_id = $id;
+    }
 
-    public function markAsApproved($id)
+    public function proceed()
+    {
+        $this->resetErrorBag();
+        $this->validate([
+            'payment_date' => 'required|date',
+            'primary_id' => 'required|integer',
+        ]);
+
+        $this->markAsApprovedConfirm();
+        $this->reset(['payment_date', 'primary_id']);
+        $this->confirm_dialog = false;
+    }
+
+
+    public function markAsApprovedConfirm()
     {
         try {
+            $id = $this->primary_id;
             DB::beginTransaction();
             $supplier_payment = SupplierPayment::findOrFail($id);
 
@@ -91,9 +114,9 @@ class PaymentList extends Component
 
             $vno = Voucher::instance()->voucher()->get();
             GeneralJournal::instance()->account($pay_from['id'])->credit($amount)->voucherNo($vno)
-                ->date($supplier_payment->payment_date)->approve()->description($description)->execute();
+                ->date($this->payment_date)->approve()->description($description)->execute();
             GeneralJournal::instance()->account($supplier['account_id'])->debit($amount)->voucherNo($vno)
-                ->date($supplier_payment->payment_date)->approve()->description($description)->execute();
+                ->date($this->payment_date)->approve()->description($description)->execute();
 
             $response = Purchase::whereIn('id', $orders)->update([
                 'is_paid' => 't'
@@ -101,7 +124,8 @@ class PaymentList extends Component
 
             $supplier_payment->update([
                 'approved_by' => Auth::user()->id,
-                'approved_at' => date('Y-m-d H:i:s')
+                'approved_at' => date('Y-m-d H:i:s'),
+                'payment_date' => $this->payment_date,
             ]);
 
             DB::commit();
@@ -117,7 +141,7 @@ class PaymentList extends Component
 
     public function removePurchase($id)
     {
-        SupplierPayment::whereNull('approved_at')->where('id', $id)->get();
+        SupplierPayment::whereNull('approved_at')->where('id', $id)->delete();
     }
 
     public function search()
