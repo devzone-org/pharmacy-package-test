@@ -11,7 +11,7 @@
                         clip-rule="evenodd"></path>
                 </svg>
             </a>
-            <span class="ml-4">Supplier Refunds</span>
+            <span class="ml-4">Supplier Returns</span>
         </h3>
     </div>
 
@@ -19,7 +19,7 @@
         <div class="shadow sm:rounded-md sm:overflow-hidden">
             <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
                 <div>
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">View Supplier Refund Details</h3>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">View Supplier Return Details</h3>
                 </div>
 
                 <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
@@ -32,26 +32,7 @@
                         </dd>
                     </div>
 
-                    <div class="sm:col-span-1">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Refund Receive In
-                        </dt>
-                        <dd class="mt-1 text-sm text-gray-900">
-                            {{ $refund->account_name }}
-                        </dd>
-                    </div>
 
-                    <div class="sm:col-span-1">
-                        <dt class="text-sm font-medium text-gray-500">
-                            Refund Receiving Date
-                        </dt>
-                        <dd class="mt-1 text-sm text-gray-900">
-                            @if(!empty( $refund->receiving_date))
-                                {{ date('d M, Y',strtotime( $refund->receiving_date))  }}
-                            @endif
-
-                        </dd>
-                    </div>
 
                     <div class="sm:col-span-1">
                         <dt class="text-sm font-medium text-gray-500">
@@ -139,7 +120,7 @@
                                         {{ $m['product_name'] }}
                                     </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{ $m['po_id'] }}
+                                       PO{{ $m['po_id'] }}
                                     </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         {{ $m['supply_price'] }}

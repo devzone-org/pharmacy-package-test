@@ -6,7 +6,9 @@ use App\Models\User;
 use Devzone\Ams\Models\ChartOfAccount;
 use Devzone\Pharmacy\Models\Payments\SupplierPayment;
 use Devzone\Pharmacy\Models\Payments\SupplierPaymentDetail;
+use Devzone\Pharmacy\Models\Payments\SupplierPaymentRefundDetail;
 use Devzone\Pharmacy\Models\Purchase;
+use Devzone\Pharmacy\Models\Refunds\SupplierRefund;
 use Devzone\Pharmacy\Models\Supplier;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -24,6 +26,9 @@ class View extends Component
     public $success;
     public $purchase_orders = [];
     public $selected_orders = [];
+
+    public $selected_returns = [];
+    public $returns = [];
     public $payment_details = [];
     public $payment_id;
     public $created_by;
@@ -41,6 +46,7 @@ class View extends Component
         $this->payment_id = $payment_id;
         $payment = SupplierPayment::find($payment_id);
         $payment_details = SupplierPaymentDetail::where('supplier_payment_id', $payment_id)->get();
+        $refund = SupplierPaymentRefundDetail::where('supplier_payment_id', $payment_id)->get();
         $supplier = Supplier::find($payment->supplier_id);
         $coa = ChartOfAccount::find($payment->pay_from);
         $this->supplier_id = $supplier->id;
@@ -56,7 +62,12 @@ class View extends Component
         }
 
         $this->selected_orders = ($payment_details->pluck('order_id')->toArray());
+        $this->selected_orders = ($payment_details->pluck('order_id')->toArray());
+        $this->selected_returns = ($refund->pluck('refund_id')->toArray());
         $this->emitSupplierId();
+
+
+
 
     }
 
@@ -65,9 +76,7 @@ class View extends Component
         $result = Purchase::from('purchases as p')
             ->join('purchase_receives as pr', 'pr.purchase_id', '=', 'p.id')
             ->where('p.supplier_id', $this->supplier_id)
-            ->where('p.status', 'received')
             ->whereIn('p.id', $this->selected_orders)
-            ->where('p.is_paid', 't')
             ->select(
                 'p.id', 'p.supplier_invoice', 'p.grn_no', 'p.delivery_date', DB::raw('sum(total_cost) as total_cost')
             )->orderBy('p.delivery_date')->groupBy('pr.purchase_id')->get();
@@ -75,6 +84,18 @@ class View extends Component
             $this->purchase_orders = [];
         } else {
             $this->purchase_orders = $result->toArray();
+        }
+
+        $returns = SupplierRefund::from('supplier_refunds as sr')
+            ->where('sr.supplier_id', $this->supplier_id)
+            ->whereIn('sr.id', $this->selected_returns)
+            ->whereNotNull('sr.created_by')
+            ->select('sr.description', 'sr.id', 'sr.total_amount as total')
+            ->get();
+        if ($returns->isEmpty()) {
+            $this->returns = [];
+        } else {
+            $this->returns = $returns->toArray();
         }
     }
 

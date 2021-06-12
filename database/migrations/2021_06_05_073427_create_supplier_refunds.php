@@ -17,8 +17,7 @@ class CreateSupplierRefunds extends Migration
             $table->id();
             $table->integer('supplier_id');
             $table->mediumText('description')->nullable();
-            $table->integer('receive_in')->nullable();
-            $table->date('receiving_date')->nullable();
+            $table->decimal('total_amount')->nullable();
             $table->integer('created_by');
             $table->integer('approved_by')->nullable();
             $table->dateTime('approved_at')->nullable();

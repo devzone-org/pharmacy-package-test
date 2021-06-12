@@ -20,7 +20,9 @@ class PurchaseReceive extends Component
     public $delivery_date;
     public $supplier_invoice;
     public $products_modal = false;
+    public $more_options_modal = false;
     public $search_products;
+    public $key_id;
     public $product_data = [];
     public $order_list = [];
     public $grn_no;
@@ -101,6 +103,12 @@ class PurchaseReceive extends Component
         return view('pharmacy::livewire.purchases.purchase-receive');
     }
 
+    public function moreOptions($key)
+    {
+        $this->key_id = $key;
+        $this->more_options_modal = true;
+    }
+
     public function openProductModal()
     {
         $this->products_modal = true;
@@ -121,7 +129,7 @@ class PurchaseReceive extends Component
     {
         $array = explode(".", $name);
         if ($array[0] == 'order_list') {
-            if (empty($value) || !is_numeric($value)) {
+            if ((empty($value) || !is_numeric($value))  && in_array($array[2],['qty','bonus','cost_of_price','disc','retail_price']) ) {
                 $this->order_list[$array[1]][$array[2]] = 0;
             }
             if ($array[2] == 'qty') {
@@ -150,7 +158,6 @@ class PurchaseReceive extends Component
     public function updatedSearchProducts($value)
     {
         if (strlen($value) > 1) {
-
             $this->highlight_index = 0;
             $search = Product::from('products as p')
                 ->where('p.status', 't')
@@ -233,6 +240,8 @@ class PurchaseReceive extends Component
                     'after_disc_cost' => $o['after_disc_cost'],
                     'retail_price' => $o['retail_price'],
                     'total_cost' => $o['after_disc_cost'] * $o['qty'],
+                    'batch_no' => $o['batch_no'] ?? null,
+                    'expiry' => $o['expiry'] ?? null,
                 ]);
             }
             DB::commit();

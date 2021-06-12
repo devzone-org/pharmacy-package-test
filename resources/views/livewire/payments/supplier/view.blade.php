@@ -16,7 +16,7 @@
     </div>
 
 
-    <form wire:submit.prevent="create">
+
         <div class="shadow sm:rounded-md sm:overflow-hidden">
             <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
                 <div>
@@ -106,9 +106,11 @@
                 </dl>
             </div>
 
+
             <table class="min-w-full divide-y divide-gray-200 rounded-md ">
                 <thead class="bg-gray-50">
                 <tr>
+
 
 
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
@@ -128,15 +130,19 @@
                         Delivery Date
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                        Payable Amount
+                        Amount
                     </th>
-
 
                 </tr>
                 </thead>
-                <tbody class="   bg-white divide-y divide-gray-200 ">
+                <tbody class="   bg-white ">
+                <tr   class="bg-gray-50">
+                    <th scope="col" colspan="7" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        <i>Purchase Orders</i>
+                    </th>
+                </tr>
                 @foreach($purchase_orders as $key => $m)
-                    <tr class="">
+                    <tr>
 
                         <td class="px-3 py-3   text-sm font-medium text-gray-500">
                             {{ $loop->iteration }}
@@ -158,30 +164,90 @@
                         </td>
 
 
-                        <td class="px-3 py-3   text-sm text-gray-500">
+                        <td class="px-3 py-3    text-sm text-gray-500">
                             {{ number_format($m['total_cost'],2) }}
                         </td>
 
 
                     </tr>
                 @endforeach
-                <tr class="bg-gray-50">
-
-                    <th scope="col" colspan="5" class="px-3 py-3 text-center text-sm font-medium text-gray-500   ">
-                        Total
+                <tr  class="bg-gray-50">
+                    <th scope="col" colspan="7" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        <i>Supplier Returns</i>
                     </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                        {{ number_format(collect($purchase_orders)->sum('total_cost'),2) }}
+                </tr>
+                @foreach($returns as $key => $m)
+                    <tr >
+
+                        <td class="px-3 py-3   text-sm font-medium text-gray-500">
+                            {{ $loop->iteration }}
+                        </td>
+                        <td  colspan="4" class="px-3 py-3   text-sm text-gray-500">
+                            {{ $m['description'] }}
+                        </td>
+
+
+
+                        <td class="px-3 py-3   text-sm text-gray-500">
+                            {{ number_format($m['total'],2) }}
+                        </td>
+
+
+                    </tr>
+                @endforeach
+                <tr>
+                    <th colspan="6">&nbsp;</th>
+                </tr>
+                <tr  >
+                    <th scope="col" colspan="5" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                        Selected Orders
                     </th>
+                    <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
+                        {{ count($selected_orders) }}
+                    </th>
+                </tr>
+                <tr  >
+                    <th scope="col" colspan="5" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                        (Payable Amount)
+                    </th>
+                    <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
+                        ({{ number_format(collect($purchase_orders)->whereIn('id',$selected_orders)->sum('total_cost'),2) }})
+                    </th>
+                </tr>
+                <tr  >
+                    <th scope="col" colspan="5" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                        Selected Returns
+                    </th>
+                    <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
+                        {{ count($selected_returns) }}
+                    </th>
+                </tr>
+                <tr  >
+                    <th scope="col" colspan="5" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                        Receivable Amount
+                    </th>
+                    <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
+                        {{ number_format(collect($returns)->whereIn('id',$selected_returns)->sum('total'),2) }}
+                    </th>
+                </tr>
 
 
+                <tr  >
+                    <th scope="col" colspan="5" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                        (Net Payable) / Receivable
+                    </th>
+                    <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
+                        {{ \Devzone\Ams\Helper\GeneralJournal::numberFormat(-collect($purchase_orders)->whereIn('id',$selected_orders)->sum('total_cost') + collect($returns)->whereIn('id',$selected_returns)->sum('total'),2) }}
+                    </th>
+                </tr>
+                <tr>
+                    <th colspan="6">&nbsp;</th>
                 </tr>
                 </tbody>
             </table>
 
-
         </div>
-    </form>
+
 
 
 </div>

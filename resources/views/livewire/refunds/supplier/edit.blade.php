@@ -11,7 +11,7 @@
                         clip-rule="evenodd"></path>
                 </svg>
             </a>
-            <span class="ml-4">Supplier Refunds</span>
+            <span class="ml-4">Supplier Returns</span>
         </h3>
     </div>
 
@@ -20,7 +20,7 @@
         <div class="shadow sm:rounded-md sm:overflow-hidden">
             <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
                 <div>
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Supplier Refund</h3>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Supplier Return</h3>
                 </div>
 
                 @if ($errors->any())
@@ -105,22 +105,7 @@
                     </div>
 
 
-                    <div class="col-span-6 sm:col-span-2">
-                        <label for="receiving_account" class="block text-sm font-medium text-gray-700">Receiving Account</label>
-                        <input wire:model.defer="receiving_account_name"
-                               wire:click="searchableOpenModal('receiving_account', 'receiving_account_name', 'receiving_account')" readonly
-                               type="text" autocomplete="off"
-                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                               id="receiving_account">
-                    </div>
 
-
-                    <div class="col-span-6 sm:col-span-2">
-                        <label for="receiving_date" class="block text-sm font-medium text-gray-700">Receiving Date</label>
-                        <input wire:model.defer="receiving_date" type="date" autocomplete="off"
-                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                               id="receiving_date">
-                    </div>
 
 
                     <div class="col-span-6 ">

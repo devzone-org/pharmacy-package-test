@@ -46,9 +46,7 @@ class Edit extends Component
 
         $refund_details = SupplierRefundDetail::where('supplier_refund_id', $refund->id)->get();
         $this->receiving_date = $refund->receiving_date;
-        $this->receiving_account = $refund->receive_in;
-        $coa = ChartOfAccount::find($this->receiving_account);
-        $this->receiving_account_name = $coa->name;
+
 
         $this->description = $refund->description;
         $this->supplier_id = $refund->supplier_id;
@@ -104,19 +102,29 @@ class Edit extends Component
             if (SupplierRefund::whereNotNull('approved_by')->where('id', $this->primary_id)->exists()) {
                 throw new \Exception('You cannot edit this record because record already has been approved.');
             }
+
+            $total_amount = 0;
+            foreach ($return as $o) {
+                $total_amount = $total_amount + ($o['supply_price'] * $o['return']);
+            }
+
+
             SupplierRefund::where('id', $this->primary_id)->update([
                 'supplier_id' => $this->supplier_id,
                 'description' => $this->description,
-                'receive_in' => $this->receiving_account,
-                'receiving_date' => $this->receiving_date,
+                'total_amount' => $total_amount
             ]);
             SupplierRefundDetail::where('supplier_refund_id', $this->primary_id)->delete();
             foreach ($return as $o) {
+                if($o['return']>$o['qty']){
+                    throw new \Exception('You cannot refund more than available qty.');
+                }
                 SupplierRefundDetail::create([
                     'supplier_refund_id' => $this->primary_id,
                     'product_id' => $o['product_id'],
                     'po_id' => $o['po_id'],
                     'qty' => $o['return'],
+                    'supply_price' => $o['supply_price'],
                     'product_inventory_id' => $o['product_inventory_id']
                 ]);
             }

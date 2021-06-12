@@ -6,7 +6,9 @@ use Devzone\Ams\Models\ChartOfAccount;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Payments\SupplierPayment;
 use Devzone\Pharmacy\Models\Payments\SupplierPaymentDetail;
+use Devzone\Pharmacy\Models\Payments\SupplierPaymentRefundDetail;
 use Devzone\Pharmacy\Models\Purchase;
+use Devzone\Pharmacy\Models\Refunds\SupplierRefund;
 use Devzone\Pharmacy\Models\Supplier;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +28,9 @@ class Edit extends Component
     public $purchase_orders = [];
     public $selected_orders = [];
     public $payment_id;
+    public $selected_returns = [];
+    public $returns = [];
+
     protected $listeners = ['emitSupplierId'];
     protected $rules = [
         'supplier_id' => 'required|integer',
@@ -39,6 +44,7 @@ class Edit extends Component
         $this->payment_id = $payment_id;
         $payment = SupplierPayment::find($payment_id);
         $payment_details = SupplierPaymentDetail::where('supplier_payment_id', $payment_id)->get();
+        $refund = SupplierPaymentRefundDetail::where('supplier_payment_id', $payment_id)->get();
         $supplier = Supplier::find($payment->supplier_id);
         $coa = ChartOfAccount::find($payment->pay_from);
         $this->supplier_id = $supplier->id;
@@ -49,6 +55,13 @@ class Edit extends Component
         $this->payment_date = $payment->payment_date;
         $this->emitSupplierId();
         $this->selected_orders = ($payment_details->pluck('order_id')->toArray());
+        $this->selected_returns = ($refund->pluck('refund_id')->toArray());
+        foreach ($this->selected_returns as $key => $a){
+            $this->selected_returns[$key] = (string)$a;
+        }
+        foreach ($this->selected_orders as $key => $a){
+            $this->selected_orders[$key] = (string)$a;
+        }
 
 
     }
@@ -68,6 +81,18 @@ class Edit extends Component
         } else {
             $this->purchase_orders = $result->toArray();
         }
+
+        $returns = SupplierRefund::from('supplier_refunds as sr')
+            ->where('sr.supplier_id', $this->supplier_id)
+            ->where('sr.is_receive', 'f')
+            ->whereNotNull('sr.created_by')
+            ->select('sr.description', 'sr.id', 'sr.total_amount as total')
+            ->get();
+        if ($returns->isEmpty()) {
+            $this->returns = [];
+        } else {
+            $this->returns = $returns->toArray();
+        }
     }
 
     public function render()
@@ -78,7 +103,7 @@ class Edit extends Component
     public function create()
     {
         $this->validate();
-        if (!empty($this->selected_orders)) {
+        if (!empty($this->selected_orders) || !empty($this->selected_returns)) {
             try {
                 DB::beginTransaction();
                 if (SupplierPayment::whereNotNull('approved_by')->where('id', $this->payment_id)->exists()) {
@@ -91,10 +116,17 @@ class Edit extends Component
                     'payment_date' => $this->payment_date,
                 ]);
                 SupplierPaymentDetail::where('supplier_payment_id',$this->payment_id)->delete();
+                SupplierPaymentRefundDetail::where('supplier_payment_id',$this->payment_id)->delete();
                 foreach ($this->selected_orders as $o) {
                     SupplierPaymentDetail::create([
                         'supplier_payment_id' => $this->payment_id,
                         'order_id' => $o
+                    ]);
+                }
+                foreach ($this->selected_returns as $o) {
+                    SupplierPaymentRefundDetail::create([
+                        'supplier_payment_id' => $this->payment_id,
+                        'refund_id' => $o
                     ]);
                 }
                 DB::commit();

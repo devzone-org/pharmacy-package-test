@@ -144,35 +144,44 @@
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Name
                     </th>
-                    <th scope="col" class="w-16 border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col"
+                        class="w-16 border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Packing Pieces
                     </th>
-                    <th scope="col" class="w-16  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col"
+                        class="w-16  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Qty
                     </th>
-                    <th scope="col" class="w-16 border  text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col"
+                        class="w-16 border  text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Bonus
                     </th>
-                    <th scope="col" class="w-16  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col"
+                        class="w-16  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Total Qty
                     </th>
-                    <th scope="col" class="w-28  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col"
+                        class="w-28  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Supply Price
                     </th>
-                    <th scope="col" class="w-16  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col"
+                        class="w-16  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Disc (%)
                     </th>
 
-                    <th scope="col" class="w-28 border  text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col"
+                        class="w-28 border  text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         SP After Disc
                     </th>
 
 
-                    <th scope="col" class="w-28 border  text-center px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                    <th scope="col"
+                        class="w-28 border  text-center px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                         Retail Price
                     </th>
 
-                    <th scope="col" class="w-28 border  text-center px-3 py-3 text-left text-md font-medium text-gray-500    ">
+                    <th scope="col"
+                        class="w-28 border  text-center px-3 py-3 text-left text-md font-medium text-gray-500    ">
                         Total Cost
                     </th>
                     <th scope="col" class="relative px-3 py-3">
@@ -186,8 +195,13 @@
                         <td class="px-3 py-3  border text-sm font-medium text-gray-500">
                             {{ $loop->iteration }}
                         </td>
-                        <td class="px-3 py-3  border text-sm text-gray-500">
-                            {{ $m['name'] }}
+                        <td class="px-3 py-3  flex justify-between  text-sm text-gray-500">
+                            <span>{{ $m['name'] }}</span>
+                            <svg wire:click="moreOptions('{{ $key }}')" class="w-6 h-6 cursor-pointer" fill="none"
+                                 stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                            </svg>
                         </td>
                         <td class="px-3 py-3 bg-gray-50 border text-sm text-gray-500">
                             {{ $m['packing'] }}
@@ -245,6 +259,8 @@
                             </svg>
                         </td>
                     </tr>
+
+
                 @endforeach
                 <tr class="bg-gray-50 border-b">
 
@@ -285,6 +301,7 @@
                 </tr>
                 </tbody>
             </table>
+
             <div class="px-4 py-3 bg-gray-50 text-right sm:px-6 border-t">
                 <button type="submit"
                         class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
@@ -402,6 +419,57 @@
                         <p class="text-sm opacity-25 pt-0 p-3">{{ empty($product_data) ? 'No Record Found': '' }}</p>
                     @endif
                 @endif
+            </div>
+        </div>
+    </div>
+    <div x-data="{ open: @entangle('more_options_modal') }" x-cloak x-show="open"
+         class="fixed z-40 inset-0 overflow-y-auto">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="open" x-description="Background overlay, show/hide based on modal state."
+                 x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <!-- This element is to trick the browser into centering the modal contents. -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true"></span>
+            <div @click.away="open = false;" x-show="open"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="h-1/3 inline-block align-bottom bg-white rounded-lg  text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full  "
+                 role="dialog" aria-modal="true" aria-labelledby="modal-headline">
+
+                <div class="  px-2 pt-2 pb-2">
+
+                    <div class="grid grid-cols-6 gap-6">
+
+
+                        <div class="col-span-6 ">
+                            <label for="expiry1" class="block text-sm font-medium text-gray-700">Date</label>
+                            <input   wire:model.lazy="order_list.{{$key_id}}.expiry" type="date"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                   id="expiry1">
+                        </div>
+
+
+                        <div class="col-span-6 ">
+                            <label for="batch_no" class="block text-sm font-medium text-gray-700">Batch #</label>
+                            <input wire:model.lazy="order_list.{{$key_id}}.batch_no" type="text" autocomplete="off"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                   id="batch_no">
+                        </div>
+
+                    </div>
+
+                </div>
+
+
             </div>
         </div>
     </div>

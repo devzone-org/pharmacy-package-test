@@ -14,12 +14,7 @@
                                            name="name" id="name" autocomplete="off" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 </div>
 
-                                <div class="col-span-8 sm:col-span-2">
-                                    <label for="salt" class="block text-sm font-medium text-gray-700">Pay From</label>
-                                    <input type="text" wire:model.defer="pay_from_name"
-                                           wire:click="searchableOpenModal('pay_from','pay_from_name','pay_from')"
-                                           id="salt" autocomplete="off" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                </div>
+
 
                                 <div class="col-span-8 sm:col-span-2">
                                     <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
@@ -55,11 +50,11 @@
     <div class="shadow  rounded-b-md ">
         <div class="bg-white py-6 px-4 space-y-6 sm:p-6  rounded-t-md">
             <div class="flex items-center justify-between">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Supplier Payments</h3>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Supplier Returns</h3>
 
                 <a href="{{ url('pharmacy/purchases/refund/add') }}"
                    class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
-                    Add New Refund
+                    Add New Return
                 </a>
             </div>
 
@@ -149,9 +144,7 @@
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                     Description
                 </th>
-                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Receive In
-                </th>
+
 
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                     Refund Amount
@@ -190,9 +183,7 @@
                         {{ $m->description }}
                     </td>
 
-                    <td class="px-3 py-3   text-sm text-gray-500">
-                        {{ $m->account_name }}
-                    </td>
+
                     <td class="px-3 py-3   text-sm text-gray-500">
                         {{ number_format($m->total_cost,2) }}
                     </td>
@@ -202,12 +193,12 @@
     @if($m->is_receive=='t')
       <span
           class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800">
-  Received
+  Adjusted
 </span>
     @else
         <span
             class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-red-100 text-red-800">
- Not Received
+ Not Adjusted
 </span>
         @endif
 </td>
@@ -253,7 +244,7 @@
                                        role="menuitem" tabindex="-1">View</a>
 
                                     @if(empty($m->approved_by))
-                                        <a href="#" wire:click="markAsApproved('{{ $m->id }}')"
+                                        <a href="#" wire:click="openConfirmation('{{ $m->id }}')"
                                            class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                            role="menuitem" tabindex="-1">Mark as Approve
                                         </a>
@@ -265,10 +256,7 @@
                                         <a href="#" wire:click="removePurchase('{{ $m->id }}')"
                                            class="text-red-700 block w-full text-left px-4 py-2 text-sm hover:bg-red-200"
                                            role="menuitem" tabindex="-1">Remove</a>
-                                    @else
-                                        <a href="#" wire:click="openConfirmation('{{ $m->id }}','{{ $m->receiving_date }}')"
-                                           class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                           role="menuitem" tabindex="-1">Refund Received</a>
+
                                     @endif
 
 
@@ -317,21 +305,28 @@
                  class="h-1/3 inline-block align-bottom bg-white rounded-lg  text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full  "
                  role="dialog" aria-modal="true" aria-labelledby="modal-headline">
 
-                <div class="  px-2 pt-2 pb-2">
+                <div class=" p-5">
 
-                    <div class="">
-                        <label for="date" class="block text-sm font-medium text-gray-700">Refund Receiving Date</label>
-                        <input type="date" wire:model="receive_date"
-
-                               id="date" autocomplete="off"
-                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-red-600" x-description="Heroicon name: outline/exclamation" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                Attention!
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500">
+                                    Are you sure you want to proceed? This action cannot be undone.
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    @error('receive_date')
-                    <p class="mt-2 text-sm text-red-600" id="">{{ $message }}</p>
-                    @enderror
 
                     <div class=" ">
-                        <button type="button" wire:click="proceed"
+                        <button type="button" wire:click="confirm('{{ $primary_id }}')"
                                 class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             Proceed
                         </button>

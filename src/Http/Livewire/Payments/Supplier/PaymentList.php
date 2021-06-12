@@ -8,8 +8,10 @@ use Devzone\Ams\Models\ChartOfAccount;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Payments\SupplierPayment;
 use Devzone\Pharmacy\Models\Payments\SupplierPaymentDetail;
+use Devzone\Pharmacy\Models\Payments\SupplierPaymentRefundDetail;
 use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\PurchaseReceive;
+use Devzone\Pharmacy\Models\Refunds\SupplierRefund;
 use Devzone\Pharmacy\Models\Supplier;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -39,6 +41,7 @@ class PaymentList extends Component
             ->join('suppliers as s', 's.id', 'sp.supplier_id')
             ->join('chart_of_accounts as coa', 'coa.id', '=', 'sp.pay_from')
             ->join('supplier_payment_details as spd', 'spd.supplier_payment_id', '=', 'sp.id')
+
             ->join('purchase_receives as pr', 'pr.purchase_id', '=', 'spd.order_id')
             ->join('users as c', 'c.id', '=', 'sp.added_by')
             ->leftJoin('users as a', 'a.id', '=', 'sp.approved_by')
@@ -57,9 +60,10 @@ class PaymentList extends Component
 
             })
             ->select('s.name as supplier_name', 'sp.id', 'sp.description', 'coa.name as account_name', 'sp.payment_date',
-                DB::raw('sum(pr.total_cost) as total_cost'), 'sp.created_at', 'c.name as created_by',
+                DB::raw('sum(pr.total_cost) as total_cost'),'sp.created_at', 'c.name as created_by',
                 'a.name as approved_by', 'sp.approved_at', 'spd.order_id')
-            ->groupBy('spd.supplier_payment_id')
+            ->groupBy('sp.id')
+
             ->orderBy('sp.id', 'desc')
             ->paginate(20);
         return view('pharmacy::livewire.payments.supplier.payment-list', ['payments' => $payments]);
@@ -98,28 +102,49 @@ class PaymentList extends Component
             }
 
             $orders = SupplierPaymentDetail::where('supplier_payment_id', $id)->get()->pluck('order_id')->toArray();
-
             if (Purchase::whereIn('id', $orders)->where('is_paid', 't')->exists()) {
                 throw new \Exception('Purchase order that you select already mark as paid.');
             }
+
+            $returns = SupplierPaymentRefundDetail::where('supplier_payment_id', $id)->get()->pluck('refund_id')->toArray();
+            if (SupplierRefund::whereIn('id', $returns)->where('is_receive', 't')->exists()) {
+                throw new \Exception('Un adjusted returns that you select already mark as settled.');
+            }
+
 
             $pay_from = ChartOfAccount::findOrFail($supplier_payment->pay_from);
             $supplier = Supplier::findOrFail($supplier_payment->supplier_id);
 
 
             $amount = PurchaseReceive::whereIn('purchase_id', $orders)->sum('total_cost');
+            $return_amount = SupplierRefund::whereIn('id', $returns)->sum('total_amount');
+            $diff = $amount - $return_amount;
             $description = "Amounting total PKR " . number_format($amount, 2) . "/- paid on dated " . date('d M, Y', strtotime($supplier_payment->payment_date)) .
                 " against PO # " . implode(', ', $orders) . " to supplier " . $supplier['name'] . " by " . Auth::user()->name . " " . $supplier_payment->description;
 
 
             $vno = Voucher::instance()->voucher()->get();
-            GeneralJournal::instance()->account($pay_from['id'])->credit($amount)->voucherNo($vno)
-                ->date($this->payment_date)->approve()->description($description)->execute();
-            GeneralJournal::instance()->account($supplier['account_id'])->debit($amount)->voucherNo($vno)
-                ->date($this->payment_date)->approve()->description($description)->execute();
+            $bank = GeneralJournal::instance()->account($pay_from['id']);
+            if ($diff > 0) {
+                $bank = $bank->credit($diff);
+            } else {
+                $bank = $bank->debit(abs($diff));
+            }
+            $bank->voucherNo($vno)->date($this->payment_date)->approve()->description($description)->execute();
 
-            $response = Purchase::whereIn('id', $orders)->update([
+            $sp = GeneralJournal::instance()->account($supplier['account_id']);
+            if ($diff > 0) {
+                $sp = $sp->debit($diff);
+            } else {
+                $sp = $sp->credit(abs($diff));
+            }
+            $sp->voucherNo($vno)->date($this->payment_date)->approve()->description($description)->execute();
+
+            Purchase::whereIn('id', $orders)->update([
                 'is_paid' => 't'
+            ]);
+            SupplierRefund::whereIn('id', $returns)->update([
+                'is_receive' => 't'
             ]);
 
             $supplier_payment->update([

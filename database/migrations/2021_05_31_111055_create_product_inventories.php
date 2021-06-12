@@ -23,6 +23,8 @@ class CreateProductInventories extends Migration
             $table->date('expiry')->nullable();
             $table->integer('po_id');
             $table->string('type','10')->nullable();
+            $table->string('batch_no',30)->nullable();
+            $table->date('expiry')->nullable();
             $table->timestamps();
         });
     }

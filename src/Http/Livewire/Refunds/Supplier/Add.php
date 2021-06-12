@@ -55,12 +55,16 @@ class Add extends Component
             if (empty($return)) {
                 throw new \Exception('No product found for refund.');
             }
+
+            $total_amount = 0;
+            foreach ($return as $o) {
+                $total_amount = $total_amount + ($o['supply_price'] * $o['return']);
+            }
             $id = SupplierRefund::create([
                 'supplier_id' => $this->supplier_id,
                 'description' => $this->description,
-                'receive_in' => $this->receiving_account,
-                'receiving_date' => $this->receiving_date,
-                'created_by' => Auth::user()->id
+                'created_by' => Auth::user()->id,
+                'total_amount' => $total_amount
             ])->id;
 
             foreach ($return as $o) {
@@ -68,6 +72,7 @@ class Add extends Component
                     'supplier_refund_id' => $id,
                     'product_id' => $o['product_id'],
                     'po_id' => $o['po_id'],
+                    'supply_price' => $o['supply_price'],
                     'qty' => $o['return'],
                     'product_inventory_id' => $o['product_inventory_id']
                 ]);

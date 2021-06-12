@@ -23,6 +23,8 @@ class CreatePurchaseReceivesTable extends Migration
             $table->decimal('total_cost');
             $table->integer('bonus')->nullable();
             $table->decimal('discount')->nullable();
+            $table->string('batch_no',30)->nullable();
+            $table->date('expiry')->nullable();
             $table->decimal('after_disc_cost')->nullable();
             $table->timestamps();
         });

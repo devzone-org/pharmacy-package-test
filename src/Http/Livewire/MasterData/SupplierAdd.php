@@ -56,9 +56,10 @@ class SupplierAdd extends Component
 
             $this->success = 'Record has been added.';
             DB::commit();
-            $this->addError(['name', 'phone', 'address', 'contact_name', 'contact_phone', 'account_id', 'status']);
+            $this->reset(['name', 'phone', 'address', 'contact_name', 'contact_phone', 'status']);
 
         } catch (\Exception $e) {
+
             $this->addError('name', $e->getMessage());
             DB::rollBack();
         }

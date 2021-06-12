@@ -134,6 +134,7 @@
                 </div>
             </div>
 
+
             <table class="min-w-full divide-y divide-gray-200 rounded-md ">
                 <thead class="bg-gray-50">
                 <tr>
@@ -159,15 +160,19 @@
                         Delivery Date
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                        Payable Amount
+                        Amount
                     </th>
-
 
                 </tr>
                 </thead>
-                <tbody class="   bg-white divide-y divide-gray-200 ">
+                <tbody class="   bg-white ">
+                <tr   class="bg-gray-50">
+                    <th scope="col" colspan="7" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        <i>Un Paid Purchase Orders</i>
+                    </th>
+                </tr>
                 @foreach($purchase_orders as $key => $m)
-                    <tr class="">
+                    <tr>
                         <td class="px-3 py-3   text-sm font-medium text-gray-500">
 
                             <input id="orders{{$loop->iteration}}" value="{{ $m['id'] }}"
@@ -194,50 +199,96 @@
                         </td>
 
 
-                        <td class="px-3 py-3   text-sm text-gray-500">
+                        <td class="px-3 py-3    text-sm text-gray-500">
                             {{ number_format($m['total_cost'],2) }}
                         </td>
 
 
                     </tr>
                 @endforeach
-                <tr class="bg-gray-50">
-
-                    <th scope="col" colspan="6" class="px-3 py-3 text-center text-sm font-medium text-gray-500   ">
-                        Total
+                <tr  class="bg-gray-50">
+                    <th scope="col" colspan="7" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        <i>Un Adjusted Returns</i>
                     </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                        {{ number_format(collect($purchase_orders)->sum('total_cost'),2) }}
+                </tr>
+                @foreach($returns as $key => $m)
+                    <tr >
+                        <td class="px-3 py-3   text-sm font-medium text-gray-500">
+
+                            <input id="returns{{$loop->iteration}}" value="{{ $m['id'] }}"
+                                   name="returns{{$loop->iteration}}" wire:model="selected_returns" type="checkbox"
+                                   class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                        </td>
+                        <td class="px-3 py-3   text-sm font-medium text-gray-500">
+                            {{ $loop->iteration }}
+                        </td>
+                        <td  colspan="4" class="px-3 py-3   text-sm text-gray-500">
+                            {{ $m['description'] }}
+                        </td>
+
+
+
+                        <td class="px-3 py-3   text-sm text-gray-500">
+                            {{ number_format($m['total'],2) }}
+                        </td>
+
+
+                    </tr>
+                @endforeach
+                <tr>
+                    <th colspan="7">&nbsp;</th>
+                </tr>
+                <tr  >
+                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                        Selected Orders
                     </th>
+                    <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
+                        {{ count($selected_orders) }}
+                    </th>
+                </tr>
+                <tr  >
+                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                        (Payable Amount)
+                    </th>
+                    <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
+                        ({{ number_format(collect($purchase_orders)->whereIn('id',$selected_orders)->sum('total_cost'),2) }})
+                    </th>
+                </tr>
+                <tr  >
+                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                        Selected Returns
+                    </th>
+                    <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
+                        {{ count($selected_returns) }}
+                    </th>
+                </tr>
+                <tr  >
+                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                        Receivable Amount
+                    </th>
+                    <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
+                        {{ number_format(collect($returns)->whereIn('id',$selected_returns)->sum('total'),2) }}
+                    </th>
+                </tr>
 
 
+                <tr  >
+                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                        (Net Payable) / Receivable
+                    </th>
+                    <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
+                        {{ \Devzone\Ams\Helper\GeneralJournal::numberFormat(-collect($purchase_orders)->whereIn('id',$selected_orders)->sum('total_cost') + collect($returns)->whereIn('id',$selected_returns)->sum('total'),2) }}
+                    </th>
+                </tr>
+                <tr>
+                    <th colspan="7">&nbsp;</th>
                 </tr>
                 </tbody>
             </table>
-            <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
-                <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-                    <div class="sm:col-span-1">
-                        <dt class="text-md font-medium text-center text-gray-500">
-                            Selected Orders
-                        </dt>
-                        <dd class="mt-1 text-md text-center text-gray-900">
-                            {{ count($selected_orders) }}
-                        </dd>
-                    </div>
-                    <div class="sm:col-span-1">
-                        <dt class="text-md font-medium text-center text-gray-500">
-                            Total Payable Amount
-                        </dt>
-                        <dd class="mt-1 text-md text-center text-gray-900">
-                            {{ number_format(collect($purchase_orders)->whereIn('id',$selected_orders)->sum('total_cost'),2) }}
-                        </dd>
-                    </div>
 
 
-                </dl>
 
 
-            </div>
             <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
                 <button type="submit"
                         class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
@@ -258,6 +309,11 @@
                 document.getElementById('searchable_query').focus();
             }, 100);
         });
-
     });
+
+    // document.addEventListener("keydown", event => {
+    //     if (event.keyCode == 13) {
+    //         alert('ads');
+    //     }
+    // });
 </script>

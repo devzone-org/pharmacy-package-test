@@ -20,6 +20,7 @@ class CreateSupplierRefundDetails extends Migration
             $table->integer('product_inventory_id');
             $table->integer('po_id');
             $table->integer('qty');
+            $table->decimal('supply_price')->nullable();
             $table->timestamps();
         });
     }

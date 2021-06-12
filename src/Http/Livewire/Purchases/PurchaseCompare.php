@@ -149,10 +149,15 @@ class PurchaseCompare extends Component
             }
 
             $inventory = ChartOfAccount::where('reference', 'pharmacy-inventory-5')->first();
+            if(empty($inventory)){
+                throw new \Exception('Inventory account not found in chart of accounts.');
+            }
             $supplier = Supplier::find($this->purchase->supplier_id);
             $amount = $this->receive->sum('total_cost');
             $description = "Inventory amounting total PKR " . number_format($amount, 2) . "/- received on dated " . date('d M, Y', strtotime($this->purchase->delivery_date)) .
                 " against PO # " . $this->purchase_id . " from supplier " . $supplier['name'] . " by " . Auth::user()->name;
+
+
             $vno = Voucher::instance()->voucher()->get();
             GeneralJournal::instance()->account($inventory['id'])->debit($amount)->voucherNo($vno)
                 ->date($this->purchase->delivery_date)->approve()->description($description)->execute();
@@ -173,6 +178,8 @@ class PurchaseCompare extends Component
                     'qty' => $r->qty,
                     'retail_price' => $r->retail_price,
                     'supply_price' => $r->after_disc_cost,
+                    'expiry' => !empty($r->expiry) ? $r->expiry : null,
+                    'batch_no' => !empty($r->batch_no) ? $r->batch_no : null,
                     'po_id' => $this->purchase_id,
                     'type' => 'regular'
                 ]);
@@ -182,14 +189,16 @@ class PurchaseCompare extends Component
                     'increase' => $r->qty,
                     'description' => 'Inventory increase'
                 ]);
-                if($r->bonus > 0){
+                if ($r->bonus > 0) {
                     ProductInventory::create([
                         'product_id' => $r->product_id,
                         'qty' => $r->bonus,
                         'retail_price' => $r->retail_price,
                         'supply_price' => 0,
                         'po_id' => $this->purchase_id,
-                        'type' => 'bonus'
+                        'type' => 'bonus',
+                        'expiry' => !empty($r->expiry) ? $r->expiry : null,
+                        'batch_no' =>!empty($r->batch_no) ? $r->batch_no : null,
                     ]);
                     InventoryLedger::create([
                         'product_id' => $r->product_id,
@@ -202,6 +211,7 @@ class PurchaseCompare extends Component
 
             DB::commit();
         } catch (\Exception $e) {
+
             $this->error = $e->getMessage();
             DB::rollBack();
         }

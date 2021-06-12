@@ -161,7 +161,11 @@
                 </th>
 
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Payable Amount
+                    (Payable) / Receivable
+                </th>
+
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    Status
                 </th>
 
 
@@ -180,6 +184,14 @@
             </thead>
             <tbody class="   bg-white divide-y divide-gray-200 ">
             @foreach($payments as $key => $m)
+                @php
+                    $total_return = \Devzone\Pharmacy\Models\Payments\SupplierPaymentRefundDetail::from('supplier_payment_refund_details as sprd')
+                             ->join('supplier_refunds as sr','sr.id','=','sprd.refund_id')
+                 ->where('sprd.supplier_payment_id',$m->id)
+                 ->sum('total_amount');
+                $total = $m->total_cost - $total_return;
+
+                @endphp
                 <tr class="">
                     <td class="px-3 py-3   text-sm font-medium text-gray-500">
                         {{ $loop->iteration }}
@@ -196,7 +208,34 @@
                         {{ $m->account_name }}
                     </td>
                     <td class="px-3 py-3   text-sm text-gray-500">
-                        {{ number_format($m->total_cost,2) }}
+
+                        @if($total>0)
+                            ({{ number_format($total ,2) }})
+                        @else
+                            {{ number_format(abs($total) ,2) }}
+                        @endif
+
+                    </td>
+
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        @if(empty($m->approved_by))
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+  In process
+</span>
+                        @else
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+
+
+                            @if($total>0)
+                               Paid
+                            @else
+                                Received
+                            @endif
+                            </span>
+                        @endif
+
                     </td>
 
 

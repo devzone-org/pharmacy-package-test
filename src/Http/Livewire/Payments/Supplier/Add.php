@@ -5,7 +5,9 @@ namespace Devzone\Pharmacy\Http\Livewire\Payments\Supplier;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Payments\SupplierPayment;
 use Devzone\Pharmacy\Models\Payments\SupplierPaymentDetail;
+use Devzone\Pharmacy\Models\Payments\SupplierPaymentRefundDetail;
 use Devzone\Pharmacy\Models\Purchase;
+use Devzone\Pharmacy\Models\Refunds\SupplierRefund;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -23,6 +25,8 @@ class Add extends Component
     public $success;
     public $purchase_orders = [];
     public $selected_orders = [];
+    public $selected_returns = [];
+    public $returns = [];
     protected $listeners = ['emitSupplierId'];
 
     protected $rules = [
@@ -40,13 +44,14 @@ class Add extends Component
 
     public function render()
     {
+
         return view('pharmacy::livewire.payments.supplier.add');
     }
 
     public function create()
     {
         $this->validate();
-        if (!empty($this->selected_orders)) {
+        if (!empty($this->selected_orders) || !empty($this->selected_returns)) {
             try {
                 DB::beginTransaction();
 
@@ -64,9 +69,15 @@ class Add extends Component
                         'order_id' => $o
                     ]);
                 }
+                foreach ($this->selected_returns as $o) {
+                    SupplierPaymentRefundDetail::create([
+                        'supplier_payment_id' => $id,
+                        'refund_id' => $o
+                    ]);
+                }
                 DB::commit();
                 $this->success = 'Record has been added and need for approval.';
-                $this->reset(['supplier_id','supplier_name','purchase_orders','selected_orders','description','pay_from','pay_from_name']);
+                $this->reset(['supplier_id', 'selected_returns', 'supplier_name', 'purchase_orders', 'selected_orders', 'returns', 'description', 'pay_from', 'pay_from_name']);
 
             } catch (\Exception $e) {
                 $this->addError('purchase_orders', $e->getMessage());
@@ -93,6 +104,18 @@ class Add extends Component
             $this->purchase_orders = [];
         } else {
             $this->purchase_orders = $result->toArray();
+        }
+
+        $returns = SupplierRefund::from('supplier_refunds as sr')
+            ->where('sr.supplier_id', $this->supplier_id)
+            ->where('sr.is_receive', 'f')
+            ->whereNotNull('sr.created_by')
+            ->select('sr.description', 'sr.id', 'sr.total_amount as total')
+            ->get();
+        if ($returns->isEmpty()) {
+            $this->returns = [];
+        } else {
+            $this->returns = $returns->toArray();
         }
     }
 }
