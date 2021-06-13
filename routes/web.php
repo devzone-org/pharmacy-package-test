@@ -90,3 +90,7 @@ Route::get('purchases/refund/edit/{id}', function ($id) {
 Route::get('purchases/refund/view/{id}', function ($id) {
     return view('pharmacy::refunds.supplier.view', compact('id'));
 });
+
+Route::get('sales', function () {
+    return view('pharmacy::sales.add');
+});

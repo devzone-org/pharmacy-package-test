@@ -4,6 +4,8 @@
 namespace Devzone\Pharmacy\Http\Traits;
 
 
+use App\Models\Hospital\Employees\Employee;
+use App\Models\Hospital\Patient;
 use Devzone\Ams\Models\ChartOfAccount;
 use Devzone\Pharmacy\Models\Category;
 use Devzone\Pharmacy\Models\Manufacture;
@@ -16,6 +18,7 @@ use Illuminate\Support\Str;
 trait Searchable
 {
     public $searchable_query = '';
+    public $searchable_emit_only = false;
     public $searchable_data = [];
     public $highlight_index = 0;
     public $searchable_modal = false;
@@ -29,7 +32,10 @@ trait Searchable
         'product' => ['name', 'generic', 'category', 'rack'],
         'supplier' => ['name', 'address', 'phone'],
         'pay_from' => ['name', 'code'],
-        'receiving_account' =>  ['name', 'code'],
+        'receiving_account' => ['name', 'code'],
+        'patient' => ['mr_no','name', 'phone'],
+        'referred_by' => ['name'],
+        'inventory' => ['item', 'qty', 'retail_price', 'rack', 'tier']
     ];
 
 
@@ -65,11 +71,16 @@ trait Searchable
         if (!empty($key)) {
             $this->highlight_index = $key;
         }
-        $data = $this->searchable_data[$this->highlight_index] ?? null;
-        $this->{$this->searchable_id} = $data['id'];
-        $this->{$this->searchable_name} = $data['name'];
-        $this->emitSelf(Str::camel('emit_'.$this->searchable_id));
-        $this->searchableReset();
+        if ($this->searchable_emit_only) {
+            $this->emitSelf(Str::camel('emit_' . $this->searchable_id));
+        } else {
+            $data = $this->searchable_data[$this->highlight_index] ?? null;
+            $this->{$this->searchable_id} = $data['id'];
+            $this->{$this->searchable_name} = $data['name'];
+            $this->emitSelf(Str::camel('emit_' . $this->searchable_id));
+            $this->searchableReset();
+        }
+
     }
 
     public function searchableReset()
@@ -135,6 +146,50 @@ trait Searchable
 
             if ($this->searchable_type == 'supplier') {
                 $search = Supplier::where('status', 't')->where('name', 'LIKE', '%' . $value . '%')->get();
+                if ($search->isNotEmpty()) {
+                    $this->searchable_data = $search->toArray();
+                } else {
+                    $this->searchable_data = [];
+                }
+            }
+
+            if ($this->searchable_type == 'inventory') {
+                $search = Product::from('products as p')
+                    ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
+                    ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
+                    ->where(function ($q) use ($value) {
+                        return $q->orWhere('p.name', 'LIKE', '%' . $value . '%')
+                            ->orWhere('p.salt', 'LIKE', '%' . $value . '%');
+                    })->select('p.name as item', DB::raw('SUM(qty) as qty'),
+                        'pi.retail_price', 'pi.supply_price', 'pi.id', 'pi.product_id', 'r.name as rack', 'r.tier')
+                    ->groupBy('pi.product_id')->groupBy('pi.supply_price')
+                    ->groupBy('pi.retail_price')->orderBy('qty', 'desc')->get();
+                if ($search->isNotEmpty()) {
+                    $this->searchable_data = $search->toArray();
+                } else {
+                    $this->searchable_data = [];
+                }
+            }
+
+            if ($this->searchable_type == 'referred_by') {
+                $search = Employee::where(function ($q) use ($value) {
+                    return $q->orWhere('name', 'LIKE', '%' . $value . '%')
+                       ;
+                })->select('name','id')->where('is_doctor','t')->where('status','t')->get();
+                if ($search->isNotEmpty()) {
+                    $this->searchable_data = $search->toArray();
+                } else {
+                    $this->searchable_data = [];
+                }
+            }
+
+            if ($this->searchable_type == 'patient') {
+
+                $search = Patient::where(function ($q) use ($value) {
+                    return $q->orWhere('name', 'LIKE', '%' . $value . '%')
+                        ->orWhere('mr_no', 'LIKE', '%' . $value . '%')
+                        ->orWhere('phone', 'LIKE', '%' . $value . '%');
+                })->select('name', 'mr_no', 'phone','id')->get();
                 if ($search->isNotEmpty()) {
                     $this->searchable_data = $search->toArray();
                 } else {

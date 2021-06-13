@@ -94,6 +94,7 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('refunds.supplier.edit',\Devzone\Pharmacy\Http\Livewire\Refunds\Supplier\Edit::class);
         Livewire::component('refunds.supplier.view',\Devzone\Pharmacy\Http\Livewire\Refunds\Supplier\View::class);
 
+        Livewire::component('sales.add',\Devzone\Pharmacy\Http\Livewire\Sales\Add::class);
     }
 
     /**
