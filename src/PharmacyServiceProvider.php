@@ -21,7 +21,6 @@ use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseEdit;
 use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseList;
 use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseReceive;
 use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseView;
-use Devzone\Pharmacy\Http\Livewire\Refunds\Supplier\RefundList;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -89,12 +88,15 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('payments.supplier.edit', Edit::class);
         Livewire::component('payments.supplier.view', View::class);
 
-        Livewire::component('refunds.supplier.list',\Devzone\Pharmacy\Http\Livewire\Refunds\Supplier\RefundList::class);
-        Livewire::component('refunds.supplier.add',\Devzone\Pharmacy\Http\Livewire\Refunds\Supplier\Add::class);
-        Livewire::component('refunds.supplier.edit',\Devzone\Pharmacy\Http\Livewire\Refunds\Supplier\Edit::class);
-        Livewire::component('refunds.supplier.view',\Devzone\Pharmacy\Http\Livewire\Refunds\Supplier\View::class);
+        Livewire::component('refunds.supplier.list', \Devzone\Pharmacy\Http\Livewire\Refunds\Supplier\RefundList::class);
+        Livewire::component('refunds.supplier.add', \Devzone\Pharmacy\Http\Livewire\Refunds\Supplier\Add::class);
+        Livewire::component('refunds.supplier.edit', \Devzone\Pharmacy\Http\Livewire\Refunds\Supplier\Edit::class);
+        Livewire::component('refunds.supplier.view', \Devzone\Pharmacy\Http\Livewire\Refunds\Supplier\View::class);
 
-        Livewire::component('sales.add',\Devzone\Pharmacy\Http\Livewire\Sales\Add::class);
+        Livewire::component('sales.add', \Devzone\Pharmacy\Http\Livewire\Sales\Add::class);
+        Livewire::component('sales.history', \Devzone\Pharmacy\Http\Livewire\Sales\History::class);
+        Livewire::component('sales.refund', \Devzone\Pharmacy\Http\Livewire\Sales\Refund::class);
+        Livewire::component('sales.view', \Devzone\Pharmacy\Http\Livewire\Sales\View::class);
     }
 
     /**

@@ -31,7 +31,7 @@ class Add extends Component
     public $error;
     public $sales = [];
 
-    protected $listeners = ['openSearch', 'emitProductId', 'emitPatientId', 'emitReferredById','saleComplete'  ];
+    protected $listeners = ['openSearch', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
 
     public function mount()
     {
@@ -104,11 +104,9 @@ class Add extends Component
                 }
                 $this->sales[$array[1]]['total'] = round($this->sales[$array[1]]['s_qty'] * $this->sales[$array[1]]['retail_price'], 2);
 
-                if ($array[2] == 'disc') {
-                    if ($value >= 0 || $value <= 100) {
-                        $discount = round(($value / 100) * $this->sales[$array[1]]['total'], 2);
-                        $this->sales[$array[1]]['total_after_disc'] = $this->sales[$array[1]]['total'] - $discount;
-                    }
+                if ($this->sales[$array[1]]['disc'] >= 0 || $this->sales[$array[1]]['disc'] <= 100) {
+                    $discount = round(($this->sales[$array[1]]['disc'] / 100) * $this->sales[$array[1]]['total'], 2);
+                    $this->sales[$array[1]]['total_after_disc'] = $this->sales[$array[1]]['total'] - $discount;
                 }
             }
         }
@@ -168,29 +166,64 @@ class Add extends Component
             foreach ($this->sales as $s) {
 
 
-                $product_inv = ProductInventory::find($s['id']);
-                if ($product_inv['qty'] < $s['s_qty']) {
+                $inv = ProductInventory::where('product_id', $s['product_id'])
+                    ->where('supply_price', $s['supply_price'])
+                    ->where('qty', '>', 0)->get();
+
+                if ($inv->sum('qty') < $s['s_qty']) {
                     throw new \Exception('System does not have much inventory for the item ' . $s['item']);
                 }
-                $product_inv->decrement('qty', $s['s_qty']);
-                InventoryLedger::create([
-                    'product_id' => $product_inv->product_id,
-                    'order_id' => $product_inv->po_id,
-                    'decrease' => $s['s_qty'],
-                    'description' => "Sale on dated " . date('d M, Y') .
-                        " against receipt #" . $sale_id
-                ]);
-                SaleDetail::create([
-                    'sale_id' => $sale_id,
-                    'product_id' => $s['product_id'],
-                    'product_inventory_id' => $s['id'],
-                    'qty' => $s['s_qty'],
-                    'supply_price' => $product_inv['supply_price'],
-                    'retail_price' => $s['retail_price'],
-                    'total' => $s['total'],
-                    'disc' => $s['disc'],
-                    'total_after_disc' => $s['total_after_disc'],
-                ]);
+
+                $sale_qty = $s['s_qty'];
+                foreach ($inv as $i) {
+                    if ($sale_qty > 0) {
+                        $dec = 0;
+                        $product_inv = ProductInventory::find($i->id);
+                        if ($sale_qty <= $product_inv->qty) {
+                            $dec = $sale_qty;
+                            $product_inv->decrement('qty', $sale_qty);
+                            InventoryLedger::create([
+                                'product_id' => $product_inv->product_id,
+                                'order_id' => $product_inv->po_id,
+                                'decrease' => $sale_qty,
+                                'description' => "Sale on dated " . date('d M, Y') .
+                                    " against receipt #" . $sale_id
+                            ]);
+                            $sale_qty = 0;
+
+                        }
+                        if ($sale_qty > $product_inv->qty) {
+                            $dec = $product_inv->qty;
+                            $product_inv->decrement('qty', $dec);
+                            InventoryLedger::create([
+                                'product_id' => $product_inv->product_id,
+                                'order_id' => $product_inv->po_id,
+                                'decrease' => $product_inv->qty,
+                                'description' => "Sale on dated " . date('d M, Y') .
+                                    " against receipt #" . $sale_id
+                            ]);
+                            $sale_qty = $sale_qty - $dec;
+                        }
+                        $total = $s['retail_price'] * $dec;
+
+                        $discount = round(($s['disc'] / 100) * $total, 2);
+                        $after_total = $total - $discount;
+                        SaleDetail::create([
+                            'sale_id' => $sale_id,
+                            'product_id' => $s['product_id'],
+                            'product_inventory_id' => $i->id,
+                            'qty' => $dec,
+                            'supply_price' => $product_inv->supply_price,
+                            'retail_price' => $s['retail_price'],
+                            'total' => $total,
+                            'disc' => $s['disc'],
+                            'total_after_disc' => $after_total,
+                        ]);
+
+                    }
+                }
+
+
             }
 
             $this->resetAll();

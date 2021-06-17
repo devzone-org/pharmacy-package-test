@@ -35,12 +35,13 @@ trait Searchable
         'receiving_account' => ['name', 'code'],
         'patient' => ['mr_no','name', 'phone'],
         'referred_by' => ['name'],
-        'inventory' => ['item', 'qty', 'retail_price', 'rack', 'tier']
+        'item' => ['item', 'qty', 'retail_price', 'rack', 'tier']
     ];
 
 
     public function searchableOpenModal($id, $name, $type)
     {
+        $this->searchableReset();
         $this->searchable_modal = true;
         $this->searchable_id = $id;
         $this->searchable_name = $name;
@@ -153,7 +154,7 @@ trait Searchable
                 }
             }
 
-            if ($this->searchable_type == 'inventory') {
+            if ($this->searchable_type == 'item') {
                 $search = Product::from('products as p')
                     ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
                     ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
@@ -162,7 +163,7 @@ trait Searchable
                             ->orWhere('p.salt', 'LIKE', '%' . $value . '%');
                     })->select('p.name as item', DB::raw('SUM(qty) as qty'),
                         'pi.retail_price', 'pi.supply_price', 'pi.id', 'pi.product_id', 'r.name as rack', 'r.tier')
-                    ->groupBy('pi.product_id')->groupBy('pi.supply_price')
+                    ->groupBy('pi.product_id')
                     ->groupBy('pi.retail_price')->orderBy('qty', 'desc')->get();
                 if ($search->isNotEmpty()) {
                     $this->searchable_data = $search->toArray();

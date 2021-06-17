@@ -1,34 +1,18 @@
-<div class="max-w-3xl mx-auto mt-5   lg:max-w-7xl   lg:grid lg:grid-cols-12 lg:gap-4">
+<div class="max-w-3xl mx-auto    lg:max-w-7xl   lg:grid lg:grid-cols-12 lg:gap-4">
 
     <main class="col-span-12 ">
 
 
-        <div class="lg:flex  lg:justify-between  ">
+        <div class="lg:flex  lg:justify-between ">
             <div class="flex-1 min-w-0">
                 <h2 class="text-2xl mb-3 font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                    Sale Invoice
+                    Refund Invoice # {{ $sale_id }}
                 </h2>
 
             </div>
             <div class="mt-5 flex lg:mt-0 lg:ml-4 ">
 
-                <span class="">
-      <button type="button" wire:click="searchableOpenModal('referred_by_id', 'referred_by_name', 'referred_by')"
-              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
 
-
-        Add Referred By
-      </button>
-    </span>
-
-                <span class="ml-3">
-      <button type="button" wire:click="searchableOpenModal('patient_id', 'patient_name', 'patient')"
-              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-
-
-        Add Patient
-      </button>
-    </span>
 
 
                 <span class="ml-3">
@@ -45,20 +29,18 @@
 
                 <span class="ml-3">
       <button type="button" wire:click="saleComplete"
-              class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
 
           <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
 
-        Complete Sale (F2)
+        Refund Sale (F2)
       </button>
     </span>
 
             </div>
-
         </div>
-
         <div class="grid mb-3 bg-white gap-x-4 gap-y-8 grid-cols-4   shadow rounded-md p-3">
             <div class="">
                 <dt class="text-sm font-medium text-gray-500">
@@ -89,14 +71,13 @@
 
             <div class="">
                 <dt class="text-sm font-medium text-gray-500">
-                    Sale By
+                    Refund By
                 </dt>
                 <dd class="mt-1 text-sm text-gray-900">
                     {{ Auth::user()->name }}
                 </dd>
             </div>
         </div>
-
         @if(!empty($success))
             <div class="rounded-md mb-5 bg-green-50 p-4">
                 <div class="flex">
@@ -199,10 +180,6 @@
                     </th>
                     <th scope="col" title="Total After Disc"
                         class="w-32 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
-                        Disc PKR
-                    </th>
-                    <th scope="col" title="Total After Disc"
-                        class="w-32 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
                         Gross Total
                     </th>
                     <th scope="col"
@@ -212,6 +189,112 @@
                 </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
+
+                @foreach($old_sales as $key => $s)
+                    <tr>
+                        <td class="px-2  text-center  border-r text-md font-medium text-gray-900">
+                            {{ $loop->iteration }}
+                        </td>
+                        <td class="px-2  text-left   border-r text-md text-gray-500">
+                            {{ $s['item'] }}
+                        </td>
+                        <td class="px-2   text-center   border-r  text-md text-gray-500">
+                            {{$s['qty']}}
+
+                        </td>
+                        <td class="px-2  text-center  border-r text-md text-gray-500">
+                            {{ number_format($s['retail_price'],2) }}
+
+
+                        </td>
+                        <td class="px-2   text-center border-r text-md text-gray-500">
+                            {{ number_format($s['total'],2) }}
+                        </td>
+                        <td class="px-2  text-center border-r text-md text-gray-500">
+                            {{ number_format($s['disc'],2) }}
+
+                        </td>
+                        <td class="px-2    text-center border-r text-md text-gray-500">
+                            {{ number_format($s['total_after_disc'],2) }}
+                        </td>
+                        <td class="  w-10 cursor-pointer px-2 py-3   border-r text-center text-md font-medium text-red-700  tracking-wider  ">
+                            <svg wire:click="refundEntry('{{ $key }}')" class="w-5 h-5 " fill="none"
+                                 stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                            </svg>
+
+                        </td>
+                    </tr>
+                @endforeach
+                @if(!empty($refunds)  )
+                    <tr class="">
+                        <th scope="col" colspan="8"
+                            class="w-10 px-3 py-3 text-left text-sm font-medium text-red-500   ">
+                            <i>Refunds Entries</i>
+                        </th>
+                    </tr>
+                @endif
+
+                @foreach($refunds as $key => $s)
+                    <tr>
+                        <td class="px-2  text-center  border-r text-md font-medium text-gray-900">
+                            {{ $loop->iteration }}
+                        </td>
+                        <td class="px-2  text-left   border-r text-md text-gray-500">
+                            {{ $s['item'] }}
+                        </td>
+                        <td class="px-2   text-center   border-r  text-md text-gray-500">
+                            @if(isset($s['restrict']))
+                                {{ $s['qty'] }}
+                                @else
+                                <input type="number" wire:model.lazy="refunds.{{ $key }}.qty" onClick="this.select();"
+                                       class="p-0 focus:ring-0 block w-full  text-md border-0 text-center "
+                                       autocomplete="off">
+                                @endif
+
+                        </td>
+                        <td class="px-2  text-center  border-r text-md text-gray-500">
+
+{{$s['qty'] }}
+
+                        </td>
+                        <td class="px-2    text-center border-r text-md text-gray-500">
+
+                                {{ number_format($s['total'],2) }}
+
+                        </td>
+                        <td class="px-2  text-center border-r text-md text-gray-500">
+                            {{ number_format($s['disc'],2) }}
+
+                        </td>
+                        <td class="px-2   text-center border-r text-md text-gray-500">
+                            {{ number_format($s['total_after_disc'],2) }}
+                        </td>
+                        <td class="  w-10 cursor-pointer px-2 py-3   border-r text-center text-md font-medium text-red-700  tracking-wider  ">
+                            @if(isset($s['restrict']))
+                                &nbsp;
+                                @else
+                            <svg wire:click="removeRefundEntry('{{ $key }}')" class="w-5 h-5 " fill="currentColor"
+                                 viewBox="0 0 20 20"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd"
+                                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                      clip-rule="evenodd"></path>
+                            </svg>
+                                @endif
+                        </td>
+                    </tr>
+                @endforeach
+                @if(!empty($sales))
+                    <tr class="">
+                        <th scope="col" colspan="8"
+                            class="w-10 px-3 py-3 text-left text-sm font-medium text-green-500   ">
+                            <i>New Entries</i>
+                        </th>
+                    </tr>
+                @endif
+
                 @foreach($sales as $key => $s)
                     <tr>
                         <td class="px-2  text-center  border-r text-md font-medium text-gray-900">
@@ -242,9 +325,6 @@
                                    autocomplete="off">
                         </td>
                         <td class="px-2 bg-gray-50  text-center border-r text-md text-gray-500">
-                            {{ number_format($s['total'] - $s['total_after_disc'],2) }}
-                        </td>
-                        <td class="px-2 bg-gray-50  text-center border-r text-md text-gray-500">
                             {{ number_format($s['total_after_disc'],2) }}
                         </td>
                         <td class="  w-10 cursor-pointer px-2 py-3   border-r text-center text-md font-medium text-red-700  tracking-wider  ">
@@ -258,43 +338,20 @@
                         </td>
                     </tr>
                 @endforeach
-                <tr>
-                    <th scope="col" colspan="2"
-                        class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
-                        Total
-                    </th>
-                    <th scope="col"
-                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        {{ collect($sales)->sum('s_qty') }}
-                    </th>
-                    <th scope="col"
-                        class="w-7 px-2   border-r py-2 text-right text-xs font-medium text-gray-500  tracking-wider">
-                    </th>
-                    <th scope="col"
-                        class="w-7 px-2   border-r py-2 text-center text-md font-medium text-gray-500  tracking-wider">
-                        {{ number_format(collect($sales)->sum('total'),2) }}
-                    </th>
 
-                    <th scope="col"
-                        class="w-7 px-2   border-r py-2 text-right text-xs font-medium text-gray-500  tracking-wider">
-                    </th>
-
-                    <th scope="col"
-                        class="w-7 px-2   border-r py-2 text-center text-md font-medium text-gray-500  tracking-wider">
-                        {{ number_format(collect($sales)->sum('total') - collect($sales)->sum('total_after_disc'),2) }}
-
-                    </th>
-
-
-                    <th scope="col"
-                        class="w-7 px-2   border-r py-2 text-center text-md font-medium text-gray-500  tracking-wider">
-                        {{ number_format(collect($sales)->sum('total_after_disc'),2) }}
-
-                    </th>
-                </tr>
 
                 <tr>
                     <th class="p-2">&nbsp;</th>
+                </tr>
+                <tr>
+                    <th scope="col" colspan="6"
+                        class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
+                        Paid Bill
+                    </th>
+                    <th scope="col" colspan="2"
+                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        {{ number_format($old_sales[0]['gross_total'] - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }}
+                    </th>
                 </tr>
                 <tr class="bg-gray-50">
                     <th rowspan="4" colspan="3"
@@ -304,20 +361,20 @@
                                   class="p-0 focus:ring-0 block w-full border-0 text-md resize-none h-40  "></textarea>
 
                     </th>
-                    <th scope="col" colspan="4"
+                    <th scope="col" colspan="3"
                         class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
-                        Sub Total
+                        New Sub Total
                     </th>
                     <th scope="col" colspan="2"
-                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        class="w-10 cursor-pointer px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
                         {{ number_format(collect($sales)->sum('total'),2) }}
                     </th>
                 </tr>
 
                 <tr>
-                    <th scope="col" colspan="4"
+                    <th scope="col" colspan="3"
                         class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
-                        Discount (F3)  (%)
+                        Discount(%) (F3)
                     </th>
                     <th scope="col" colspan="2"
                         class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
@@ -328,27 +385,24 @@
                     </th>
                 </tr>
                 <tr class="bg-gray-50">
-                    <th scope="col" colspan="4"
+                    <th scope="col" colspan="3"
                         class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
                         Gross Total
                     </th>
                     <th scope="col" colspan="2"
-                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        class="w-10 cursor-pointer px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
                         {{ number_format(collect($sales)->sum('total_after_disc'),2) }}
                     </th>
                 </tr>
 
                 <tr>
-                    <th scope="col" colspan="4"
+                    <th scope="col" colspan="3"
                         class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
-                        Received Amount (F4)
+                        Refunded
                     </th>
                     <th scope="col" colspan="2"
                         class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        <input type="number" wire:model.lazy="received" onClick="this.select();" id="received"
-                               wire:keydown.enter="saleComplete"
-                               class="p-0 focus:ring-0 block w-full  text-md border-0 font-medium text-gray-500 text-center "
-                               autocomplete="off">
+                        ({{ number_format(collect($refunds)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }})
                     </th>
                 </tr>
 
@@ -357,16 +411,28 @@
                         class="w-7 px-2    py-2 text-left text-md font-medium text-gray-500  tracking-wider">
                         Remarks (F5)
                     </th>
-
-                    <th scope="col" colspan="5"
+                    @php
+                        $dif = collect($sales)->sum('total_after_disc') +collect($refunds)->where('restrict',true)->sum('total_after_disc') - collect($refunds)->sum('total_after_disc');
+                    @endphp
+                    <th scope="col" colspan="4"
                         class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
-                        Change
+                        @if($dif>0)
+                            Receivable
+                        @else
+                            Payable
+                        @endif
                     </th>
                     <th scope="col" colspan="2"
-                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        {{ number_format($payable,2) }}
+                        class="w-10 cursor-pointer px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+
+                        @if($dif>0)
+                            {{ number_format($dif,2) }}
+                        @else
+                            ({{ number_format(abs($dif),2) }})
+                        @endif
                     </th>
                 </tr>
+
                 </tbody>
             </table>
         </div>
