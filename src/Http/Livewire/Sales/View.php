@@ -4,11 +4,10 @@
 namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
 
+use Devzone\Pharmacy\Helper\Receipt;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
-use Mike42\Escpos\Printer;
-use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 
 
 class View extends Component
@@ -80,6 +79,8 @@ class View extends Component
 
 
         }
+
+
     }
 
 
@@ -90,11 +91,6 @@ class View extends Component
 
     public function printSale()
     {
-        $connector = new WindowsPrintConnector("DEVZONE-PRINTER");
-        $printer = new Printer($connector);
-        $printer->text("Hello World!\n");
-        $printer->cut();
-
-        $printer->close();
+        Receipt::generate($this->sales_ref, $this->sale_id);
     }
 }
