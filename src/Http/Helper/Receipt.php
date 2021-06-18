@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Devzone\Pharmacy\Helper;
+namespace Devzone\Pharmacy\Http\Helper;
 
 
 use Mike42\Escpos\EscposImage;
@@ -58,15 +58,15 @@ class Receipt
         $collect = collect($sales);
 
         $printer->text(str_pad("Sub Total", 33, " ", STR_PAD_LEFT) .
-            str_pad(number_format($collect->where('sale_qty','>',0)->sum('total'),2), 15, " ", STR_PAD_LEFT) . "\n");
+            str_pad(number_format($collect->where('sale_qty', '>', 0)->sum('total'), 2), 15, " ", STR_PAD_LEFT) . "\n");
         $printer->text(str_pad("Discount (PKR)", 33, " ", STR_PAD_LEFT) .
-            str_pad(number_format($collect->where('sale_qty','>',0)->sum('total') - $collect->where('sale_qty','>',0)->sum('total_after_disc'),2), 15, " ", STR_PAD_LEFT) . "\n");
+            str_pad(number_format($collect->where('sale_qty', '>', 0)->sum('total') - $collect->where('sale_qty', '>', 0)->sum('total_after_disc'), 2), 15, " ", STR_PAD_LEFT) . "\n");
         $printer->text(str_pad("Gross Total", 33, " ", STR_PAD_LEFT) .
-            str_pad(number_format($collect->where('sale_qty','>',0)->sum('total_after_disc'),2), 15, " ", STR_PAD_LEFT) . "\n");
+            str_pad(number_format($collect->where('sale_qty', '>', 0)->sum('total_after_disc'), 2), 15, " ", STR_PAD_LEFT) . "\n");
         $printer->text(str_pad("Refunded", 33, " ", STR_PAD_LEFT) .
-            str_pad( number_format($collect->where('sale_qty','<',0)->sum('total_after_disc'),2), 15, " ", STR_PAD_LEFT) . "\n");
+            str_pad(number_format($collect->where('sale_qty', '<', 0)->sum('total_after_disc'), 2), 15, " ", STR_PAD_LEFT) . "\n");
         $printer->text(str_pad("Net Total", 33, " ", STR_PAD_LEFT) .
-            str_pad(number_format($collect->where('sale_qty','>',0)->sum('total_after_disc') - $collect->where('sale_qty','<',0)->sum('total_after_disc'),2), 15, " ", STR_PAD_LEFT) . "\n");
+            str_pad(number_format($collect->where('sale_qty', '>', 0)->sum('total_after_disc') - $collect->where('sale_qty', '<', 0)->sum('total_after_disc'), 2), 15, " ", STR_PAD_LEFT) . "\n");
         $printer->setJustification(Printer::JUSTIFY_CENTER);
         $printer->feed('2');
         $printer->text(env('RECEIPT_PRINTER_TAGLINE'));

@@ -4,7 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
 
-use Devzone\Pharmacy\Helper\Receipt;
+use Devzone\Pharmacy\Http\Helper\Receipt;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -91,6 +91,7 @@ class View extends Component
 
     public function printSale()
     {
+
         Receipt::generate($this->sales_ref, $this->sale_id);
     }
 }
