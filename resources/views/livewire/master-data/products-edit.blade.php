@@ -2,18 +2,21 @@
 
     <div class="pb-5 border-gray-200">
         <h3 class="text-lg leading-6 font-medium text-gray-900 flex items-center">
-        <a href="{{ url('pharmacy/master-data/products') }}" class="p-3 bg-gray-200 border-2 rounded-md  border-gray-400 cursor-pointer hover:bg-gray-300 ">
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path
-                    fill-rule="evenodd"
-                    d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                    clip-rule="evenodd"></path></svg>
-        </a>
+            <a href="{{ url('pharmacy/master-data/products') }}"
+               class="p-3 bg-gray-200 border-2 rounded-md  border-gray-400 cursor-pointer hover:bg-gray-300 ">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        fill-rule="evenodd"
+                        d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                        clip-rule="evenodd"></path>
+                </svg>
+            </a>
             <span class="ml-4">Product List</span>
         </h3>
     </div>
 
 
-    <form wire:submit.prevent="create">
+    <form wire:submit.prevent="preCreate">
         <div class="shadow sm:rounded-md sm:overflow-hidden">
             <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
                 <div>
@@ -220,7 +223,67 @@
         </div>
     </form>
 
+    <div x-data="{ open: @entangle('retail_price_notification') }" x-cloak x-show="open"
+         class="fixed z-40 inset-0 overflow-y-auto">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="open" x-description="Background overlay, show/hide based on modal state."
+                 x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
 
+            <!-- This element is to trick the browser into centering the modal contents. -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true"></span>
+            <div @click.away="open = false;" x-show="open" x-description="Modal panel, show/hide based on modal state."
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="h-1/3 inline-block align-bottom bg-white rounded-lg  text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full  "
+                 role="dialog" aria-modal="true" aria-labelledby="modal-headline">
+                <div class="p-3">
+                    <div>
+                        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                            <svg class="h-6 w-6 text-green-600" x-description="Heroicon name: outline/check"
+                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                 stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-5">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                Attention
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500">
+                                    Are you sure you want to update retail price in existing inventory also?
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+                        <button type="button"
+                                wire:click="forceCreate"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:col-start-2 sm:text-sm"
+                                @click="open = false">
+                            Update Inventory Prices
+                        </button>
+                        <button type="button"
+                                wire:click="create"
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm"
+                                @click="open = false">
+                            Update Only
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     @include('pharmacy::include.searchable')
 </div>
 

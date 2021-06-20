@@ -144,6 +144,13 @@
                         Qty
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        Pieces in Packing
+                    </th>
+
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        Total Qty
+                    </th>
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Supplier Cost
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
@@ -171,14 +178,20 @@
                             {{ $m['salt'] }}
                         </td>
                         <td class="px-3 py-3   text-sm text-gray-500">
-                            <input type="text" class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" wire:model="order_list.{{$key}}.qty">
+                            <input type="number"  onclick="this.select()"  class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" wire:model="order_list.{{$key}}.qty">
                         </td>
                         <td class="px-3 py-3   text-sm text-gray-500">
-                            <input type="text" class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" wire:model="order_list.{{$key}}.cost_of_price">
+                            {{ $m['packing'] }}
+                        </td>
+                        <td class="px-3 py-3   text-sm text-gray-500">
+                            {{ number_format($m['packing']*$m['qty'],2) }}
+                        </td>
+                        <td class="px-3 py-3   text-sm text-gray-500">
+                            <input type="number" step="0.01" onclick="this.select()"  class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" wire:model="order_list.{{$key}}.cost_of_price">
 
                         </td>
                         <td class="px-3 py-3   text-sm text-gray-500">
-                            <input type="text" class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" wire:model="order_list.{{$key}}.retail_price">
+                            <input type="number" step="0.01" onclick="this.select()"  class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" wire:model="order_list.{{$key}}.retail_price">
 
                         </td>
 
@@ -205,6 +218,12 @@
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         {{ number_format(collect($order_list)->sum('qty'),2) }}
+                    </th>
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+
+                    </th>
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         {{ number_format(collect($order_list)->sum('cost_of_price'),2) }}

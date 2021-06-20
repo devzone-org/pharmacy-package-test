@@ -109,6 +109,7 @@
                     </div>
 
 
+
                     <div class="col-span-6 ">
                         <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
                         <textarea  class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" id="address" cols="30" wire:model="address" rows="4"></textarea>
@@ -163,3 +164,4 @@
 
 
 </div>
+

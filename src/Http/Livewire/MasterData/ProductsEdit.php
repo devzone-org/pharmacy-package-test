@@ -4,6 +4,7 @@ namespace Devzone\Pharmacy\Http\Livewire\MasterData;
 
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Product;
+use Devzone\Pharmacy\Models\ProductInventory;
 use Livewire\Component;
 
 class ProductsEdit extends Component
@@ -16,6 +17,7 @@ class ProductsEdit extends Component
     public $packing;
     public $cost_of_price;
     public $retail_price;
+    public $retail_price_old;
     public $manufacture_name;
     public $manufacture_id;
     public $rack_name;
@@ -28,12 +30,14 @@ class ProductsEdit extends Component
     public $status = 'f';
     public $success = '';
     public $primary_id;
+    public $retail_price_notification = false;
+    public $force_update = false;
 
 
     protected $rules = [
         'name' => 'required|string',
         'status' => 'required|in:t,f',
-        'packing' => 'nullable|integer',
+        'packing' => 'required|integer',
         'retail_price' => 'nullable|numeric',
         'cost_of_price' => 'nullable|numeric',
         'manufacture_id' => 'nullable|integer',
@@ -64,6 +68,7 @@ class ProductsEdit extends Component
             $this->packing = $products['packing'];
             $this->cost_of_price = $products['cost_of_price'];
             $this->retail_price = $products['retail_price'];
+            $this->retail_price_old = $products['retail_price'];
             $this->manufacture_name = $products['m_name'];
             $this->manufacture_id = $products['manufacture_id'];
             $this->rack_id = $products['rack_id'];
@@ -82,13 +87,25 @@ class ProductsEdit extends Component
         return view('pharmacy::livewire.master-data.products-edit');
     }
 
+    public function preCreate()
+    {
+        if ($this->retail_price != $this->retail_price_old) {
+            $this->retail_price_notification = true;
+            $this->force_update = false;
+        } else {
+            $this->force_update = false;
+            $this->create();
+        }
+    }
+
     public function create()
     {
         $this->validate();
-        if(Product::where('id','!=',$this->primary_id)->where('name',$this->name)->exists()){
-            $this->addError('name','This name is already exists.');
+        if (Product::where('id', '!=', $this->primary_id)->where('name', $this->name)->exists()) {
+            $this->addError('name', 'This name is already exists.');
             return false;
         }
+
         $pro = Product::find($this->primary_id);
         $pro->update([
             'name' => $this->name,
@@ -105,9 +122,21 @@ class ProductsEdit extends Component
             'narcotics' => !empty($this->narcotics) ? 't' : 'f',
             'status' => $this->status
         ]);
-
+        if ($this->force_update) {
+            $this->retail_price_old = $this->retail_price;
+            ProductInventory::where('product_id', $pro->id)->update([
+                'retail_price' => $this->retail_price
+            ]);
+        }
         $this->success = 'Record has been updated.';
+        $this->reset(['retail_price_notification', 'force_update']);
 
+    }
+
+    public function forceCreate()
+    {
+        $this->force_update = true;
+        $this->create();
     }
 
 

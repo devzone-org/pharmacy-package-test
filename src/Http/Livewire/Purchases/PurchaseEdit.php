@@ -10,7 +10,6 @@ use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\PurchaseOrder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
-use mysql_xdevapi\Exception;
 
 class PurchaseEdit extends Component
 {
@@ -71,10 +70,18 @@ class PurchaseEdit extends Component
         $details = PurchaseOrder::from('purchase_orders as po')
             ->join('products as p', 'p.id', '=', 'po.product_id')
             ->where('po.purchase_id', $this->purchase_id)
-            ->select('po.id as purchase_order_id', 'p.id', 'po.qty', 'po.cost_of_price', 'po.retail_price', 'po.total_cost', 'p.name', 'p.salt')
+            ->select('po.id as purchase_order_id', 'p.id', 'p.packing', 'po.qty', 'po.cost_of_price', 'po.retail_price', 'po.total_cost', 'p.name', 'p.salt')
             ->get();
 
-        $this->order_list = $details->toArray();
+        $arrays = [];
+        foreach ($details->toArray() as $d) {
+            $d['qty'] = $d['qty'] / $d['packing'];
+            $d['cost_of_price'] = $d['packing'] * $d['cost_of_price'];
+            $d['retail_price'] = $d['packing'] * $d['retail_price'];
+            $arrays[] = $d;
+        }
+
+        $this->order_list = $arrays;
     }
 
     public function render()
@@ -153,7 +160,8 @@ class PurchaseEdit extends Component
                     'cost_of_price' => $data['cost_of_price'],
                     'retail_price' => $data['retail_price'],
                     'salt' => $data['salt'],
-                    'total_cost' => $data['cost_of_price']
+                    'total_cost' => $data['cost_of_price'],
+                    'packing' => $data['packing']
                 ];
             } else {
                 $key = array_keys($existing)[0];
@@ -183,25 +191,25 @@ class PurchaseEdit extends Component
 
             ]);
 
-            if(!empty($this->deleted)){
-                PurchaseOrder::whereIn('id',$this->deleted)->delete();
+            if (!empty($this->deleted)) {
+                PurchaseOrder::whereIn('id', $this->deleted)->delete();
             }
 
             foreach ($this->order_list as $o) {
-                if(!empty($o['purchase_order_id'])){
+                if (!empty($o['purchase_order_id'])) {
                     PurchaseOrder::find($o['purchase_order_id'])->update([
-                        'qty' => $o['qty'],
-                        'cost_of_price' => $o['cost_of_price'],
-                        'retail_price' => $o['retail_price'],
+                        'qty' => $o['qty'] * $o['packing'],
+                        'cost_of_price' => $o['cost_of_price'] / $o['packing'],
+                        'retail_price' => $o['retail_price'] / $o['packing'],
                         'total_cost' => $o['cost_of_price'] * $o['qty'],
                     ]);
                 } else {
                     PurchaseOrder::create([
                         'purchase_id' => $this->purchase_id,
                         'product_id' => $o['id'],
-                        'qty' => $o['qty'],
-                        'cost_of_price' => $o['cost_of_price'],
-                        'retail_price' => $o['retail_price'],
+                        'qty' => $o['qty'] * $o['packing'],
+                        'cost_of_price' => $o['cost_of_price'] / $o['packing'],
+                        'retail_price' => $o['retail_price'] / $o['packing'],
                         'total_cost' => $o['cost_of_price'] * $o['qty'],
                     ]);
                 }

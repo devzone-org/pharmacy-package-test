@@ -85,15 +85,16 @@ class PurchaseReceive extends Component
             $this->order_list[] = [
                 'id' => $data['id'],
                 'name' => $data['name'],
-                'qty' => $data['qty'],
+                'qty' => $data['qty'] / $data['packing'],
                 'bonus' => 0,
                 'disc' => 0,
-                'cost_of_price' => $data['cost_of_price'],
-                'after_disc_cost' => $data['cost_of_price'],
-                'retail_price' => $data['retail_price'],
+                'cost_of_price' => $data['cost_of_price'] * $data['packing'],
+                'after_disc_cost' => $data['cost_of_price'] * $data['packing'],
+                'retail_price' => $data['retail_price'] * $data['packing'],
                 'salt' => $data['salt'],
-                'total_cost' => $data['cost_of_price'],
+                'total_cost' => $data['cost_of_price'] * ($data['packing']) * ($data['qty'] / $data['packing']),
                 'packing' => $data['packing'],
+                'total_qty' => $data['qty'] / $data['packing'],
             ];
         }
     }
@@ -129,11 +130,17 @@ class PurchaseReceive extends Component
     {
         $array = explode(".", $name);
         if ($array[0] == 'order_list') {
-            if ((empty($value) || !is_numeric($value))  && in_array($array[2],['qty','bonus','cost_of_price','disc','retail_price']) ) {
+            if ((empty($value) || !is_numeric($value)) && in_array($array[2], ['qty', 'bonus', 'cost_of_price', 'disc', 'retail_price'])) {
                 $this->order_list[$array[1]][$array[2]] = 0;
             }
             if ($array[2] == 'qty') {
                 $this->order_list[$array[1]]['total_cost'] = round($this->order_list[$array[1]]['qty'] * $this->order_list[$array[1]]['after_disc_cost'], 2);
+                $this->order_list[$array[1]]['total_qty'] = round(($this->order_list[$array[1]]['bonus']+$this->order_list[$array[1]]['qty']) * $this->order_list[$array[1]]['packing'], 2);
+            }
+
+            if ($array[2] == 'bonus') {
+
+                $this->order_list[$array[1]]['total_qty'] = round(($this->order_list[$array[1]]['bonus']+$this->order_list[$array[1]]['qty']) * $this->order_list[$array[1]]['packing'], 2);
             }
 
             if ($array[2] == 'cost_of_price' || $array[2] == 'disc') {
@@ -199,12 +206,14 @@ class PurchaseReceive extends Component
                     'packing' => $data['packing'],
                     'after_disc_cost' => $data['cost_of_price'],
                     'disc' => 0,
-                    'bonus' => 0
+                    'bonus' => 0,
+                    'total_qty' => $data['packing']
                 ];
             } else {
                 $key = array_keys($existing)[0];
                 $qty = $this->order_list[$key]['qty'];
                 $this->order_list[$key]['qty'] = $qty + 1;
+                $this->order_list[$key]['total_qty'] = $this->order_list[$key]['qty'] * $this->order_list[$key]['packing'];
             }
 
         }
@@ -230,15 +239,16 @@ class PurchaseReceive extends Component
 
 
             foreach ($this->order_list as $o) {
+
                 \Devzone\Pharmacy\Models\PurchaseReceive::create([
                     'purchase_id' => $this->purchase_id,
                     'product_id' => $o['id'],
-                    'qty' => $o['qty'],
-                    'bonus' => $o['bonus'] ?? 0,
+                    'qty' => $o['qty'] * $o['packing'],
+                    'bonus' => $o['bonus'] * $o['packing'] ?? 0,
                     'discount' => $o['disc'] ?? 0,
-                    'cost_of_price' => $o['cost_of_price'],
-                    'after_disc_cost' => $o['after_disc_cost'],
-                    'retail_price' => $o['retail_price'],
+                    'cost_of_price' => $o['cost_of_price'] / $o['packing'],
+                    'after_disc_cost' => $o['after_disc_cost'] / $o['packing'],
+                    'retail_price' => $o['retail_price'] / $o['packing'],
                     'total_cost' => $o['after_disc_cost'] * $o['qty'],
                     'batch_no' => $o['batch_no'] ?? null,
                     'expiry' => $o['expiry'] ?? null,

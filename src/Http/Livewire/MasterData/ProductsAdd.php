@@ -32,7 +32,7 @@ class ProductsAdd extends Component
     protected $rules = [
         'name' => 'required|string|unique:products,name',
         'status' => 'required|in:t,f',
-        'packing' => 'nullable|integer',
+        'packing' => 'required|integer',
         'retail_price' => 'nullable|numeric',
         'cost_of_price' => 'nullable|numeric',
         'manufacture_id' => 'nullable|integer',

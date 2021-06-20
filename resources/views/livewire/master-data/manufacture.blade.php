@@ -95,7 +95,7 @@
                 <div class="grid grid-cols-6 gap-6">
                     <div class="col-span-6 sm:col-span-2">
                         <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-                        <input wire:model="add.name" type="text" autocomplete="off" class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" id="name">
+                        <input  wire:model="add.name" type="text" autocomplete="off" class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" id="name">
                     </div>
 
                     <div class="col-span-6 sm:col-span-2">
@@ -307,8 +307,8 @@
                         </div>
 
                         <div class="col-span-6 sm:col-span-2">
-                            <label for="contact" class="block text-sm font-medium text-gray-700">Contact #</label>
-                            <input wire:model="edit.contact" type="text" autocomplete="off" class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" id="contact">
+                            <label for="editcontact" class="block text-sm font-medium text-gray-700">Contact #</label>
+                            <input wire:model="edit.contact" type="text" autocomplete="off" class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" id="editcontact">
                         </div>
 
                         <div class="col-span-6 sm:col-span-2">
@@ -340,3 +340,13 @@
         </div>
     </div>
 </div>
+<script>
+    let selector = document.getElementById("contact");
+    let im = new Inputmask("9999-9999999");
+    im.mask(selector);
+
+
+    let editselector = document.getElementById("editcontact");
+    let editim = new Inputmask("9999-9999999");
+    editim.mask(editselector);
+</script>

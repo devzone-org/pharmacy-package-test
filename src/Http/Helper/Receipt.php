@@ -12,6 +12,7 @@ class Receipt
 {
     public static function generate($sales, $sale_id)
     {
+
         $sale = collect($sales)->first();
         $connector = new WindowsPrintConnector(env('RECEIPT_PRINTER_NAME'));
         $printer = new Printer($connector);

@@ -13,6 +13,7 @@ class SupplierAdd extends Component
 
     public $name;
     public $phone;
+    public $sadfsa;
     public $address;
     public $contact_name;
     public $contact_phone;

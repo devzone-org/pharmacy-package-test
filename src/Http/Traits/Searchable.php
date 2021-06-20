@@ -35,7 +35,7 @@ trait Searchable
         'receiving_account' => ['name', 'code'],
         'patient' => ['mr_no','name', 'phone'],
         'referred_by' => ['name'],
-        'item' => ['item', 'qty', 'retail_price', 'rack', 'tier']
+        'item' => ['item', 'qty', 'retail_price', 'rack', 'tier','packing']
     ];
 
 
@@ -162,7 +162,7 @@ trait Searchable
                         return $q->orWhere('p.name', 'LIKE', '%' . $value . '%')
                             ->orWhere('p.salt', 'LIKE', '%' . $value . '%');
                     })->select('p.name as item', DB::raw('SUM(qty) as qty'),
-                        'pi.retail_price', 'pi.supply_price', 'pi.id', 'pi.product_id', 'r.name as rack', 'r.tier')
+                        'pi.retail_price', 'pi.supply_price', 'pi.id','p.packing', 'pi.product_id', 'r.name as rack', 'r.tier')
                     ->groupBy('pi.product_id')
                     ->groupBy('pi.retail_price')->orderBy('qty', 'desc')->get();
                 if ($search->isNotEmpty()) {

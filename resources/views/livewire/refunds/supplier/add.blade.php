@@ -97,7 +97,7 @@
                 <div class="grid grid-cols-6 gap-6">
                     <div class="col-span-6 sm:col-span-2">
                         <label for="supplier_name" class="block text-sm font-medium text-gray-700">Supplier Name</label>
-                        <input wire:model.defer="supplier_name"
+                        <input   wire:model.defer="supplier_name"
                                wire:click="searchableOpenModal('supplier_id', 'supplier_name', 'supplier')" readonly
                                type="text" autocomplete="off"
                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
@@ -165,7 +165,7 @@
 
 
                         <td class="px-3 py-3   text-sm text-gray-500">
-                            <input max="{{ $m['qty'] }}" wire:model.lazy="purchase_orders.{{$key}}.return" type="number" autocomplete="off"
+                            <input   max="{{ $m['qty'] }}" wire:model.lazy="purchase_orders.{{$key}}.return" type="number" autocomplete="off" onclick="this.select()"
                                    class=" block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                    id="return">
                         </td>

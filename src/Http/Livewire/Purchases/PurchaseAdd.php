@@ -111,7 +111,8 @@ class PurchaseAdd extends Component
                     'cost_of_price' => $data['cost_of_price'],
                     'retail_price' => $data['retail_price'],
                     'salt' => $data['salt'],
-                    'total_cost' => $data['cost_of_price']
+                    'total_cost' => $data['cost_of_price'],
+                    'packing' => $data['packing']
                 ];
             } else {
                 $key = array_keys($existing)[0];
@@ -139,14 +140,15 @@ class PurchaseAdd extends Component
                 'status' => 'approval-awaiting'
             ])->id;
 
+
             foreach ($this->order_list as $o) {
 
                 PurchaseOrder::create([
                     'purchase_id' => $purchase_id,
                     'product_id' => $o['id'],
-                    'qty' => $o['qty'],
-                    'cost_of_price' => $o['cost_of_price'],
-                    'retail_price' => $o['retail_price'],
+                    'qty' => $o['qty'] * $o['packing'],
+                    'cost_of_price' => $o['cost_of_price']/$o['packing'],
+                    'retail_price' => $o['retail_price']/$o['packing'],
                     'total_cost' => $o['cost_of_price'] * $o['qty'],
                 ]);
             }

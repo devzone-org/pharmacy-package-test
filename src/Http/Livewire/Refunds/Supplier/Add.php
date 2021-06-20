@@ -68,6 +68,10 @@ class Add extends Component
             ])->id;
 
             foreach ($return as $o) {
+                $check = ProductInventory::find($o['product_inventory_id']);
+                if($o['return']>$check['qty']){
+                    throw new \Exception('You cannot refund more than available qty.');
+                }
                 SupplierRefundDetail::create([
                     'supplier_refund_id' => $id,
                     'product_id' => $o['product_id'],

@@ -93,6 +93,7 @@ class Edit extends Component
     public function create()
     {
         $return = (collect($this->purchase_orders)->where('return', '>', 0))->toArray();
+
         $this->validate();
         try {
             DB::beginTransaction();
@@ -116,7 +117,8 @@ class Edit extends Component
             ]);
             SupplierRefundDetail::where('supplier_refund_id', $this->primary_id)->delete();
             foreach ($return as $o) {
-                if($o['return']>$o['qty']){
+                $check = ProductInventory::find($o['product_inventory_id']);
+                if($o['return']>$check['qty']){
                     throw new \Exception('You cannot refund more than available qty.');
                 }
                 SupplierRefundDetail::create([

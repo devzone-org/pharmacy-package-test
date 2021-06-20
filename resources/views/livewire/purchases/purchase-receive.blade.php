@@ -138,16 +138,13 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                 <tr>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col" class="w-12 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         #
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Name
                     </th>
-                    <th scope="col"
-                        class="w-16 border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                        Packing Pieces
-                    </th>
+
                     <th scope="col"
                         class="w-16  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Qty
@@ -155,6 +152,10 @@
                     <th scope="col"
                         class="w-16 border  text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Bonus
+                    </th>
+                    <th scope="col"
+                        class="w-16 border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        Pieces in Packing
                     </th>
                     <th scope="col"
                         class="w-16  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
@@ -203,32 +204,32 @@
                                       d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
                             </svg>
                         </td>
-                        <td class="px-3 py-3 bg-gray-50 border text-sm text-gray-500">
-                            {{ $m['packing'] }}
-                        </td>
+
                         <td class="p-0  border text-sm text-gray-500">
-                            <input type="text"
+                            <input type="number"  onclick="this.select()"
                                    class="p-0 focus:ring-0 block w-full text-center  text-sm border-0 "
                                    wire:model.lazy="order_list.{{$key}}.qty">
                         </td>
                         <td class="p-0  border text-sm text-gray-500">
-                            <input type="text"
+                            <input type="number"   onclick="this.select()"
                                    class="p-0 focus:ring-0 block w-full text-center text-sm border-0 "
                                    wire:model.lazy="order_list.{{$key}}.bonus">
                         </td>
-
+                        <td class="px-3 py-3 bg-gray-50 text-center border text-sm text-gray-500">
+                            {{ $m['packing'] }}
+                        </td>
                         <td class="px-3   bg-gray-50 border text-sm  text-center text-gray-500">
-                            {{ number_format($m['qty'] + ($m['bonus']?? 0),2) }}
+                            {{ number_format($m['packing']*($m['qty'] + ($m['bonus']?? 0)),2) }}
                         </td>
                         <td class="p-0 border  text-sm text-gray-500">
-                            <input type="text"
+                            <input type="number" step="0.01" onclick="this.select()"
                                    class=" p-0 focus:ring-0 block w-full text-center  text-sm border-0 "
                                    wire:model.lazy="order_list.{{$key}}.cost_of_price">
 
                         </td>
 
                         <td class="p-0 border  text-sm text-gray-500">
-                            <input type="text"
+                            <input   type="number" step="0.01" step="0.01" onclick="this.select()"
                                    class=" p-0 focus:ring-0 block w-full text-center text-sm border-0 "
                                    wire:model.lazy="order_list.{{$key}}.disc">
                         </td>
@@ -238,7 +239,7 @@
                             {{ number_format($m['after_disc_cost'],2) }}
                         </td>
                         <td class="p-0  border text-sm text-gray-500">
-                            <input type="text"
+                            <input type="number" step="0.01" onclick="this.select()"
                                    class=" p-0 focus:ring-0 block w-full text-center text-sm border-0 "
                                    wire:model.lazy="order_list.{{$key}}.retail_price">
                         </td>
@@ -264,10 +265,10 @@
                 @endforeach
                 <tr class="bg-gray-50 border-b">
 
-                    <th scope="col" colspan="2" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="1" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
 
                     </th>
-                    <th scope="col" class="px-3 py-3 text-left text-md font-medium text-gray-500   ">
+                    <th scope="col" class="px-3 py-3 text-right text-md font-medium text-gray-500   ">
                         Total
                     </th>
                     <th scope="col" class="px-3 py-3 border text-center text-md font-medium text-gray-500   ">
@@ -278,7 +279,11 @@
                     </th>
 
                     <th scope="col" class="px-3 py-3 border  text-center text-md font-medium text-gray-500   ">
-                        {{ number_format(collect($order_list)->sum('qty') + collect($order_list)->sum('bonus'),2) }}
+
+                    </th>
+
+                    <th scope="col" class="px-3 py-3 border  text-center text-md font-medium text-gray-500   ">
+                        {{ number_format(collect($order_list)->sum('total_qty'),2) }}
                     </th>
                     <th scope="col" class="px-3 py-3  border text-center text-md font-medium text-gray-500   ">
                         {{ number_format(collect($order_list)->sum('cost_of_price'),2) }}
@@ -451,7 +456,7 @@
 
 
                         <div class="col-span-6 ">
-                            <label for="expiry1" class="block text-sm font-medium text-gray-700">Date</label>
+                            <label for="expiry1" class="block text-sm font-medium text-gray-700">Expiry Date</label>
                             <input   wire:model.lazy="order_list.{{$key_id}}.expiry" type="date"
                                    class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                    id="expiry1">

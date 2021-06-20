@@ -92,6 +92,10 @@ class View extends Component
     public function printSale()
     {
 
-        Receipt::generate($this->sales_ref, $this->sale_id);
+        $ip=$_SERVER['REMOTE_ADDR'];
+        $hostname = gethostbyaddr($_SERVER['REMOTE_ADDR']);
+
+        dd($ip,$hostname);
+        //Receipt::generate($this->sales_ref, $this->sale_id);
     }
 }

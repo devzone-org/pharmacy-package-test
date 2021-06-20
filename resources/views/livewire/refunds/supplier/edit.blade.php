@@ -165,7 +165,7 @@
 
 
                         <td class="px-3 py-3   text-sm text-gray-500">
-                            <input max="{{ $m['qty'] }}" wire:model.lazy="purchase_orders.{{$key}}.return" type="number" autocomplete="off"
+                            <input onclick="this.select()"  max="{{ $m['qty'] }}" wire:model.lazy="purchase_orders.{{$key}}.return" type="number" autocomplete="off"
                                    class=" block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                    id="return">
                         </td>

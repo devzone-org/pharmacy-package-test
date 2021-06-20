@@ -144,6 +144,13 @@
                         Qty
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        Pieces in Packing
+                    </th>
+
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        Total Qty
+                    </th>
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Supplier Cost
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
@@ -171,14 +178,26 @@
                             {{ $m['salt'] }}
                         </td>
                         <td class="px-3 py-3   text-sm text-gray-500">
-                            <input type="text" class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" wire:model="order_list.{{$key}}.qty">
+                            <input type="number" onclick="this.select()"
+                                   class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                   wire:model="order_list.{{$key}}.qty">
                         </td>
                         <td class="px-3 py-3   text-sm text-gray-500">
-                            <input type="text" class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" wire:model="order_list.{{$key}}.cost_of_price">
+                            {{ $m['packing'] }}
+                        </td>
+                        <td class="px-3 py-3   text-sm text-gray-500">
+                            {{ number_format($m['packing']*$m['qty'],2) }}
+                        </td>
+                        <td class="px-3 py-3   text-sm text-gray-500">
+                            <input type="text" onclick="this.select()"
+                                   class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                   wire:model="order_list.{{$key}}.cost_of_price">
 
                         </td>
                         <td class="px-3 py-3   text-sm text-gray-500">
-                            <input type="text" class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" wire:model="order_list.{{$key}}.retail_price">
+                            <input type="text" onclick="this.select()"
+                                   class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                   wire:model="order_list.{{$key}}.retail_price">
 
                         </td>
 
@@ -189,7 +208,13 @@
 
 
                         <td class="px-3 py-3 w-7   text-right text-sm font-medium">
-                            <svg wire:click="removeProduct('{{ $key }}')" class="w-6 h-6 text-red-600 cursor-pointer hover:text-red-800" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                            <svg wire:click="removeProduct('{{ $key }}')"
+                                 class="w-6 h-6 text-red-600 cursor-pointer hover:text-red-800" fill="currentColor"
+                                 viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd"
+                                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                      clip-rule="evenodd"></path>
+                            </svg>
                         </td>
                     </tr>
                 @endforeach
@@ -197,14 +222,20 @@
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
 
                     </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
 
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Total
+                        Total
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         {{ number_format(collect($order_list)->sum('qty'),2) }}
+                    </th>
+                    <th scope="col" colspan="" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+
+                    </th>
+                    <th scope="col" colspan="" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         {{ number_format(collect($order_list)->sum('cost_of_price'),2) }}
