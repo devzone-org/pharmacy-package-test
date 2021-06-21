@@ -4,12 +4,17 @@
 namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
 
+use Devzone\Ams\Helper\GeneralJournal;
+use Devzone\Ams\Helper\Voucher;
+use Devzone\Ams\Models\ChartOfAccount;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\InventoryLedger;
 use Devzone\Pharmacy\Models\ProductInventory;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Sale\SaleDetail;
 use Devzone\Pharmacy\Models\Sale\SaleRefund;
+use Devzone\Pharmacy\Models\Sale\UserTill;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -31,7 +36,7 @@ class Refund extends Component
     public $error;
     public $old_sales = [];
     public $sales = [];
-
+    public $till_id;
     public $refunds = [];
     public $sale_id;
     protected $listeners = ['openSearch', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
@@ -39,16 +44,19 @@ class Refund extends Component
     public function mount($primary_id)
     {
         $this->sale_id = $primary_id;
-
+        $till = UserTill::where('user_id', Auth::user()->id)->first();
+        if (!empty($till)) {
+            $this->till_id = $till['account_id'];
+        }
         $this->searchable_emit_only = true;
         $this->old_sales = Sale::from('sales as s')->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
-            ->join('product_inventories as pi','pi.id','=','sd.product_inventory_id')
+            ->join('product_inventories as pi', 'pi.id', '=', 'sd.product_inventory_id')
             ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
             ->leftJoin('patients as p', 'p.id', '=', 's.patient_id')
             ->join('products as pr', 'pr.id', '=', 'sd.product_id')
             ->where('s.id', $this->sale_id)
             ->select('sd.*', 'pr.name as item', 's.remarks', 's.receive_amount', 's.payable_amount', 's.sub_total', 's.gross_total'
-              ,'pi.po_id'  , 's.patient_id', 's.referred_by', 'e.name as referred_by_name', 'p.name as patient_name')
+                , 'pi.po_id', 's.patient_id', 's.referred_by', 'e.name as referred_by_name', 'p.mr_no', 'p.name as patient_name')
             ->get()->toArray();
 
 
@@ -211,9 +219,9 @@ class Refund extends Component
         if ($old_sale['qty'] > $data['qty']) {
             $old_sale['s_qty'] = $old_sale['qty'];
             $old_sale['qty'] = $old_sale['qty'] - $data['qty'];
-
             $old_sale['total'] = $old_sale['qty'] * $old_sale['retail_price'];
             $old_sale['total_after_disc'] = $old_sale['total'];
+            $old_sale['new'] = '1';
             if ($old_sale['disc'] > 0) {
                 $discount = round(($old_sale['disc'] / 100) * $old_sale['total'], 2);
                 $old_sale['total_after_disc'] = $old_sale['total'] - $discount;
@@ -228,7 +236,25 @@ class Refund extends Component
             if (empty($this->refunds)) {
                 throw new \Exception('Refund invoice is empty.');
             }
+            if (empty($this->till_id)) {
+                throw new \Exception('To complete refund you must choose till.');
+            }
 
+            $refund_cost = 0;
+            $refund_retail = 0;
+
+            $sales_cost = 0;
+            $sales_retail = 0;
+
+            foreach (collect($this->refunds)->where('new', '1')->all() as $r) {
+                $refund_cost = $refund_cost + ($r['qty'] * $r['supply_price']);
+                $refund_retail = $refund_retail + ($r['total_after_disc']);
+            }
+
+            foreach ($this->sales as $r) {
+                $sales_cost = $sales_cost + ($r['s_qty'] * $r['supply_price']);
+                $sales_retail = $sales_retail + ($r['total_after_disc']);
+            }
             DB::beginTransaction();
             $refund = false;
 
@@ -265,7 +291,7 @@ class Refund extends Component
             }
             if ($refund) {
                 Sale::find($this->sale_id)->update([
-                   'is_refund' => 't'
+                    'is_refund' => 't'
                 ]);
             }
             if (!empty($this->sales)) {
@@ -289,7 +315,7 @@ class Refund extends Component
                                 InventoryLedger::create([
                                     'product_id' => $product_inv->product_id,
                                     'order_id' => $product_inv->po_id,
-                                    'decrease' => $this->sale_qty,
+                                    'decrease' => $sale_qty,
                                     'description' => "Sale on dated " . date('d M, Y') .
                                         " against receipt #" . $this->sale_id
                                 ]);
@@ -302,7 +328,7 @@ class Refund extends Component
                                 InventoryLedger::create([
                                     'product_id' => $product_inv->product_id,
                                     'order_id' => $product_inv->po_id,
-                                    'decrease' => $product_inv->qty,
+                                    'decrease' => $dec,
                                     'description' => "Sale on dated " . date('d M, Y') .
                                         " against receipt #" . $this->sale_id
                                 ]);
@@ -323,10 +349,53 @@ class Refund extends Component
                                 'disc' => $s['disc'],
                                 'total_after_disc' => $after_total,
                             ]);
-
                         }
                     }
                 }
+            }
+
+            $accounts = ChartOfAccount::whereIn('reference', ['cost-of-sales-pharmacy-5', 'income-pharmacy-5', 'income-return-pharmacy-5', 'pharmacy-inventory-5'])->get();
+            $description = $this->getDescription($refund_retail, $sales_retail);
+            $vno = Voucher::instance()->voucher()->get();
+
+            foreach ($accounts as $a) {
+                if ($sales_retail > 0) {
+                    if ($a->reference == 'cost-of-sales-pharmacy-5') {
+                        GeneralJournal::instance()->account($a->id)->debit($sales_cost)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    }
+                    if ($a->reference == 'pharmacy-inventory-5') {
+                        GeneralJournal::instance()->account($a->id)->credit($sales_cost)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    }
+                    if ($a->reference == 'income-pharmacy-5') {
+                        GeneralJournal::instance()->account($a->id)->credit($sales_retail)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    }
+                }
+
+                if ($refund_retail > 0) {
+                    if ($a->reference == 'cost-of-sales-pharmacy-5') {
+                        GeneralJournal::instance()->account($a->id)->credit($refund_cost)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    }
+                    if ($a->reference == 'pharmacy-inventory-5') {
+                        GeneralJournal::instance()->account($a->id)->debit($refund_cost)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    }
+                    if ($a->reference == 'income-return-pharmacy-5') {
+                        GeneralJournal::instance()->account($a->id)->debit($refund_retail)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    }
+                }
+            }
+            $dif = $refund_retail - $sales_retail;
+            if ($dif > 0) {
+                GeneralJournal::instance()->account($this->till_id)->credit(abs($dif))->voucherNo($vno)
+                    ->date(date('Y-m-d'))->approve()->description($description)->execute();
+            } else {
+                GeneralJournal::instance()->account($this->till_id)->debit(abs($dif))->voucherNo($vno)
+                    ->date(date('Y-m-d'))->approve()->description($description)->execute();
             }
 
             $this->searchableReset();
@@ -338,6 +407,34 @@ class Refund extends Component
             DB::rollBack();
         }
 
+    }
+
+
+    public function getDescription($refund_retail, $sales_retail)
+    {
+        if ($refund_retail > 0 && $sales_retail > 0) {
+            $description = 'Refunded: PKR ' . number_format($refund_retail, 2) . ' SOLD: PKR ' . number_format($sales_retail, 2) . ' ';
+        }
+        if ($refund_retail > 0) {
+            $description = 'Refunded: PKR ' . number_format($refund_retail, 2) . ' ';
+        }
+        if ($sales_retail > 0) {
+            $description = 'Refunded: PKR ' . number_format($sales_retail, 2) . ' ';
+        }
+        if ($this->old_sales[0]['patient_id'] > 0) {
+            $description .= 'to patient ' . $this->old_sales[0]['patient_name'] . ' against MR# ' . $this->old_sales[0]['mr_no'] . '. ';
+        } else {
+            $description .= 'to walking customer. ';
+        }
+        $dif = $refund_retail - $sales_retail;
+        if ($dif > 0) {
+            $description .= "Net paid amount PKR " . number_format(abs($dif), 2) . ' ';
+        } else {
+            $description .= "Net received amount PKR " . number_format(abs($dif), 2) . ' ';
+        }
+
+        $description .= " on " . date('d M, Y') . " by " . Auth::user()->name;
+        return $description;
     }
 
     public function resetAll()

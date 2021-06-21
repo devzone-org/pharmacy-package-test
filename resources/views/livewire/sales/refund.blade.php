@@ -248,7 +248,7 @@
                             @if(isset($s['restrict']))
                                 {{ $s['qty'] }}
                                 @else
-                                <input type="number" wire:model.lazy="refunds.{{ $key }}.qty" onClick="this.select();"
+                                <input type="number" wire:model.debounce.500ms="refunds.{{ $key }}.qty" onClick="this.select();"
                                        class="p-0 focus:ring-0 block w-full  text-md border-0 text-center "
                                        autocomplete="off">
                                 @endif
@@ -256,7 +256,7 @@
                         </td>
                         <td class="px-2  text-center  border-r text-md text-gray-500">
 
-{{$s['qty'] }}
+                            {{ number_format($s['retail_price'],2) }}
 
                         </td>
                         <td class="px-2    text-center border-r text-md text-gray-500">
@@ -304,12 +304,12 @@
                             {{ $s['item'] }}
                         </td>
                         <td class="px-2   text-left   border-r  text-md text-gray-500">
-                            <input type="number" wire:model.lazy="sales.{{ $key }}.s_qty" onClick="this.select();"
+                            <input type="number" wire:model.debounce.500ms="sales.{{ $key }}.s_qty" onClick="this.select();"
                                    class="p-0 focus:ring-0 block w-full  text-md border-0 text-center "
                                    autocomplete="off">
                         </td>
                         <td class="px-2  text-center  border-r text-md text-gray-500">
-                            <input type="number" wire:model.lazy="sales.{{ $key }}.retail_price"
+                            <input type="number" wire:model.debounce.500ms="sales.{{ $key }}.retail_price"
                                    onClick="this.select();"
                                    class="p-0 focus:ring-0 block w-full  text-md border-0 text-center "
                                    autocomplete="off">
@@ -319,7 +319,7 @@
                             {{ number_format($s['total'],2) }}
                         </td>
                         <td class="px-2  text-center border-r text-md text-gray-500">
-                            <input type="number" step="0.01" wire:model.lazy="sales.{{ $key }}.disc"
+                            <input type="number" step="0.01" wire:model.debounce.500ms="sales.{{ $key }}.disc"
                                    onClick="this.select();"
                                    class="text-center p-0 focus:ring-0 block w-full   text-md border-0  "
                                    autocomplete="off">
@@ -350,7 +350,7 @@
                     </th>
                     <th scope="col" colspan="2"
                         class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        {{ number_format($old_sales[0]['gross_total'] - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }}
+                        {{ number_format(collect($old_sales)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }}
                     </th>
                 </tr>
                 <tr class="bg-gray-50">
@@ -378,7 +378,7 @@
                     </th>
                     <th scope="col" colspan="2"
                         class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        <input type="number" wire:model.lazy="discount" min="0" max="100" onClick="this.select();"
+                        <input type="number" wire:model.debounce.500ms="discount" min="0" max="100" onClick="this.select();"
                                id="discount"
                                class="p-0 focus:ring-0 block w-full  text-md border-0 font-medium text-gray-500 text-center "
                                autocomplete="off">

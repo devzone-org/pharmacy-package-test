@@ -98,7 +98,7 @@ class Add extends Component
 
     public function openSearch()
     {
-        $this->searchableOpenModal('product_id', 'product_name', 'inventory');
+        $this->searchableOpenModal('product_id', 'product_name', 'item');
     }
 
     public function render()
