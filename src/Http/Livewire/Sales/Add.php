@@ -4,11 +4,15 @@
 namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
 
+use Devzone\Ams\Helper\GeneralJournal;
+use Devzone\Ams\Helper\Voucher;
+use Devzone\Ams\Models\ChartOfAccount;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\InventoryLedger;
 use Devzone\Pharmacy\Models\ProductInventory;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Sale\SaleDetail;
+use Devzone\Pharmacy\Models\Sale\UserTill;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -30,11 +34,25 @@ class Add extends Component
     public $success;
     public $error;
     public $sales = [];
+    public $tills = [];
+    public $till_id;
+    public $till_name;
+    public $choose_till = false;
 
     protected $listeners = ['openSearch', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
 
     public function mount()
     {
+        $this->tills = ChartOfAccount::from('chart_of_accounts as p')
+            ->join('chart_of_accounts as c', 'p.id', '=', 'c.sub_account')
+            ->where('p.reference', 'cash-at-pharmacy-tills-4')->get()->toArray();
+        $till = UserTill::where('user_id', Auth::id())->first();
+        if (!empty($till)) {
+            $this->till_id = $till['account_id'];
+            $till_name = collect($this->tills)->firstWhere('id', $till['account_id']);
+            $this->till_name = $till_name['name'];
+        }
+
         $this->searchable_emit_only = true;
     }
 
@@ -150,6 +168,9 @@ class Add extends Component
             if (empty($this->sales)) {
                 throw new \Exception('Invoice is empty.');
             }
+            if (empty($this->till_id)) {
+                throw new \Exception('To complete sale you must choose till.');
+            }
             DB::beginTransaction();
             $sale_id = Sale::create([
                 'patient_id' => $this->patient_id,
@@ -164,7 +185,6 @@ class Add extends Component
             ])->id;
 
             foreach ($this->sales as $s) {
-
 
                 $inv = ProductInventory::where('product_id', $s['product_id'])
                     ->where('supply_price', $s['supply_price'])
@@ -219,12 +239,36 @@ class Add extends Component
                             'disc' => $s['disc'],
                             'total_after_disc' => $after_total,
                         ]);
-
                     }
                 }
 
 
             }
+            $accounts = ChartOfAccount::whereIn('reference',['pharmacy-inventory-5','income-pharmacy-5','cost-of-sales-pharmacy-5'])->get();
+
+            $amounts = SaleDetail::where('sale_id', $sale_id)->select(DB::raw('SUM(total_after_disc) as sale'),DB::raw('SUM(qty * supply_price) as cost'))->first();
+            $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " sold to the walking customer. Cash received PKR " .
+                number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name;
+
+            $vno = Voucher::instance()->voucher()->get();
+            GeneralJournal::instance()->account($this->till_id)->debit($amounts['sale'])->voucherNo($vno)
+                ->date(date('Y-m-d'))->approve()->description($description)->execute();
+
+            foreach ($accounts as $a){
+                if($a->reference == 'pharmacy-inventory-5'){
+                    GeneralJournal::instance()->account($a->id)->credit($amounts['cost'])->voucherNo($vno)
+                        ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                }
+                if($a->reference == 'income-pharmacy-5'){
+                    GeneralJournal::instance()->account($a->id)->credit($amounts['sale'])->voucherNo($vno)
+                        ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                }
+                if($a->reference == 'cost-of-sales-pharmacy-5'){
+                    GeneralJournal::instance()->account($a->id)->debit($amounts['cost'])->voucherNo($vno)
+                        ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                }
+            }
+
 
             $this->resetAll();
             $this->searchableReset();
@@ -240,5 +284,23 @@ class Add extends Component
     {
         $this->reset(['sales', 'referred_by_id', 'referred_by_name', 'success', 'patient_id', 'patient_name',
             'payable', 'received', 'remarks', 'discount', 'error']);
+    }
+
+    public function updatedTillId($value)
+    {
+        $till = collect($this->tills)->firstWhere('id', $value);
+        if (!empty($till)) {
+            $this->till_name = $till['name'];
+        }
+    }
+
+    public function updateTill()
+    {
+        UserTill::updateOrCreate([
+            'user_id' => Auth::id()
+        ], [
+            'account_id' => $this->till_id
+        ]);
+        $this->choose_till = false;
     }
 }
