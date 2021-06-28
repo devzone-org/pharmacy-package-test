@@ -22,6 +22,7 @@ class Edit extends Component
     public $receiving_account_name;
     public $receiving_account;
     public $receiving_date;
+    public $closing_balance;
     public $description;
     public $success;
     public $purchase_orders = [];
@@ -59,14 +60,32 @@ class Edit extends Component
             if (!empty($return)) {
                 $this->purchase_orders[$key]['return'] = $return['qty'];
                 $this->purchase_orders[$key]['id'] = $return['id'];
+                $this->purchase_orders[$key]['total_return'] = $return['qty'] *  $po['supply_price'];
             }
         }
 
 
     }
+    public function updated($name, $value)
+    {
+        $array = explode(".", $name);
+        if ($array[0] == 'purchase_orders') {
+            if(empty($value)){
+                $this->purchase_orders[$array[1]]['return'] = 0;
+            }
+            $this->purchase_orders[$array[1]]['total_return'] = round($this->purchase_orders[$array[1]]['return'] * $this->purchase_orders[$array[1]]['supply_price'], 2);
 
+        }
+    }
     public function emitSupplierId()
     {
+        $supplier = Supplier::from('suppliers as s')
+            ->join('ledgers as l', function ($q) {
+                return $q->on('l.account_id', '=', 's.account_id')->where('l.is_approve', 't');
+            })->where('s.id', $this->supplier_id)
+            ->select(DB::raw('sum(l.credit - l.debit) as closing'))->first();
+        $this->closing_balance = !empty($supplier) ? $supplier->closing : 0;
+
         $result = ProductInventory::from('product_inventories as pi')
             ->join('purchases as p', 'p.id', '=', 'pi.po_id')
             ->join('products as pr', 'pr.id', '=', 'pi.product_id')

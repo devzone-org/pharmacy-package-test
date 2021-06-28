@@ -108,8 +108,13 @@
 
 
             <table class="min-w-full divide-y divide-gray-200 rounded-md ">
-                <thead class="bg-gray-50">
-                <tr>
+                <thead  class="bg-white">
+                <tr  >
+                    <th scope="col" colspan="6" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        <i>Un Paid Purchase Orders</i>
+                    </th>
+                </tr>
+                <tr  class="bg-gray-50">
 
 
 
@@ -136,11 +141,7 @@
                 </tr>
                 </thead>
                 <tbody class="   bg-white ">
-                <tr   class="bg-gray-50">
-                    <th scope="col" colspan="7" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                        <i>Purchase Orders</i>
-                    </th>
-                </tr>
+
                 @foreach($purchase_orders as $key => $m)
                     <tr>
 
@@ -171,10 +172,33 @@
 
                     </tr>
                 @endforeach
-                <tr  class="bg-gray-50">
-                    <th scope="col" colspan="7" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                        <i>Supplier Returns</i>
+
+                <tr   class="bg-white">
+                    <th scope="col" colspan="6" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        &nbsp;
                     </th>
+                </tr>
+
+                <tr  class="bg-white">
+                    <th scope="col" colspan="6" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        <i>Un Adjusted Returns</i>
+                    </th>
+                </tr>
+                <tr  class="bg-gray-50">
+
+
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        #
+                    </th>
+
+                    <th scope="col"  colspan="4" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        Description
+                    </th>
+
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                        Amount
+                    </th>
+
                 </tr>
                 @foreach($returns as $key => $m)
                     <tr >

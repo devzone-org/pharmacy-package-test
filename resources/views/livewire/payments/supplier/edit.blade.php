@@ -24,40 +24,7 @@
 
                 </div>
 
-                @if ($errors->any())
-                    <div class="rounded-md bg-red-50 p-4">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <!-- Heroicon name: x-circle -->
-                                <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg"
-                                     viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd"
-                                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                          clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                            <div class="ml-3">
-                                <h3 class="text-sm font-medium text-red-800">
-                                    @php
-                                        $count = count($errors->all());
-                                    @endphp
-                                    There {{ $count > 1 ? "were {$count} errors": "was {$count} error" }}
-                                    with
-                                    your submission
-                                </h3>
-                                <div class="mt-2 text-sm text-red-700">
-                                    <ul class="list-disc pl-5 space-y-1">
-
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
+                @include('pharmacy::include.errors')
                 @if(!empty($success))
                     <div class="rounded-md bg-green-50 p-4">
                         <div class="flex">
@@ -106,15 +73,14 @@
                     </div>
 
 
-                    <div class="col-span-6 sm:col-span-2">
-                        <label for="pay_from" class="block text-sm font-medium text-gray-700">Pay From</label>
-                        <input wire:model.defer="pay_from_name"
-                               wire:click="searchableOpenModal('pay_from', 'pay_from_name', 'pay_from')" readonly
-                               type="text" autocomplete="off"
-                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                               id="pay_from">
-                    </div>
 
+                    <div class="col-span-6 sm:col-span-2">
+                        <label for="closing_balance" class="block text-sm font-medium text-gray-700">Closing Balance</label>
+                        <input   value="{{ $closing_balance }}" readonly
+                                 type="text" autocomplete="off"
+                                 class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                 id="closing_balance">
+                    </div>
 
                     <div class="col-span-6 sm:col-span-2">
                         <label for="payment_date" class="block text-sm font-medium text-gray-700">Payment Date</label>
@@ -135,8 +101,13 @@
             </div>
 
             <table class="min-w-full divide-y divide-gray-200 rounded-md ">
-                <thead class="bg-gray-50">
-                <tr>
+                <thead  class="bg-white">
+                <tr  >
+                    <th scope="col" colspan="7" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        <i>Un Paid Purchase Orders</i>
+                    </th>
+                </tr>
+                <tr  class="bg-gray-50">
 
                     <th scope="col" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
 
@@ -165,11 +136,7 @@
                 </tr>
                 </thead>
                 <tbody class="   bg-white ">
-                <tr   class="bg-gray-50">
-                    <th scope="col" colspan="7" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                        <i>Un Paid Purchase Orders</i>
-                    </th>
-                </tr>
+
                 @foreach($purchase_orders as $key => $m)
                     <tr>
                         <td class="px-3 py-3   text-sm font-medium text-gray-500">
@@ -205,10 +172,36 @@
 
                     </tr>
                 @endforeach
-                <tr  class="bg-gray-50">
+
+                <tr   class="bg-white">
+                    <th scope="col" colspan="7" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        &nbsp;
+                    </th>
+                </tr>
+
+                <tr  class="bg-white">
                     <th scope="col" colspan="7" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         <i>Un Adjusted Returns</i>
                     </th>
+                </tr>
+                <tr  class="bg-gray-50">
+
+                    <th scope="col" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+
+                    </th>
+
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        #
+                    </th>
+
+                    <th scope="col"  colspan="4" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        Description
+                    </th>
+
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                        Amount
+                    </th>
+
                 </tr>
                 @foreach($returns as $key => $m)
                     <tr >

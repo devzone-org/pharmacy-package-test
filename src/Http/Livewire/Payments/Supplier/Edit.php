@@ -23,6 +23,7 @@ class Edit extends Component
     public $pay_from_name;
     public $pay_from;
     public $payment_date;
+    public $closing_balance;
     public $description;
     public $success;
     public $purchase_orders = [];
@@ -34,7 +35,7 @@ class Edit extends Component
     protected $listeners = ['emitSupplierId'];
     protected $rules = [
         'supplier_id' => 'required|integer',
-        'pay_from' => 'required|integer',
+
         'payment_date' => 'required|date',
         'description' => 'nullable|string'
     ];
@@ -46,11 +47,10 @@ class Edit extends Component
         $payment_details = SupplierPaymentDetail::where('supplier_payment_id', $payment_id)->get();
         $refund = SupplierPaymentRefundDetail::where('supplier_payment_id', $payment_id)->get();
         $supplier = Supplier::find($payment->supplier_id);
-        $coa = ChartOfAccount::find($payment->pay_from);
+
         $this->supplier_id = $supplier->id;
         $this->supplier_name = $supplier->name;
-        $this->pay_from = $coa->id;
-        $this->pay_from_name = $coa->name;
+
         $this->description = $payment->description;
         $this->payment_date = $payment->payment_date;
         $this->emitSupplierId();
@@ -68,6 +68,12 @@ class Edit extends Component
 
     public function emitSupplierId()
     {
+        $supplier = Supplier::from('suppliers as s')
+            ->join('ledgers as l', function ($q) {
+                return $q->on('l.account_id', '=', 's.account_id')->where('l.is_approve', 't');
+            })->where('s.id', $this->supplier_id)
+            ->select(DB::raw('sum(l.credit - l.debit) as closing'))->first();
+        $this->closing_balance = !empty($supplier) ? $supplier->closing : 0;
         $result = Purchase::from('purchases as p')
             ->join('purchase_receives as pr', 'pr.purchase_id', '=', 'p.id')
             ->where('p.supplier_id', $this->supplier_id)
@@ -112,7 +118,6 @@ class Edit extends Component
                 SupplierPayment::find($this->payment_id)->update([
                     'supplier_id' => $this->supplier_id,
                     'description' => $this->description,
-                    'pay_from' => $this->pay_from,
                     'payment_date' => $this->payment_date,
                 ]);
                 SupplierPaymentDetail::where('supplier_payment_id',$this->payment_id)->delete();
