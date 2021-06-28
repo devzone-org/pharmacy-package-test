@@ -22,6 +22,7 @@ class PurchaseView extends Component
     {
         $this->purchase_id = $purchase_id;
         $purchase = Purchase::find($purchase_id);
+
         $this->grn_no = $purchase->grn_no;
         $this->delivery_date = $purchase->delivery_date;
         $this->supplier_invoice = $purchase->supplier_invoice;
@@ -40,6 +41,7 @@ class PurchaseView extends Component
                 's.name as supplier_name',
                 'p.supplier_invoice',
                 'p.grn_no',
+                'p.is_paid',
                 'p.delivery_date',
                 'p.status',
                 'c.name as created_by',

@@ -4,10 +4,18 @@
 namespace Devzone\Pharmacy\Http\Livewire\Purchases;
 
 
+use Devzone\Ams\Helper\GeneralJournal;
+use Devzone\Ams\Helper\Voucher;
+use Devzone\Ams\Models\ChartOfAccount;
 use Devzone\Pharmacy\Http\Traits\Searchable;
+use Devzone\Pharmacy\Models\InventoryLedger;
 use Devzone\Pharmacy\Models\Product;
+use Devzone\Pharmacy\Models\ProductInventory;
 use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\PurchaseOrder;
+use Devzone\Pharmacy\Models\Supplier;
+use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -135,12 +143,12 @@ class PurchaseReceive extends Component
             }
             if ($array[2] == 'qty') {
                 $this->order_list[$array[1]]['total_cost'] = round($this->order_list[$array[1]]['qty'] * $this->order_list[$array[1]]['after_disc_cost'], 2);
-                $this->order_list[$array[1]]['total_qty'] = round(($this->order_list[$array[1]]['bonus']+$this->order_list[$array[1]]['qty']) * $this->order_list[$array[1]]['packing'], 2);
+                $this->order_list[$array[1]]['total_qty'] = round(($this->order_list[$array[1]]['bonus'] + $this->order_list[$array[1]]['qty']), 2);
             }
 
             if ($array[2] == 'bonus') {
 
-                $this->order_list[$array[1]]['total_qty'] = round(($this->order_list[$array[1]]['bonus']+$this->order_list[$array[1]]['qty']) * $this->order_list[$array[1]]['packing'], 2);
+                $this->order_list[$array[1]]['total_qty'] = round(($this->order_list[$array[1]]['bonus'] + $this->order_list[$array[1]]['qty']) , 2);
             }
 
             if ($array[2] == 'cost_of_price' || $array[2] == 'disc') {
@@ -207,13 +215,13 @@ class PurchaseReceive extends Component
                     'after_disc_cost' => $data['cost_of_price'],
                     'disc' => 0,
                     'bonus' => 0,
-                    'total_qty' => $data['packing']
+                    'total_qty' => 1
                 ];
             } else {
                 $key = array_keys($existing)[0];
                 $qty = $this->order_list[$key]['qty'];
                 $this->order_list[$key]['qty'] = $qty + 1;
-                $this->order_list[$key]['total_qty'] = $this->order_list[$key]['qty'] * $this->order_list[$key]['packing'];
+                $this->order_list[$key]['total_qty'] = $this->order_list[$key]['qty'];
             }
 
         }
@@ -254,6 +262,98 @@ class PurchaseReceive extends Component
                     'expiry' => $o['expiry'] ?? null,
                 ]);
             }
+            $is_auto_approve = true;
+            $purchase_order = PurchaseOrder::where('purchase_id', $this->purchase_id)->get();
+            foreach ($purchase_order as $p) {
+                $auto_approve = \Devzone\Pharmacy\Models\PurchaseReceive::where('purchase_id', $this->purchase_id)
+                    ->where('product_id', $p->product_id)
+                    ->where('qty', $p->qty)
+                    ->where('cost_of_price', $p->cost_of_price)
+                    ->where('retail_price', $p->retail_price)
+                    ->where('total_cost', $p->total_cost)
+                    ->exists();
+
+                if ($auto_approve == false) {
+                    $is_auto_approve = false;
+                }
+            }
+
+            if ($is_auto_approve) {
+                $receive = \Devzone\Pharmacy\Models\PurchaseReceive::from('purchase_receives as po')
+                    ->join('products as p', 'p.id', '=', 'po.product_id')
+                    ->where('po.purchase_id', $this->purchase_id)
+                    ->select('po.*', 'p.name', 'p.salt', 'p.packing')
+                    ->get();
+
+
+                if (empty($this->delivery_date)) {
+                    throw new \Exception("Delivery date not updated.");
+                }
+
+                $inventory = ChartOfAccount::where('reference', 'pharmacy-inventory-5')->first();
+                if (empty($inventory)) {
+                    throw new \Exception('Inventory account not found in chart of accounts.');
+                }
+                $supplier = Supplier::find($this->supplier_id);
+                $amount = $receive->sum('total_cost');
+                $description = "Inventory amounting total PKR " . number_format($amount, 2) . "/- received on dated " . date('d M, Y', strtotime($this->delivery_date)) .
+                    " against PO # " . $this->purchase_id . " from supplier " . $supplier['name'] . " by " . Auth::user()->name;
+
+
+                $vno = Voucher::instance()->voucher()->get();
+                GeneralJournal::instance()->account($inventory['id'])->debit($amount)->voucherNo($vno)
+                    ->date($this->delivery_date)->approve()->description($description)->execute();
+                GeneralJournal::instance()->account($supplier['account_id'])->credit($amount)->voucherNo($vno)
+                    ->date($this->delivery_date)->approve()->description($description)->execute();
+
+
+                $id = Purchase::where('status', 'receiving')->where('id', $this->purchase_id)->update([
+                    'is_paid' => 'f',
+                    'status' => 'received'
+                ]);
+                if (empty($id)) {
+                    throw new Exception('Something went wrong please try again.');
+                }
+                foreach ($receive as $r) {
+                    ProductInventory::create([
+                        'product_id' => $r->product_id,
+                        'qty' => $r->qty,
+                        'retail_price' => $r->retail_price,
+                        'supply_price' => $r->after_disc_cost,
+                        'expiry' => !empty($r->expiry) ? $r->expiry : null,
+                        'batch_no' => !empty($r->batch_no) ? $r->batch_no : null,
+                        'po_id' => $this->purchase_id,
+                        'type' => 'regular'
+                    ]);
+                    InventoryLedger::create([
+                        'product_id' => $r->product_id,
+                        'order_id' => $this->purchase_id,
+                        'increase' => $r->qty,
+                        'description' => 'Inventory increase'
+                    ]);
+                    if ($r->bonus > 0) {
+                        ProductInventory::create([
+                            'product_id' => $r->product_id,
+                            'qty' => $r->bonus,
+                            'retail_price' => $r->retail_price,
+                            'supply_price' => 0,
+                            'po_id' => $this->purchase_id,
+                            'type' => 'bonus',
+                            'expiry' => !empty($r->expiry) ? $r->expiry : null,
+                            'batch_no' => !empty($r->batch_no) ? $r->batch_no : null,
+                        ]);
+                        InventoryLedger::create([
+                            'product_id' => $r->product_id,
+                            'order_id' => $this->purchase_id,
+                            'increase' => $r->bonus,
+                            'description' => 'Inventory increase by bonus'
+                        ]);
+                    }
+                }
+
+
+            }
+
             DB::commit();
             return redirect()->to('pharmacy/purchases/compare/' . $this->purchase_id);
 

@@ -20,6 +20,7 @@ class CreatePurchasesTable extends Migration
             $table->string('grn_no')->nullable();
             $table->string('grn_attachment')->nullable();
             $table->date('delivery_date')->nullable();
+            $table->date('expected_date')->nullable();
             $table->integer('created_by');
             $table->integer('approved_by')->nullable();
             $table->dateTime('approved_at')->nullable();

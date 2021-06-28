@@ -326,16 +326,16 @@
                     @endphp
                     <th scope="col"
                         class="px-3 py-3 text-center  border-l flex justify-center items-center text-sm font-medium text-gray-500   ">
-                        <span>{{ abs($dif_qty) }}</span>
+                        <span class="text-xl">{{ abs($dif_qty) }}</span>
                         @if($dif_qty>0)
-                            <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20"
+                            <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20"
                                  xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd"
                                       d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z"
                                       clip-rule="evenodd"></path>
                             </svg>
                         @elseif($dif_qty<0)
-                            <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20"
+                            <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20"
                                  xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd"
                                       d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
@@ -348,16 +348,16 @@
                     </th>
                     <th scope="col"
                         class="px-3 py-3 text-center flex justify-center items-center   text-sm font-medium  border-r text-gray-500   ">
-                        <span>{{ abs( $dif_bonus) }}</span>
+                        <span class="text-xl">{{ abs( $dif_bonus) }}</span>
                         @if(abs( $dif_bonus)<0)
-                            <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20"
+                            <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20"
                                  xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd"
                                       d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z"
                                       clip-rule="evenodd"></path>
                             </svg>
                         @elseif(abs( $dif_bonus)>0)
-                            <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20"
+                            <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20"
                                  xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd"
                                       d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
@@ -367,17 +367,17 @@
                     </th>
                     <th scope="col" class="px-3 py-3 text-center  border-r text-sm font-medium text-gray-500   ">
                         <p class="flex justify-center items-center">
-                            <span>{{abs($dif_cost)}}</span>
+                            <span class="text-xl">{{abs($dif_cost)}}</span>
 
                             @if($dif_cost>0)
-                                <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20"
+                                <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20"
                                      xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd"
                                           d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z"
                                           clip-rule="evenodd"></path>
                                 </svg>
                             @elseif($dif_cost<0)
-                                <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20"
+                                <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20"
                                      xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd"
                                           d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"

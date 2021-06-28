@@ -21,6 +21,8 @@ use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseEdit;
 use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseList;
 use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseReceive;
 use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseView;
+use Devzone\Pharmacy\Http\Livewire\Reports\SaleReturnTransaction;
+use Devzone\Pharmacy\Http\Livewire\Reports\SaleTransaction;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -97,6 +99,8 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('sales.history', \Devzone\Pharmacy\Http\Livewire\Sales\History::class);
         Livewire::component('sales.refund', \Devzone\Pharmacy\Http\Livewire\Sales\Refund::class);
         Livewire::component('sales.view', \Devzone\Pharmacy\Http\Livewire\Sales\View::class);
+        Livewire::component('report.sales-transaction',SaleTransaction::class);
+        Livewire::component('report.sales-return-transaction',SaleReturnTransaction::class);
     }
 
     /**

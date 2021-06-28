@@ -19,6 +19,7 @@ class PurchaseAdd extends Component
     public $supplier_id;
     public $supplier_name;
     public $delivery_date;
+    public $expected_date;
     public $supplier_invoice;
     public $products_modal = false;
     public $search_products;
@@ -29,7 +30,7 @@ class PurchaseAdd extends Component
 
     protected $rules = [
         'supplier_id' => 'required|integer',
-        'delivery_date' => 'nullable|date',
+        'expected_date' => 'required|date',
         'supplier_invoice' => 'nullable|string',
         'order_list.*.qty' => 'required|integer',
         'order_list.*.cost_of_price' => 'required|numeric',
@@ -118,6 +119,7 @@ class PurchaseAdd extends Component
                 $key = array_keys($existing)[0];
                 $qty = $this->order_list[$key]['qty'];
                 $this->order_list[$key]['qty'] = $qty + 1;
+                $this->order_list[$key]['total_cost'] = $this->order_list[$key]['qty'] * $this->order_list[$key]['cost_of_price'];
             }
 
         }
@@ -136,6 +138,7 @@ class PurchaseAdd extends Component
                 'supplier_id' => $this->supplier_id,
                 'supplier_invoice' => $this->supplier_invoice,
                 'delivery_date' => $this->delivery_date,
+                'expected_date' => $this->expected_date,
                 'created_by' => Auth::user()->id,
                 'status' => 'approval-awaiting'
             ])->id;
@@ -147,14 +150,14 @@ class PurchaseAdd extends Component
                     'purchase_id' => $purchase_id,
                     'product_id' => $o['id'],
                     'qty' => $o['qty'] * $o['packing'],
-                    'cost_of_price' => $o['cost_of_price']/$o['packing'],
-                    'retail_price' => $o['retail_price']/$o['packing'],
+                    'cost_of_price' => $o['cost_of_price'] / $o['packing'],
+                    'retail_price' => $o['retail_price'] / $o['packing'],
                     'total_cost' => $o['cost_of_price'] * $o['qty'],
                 ]);
             }
             DB::commit();
             $this->success = 'Purchase order has been created and awaiting for approval.';
-            $this->reset(['order_list', 'supplier_id', 'supplier_name', 'supplier_invoice', 'delivery_date']);
+            $this->reset(['order_list','expected_date', 'supplier_id', 'supplier_name', 'supplier_invoice', 'delivery_date']);
         } catch (\Exception $e) {
             $this->addError('supplier_name', $e->getMessage());
             DB::rollBack();

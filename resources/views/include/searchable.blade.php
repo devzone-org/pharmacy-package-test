@@ -44,41 +44,45 @@
 
             </div>
 
-            @if(!empty($searchable_data))
-                <table class="mt-3 min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                    <tr>
-                        @foreach($searchable_column[$searchable_type] as $c)
-                            <th scope="col"
-                                class="px-2 py-2 text-left text-xs font-medium text-gray-500   tracking-wider">
-                                {{ ucwords($c) }}
-                            </th>
-                        @endforeach
-
-
-                    </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach($searchable_data as $key=> $a)
-                        <tr class="hover:bg-indigo-600 hover:text-white cursor-pointer  {{ $highlight_index === $key ? 'bg-indigo-600 text-white' : ' text-gray-500' }}"
-                            wire:click="searchableSelection('{{ $key }}')">
+            @if($searchable_loading==false)
+                @if(!empty($searchable_data))
+                    <table class="mt-3 min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
                             @foreach($searchable_column[$searchable_type] as $c)
-                                <td class="px-2 py-2 whitespace-nowrap text-sm ">
-                                    {{ $a[$c] }}
-                                </td>
+                                <th scope="col"
+                                    class="px-2 py-2 text-left text-xs font-medium text-gray-500   tracking-wider">
+                                    {{ ucwords($c) }}
+                                </th>
                             @endforeach
+
+
                         </tr>
-                    @endforeach
-                    </tbody>
-                </table>
-            @else
-                @if(strlen($searchable_query) < 2)
-                    <p class="text-sm opacity-25 pt-0 p-3 ">Please enter {{ 2 - strlen($searchable_query) }}
-                        or more
-                        {{ (2 - strlen($searchable_query)) > 1 ? 'characters' : 'character' }}</p>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach($searchable_data as $key=> $a)
+                            <tr class="hover:bg-indigo-600 hover:text-white cursor-pointer  {{ $highlight_index === $key ? 'bg-indigo-600 text-white' : ' text-gray-500' }}"
+                                wire:click="searchableSelection('{{ $key }}')">
+                                @foreach($searchable_column[$searchable_type] as $c)
+                                    <td class="px-2 py-2 whitespace-nowrap text-sm ">
+                                        {{ $a[$c] }}
+                                    </td>
+                                @endforeach
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
                 @else
-                    <p class="text-sm opacity-25 pt-0 p-3">{{ empty($searchable_data) ? 'No Record Found': '' }}</p>
+                    @if(strlen($searchable_query) < 2)
+                        <p class="text-sm opacity-25 pt-0 p-3 ">Please enter {{ 2 - strlen($searchable_query) }}
+                            or more
+                            {{ (2 - strlen($searchable_query)) > 1 ? 'characters' : 'character' }}</p>
+                    @else
+                        <p class="text-sm opacity-25 pt-0 p-3">{{ empty($searchable_data) ? 'No Record Found': '' }}</p>
+                    @endif
                 @endif
+            @else
+                <p class="text-center text-sm text-gray-600 mb-3">Loading...</p>
             @endif
         </div>
     </div>

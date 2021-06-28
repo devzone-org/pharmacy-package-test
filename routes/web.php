@@ -90,21 +90,23 @@ Route::get('purchases/refund/edit/{id}', function ($id) {
 Route::get('purchases/refund/view/{id}', function ($id) {
     return view('pharmacy::refunds.supplier.view', compact('id'));
 });
-
-
 Route::get('sales', function () {
     return view('pharmacy::sales.history');
 });
-
-
 Route::get('sales/add', function () {
     return view('pharmacy::sales.add');
 });
-
 Route::get('sales/refund/{id}', function ($id) {
     return view('pharmacy::sales.refund',compact('id'));
 });
-
 Route::get('sales/view/{id}', function ($id) {
     return view('pharmacy::sales.view',compact('id'));
+});
+
+Route::get('report/sale-transaction',function(){
+    return  view('pharmacy::reports.sale-transaction');
+});
+
+Route::get('report/sale-return-transaction',function(){
+    return  view('pharmacy::reports.sale-return-transaction');
 });

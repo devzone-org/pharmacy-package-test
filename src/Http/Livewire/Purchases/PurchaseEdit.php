@@ -18,6 +18,7 @@ class PurchaseEdit extends Component
     public $supplier_id;
     public $supplier_name;
     public $delivery_date;
+    public $expected_date;
     public $supplier_invoice;
     public $products_modal = false;
     public $search_products;
@@ -29,7 +30,7 @@ class PurchaseEdit extends Component
 
     protected $rules = [
         'supplier_id' => 'required|integer',
-        'delivery_date' => 'nullable|date',
+        'expected_date' => 'required|date',
         'supplier_invoice' => 'nullable|string',
         'order_list.*.qty' => 'required|integer',
         'order_list.*.cost_of_price' => 'required|numeric',
@@ -56,6 +57,7 @@ class PurchaseEdit extends Component
                 'p.supplier_invoice',
                 'p.grn_no',
                 'p.delivery_date',
+                'p.expected_date',
                 'p.status',
                 'c.name as created_by',
                 'a.name as approved_by',
@@ -65,7 +67,7 @@ class PurchaseEdit extends Component
         $this->supplier_invoice = $purchase->supplier_invoice;
         $this->supplier_id = $purchase->supplier_id;
         $this->supplier_name = $purchase->supplier_name;
-        $this->delivery_date = $purchase->delivery_date;
+        $this->expected_date = $purchase->expected_date;
 
         $details = PurchaseOrder::from('purchase_orders as po')
             ->join('products as p', 'p.id', '=', 'po.product_id')

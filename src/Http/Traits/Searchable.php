@@ -25,6 +25,7 @@ trait Searchable
     public $searchable_id;
     public $searchable_name;
     public $searchable_type;
+    public $searchable_loading = false;
     public $searchable_column = [
         'manufacture' => ['name', 'contact', 'address'],
         'rack' => ['name', 'tier'],
@@ -33,20 +34,169 @@ trait Searchable
         'supplier' => ['name', 'address', 'phone'],
         'pay_from' => ['name', 'code'],
         'receiving_account' => ['name', 'code'],
-        'patient' => ['mr_no','name', 'phone'],
+        'patient' => ['mr_no', 'name', 'phone'],
         'referred_by' => ['name'],
-        'item' => ['item', 'qty', 'retail_price', 'rack', 'tier','packing']
+        'item' => ['item', 'qty', 'retail_price', 'rack', 'tier', 'packing']
     ];
 
 
     public function searchableOpenModal($id, $name, $type)
     {
         $this->searchableReset();
-        $this->searchable_modal = true;
+
         $this->searchable_id = $id;
         $this->searchable_name = $name;
         $this->searchable_type = $type;
         $this->emit('focusInput');
+        $this->searchable_modal = true;
+        $this->searchQuery();
+    }
+
+    public function searchableReset()
+    {
+        $this->searchable_modal = false;
+        $this->searchable_id = '';
+        $this->searchable_name = '';
+        $this->highlight_index = 0;
+        $this->searchable_query = '';
+        $this->searchable_type = '';
+        $this->searchable_data = [];
+    }
+
+    private function searchQuery($value = null)
+    {
+        $this->highlight_index = 0;
+        $this->searchable_loading = true;
+        if ($this->searchable_type == 'manufacture') {
+            $search = Manufacture::where('status', 't')
+                ->when(!empty($value), function ($q) use ($value) {
+                    return $q->where('name', 'LIKE', '%' . $value . '%');
+                })
+                ->get();
+            if ($search->isNotEmpty()) {
+                $this->searchable_data = $search->toArray();
+            } else {
+                $this->searchable_data = [];
+            }
+        }
+
+        if ($this->searchable_type == 'pay_from' || $this->searchable_type == 'receiving_account') {
+            $search = ChartOfAccount::where('status', 't')->where('type', 'Assets')
+                ->whereIn('sub_account', [11, 12])
+                ->when(!empty($value), function ($q) use ($value) {
+                    return $q->where('name', 'LIKE', '%' . $value . '%');
+                })
+                ->get();
+
+            if ($search->isNotEmpty()) {
+                $this->searchable_data = $search->toArray();
+            } else {
+                $this->searchable_data = [];
+            }
+
+
+        }
+
+        if ($this->searchable_type == 'product') {
+            $search = Product::from('products as p')
+                ->leftJoin('categories as c', 'c.id', '=', 'p.category_id')
+                ->when(!empty($value), function ($q) use ($value) {
+                    return $q->where('p.name', 'LIKE', '%' . $value . '%');
+                })
+                ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
+                ->select('p.id', 'p.name', 'p.salt as generic', 'c.name as category',
+                    DB::raw("CONCAT(COALESCE(`r.name`,''),' ',COALESCE(`r.tier`,'')) AS rack")
+                )->get();
+            if ($search->isNotEmpty()) {
+                $this->searchable_data = $search->toArray();
+            } else {
+                $this->searchable_data = [];
+            }
+        }
+
+        if ($this->searchable_type == 'category') {
+            $search = Category::where('status', 't')
+                ->when(!empty($value), function ($q) use ($value) {
+                    return $q->where('name', 'LIKE', '%' . $value . '%');
+                })
+                ->get();
+            if ($search->isNotEmpty()) {
+                $this->searchable_data = $search->toArray();
+            } else {
+                $this->searchable_data = [];
+            }
+        }
+
+        if ($this->searchable_type == 'supplier') {
+            $search = Supplier::where('status', 't')
+                ->when(!empty($value), function ($q) use ($value) {
+                    return $q->where('name', 'LIKE', '%' . $value . '%');
+                })
+                ->get();
+            if ($search->isNotEmpty()) {
+                $this->searchable_data = $search->toArray();
+            } else {
+                $this->searchable_data = [];
+            }
+        }
+
+        if ($this->searchable_type == 'item') {
+            $search = Product::from('products as p')
+                ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
+                ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
+                ->where(function ($q) use ($value) {
+                    return $q->orWhere('p.name', 'LIKE', '%' . $value . '%')
+                        ->orWhere('p.salt', 'LIKE', '%' . $value . '%');
+                })->select('p.name as item', DB::raw('SUM(qty) as qty'),
+                    'pi.retail_price', 'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'r.name as rack', 'r.tier')
+                ->groupBy('pi.product_id')
+                ->groupBy('pi.retail_price')->orderBy('qty', 'desc')->get();
+            if ($search->isNotEmpty()) {
+                $this->searchable_data = $search->toArray();
+            } else {
+                $this->searchable_data = [];
+            }
+        }
+
+        if ($this->searchable_type == 'referred_by') {
+            $search = Employee::where(function ($q) use ($value) {
+                return $q->orWhere('name', 'LIKE', '%' . $value . '%');
+            })->select('name', 'id')->where('is_doctor', 't')->where('status', 't')->get();
+            if ($search->isNotEmpty()) {
+                $this->searchable_data = $search->toArray();
+            } else {
+                $this->searchable_data = [];
+            }
+        }
+
+        if ($this->searchable_type == 'patient') {
+
+            $search = Patient::where(function ($q) use ($value) {
+                return $q->orWhere('name', 'LIKE', '%' . $value . '%')
+                    ->orWhere('mr_no', 'LIKE', '%' . $value . '%')
+                    ->orWhere('phone', 'LIKE', '%' . $value . '%');
+            })->select('name', 'mr_no', 'phone', 'id')->get();
+            if ($search->isNotEmpty()) {
+                $this->searchable_data = $search->toArray();
+            } else {
+                $this->searchable_data = [];
+            }
+        }
+
+        if ($this->searchable_type == 'rack') {
+            $search = Rack::where('status', 't')
+                ->where(function ($q) use ($value) {
+                    return $q->orWhere('name', 'LIKE', '%' . $value . '%')
+                        ->orWhere('tier', 'LIKE', '%' . $value . '%');
+                })
+                ->get();
+            if ($search->isNotEmpty()) {
+                $this->searchable_data = $search->toArray();
+            } else {
+                $this->searchable_data = [];
+            }
+        }
+        $this->searchable_loading = false;
     }
 
     public function incrementHighlight()
@@ -84,137 +234,14 @@ trait Searchable
 
     }
 
-    public function searchableReset()
-    {
-        $this->searchable_modal = false;
-        $this->searchable_id = '';
-        $this->searchable_name = '';
-        $this->highlight_index = 0;
-        $this->searchable_query = '';
-        $this->searchable_type = '';
-        $this->searchable_data = [];
-    }
-
     public function updatedSearchableQuery($value)
     {
-        if (strlen($value) > 1) {
-            $this->highlight_index = 0;
-            if ($this->searchable_type == 'manufacture') {
-                $search = Manufacture::where('status', 't')->where('name', 'LIKE', '%' . $value . '%')->get();
-                if ($search->isNotEmpty()) {
-                    $this->searchable_data = $search->toArray();
-                } else {
-                    $this->searchable_data = [];
-                }
-            }
-
-            if ($this->searchable_type == 'pay_from' || $this->searchable_type == 'receiving_account') {
-                $search = ChartOfAccount::where('status', 't')->where('type', 'Assets')
-                    ->whereIn('sub_account', [11, 12])->where('name', 'LIKE', '%' . $value . '%')->get();
-
-                if ($search->isNotEmpty()) {
-                    $this->searchable_data = $search->toArray();
-                } else {
-                    $this->searchable_data = [];
-                }
-
-
-            }
-
-            if ($this->searchable_type == 'product') {
-                $search = Product::from('products as p')
-                    ->leftJoin('categories as c', 'c.id', '=', 'p.category_id')
-                    ->where('p.name', 'LIKE', '%' . $value . '%')
-                    ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
-                    ->select('p.id', 'p.name', 'p.salt as generic', 'c.name as category',
-                        DB::raw("CONCAT(COALESCE(`r.name`,''),' ',COALESCE(`r.tier`,'')) AS rack")
-                    )->get();
-                if ($search->isNotEmpty()) {
-                    $this->searchable_data = $search->toArray();
-                } else {
-                    $this->searchable_data = [];
-                }
-            }
-
-            if ($this->searchable_type == 'category') {
-                $search = Category::where('status', 't')->where('name', 'LIKE', '%' . $value . '%')->get();
-                if ($search->isNotEmpty()) {
-                    $this->searchable_data = $search->toArray();
-                } else {
-                    $this->searchable_data = [];
-                }
-            }
-
-            if ($this->searchable_type == 'supplier') {
-                $search = Supplier::where('status', 't')->where('name', 'LIKE', '%' . $value . '%')->get();
-                if ($search->isNotEmpty()) {
-                    $this->searchable_data = $search->toArray();
-                } else {
-                    $this->searchable_data = [];
-                }
-            }
-
-            if ($this->searchable_type == 'item') {
-                $search = Product::from('products as p')
-                    ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
-                    ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
-                    ->where(function ($q) use ($value) {
-                        return $q->orWhere('p.name', 'LIKE', '%' . $value . '%')
-                            ->orWhere('p.salt', 'LIKE', '%' . $value . '%');
-                    })->select('p.name as item', DB::raw('SUM(qty) as qty'),
-                        'pi.retail_price', 'pi.supply_price', 'pi.id','p.packing', 'pi.product_id', 'r.name as rack', 'r.tier')
-                    ->groupBy('pi.product_id')
-                    ->groupBy('pi.retail_price')->orderBy('qty', 'desc')->get();
-                if ($search->isNotEmpty()) {
-                    $this->searchable_data = $search->toArray();
-                } else {
-                    $this->searchable_data = [];
-                }
-            }
-
-            if ($this->searchable_type == 'referred_by') {
-                $search = Employee::where(function ($q) use ($value) {
-                    return $q->orWhere('name', 'LIKE', '%' . $value . '%')
-                       ;
-                })->select('name','id')->where('is_doctor','t')->where('status','t')->get();
-                if ($search->isNotEmpty()) {
-                    $this->searchable_data = $search->toArray();
-                } else {
-                    $this->searchable_data = [];
-                }
-            }
-
-            if ($this->searchable_type == 'patient') {
-
-                $search = Patient::where(function ($q) use ($value) {
-                    return $q->orWhere('name', 'LIKE', '%' . $value . '%')
-                        ->orWhere('mr_no', 'LIKE', '%' . $value . '%')
-                        ->orWhere('phone', 'LIKE', '%' . $value . '%');
-                })->select('name', 'mr_no', 'phone','id')->get();
-                if ($search->isNotEmpty()) {
-                    $this->searchable_data = $search->toArray();
-                } else {
-                    $this->searchable_data = [];
-                }
-            }
-
-            if ($this->searchable_type == 'rack') {
-                $search = Rack::where('status', 't')
-                    ->where(function ($q) use ($value) {
-                        return $q->orWhere('name', 'LIKE', '%' . $value . '%')
-                            ->orWhere('tier', 'LIKE', '%' . $value . '%');
-                    })
-                    ->get();
-                if ($search->isNotEmpty()) {
-                    $this->searchable_data = $search->toArray();
-                } else {
-                    $this->searchable_data = [];
-                }
-            }
-        } else {
-            $this->searchable_data = [];
-        }
+        $this->searchQuery($value);
+//        if (strlen($value) > 1) {
+//            $this->searchQuery($value);
+//        } else {
+//            $this->searchable_data = [];
+//        }
     }
-
 
 }
