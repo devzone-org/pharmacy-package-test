@@ -140,7 +140,7 @@ trait Searchable
             }
         }
 
-        if ($this->searchable_type == 'item') {
+        if ($this->searchable_type == 'item' && strlen($value) > 1) {
             $search = Product::from('products as p')
                 ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
                 ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
@@ -148,8 +148,9 @@ trait Searchable
                     return $q->orWhere('p.name', 'LIKE', '%' . $value . '%')
                         ->orWhere('p.salt', 'LIKE', '%' . $value . '%');
                 })->select('p.name as item', DB::raw('SUM(qty) as qty'),
-                    'pi.retail_price', 'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'r.name as rack', 'r.tier')
-                ->groupBy('pi.product_id')
+                    'pi.retail_price','p.retail_price as product_price',
+                    'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'r.name as rack', 'r.tier')
+                ->groupBy('p.id')
                 ->groupBy('pi.retail_price')->orderBy('qty', 'desc')->get();
             if ($search->isNotEmpty()) {
                 $this->searchable_data = $search->toArray();
@@ -170,12 +171,11 @@ trait Searchable
         }
 
         if ($this->searchable_type == 'patient') {
-
             $search = Patient::where(function ($q) use ($value) {
                 return $q->orWhere('name', 'LIKE', '%' . $value . '%')
                     ->orWhere('mr_no', 'LIKE', '%' . $value . '%')
                     ->orWhere('phone', 'LIKE', '%' . $value . '%');
-            })->select('name', 'mr_no', 'phone', 'id')->get();
+            })->select(DB::raw("CONCAT(COALESCE(`mr_no`,''),' ',COALESCE(`name`,'')) AS rack"), 'phone', 'id')->get();
             if ($search->isNotEmpty()) {
                 $this->searchable_data = $search->toArray();
             } else {

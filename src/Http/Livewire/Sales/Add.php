@@ -43,15 +43,15 @@ class Add extends Component
 
     public function mount()
     {
-        $this->tills = ChartOfAccount::from('chart_of_accounts as p')
-            ->join('chart_of_accounts as c', 'p.id', '=', 'c.sub_account')
-            ->where('p.reference', 'cash-at-pharmacy-tills-4')->get()->toArray();
-        $till = UserTill::where('user_id', Auth::id())->first();
-        if (!empty($till)) {
-            $this->till_id = $till['account_id'];
-            $till_name = collect($this->tills)->firstWhere('id', $till['account_id']);
-            $this->till_name = $till_name['name'];
-        }
+//        $this->tills = ChartOfAccount::from('chart_of_accounts as p')
+//            ->join('chart_of_accounts as c', 'p.id', '=', 'c.sub_account')
+//            ->where('p.reference', 'cash-at-pharmacy-tills-4')->get()->toArray();
+//        $till = UserTill::where('user_id', Auth::id())->first();
+//        if (!empty($till)) {
+//            $this->till_id = $till['account_id'];
+//            $till_name = collect($this->tills)->firstWhere('id', $till['account_id']);
+//            $this->till_name = $till_name['name'];
+//        }
 
         $this->searchable_emit_only = true;
     }
@@ -168,8 +168,11 @@ class Add extends Component
             if (empty($this->sales)) {
                 throw new \Exception('Invoice is empty.');
             }
-            if (empty($this->till_id)) {
-                throw new \Exception('To complete sale you must choose till.');
+            if (empty(Auth::user()->account_id)) {
+                throw new \Exception('Cash in Hand - ' . Auth::user()->name . ' not found.');
+            }
+            if (empty($this->received)) {
+                throw new \Exception('Please enter received amount.');
             }
             DB::beginTransaction();
             $sale_id = Sale::create([
@@ -188,7 +191,7 @@ class Add extends Component
 
                 $inv = ProductInventory::where('product_id', $s['product_id'])
                     ->where('supply_price', $s['supply_price'])
-                    ->where('qty', '>', 0)->get();
+                    ->where('qty', '>', 0)->orderBy('id', 'asc')->get();
 
                 if ($inv->sum('qty') < $s['s_qty']) {
                     throw new \Exception('System does not have much inventory for the item ' . $s['item']);
@@ -244,26 +247,26 @@ class Add extends Component
 
 
             }
-            $accounts = ChartOfAccount::whereIn('reference',['pharmacy-inventory-5','income-pharmacy-5','cost-of-sales-pharmacy-5'])->get();
+            $accounts = ChartOfAccount::whereIn('reference', ['pharmacy-inventory-5', 'income-pharmacy-5', 'cost-of-sales-pharmacy-5'])->get();
 
-            $amounts = SaleDetail::where('sale_id', $sale_id)->select(DB::raw('SUM(total_after_disc) as sale'),DB::raw('SUM(qty * supply_price) as cost'))->first();
+            $amounts = SaleDetail::where('sale_id', $sale_id)->select(DB::raw('SUM(total_after_disc) as sale'), DB::raw('SUM(qty * supply_price) as cost'))->first();
             $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " sold to the walking customer. Cash received PKR " .
                 number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name;
 
             $vno = Voucher::instance()->voucher()->get();
-            GeneralJournal::instance()->account($this->till_id)->debit($amounts['sale'])->voucherNo($vno)
+            GeneralJournal::instance()->account(Auth::user()->account_id)->debit($amounts['sale'])->voucherNo($vno)
                 ->date(date('Y-m-d'))->approve()->description($description)->execute();
 
-            foreach ($accounts as $a){
-                if($a->reference == 'pharmacy-inventory-5'){
+            foreach ($accounts as $a) {
+                if ($a->reference == 'pharmacy-inventory-5') {
                     GeneralJournal::instance()->account($a->id)->credit($amounts['cost'])->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->description($description)->execute();
                 }
-                if($a->reference == 'income-pharmacy-5'){
+                if ($a->reference == 'income-pharmacy-5') {
                     GeneralJournal::instance()->account($a->id)->credit($amounts['sale'])->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->description($description)->execute();
                 }
-                if($a->reference == 'cost-of-sales-pharmacy-5'){
+                if ($a->reference == 'cost-of-sales-pharmacy-5') {
                     GeneralJournal::instance()->account($a->id)->debit($amounts['cost'])->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->description($description)->execute();
                 }

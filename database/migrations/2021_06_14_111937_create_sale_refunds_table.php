@@ -16,6 +16,7 @@ class CreateSaleRefundsTable extends Migration
         Schema::create('sale_refunds', function (Blueprint $table) {
             $table->id();
             $table->integer('sale_id');
+            $table->integer('product_id');
             $table->integer('sale_detail_id');
             $table->integer('refund_qty');
             $table->timestamps();

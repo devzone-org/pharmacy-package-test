@@ -1,6 +1,7 @@
 <?php
 
 
+use Devzone\Pharmacy\Http\Controllers\PrintController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -97,16 +98,18 @@ Route::get('sales/add', function () {
     return view('pharmacy::sales.add');
 });
 Route::get('sales/refund/{id}', function ($id) {
-    return view('pharmacy::sales.refund',compact('id'));
+    return view('pharmacy::sales.refund', compact('id'));
 });
 Route::get('sales/view/{id}', function ($id) {
-    return view('pharmacy::sales.view',compact('id'));
+    return view('pharmacy::sales.view', compact('id'));
 });
 
-Route::get('report/sale-transaction',function(){
-    return  view('pharmacy::reports.sale-transaction');
+Route::get('report/sale-transaction', function () {
+    return view('pharmacy::reports.sale-transaction');
 });
 
-Route::get('report/sale-return-transaction',function(){
-    return  view('pharmacy::reports.sale-return-transaction');
+Route::get('report/sale-return-transaction', function () {
+    return view('pharmacy::reports.sale-return-transaction');
 });
+
+Route::get('print/sale/{id}', [PrintController::class, 'print']);

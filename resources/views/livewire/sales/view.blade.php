@@ -18,13 +18,16 @@
 
 
                 <span class="ml-3">
-      <button type="button" wire:click="printSale"
-              class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+{{--      <button type="button" wire:click="printSale"--}}
+{{--              class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">--}}
 
 
 
-        Print Sale
-      </button>
+{{--        Print Sale--}}
+{{--      </button>--}}
+                   <a class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="javascript:void(0);" onclick="window.open('{{ url('pharmacy/print/sale/').'/'.$sale_id }}','receipt-print','height=150,width=400');">
+                       Print Sale
+                   </a>
     </span>
 
             </div>

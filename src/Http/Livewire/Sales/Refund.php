@@ -13,7 +13,6 @@ use Devzone\Pharmacy\Models\ProductInventory;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Sale\SaleDetail;
 use Devzone\Pharmacy\Models\Sale\SaleRefund;
-use Devzone\Pharmacy\Models\Sale\UserTill;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -44,27 +43,28 @@ class Refund extends Component
     public function mount($primary_id)
     {
         $this->sale_id = $primary_id;
-        $till = UserTill::where('user_id', Auth::user()->id)->first();
-        if (!empty($till)) {
-            $this->till_id = $till['account_id'];
-        }
+
         $this->searchable_emit_only = true;
-        $this->old_sales = Sale::from('sales as s')->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
-            ->join('product_inventories as pi', 'pi.id', '=', 'sd.product_inventory_id')
+        $this->old_sales = Sale::from('sales as s')
+            ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
             ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
             ->leftJoin('patients as p', 'p.id', '=', 's.patient_id')
             ->join('products as pr', 'pr.id', '=', 'sd.product_id')
             ->where('s.id', $this->sale_id)
-            ->select('sd.*', 'pr.name as item', 's.remarks', 's.receive_amount', 's.payable_amount', 's.sub_total', 's.gross_total'
-                , 'pi.po_id', 's.patient_id', 's.referred_by', 'e.name as referred_by_name', 'p.mr_no', 'p.name as patient_name')
-            ->get()->toArray();
+            ->select('sd.*', DB::raw('sum(sd.qty) as qty'), 'pr.name as item', 's.remarks', 's.receive_amount', 's.payable_amount', 's.sub_total', 's.gross_total'
+                , 's.patient_id', 's.referred_by', 'e.name as referred_by_name', 'p.mr_no', 'p.name as patient_name')
+            ->groupBy('sd.product_id')
+            ->get()
+            ->toArray();
+
 
 
         foreach ($this->old_sales as $s) {
-            $check = SaleRefund::where('sale_id', $s['sale_id'])->where('sale_detail_id', $s['id'])->first();
+            $check = SaleRefund::where('sale_id', $s['sale_id'])->where('product_id', $s['product_id'])
+                 ->sum('refund_qty');
             if (!empty($check)) {
-                $s['qty'] = $check['refund_qty'];
-                $s['s_qty'] = $check['qty'];
+                $s['qty'] = $check;
+                $s['s_qty'] = $s['qty'];
                 $s['restrict'] = true;
                 $s['total'] = $s['qty'] * $s['retail_price'];
                 $s['total_after_disc'] = $s['total'];
@@ -75,6 +75,7 @@ class Refund extends Component
                 $this->refunds[] = $s;
             }
         }
+
     }
 
     public function emitReferredById()
@@ -213,7 +214,6 @@ class Refund extends Component
     public function refundEntry($key)
     {
         $old_sale = $this->old_sales[$key];
-
         $data = collect($this->refunds)->where('id', $old_sale['id'])->firstWhere('sale_id', $this->sale_id);
 
         if ($old_sale['qty'] > $data['qty']) {
@@ -236,8 +236,8 @@ class Refund extends Component
             if (empty($this->refunds)) {
                 throw new \Exception('Refund invoice is empty.');
             }
-            if (empty($this->till_id)) {
-                throw new \Exception('To complete refund you must choose till.');
+            if (empty(Auth::user()->account_id)) {
+                throw new \Exception('Cash in Hand - ' . Auth::user()->name . ' not found.');
             }
 
             $refund_cost = 0;
@@ -259,35 +259,50 @@ class Refund extends Component
             $refund = false;
 
             foreach ($this->refunds as $r) {
+
                 if (isset($r['restrict'])) {
                     continue;
                 }
-                $refund_qty = SaleRefund::where('sale_id', $r['sale_id'])->where('sale_detail_id', $r['id'])
+
+                $limit = SaleDetail::from('sale_details as sd')
+                    ->leftJoin('sale_refunds as sr', 'sr.sale_detail_id', '=', 'sd.id')
+                    ->where('sd.product_id', $r['product_id'])
+                    ->where('sd.sale_id', $r['sale_id'])
+                    ->select('sd.id', 'sd.qty', 'sr.refund_qty')
                     ->get();
-                if ($refund_qty->isEmpty()) {
-                    $refund_qty = 0;
-                } else {
-                    $refund_qty = $refund_qty->first()->refund_qty;
+                $total_limit = $limit->sum('qty') - $limit->sum('refund_qty');
+                $qty_tobe_refunded = $r['qty'];
+
+                if ($qty_tobe_refunded <= $total_limit) {
+                    foreach ($limit as $l) {
+                        $available_qty = $l->qty - $l->refund_qty;
+                        if ($qty_tobe_refunded > 0 && $available_qty > 0) {
+
+                            if ($qty_tobe_refunded > $available_qty) {
+                                $dec = $available_qty;
+                            } else {
+                                $dec = $qty_tobe_refunded;
+                            }
+
+                            $qty_tobe_refunded = $qty_tobe_refunded - $dec;
+                            SaleRefund::updateOrCreate([
+                                'sale_id' => $r['sale_id'],
+                                'sale_detail_id' => $l->id,
+                                'product_id' => $r['product_id']
+                            ], [
+                                'refund_qty' => $dec + $l->refund_qty
+                            ]);
+                            InventoryLedger::create([
+                                'product_id' => $r['product_id'],
+                                'increase' => $dec,
+                                'description' => "Refund on dated " . date('d M, Y') .
+                                    " against receipt #" . $this->sale_id
+                            ]);
+                        }
+                    }
+                    $refund = true;
                 }
-                $detail = SaleDetail::find($r['id']);
-                if ($detail['qty'] >= $refund_qty + $r['qty']) {
-                    SaleRefund::updateOrCreate([
-                        'sale_id' => $r['sale_id'],
-                        'sale_detail_id' => $r['id']
-                    ], [
-                        'refund_qty' => $refund_qty + $r['qty']
-                    ]);
-                    InventoryLedger::create([
-                        'product_id' => $r['product_id'],
-                        'order_id' => $r['po_id'],
-                        'increase' => $r['qty'],
-                        'description' => "Refund on dated " . date('d M, Y') .
-                            " against receipt #" . $this->sale_id
-                    ]);
-                } else {
-                    throw new \Exception('ERROR: Refund qty is more than sale qty.');
-                }
-                $refund = true;
+
             }
             if ($refund) {
                 Sale::find($this->sale_id)->update([
@@ -391,10 +406,10 @@ class Refund extends Component
             }
             $dif = $refund_retail - $sales_retail;
             if ($dif > 0) {
-                GeneralJournal::instance()->account($this->till_id)->credit(abs($dif))->voucherNo($vno)
+                GeneralJournal::instance()->account(Auth::user()->account_id)->credit(abs($dif))->voucherNo($vno)
                     ->date(date('Y-m-d'))->approve()->description($description)->execute();
             } else {
-                GeneralJournal::instance()->account($this->till_id)->debit(abs($dif))->voucherNo($vno)
+                GeneralJournal::instance()->account(Auth::user()->account_id)->debit(abs($dif))->voucherNo($vno)
                     ->date(date('Y-m-d'))->approve()->description($description)->execute();
             }
 

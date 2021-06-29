@@ -16,7 +16,7 @@ class CreateInventoryLedgerTable extends Migration
         Schema::create('inventory_ledgers', function (Blueprint $table) {
             $table->id();
             $table->integer('product_id');
-            $table->integer('order_id');
+            $table->integer('order_id')->nullable();
             $table->text('description');
             $table->integer('increase')->default(0);
             $table->integer('decrease')->default(0);

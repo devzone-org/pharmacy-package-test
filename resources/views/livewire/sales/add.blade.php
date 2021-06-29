@@ -59,7 +59,7 @@
 
         </div>
 
-        <div class="grid mb-3 bg-white gap-x-4 gap-y-8 grid-cols-5   shadow rounded-md p-3">
+        <div class="grid mb-3 bg-white gap-x-4 gap-y-8 grid-cols-4   shadow rounded-md p-3">
             <div class="">
                 <dt class="text-sm font-medium text-gray-500">
                     Referred By
@@ -74,7 +74,7 @@
                     Patient Name
                 </dt>
                 <dd class="mt-1 text-sm text-gray-900">
-                    {{ $patient_name ?? '-' }}
+                    {{ $patient_name ?? 'Walk-in' }}
                 </dd>
             </div>
 
@@ -95,25 +95,25 @@
                     {{ Auth::user()->name }}
                 </dd>
             </div>
-            <div>
+{{--            <div>--}}
 
-                <dd class="mt-1 ">
+{{--                <dd class="mt-1 ">--}}
 
-                    <div class="float-right">
-                        <button type="button" wire:click="$set('choose_till','true')"
-                                class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
-                                id="menu-button" aria-expanded="true" aria-haspopup="true">
-                            @if(empty($till_id))
-                                Choose Till
-                            @else
-                                {{ $till_name }}
-                            @endif
-                        </button>
-                    </div>
+{{--                    <div class="float-right">--}}
+{{--                        <button type="button" wire:click="$set('choose_till','true')"--}}
+{{--                                class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"--}}
+{{--                                id="menu-button" aria-expanded="true" aria-haspopup="true">--}}
+{{--                            @if(empty($till_id))--}}
+{{--                                Choose Till--}}
+{{--                            @else--}}
+{{--                                {{ $till_name }}--}}
+{{--                            @endif--}}
+{{--                        </button>--}}
+{{--                    </div>--}}
 
 
-                </dd>
-            </div>
+{{--                </dd>--}}
+{{--            </div>--}}
         </div>
 
         @if(!empty($success))
@@ -364,7 +364,7 @@
                     </th>
                     <th scope="col" colspan="2"
                         class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        <input type="number" wire:model.lazy="received" onClick="this.select();" id="received"
+                        <input type="number" wire:model.debounce.300ms="received" onClick="this.select();" id="received"
                                wire:keydown.enter="saleComplete"
                                class="p-0 focus:ring-0 block w-full  text-md border-0 font-medium text-gray-500 text-center "
                                autocomplete="off">
@@ -457,14 +457,20 @@
 
     document.addEventListener("keydown", event => {
         if (event.keyCode == 112) {
+            event.preventDefault();
+            event.stopPropagation();
             window.livewire.emit('openSearch');
         }
 
         if (event.keyCode == 113) {
+            event.preventDefault();
+            event.stopPropagation();
             window.livewire.emit('saleComplete');
         }
 
         if (event.keyCode == 114) {
+            event.preventDefault();
+            event.stopPropagation();
             const input = document.getElementById('discount');
             input.focus();
             input.select();
@@ -472,13 +478,16 @@
         }
 
         if (event.keyCode == 115) {
-
+            event.preventDefault();
+            event.stopPropagation();
             const input = document.getElementById('received');
             input.focus();
             input.select();
         }
 
         if (event.keyCode == 116) {
+            event.preventDefault();
+            event.stopPropagation();
             const input = document.getElementById('remarks');
             input.focus();
             input.select();
