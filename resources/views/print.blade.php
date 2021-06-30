@@ -130,7 +130,7 @@
 
                     // Send print job to printer!
                     cpj.sendToClient();
-                    close();
+                    //close();
                 });
         }
     }
