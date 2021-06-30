@@ -38,7 +38,7 @@ class PrintController extends Controller
 
             $sales_ref[] = $sales[$key];
             if ($s['refund_qty'] > 0) {
-                $array['item'] = 'Refunded - ' . $sales[$key]['item'];
+                $array['item'] = ' -' . $sales[$key]['item'];
                 $array['sale_qty'] = -$sales[$key]['sale_qty'];
                 $array['retail_price'] = -$sales[$key]['retail_price'];
                 $array['total'] = -$sales[$key]['total'];
@@ -50,7 +50,7 @@ class PrintController extends Controller
 
         $sale = collect($sales_ref)->first();
         $print = [];
-
+        $print['feed'] = "               ";
         $print['address_1'] = env('RECEIPT_PRINTER_ADDRESS_1');
         $print['address_2'] = env('RECEIPT_PRINTER_ADDRESS_2');
         $print['developer'] = env('RECEIPT_PRINTER_DEVELOPER');
@@ -70,6 +70,7 @@ class PrintController extends Controller
             $total = str_pad($s['total'], 11, " ", STR_PAD_LEFT);
             $inner .= $item . $qty . " " . $retail . " " . $total;
         }
+
         $collect = collect($sales_ref);
         $print['inner'] = $inner;
 
@@ -82,7 +83,7 @@ class PrintController extends Controller
         $print['refund'] = str_pad("Refunded", 33, " ", STR_PAD_LEFT) .
             str_pad(number_format($collect->where('sale_qty', '<', 0)->sum('total_after_disc'), 2), 15, " ", STR_PAD_LEFT);
         $print['net_total'] = str_pad("Net Total", 33, " ", STR_PAD_LEFT) .
-            str_pad(number_format($collect->where('sale_qty', '>', 0)->sum('total_after_disc') - $collect->where('sale_qty', '<', 0)->sum('total_after_disc'), 2), 15, " ", STR_PAD_LEFT);
+            str_pad(number_format($collect->where('sale_qty', '>', 0)->sum('total_after_disc') + $collect->where('sale_qty', '<', 0)->sum('total_after_disc'), 2), 15, " ", STR_PAD_LEFT);
         return view('pharmacy::print', compact('sales_ref', 'sale', 'id', 'print'));
     }
 }

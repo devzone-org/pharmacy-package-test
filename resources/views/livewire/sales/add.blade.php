@@ -59,62 +59,41 @@
 
         </div>
 
-        <div class="grid mb-3 bg-white gap-x-4 gap-y-8 grid-cols-4   shadow rounded-md p-3">
+        <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-4   shadow rounded-md p-3">
             <div class="">
                 <dt class="text-sm font-medium text-gray-500">
                     Referred By
                 </dt>
-                <dd class="mt-1 text-sm text-gray-900">
+                <dd class="mt-1 text-xl font-medium text-gray-900">
                     {{ $referred_by_name ?? '-' }}
                 </dd>
             </div>
-
             <div class="">
                 <dt class="text-sm font-medium text-gray-500">
                     Patient Name
                 </dt>
-                <dd class="mt-1 text-sm text-gray-900">
+                <dd class="mt-1 text-xl font-medium text-gray-900">
                     {{ $patient_name ?? 'Walk-in' }}
                 </dd>
             </div>
-
             <div class="">
                 <dt class="text-sm font-medium text-gray-500">
                     Date
                 </dt>
-                <dd class="mt-1 text-sm text-gray-900">
+                <dd class="mt-1 text-xl font-medium text-gray-900">
                     {{ date('d M, Y') }}
                 </dd>
             </div>
-
             <div class="">
                 <dt class="text-sm font-medium text-gray-500">
                     Sale By
                 </dt>
-                <dd class="mt-1 text-sm text-gray-900">
+                <dd class="mt-1 text-xl font-medium text-gray-900">
                     {{ Auth::user()->name }}
                 </dd>
             </div>
-{{--            <div>--}}
-
-{{--                <dd class="mt-1 ">--}}
-
-{{--                    <div class="float-right">--}}
-{{--                        <button type="button" wire:click="$set('choose_till','true')"--}}
-{{--                                class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"--}}
-{{--                                id="menu-button" aria-expanded="true" aria-haspopup="true">--}}
-{{--                            @if(empty($till_id))--}}
-{{--                                Choose Till--}}
-{{--                            @else--}}
-{{--                                {{ $till_name }}--}}
-{{--                            @endif--}}
-{{--                        </button>--}}
-{{--                    </div>--}}
-
-
-{{--                </dd>--}}
-{{--            </div>--}}
         </div>
+
 
         @if(!empty($success))
             <div class="rounded-md mb-5 bg-green-50 p-4">
@@ -324,49 +303,49 @@
 
                     </th>
                     <th scope="col" colspan="4"
-                        class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
+                        class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
                         Sub Total
                     </th>
                     <th scope="col" colspan="2"
-                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
                         {{ number_format(collect($sales)->sum('total'),2) }}
                     </th>
                 </tr>
 
                 <tr>
                     <th scope="col" colspan="4"
-                        class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
+                        class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
                         Discount (F3) (%)
                     </th>
                     <th scope="col" colspan="2"
-                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
                         <input type="number" wire:model.lazy="discount" min="0" max="100" onClick="this.select();"
                                id="discount"
-                               class="p-0 focus:ring-0 block w-full  text-md border-0 font-medium text-gray-500 text-center "
+                               class="p-0 focus:ring-0 block w-full  text-xl border-0 font-medium text-gray-500 text-center "
                                autocomplete="off">
                     </th>
                 </tr>
                 <tr class="bg-gray-50">
                     <th scope="col" colspan="4"
-                        class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
+                        class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
                         Gross Total
                     </th>
                     <th scope="col" colspan="2"
-                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
                         {{ number_format(collect($sales)->sum('total_after_disc'),2) }}
                     </th>
                 </tr>
 
                 <tr>
                     <th scope="col" colspan="4"
-                        class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
+                        class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
                         Received Amount (F4)
                     </th>
                     <th scope="col" colspan="2"
-                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
                         <input type="number" wire:model.debounce.300ms="received" onClick="this.select();" id="received"
                                wire:keydown.enter="saleComplete"
-                               class="p-0 focus:ring-0 block w-full  text-md border-0 font-medium text-gray-500 text-center "
+                               class="p-0 focus:ring-0 block w-full  text-xl border-0 font-medium text-gray-500 text-center "
                                autocomplete="off">
                     </th>
                 </tr>
@@ -378,11 +357,11 @@
                     </th>
 
                     <th scope="col" colspan="5"
-                        class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
+                        class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
                         Change
                     </th>
                     <th scope="col" colspan="2"
-                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
                         {{ number_format($payable,2) }}
                     </th>
                 </tr>
