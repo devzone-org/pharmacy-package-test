@@ -149,7 +149,7 @@ trait Searchable
                         ->orWhere('p.salt', 'LIKE', '%' . $value . '%');
                 })->select('p.name as item', DB::raw('SUM(qty) as qty'),
                     'pi.retail_price','p.retail_price as product_price',
-                    'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'r.name as rack', 'r.tier')
+                    'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id','p.type', 'r.name as rack', 'r.tier')
                 ->groupBy('p.id')
                 ->groupBy('pi.retail_price')->orderBy('qty', 'desc')->get();
             if ($search->isNotEmpty()) {

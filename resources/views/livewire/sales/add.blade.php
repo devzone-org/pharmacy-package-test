@@ -211,7 +211,7 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                 @foreach($sales as $key => $s)
-                    <tr>
+                    <tr class="{{ !empty($s['type']) ? 'bg-red-50' : '' }}">
                         <td class="px-2  text-center  border-r text-md font-medium text-gray-900">
                             {{ $loop->iteration }}
                         </td>

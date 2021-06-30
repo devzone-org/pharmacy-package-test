@@ -32,6 +32,8 @@ class ProductsEdit extends Component
     public $primary_id;
     public $retail_price_notification = false;
     public $force_update = false;
+    public $type;
+    public $control_medicine;
 
 
     protected $rules = [
@@ -78,7 +80,10 @@ class ProductsEdit extends Component
             $this->reorder_qty = $products['reorder_qty'];
             $this->reorder_level = $products['reorder_level'];
             $this->status = $products['status'];
+            $this->type = $products['type'];
+            $this->control_medicine = $products['control_medicine'];
             $this->narcotics = $products['narcotics'] == 't' ? true : false;
+
         }
     }
 
@@ -120,7 +125,9 @@ class ProductsEdit extends Component
             'reorder_level' => $this->reorder_level,
             'reorder_qty' => $this->reorder_qty,
             'narcotics' => !empty($this->narcotics) ? 't' : 'f',
-            'status' => $this->status
+            'status' => $this->status,
+            'control_medicine' => $this->control_medicine,
+            'type' => $this->type
         ]);
         if ($this->force_update) {
             $this->retail_price_old = $this->retail_price;

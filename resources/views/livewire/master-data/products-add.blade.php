@@ -201,8 +201,8 @@
                         <select wire:model="type" id="type"
                                 class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                             <option value=""></option>
-                            <option value="t">Sound alike</option>
-                            <option value="f">Look alike</option>
+                            <option value="s">Sound alike</option>
+                            <option value="l">Look alike</option>
                         </select>
                     </div>
 

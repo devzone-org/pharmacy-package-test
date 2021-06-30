@@ -27,6 +27,7 @@ class ProductsAdd extends Component
     public $narcotics = false;
     public $status = 'f';
     public $success = '';
+    public $type;
     public $control_medicine;
 
 
@@ -67,7 +68,8 @@ class ProductsAdd extends Component
             'reorder_qty' => $this->reorder_qty,
             'narcotics' => !empty($this->narcotics) ? 't' : 'f',
             'status' => $this->status,
-            'control_medicine' => $this->control_medicine
+            'control_medicine' => $this->control_medicine,
+            'type' => $this->type,
         ]);
 
         $this->success = 'Record has been added.';

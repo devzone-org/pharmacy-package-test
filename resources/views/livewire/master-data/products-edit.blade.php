@@ -189,18 +189,25 @@
                     </div>
 
                     <div class="col-span-6 sm:col-span-2">
-                        <div class="relative flex items-start mt-8">
-                            <div class="flex items-center h-5">
-                                <input id="narcotics" wire:model="narcotics" type="checkbox"
-                                       class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
-                            </div>
-                            <div class="ml-3 text-sm">
-                                <label for="narcotics" class="font-medium text-gray-700">Narcotics</label>
-
-                            </div>
-                        </div>
+                        <label for="control_medicine" class="block text-sm font-medium text-gray-700">Control Medicine</label>
+                        <select wire:model="control_medicine" id="control_medicine"
+                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value=""></option>
+                            <option value="t">Yes</option>
+                            <option value="f">No</option>
+                        </select>
                     </div>
 
+
+                    <div class="col-span-6 sm:col-span-2">
+                        <label for="type" class="block text-sm font-medium text-gray-700">Type</label>
+                        <select wire:model="type" id="type"
+                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value=""></option>
+                            <option value="s">Sound alike</option>
+                            <option value="l">Look alike</option>
+                        </select>
+                    </div>
 
                     <div class="col-span-6 sm:col-span-2">
                         <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
