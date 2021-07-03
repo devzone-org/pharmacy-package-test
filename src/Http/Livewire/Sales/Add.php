@@ -38,11 +38,57 @@ class Add extends Component
     public $till_id;
     public $till_name;
     public $choose_till = false;
+    public $admission_id;
+    public $procedure_id;
+    public $admission = false;
 
     protected $listeners = ['openSearch', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
 
-    public function mount()
+    public function mount($admission_id, $procedure_id)
     {
+        $this->admission_id = $admission_id;
+        $this->procedure_id = $procedure_id;
+        if (!empty($this->admission_id) && !empty($this->procedure_id)) {
+            if (class_exists(\App\Models\Hospital\ProcedureMedicine::class)) {
+                $this->admission = true;
+                $medicines = \App\Models\Hospital\ProcedureMedicine::from('procedure_medicines as pm')
+                    ->join('products as p', 'p.id', '=', 'pm.product_id')
+                    ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
+                    ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
+                    ->where('pm.procedure_id', $this->procedure_id)
+                    ->select('p.name as item', 'p.retail_price as product_price', 'pm.qty as required_qty',
+                        'pi.qty as available_qty', 'pi.retail_price',
+                        'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'r.name as rack', 'r.tier')
+                    ->groupBy('p.id')
+                    ->groupBy('pi.retail_price')
+                    ->orderBy('pi.qty', 'desc')->get()->toArray();
+                foreach ($medicines as $medicine) {
+                    if ($medicine['required_qty'] <= $medicine['available_qty']) {
+                        $sale_qty = $medicine['required_qty'];
+                    } else {
+                        $sale_qty = $medicine['available_qty'];
+                    }
+                    $this->sales[] = [
+                        'id' => $medicine['id'],
+                        'item' => $medicine['item'],
+                        'qty' => $medicine['available_qty'],
+                        's_qty' => $sale_qty,
+                        'retail_price' => $medicine['retail_price'],
+                        'product_price' => $medicine['product_price'],
+                        'supply_price' => $medicine['supply_price'],
+                        'disc' => 0,
+                        'packing' => $medicine['packing'],
+                        'product_id' => $medicine['product_id'],
+                        'type' => $medicine['type'],
+                        'rack' => $medicine['rack'],
+                        'tier' => $medicine['tier'],
+                        'total' => $sale_qty * $medicine['retail_price'],
+                        'total_after_disc' => $sale_qty * $medicine['retail_price'],
+                    ];
+                }
+            }
+
+        }
 //        $this->tills = ChartOfAccount::from('chart_of_accounts as p')
 //            ->join('chart_of_accounts as c', 'p.id', '=', 'c.sub_account')
 //            ->where('p.reference', 'cash-at-pharmacy-tills-4')->get()->toArray();
@@ -184,7 +230,9 @@ class Add extends Component
                 'receive_amount' => $this->received,
                 'payable_amount' => $this->payable,
                 'sub_total' => collect($this->sales)->sum('total'),
-                'gross_total' => collect($this->sales)->sum('total_after_disc')
+                'gross_total' => collect($this->sales)->sum('total_after_disc'),
+                'admission_id' => $this->admission_id ?? null,
+                'procedure_id' => $this->procedure_id ?? null,
             ])->id;
 
             foreach ($this->sales as $s) {
@@ -213,7 +261,6 @@ class Add extends Component
                                     " against receipt #" . $sale_id
                             ]);
                             $sale_qty = 0;
-
                         }
                         if ($sale_qty > $product_inv->qty) {
                             $dec = $product_inv->qty;
@@ -244,18 +291,48 @@ class Add extends Component
                         ]);
                     }
                 }
-
-
             }
             $accounts = ChartOfAccount::whereIn('reference', ['pharmacy-inventory-5', 'income-pharmacy-5', 'cost-of-sales-pharmacy-5'])->get();
 
             $amounts = SaleDetail::where('sale_id', $sale_id)->select(DB::raw('SUM(total_after_disc) as sale'), DB::raw('SUM(qty * supply_price) as cost'))->first();
+
             $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " sold to the walking customer. Cash received PKR " .
                 number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name;
 
             $vno = Voucher::instance()->voucher()->get();
-            GeneralJournal::instance()->account(Auth::user()->account_id)->debit($amounts['sale'])->voucherNo($vno)
-                ->date(date('Y-m-d'))->approve()->description($description)->execute();
+
+            if ($this->admission) {
+                if (class_exists(\App\Models\Hospital\AdmissionPaymentDetail::class)) {
+                    \App\Models\Hospital\AdmissionPaymentDetail::from('admission_payment_details as apd')->where('apd.admission_id', $this->admission_id)
+                        ->where('apd.procedure_id', $this->procedure_id)
+                        ->where('apd.medicines', 't')
+                        ->update([
+                            'sale_id' => $sale_id,
+                            'amount' => $amounts->sale,
+                        ]);
+
+                    $ipd_medicine_account = ChartOfAccount::where('reference', 'payable-medicine-5')->first();
+                    if (class_exists(\App\Models\Hospital\AdmissionJobDetail::class)){
+                        $admission_details=\App\Models\Hospital\AdmissionJobDetail::from('admission_job_details as ajd')
+                            ->join('admissions as a','a.id','=','ajd.admission_id')
+                            ->join('procedures as p','p.id','=','ajd.procedure_id')
+                            ->where('ajd.admission_id',$this->admission_id)
+                            ->where('ajd.procedure_id',$this->procedure_id)
+                            ->select('a.admission_no','p.name as procedure_name')
+                            ->first();
+                    }
+                    $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) .
+                        " Issued against admission # ".$admission_details->admission_no." and procedure ".$admission_details->procedure_name.". Account ".$ipd_medicine_account->name." debited with PKR " .
+                        number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name;
+                    $account_entry=GeneralJournal::instance()->account($ipd_medicine_account->id)->debit($amounts['sale'])->voucherNo($vno)
+                        ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                }
+            }
+
+            if (!isset($account_entry)){
+                GeneralJournal::instance()->account(Auth::user()->account_id)->debit($amounts['sale'])->voucherNo($vno)
+                    ->date(date('Y-m-d'))->approve()->description($description)->execute();
+            }
 
             foreach ($accounts as $a) {
                 if ($a->reference == 'pharmacy-inventory-5') {
