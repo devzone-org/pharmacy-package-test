@@ -72,7 +72,7 @@
     </div>
     <div class="relative" x-data="{open:false}">
         <button @click="open=true;"
-                class="{{ Request::segment(1)=='pharmacy' && Request::segment(2) ? $a_current : '' }} cursor-pointer  rounded-md py-2 px-3 inline-flex items-center text-sm font-medium text-gray-900 hover:bg-gray-50 hover:text-gray-900 focus-within:bg-gray-50 focus-within:outline-none"
+                class="{{ Request::segment(1)=='pharmacy' && Request::segment(2)=='purchases' ? $a_current : '' }} cursor-pointer  rounded-md py-2 px-3 inline-flex items-center text-sm font-medium text-gray-900 hover:bg-gray-50 hover:text-gray-900 focus-within:bg-gray-50 focus-within:outline-none"
                 aria-expanded="false">
             <span>Purchases</span>
 
