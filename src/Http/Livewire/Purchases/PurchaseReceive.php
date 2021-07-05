@@ -244,8 +244,6 @@ class PurchaseReceive extends Component
                 'status' => 'receiving',
                 'grn_no' => $this->grn_no
             ]);
-
-
             foreach ($this->order_list as $o) {
 
                 \Devzone\Pharmacy\Models\PurchaseReceive::create([

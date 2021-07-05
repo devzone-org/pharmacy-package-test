@@ -111,7 +111,10 @@
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Name
                     </th>
-
+                    <th scope="col"
+                        class="w-28  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        Expiry
+                    </th>
                     <th scope="col"
                         class="w-16  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Qty
@@ -127,7 +130,7 @@
                     </th>
                     <th scope="col"
                         class="w-28  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                        Supply Price
+                        S.P
                     </th>
                     <th scope="col"
                         class="w-16  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
@@ -168,7 +171,11 @@
                                       d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
                             </svg>
                         </td>
-
+                        <td class="p-0  border text-sm text-gray-500">
+                            <input type="date"  onclick="this.select()"
+                                   class="p-0 focus:ring-0 block w-full text-center  text-sm border-0 "
+                                   wire:model.lazy="order_list.{{$key}}.expiry">
+                        </td>
                         <td class="p-0  border text-sm text-gray-500">
                             <input type="number"  onclick="this.select()"
                                    class="p-0 focus:ring-0 block w-full text-center  text-sm border-0 "
@@ -227,7 +234,7 @@
                 @endforeach
                 <tr class="bg-gray-50 border-b">
 
-                    <th scope="col" colspan="1" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="2" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
 
                     </th>
                     <th scope="col" class="px-3 py-3 text-right text-md font-medium text-gray-500   ">
@@ -239,8 +246,6 @@
                     <th scope="col" class="px-3 py-3 border  text-center text-md font-medium text-gray-500   ">
                         {{ number_format(collect($order_list)->sum('bonus'),2) }}
                     </th>
-
-
 
                     <th scope="col" class="px-3 py-3 border  text-center text-md font-medium text-gray-500   ">
                         {{ number_format(collect($order_list)->sum('total_qty'),2) }}
@@ -415,12 +420,12 @@
                     <div class="grid grid-cols-6 gap-6">
 
 
-                        <div class="col-span-6 ">
-                            <label for="expiry1" class="block text-sm font-medium text-gray-700">Expiry Date</label>
-                            <input   wire:model.lazy="order_list.{{$key_id}}.expiry" type="date"
-                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                   id="expiry1">
-                        </div>
+{{--                        <div class="col-span-6 ">--}}
+{{--                            <label for="expiry1" class="block text-sm font-medium text-gray-700">Expiry Date</label>--}}
+{{--                            <input   wire:model.lazy="" type="date"--}}
+{{--                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"--}}
+{{--                                   id="expiry1">--}}
+{{--                        </div>--}}
 
 
                         <div class="col-span-6 ">

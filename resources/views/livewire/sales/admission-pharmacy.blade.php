@@ -46,7 +46,7 @@
                 <div class="shadow bg-white rounded-lg pb-1 border-b border-gray-200 ">
                     <div class=" py-6 px-4 space-y-6 sm:p-6 ">
                         <div class="flex justify-between items-center">
-                            <h3 class="text-lg leading-6 font-medium text-gray-900">Admissions</h3>
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Inter Transfer Medicines</h3>
                         </div>
                     </div>
                     <table class="min-w-full divide-y divide-gray-200">
@@ -65,10 +65,13 @@
                                 Procedure
                             </th>
                             <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500">
-                                Amount
+                                Amount(PKR)
                             </th>
                             <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500">
                                 Sale Status
+                            </th>
+                            <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500">
+                                Admitted At
                             </th>
                             <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500">
                                 Admission Status
@@ -88,7 +91,8 @@
                                     {{ $admission->admission_no  }}
                                 </td>
                                 <td class="px-3 py-3  text-center text-sm text-gray-500">
-                                    {{ $admission->patient_name  }}
+                                    {{ $admission->patient_name  }}<br>
+                                    {{$admission->patient_mr}}
                                 </td>
                                 <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                     {{ $admission->procedure_name  }}
@@ -101,21 +105,31 @@
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
                                                   Issued
                                             </span>
+                                        @if(!empty($admission->sold_By))
+                                            <br>
+                                            {{!empty($admission->sold_By) ? ' by '.$admission->sold_By : ''}}
+                                            <br> {{ !empty($admission->sale_at) ? '@ ' .date('d M Y H:i A',strtotime($admission->sale_at)) : '' }}
+                                        @endif
                                     @else
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
                                               Not Issued
-                                            </span>
+                                        </span>
                                     @endif
+                                </td>
+                                <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                    {{ date('d M Y',strtotime($admission->admission_date)) }} {{date('H:i A',strtotime($admission->admission_time))}}
                                 </td>
                                 <td class="px-3 py-3  text-center text-sm text-gray-500">
                                     @if(!empty($admission->checkout_date))
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
                                               Checked Out
                                             </span>
+                                        <br>
+                                        @ {{date('d M Y',strtotime($admission->checkout_date))}} {{date('H:i A',strtotime($admission->checkout_time))}}
                                     @else
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
                                                Checked In
-                                            </span>
+                                        </span>
                                     @endif
                                 </td>
                                 <td class="px-3 py-3 text-center  text-sm text-gray-500">
@@ -141,6 +155,13 @@
                                                 <a href="{{url('pharmacy/sales/add?admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id)}}"
                                                    class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                                    role="menuitem" tabindex="-1">Issue Medicines</a>
+                                                @if(empty($admission->checkout_date))
+                                                    @if(!empty($admission->sale_id))
+                                                        <a href="{{url('pharmacy/sales/refund/'.$admission->sale_id.'?admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id)}}"
+                                                           class="text-red-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                                           role="menuitem" tabindex="-1">Refund</a>
+                                                    @endif
+                                                @endif
                                             </div>
                                         </div>
                                     </div>

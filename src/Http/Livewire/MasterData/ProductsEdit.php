@@ -34,7 +34,7 @@ class ProductsEdit extends Component
     public $force_update = false;
     public $type;
     public $control_medicine;
-
+    public $temperature;
 
     protected $rules = [
         'name' => 'required|string',
@@ -83,6 +83,7 @@ class ProductsEdit extends Component
             $this->type = $products['type'];
             $this->control_medicine = $products['control_medicine'];
             $this->narcotics = $products['narcotics'] == 't' ? true : false;
+            $this->temperature=$products['temperature'];
 
         }
     }
@@ -127,7 +128,8 @@ class ProductsEdit extends Component
             'narcotics' => !empty($this->narcotics) ? 't' : 'f',
             'status' => $this->status,
             'control_medicine' => $this->control_medicine,
-            'type' => $this->type
+            'type' => $this->type,
+            'temperature'=>$this->temperature??null,
         ]);
         if ($this->force_update) {
             $this->retail_price_old = $this->retail_price;
@@ -145,6 +147,5 @@ class ProductsEdit extends Component
         $this->force_update = true;
         $this->create();
     }
-
 
 }

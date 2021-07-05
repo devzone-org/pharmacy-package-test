@@ -211,6 +211,7 @@ class Add extends Component
     public function saleComplete()
     {
         try {
+            DB::beginTransaction();
             if (empty($this->sales)) {
                 throw new \Exception('Invoice is empty.');
             }
@@ -220,7 +221,7 @@ class Add extends Component
             if (empty($this->received)) {
                 throw new \Exception('Please enter received amount.');
             }
-            DB::beginTransaction();
+
             $sale_id = Sale::create([
                 'patient_id' => $this->patient_id,
                 'referred_by' => $this->referred_by_id,
@@ -302,6 +303,18 @@ class Add extends Component
             $vno = Voucher::instance()->voucher()->get();
 
             if ($this->admission) {
+                if (class_exists(\App\Models\Hospital\AdmissionJobDetail::class)){
+                    $admission_details=\App\Models\Hospital\AdmissionJobDetail::from('admission_job_details as ajd')
+                        ->join('admissions as a','a.id','=','ajd.admission_id')
+                        ->join('procedures as p','p.id','=','ajd.procedure_id')
+                        ->where('ajd.admission_id',$this->admission_id)
+                        ->where('ajd.procedure_id',$this->procedure_id)
+                        ->select('a.admission_no','a.checkout_date','p.name as procedure_name')
+                        ->first();
+                    if (!empty($admission_details->checkout_date)){
+                        throw new \Exception('Can not Issue Medicines for Closed Admission');
+                    }
+                }
                 if (class_exists(\App\Models\Hospital\AdmissionPaymentDetail::class)) {
                     \App\Models\Hospital\AdmissionPaymentDetail::from('admission_payment_details as apd')->where('apd.admission_id', $this->admission_id)
                         ->where('apd.procedure_id', $this->procedure_id)
@@ -312,15 +325,7 @@ class Add extends Component
                         ]);
 
                     $ipd_medicine_account = ChartOfAccount::where('reference', 'payable-medicine-5')->first();
-                    if (class_exists(\App\Models\Hospital\AdmissionJobDetail::class)){
-                        $admission_details=\App\Models\Hospital\AdmissionJobDetail::from('admission_job_details as ajd')
-                            ->join('admissions as a','a.id','=','ajd.admission_id')
-                            ->join('procedures as p','p.id','=','ajd.procedure_id')
-                            ->where('ajd.admission_id',$this->admission_id)
-                            ->where('ajd.procedure_id',$this->procedure_id)
-                            ->select('a.admission_no','p.name as procedure_name')
-                            ->first();
-                    }
+
                     $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) .
                         " Issued against admission # ".$admission_details->admission_no." and procedure ".$admission_details->procedure_name.". Account ".$ipd_medicine_account->name." debited with PKR " .
                         number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name;
