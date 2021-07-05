@@ -78,7 +78,7 @@ class SaleTransaction extends Component
         }elseif($val=='yesterday'){
             $this->date_range=false;
             $this->from = date('Y-m-d', strtotime('-1 days'));
-            $this->to = date('Y-m-d');
+            $this->to = date('Y-m-d', strtotime('-1 days'));
             $this->search();
         }
         elseif($val=='today'){
