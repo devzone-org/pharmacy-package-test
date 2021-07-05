@@ -101,6 +101,7 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('sales.view', \Devzone\Pharmacy\Http\Livewire\Sales\View::class);
         Livewire::component('report.sales-transaction',SaleTransaction::class);
         Livewire::component('report.sales-return-transaction',SaleReturnTransaction::class);
+        Livewire::component('sales.admission-pharmacy',\Devzone\Pharmacy\Http\Livewire\Sales\AdmissionPharmacy::class);
     }
 
     /**

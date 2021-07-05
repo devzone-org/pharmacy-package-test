@@ -29,7 +29,6 @@ class CreateProductsTable extends Migration
             $table->char('narcotics',1)->default('f');
             $table->char('type',1)->default('f');
             $table->char('control_medicine',1)->default('f');
-            $table->char('narcotics',1)->default('f');
             $table->char('status',1)->default('f');
             $table->timestamps();
         });

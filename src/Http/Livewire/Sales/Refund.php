@@ -38,6 +38,8 @@ class Refund extends Component
     public $till_id;
     public $refunds = [];
     public $sale_id;
+    public $admission_id;
+    public $procedure_id;
     protected $listeners = ['openSearch', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
 
     public function mount($primary_id)
@@ -52,16 +54,18 @@ class Refund extends Component
             ->join('products as pr', 'pr.id', '=', 'sd.product_id')
             ->where('s.id', $this->sale_id)
             ->select('sd.*', DB::raw('sum(sd.qty) as qty'), 'pr.name as item', 's.remarks', 's.receive_amount', 's.payable_amount', 's.sub_total', 's.gross_total'
-                , 's.patient_id', 's.referred_by', 'e.name as referred_by_name', 'p.mr_no', 'p.name as patient_name')
+                , 's.patient_id', 's.referred_by', 's.admission_id', 's.procedure_id', 'e.name as referred_by_name', 'p.mr_no', 'p.name as patient_name')
             ->groupBy('sd.product_id')
             ->get()
             ->toArray();
 
-
+        $first = collect($this->old_sales)->first();
+        $this->admission_id = $first['admission_id'];
+        $this->procedure_id = $first['procedure_id'];
 
         foreach ($this->old_sales as $s) {
             $check = SaleRefund::where('sale_id', $s['sale_id'])->where('product_id', $s['product_id'])
-                 ->sum('refund_qty');
+                ->sum('refund_qty');
             if (!empty($check)) {
                 $s['qty'] = $check;
                 $s['s_qty'] = $s['qty'];
@@ -367,12 +371,47 @@ class Refund extends Component
                         }
                     }
                 }
+
             }
-
-            $accounts = ChartOfAccount::whereIn('reference', ['cost-of-sales-pharmacy-5', 'income-pharmacy-5', 'income-return-pharmacy-5', 'pharmacy-inventory-5'])->get();
-            $description = $this->getDescription($refund_retail, $sales_retail);
+            $cash_acount = Auth::user()->account_id;
+            if (!empty($this->admission_id) && !empty($this->procedure_id)) {
+                $admission_details = \App\Models\Hospital\AdmissionJobDetail::from('admission_job_details as ajd')
+                    ->join('admissions as a', 'a.id', '=', 'ajd.admission_id')
+                    ->join('procedures as p', 'p.id', '=', 'ajd.procedure_id')
+                    ->where('ajd.admission_id', $this->admission_id)
+                    ->where('ajd.procedure_id', $this->procedure_id)
+                    ->select('a.admission_no', 'p.name as procedure_name','a.checkout_date')
+                    ->first();
+                if (!empty($admission_details->checkout_date)){
+                    throw new \Exception('Admission Closed already. You can not Proceed further.');
+                }
+                $diff = $refund_retail - $sales_retail;
+                if (class_exists(\App\Models\Hospital\AdmissionPaymentDetail::class)) {
+                    $check = \App\Models\Hospital\AdmissionPaymentDetail::from('admission_payment_details as apd')
+                        ->where('apd.admission_id', $this->admission_id)
+                        ->where('apd.procedure_id', $this->procedure_id)
+                        ->where('apd.medicines', 't')
+                        ->update([
+                            'amount' => $diff < 0 ? DB::raw('amount +' . abs($diff)) : DB::raw('amount -' . $diff)
+                        ]);
+                    $ipd_medicine_account = ChartOfAccount::where('reference', 'payable-medicine-5')->first();
+                    $description = $this->getDescriptionAdmissionProcedure($refund_retail, $sales_retail, $admission_details->admission_no, $admission_details->procedure_name, $ipd_medicine_account->name);
+                    $cash_acount=$ipd_medicine_account->id;
+                }
+            }else{
+                $description = $this->getDescription($refund_retail, $sales_retail);
+            }
             $vno = Voucher::instance()->voucher()->get();
+            $accounts = ChartOfAccount::whereIn('reference', ['cost-of-sales-pharmacy-5', 'income-pharmacy-5', 'income-return-pharmacy-5', 'pharmacy-inventory-5'])->get();
 
+            $dif = $refund_retail - $sales_retail;
+            if ($dif > 0) {
+                GeneralJournal::instance()->account($cash_acount)->credit(abs($dif))->voucherNo($vno)
+                    ->date(date('Y-m-d'))->approve()->description($description)->execute();
+            } else {
+                GeneralJournal::instance()->account($cash_acount)->debit(abs($dif))->voucherNo($vno)
+                    ->date(date('Y-m-d'))->approve()->description($description)->execute();
+            }
             foreach ($accounts as $a) {
                 if ($sales_retail > 0) {
                     if ($a->reference == 'cost-of-sales-pharmacy-5') {
@@ -404,24 +443,17 @@ class Refund extends Component
                     }
                 }
             }
-            $dif = $refund_retail - $sales_retail;
-            if ($dif > 0) {
-                GeneralJournal::instance()->account(Auth::user()->account_id)->credit(abs($dif))->voucherNo($vno)
-                    ->date(date('Y-m-d'))->approve()->description($description)->execute();
-            } else {
-                GeneralJournal::instance()->account(Auth::user()->account_id)->debit(abs($dif))->voucherNo($vno)
-                    ->date(date('Y-m-d'))->approve()->description($description)->execute();
-            }
+
 
             $this->searchableReset();
             $this->success = 'Refund has been complete with receipt #' . $this->sale_id;
             DB::commit();
             return redirect()->to('pharmacy/sales/refund/' . $this->sale_id);
-        } catch (\Exception $e) {
+        } catch
+        (\Exception $e) {
             $this->error = $e->getMessage();
             DB::rollBack();
         }
-
     }
 
 
@@ -429,13 +461,15 @@ class Refund extends Component
     {
         if ($refund_retail > 0 && $sales_retail > 0) {
             $description = 'Refunded: PKR ' . number_format($refund_retail, 2) . ' SOLD: PKR ' . number_format($sales_retail, 2) . ' ';
+        } else {
+            if ($refund_retail > 0) {
+                $description = 'Refunded: PKR ' . number_format($refund_retail, 2) . ' ';
+            }
+            if ($sales_retail > 0) {
+                $description = 'Refunded: PKR ' . number_format($sales_retail, 2) . ' ';
+            }
         }
-        if ($refund_retail > 0) {
-            $description = 'Refunded: PKR ' . number_format($refund_retail, 2) . ' ';
-        }
-        if ($sales_retail > 0) {
-            $description = 'Refunded: PKR ' . number_format($sales_retail, 2) . ' ';
-        }
+
         if ($this->old_sales[0]['patient_id'] > 0) {
             $description .= 'to patient ' . $this->old_sales[0]['patient_name'] . ' against MR# ' . $this->old_sales[0]['mr_no'] . '. ';
         } else {
@@ -446,6 +480,33 @@ class Refund extends Component
             $description .= "Net paid amount PKR " . number_format(abs($dif), 2) . ' ';
         } else {
             $description .= "Net received amount PKR " . number_format(abs($dif), 2) . ' ';
+        }
+
+        $description .= " on " . date('d M, Y') . " by " . Auth::user()->name;
+        return $description;
+    }
+
+    public function getDescriptionAdmissionProcedure($refund_retail, $sales_retail, $admission_no,$procedure_name, $account_name)
+    {
+        if ($refund_retail > 0 && $sales_retail > 0) {
+            $description = 'Refunded: PKR ' . number_format($refund_retail, 2) . ' Issued: PKR ' . number_format($sales_retail, 2) . ' ';
+        } else {
+            if ($refund_retail > 0) {
+                $description = 'Refunded: PKR ' . number_format($refund_retail, 2) . ' ';
+            }
+            if ($sales_retail > 0) {
+                $description = 'Refunded: PKR ' . number_format($sales_retail, 2) . ' ';
+            }
+        }
+      ;
+        $description .= 'against Admission # ' . $admission_details->admission_no . ' and procedure ' . $admission_details->procedure_name . '. Account ' . $account_name .
+
+
+            $dif = $refund_retail - $sales_retail;
+        if ($dif > 0) {
+            $description .= "Net credited amount PKR " . number_format(abs($dif), 2) . ' ';
+        } else {
+            $description .= "Net debited amount PKR " . number_format(abs($dif), 2) . ' ';
         }
 
         $description .= " on " . date('d M, Y') . " by " . Auth::user()->name;

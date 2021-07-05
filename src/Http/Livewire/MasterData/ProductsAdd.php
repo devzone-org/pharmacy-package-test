@@ -29,6 +29,7 @@ class ProductsAdd extends Component
     public $success = '';
     public $type;
     public $control_medicine;
+    public $temperature;
 
 
     protected $rules = [
@@ -70,10 +71,11 @@ class ProductsAdd extends Component
             'status' => $this->status,
             'control_medicine' => $this->control_medicine,
             'type' => $this->type,
+            'temperature'=>$this->temperature??null,
         ]);
 
         $this->success = 'Record has been added.';
-        $this->reset(['status', 'narcotics', 'reorder_qty', 'reorder_level', 'category_id', 'category_name'
+        $this->reset(['temperature','status', 'narcotics', 'reorder_qty', 'reorder_level', 'category_id', 'category_name'
             , 'manufacture_id', 'manufacture_name', 'rack_id', 'rack_name', 'retail_price', 'cost_of_price', 'packing',
             'barcode', 'salt', 'name']);
     }
