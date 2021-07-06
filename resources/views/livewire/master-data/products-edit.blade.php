@@ -254,13 +254,9 @@
                  role="dialog" aria-modal="true" aria-labelledby="modal-headline">
                 <div class="p-3">
                     <div>
-                        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-                            <svg class="h-6 w-6 text-green-600" x-description="Heroicon name: outline/check"
-                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                 stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M5 13l4 4L19 7"></path>
-                            </svg>
+                        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+
+                            <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
                         </div>
                         <div class="mt-3 text-center sm:mt-5">
                             <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">

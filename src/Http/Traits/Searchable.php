@@ -175,7 +175,7 @@ trait Searchable
                 return $q->orWhere('name', 'LIKE', '%' . $value . '%')
                     ->orWhere('mr_no', 'LIKE', '%' . $value . '%')
                     ->orWhere('phone', 'LIKE', '%' . $value . '%');
-            })->select(DB::raw("CONCAT(COALESCE(`mr_no`,''),' ',COALESCE(`name`,'')) AS rack"), 'phone', 'id')->get();
+            })->select('mr_no','name', 'phone', 'id')->get();
             if ($search->isNotEmpty()) {
                 $this->searchable_data = $search->toArray();
             } else {
