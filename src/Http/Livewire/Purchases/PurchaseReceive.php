@@ -46,11 +46,13 @@ class PurchaseReceive extends Component
         'order_list.*.bonus' => 'nullable|integer',
         'order_list.*.disc' => 'nullable|numeric',
         'order_list.*.cost_of_price' => 'required|numeric',
-        'order_list.*.retail_price' => 'required|numeric'
+        'order_list.*.retail_price' => 'required|numeric',
+        'order_list.*.expiry' => 'required|numeric'
     ];
 
     protected $validationAttributes = [
-        'supplier_id' => 'supplier'
+        'supplier_id' => 'supplier',
+        'order_list.*.expiry' => 'Expiry Date'
     ];
 
     public function mount($purchase_id)
