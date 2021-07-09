@@ -63,16 +63,20 @@ class Add extends Component
                     ->groupBy('pi.retail_price')
                     ->orderBy('pi.qty', 'desc')->get()->toArray();
                 foreach ($medicines as $medicine) {
+                    $required_qty=null;
                     if ($medicine['required_qty'] <= $medicine['available_qty']) {
                         $sale_qty = $medicine['required_qty'];
+
                     } else {
                         $sale_qty = $medicine['available_qty'];
+                        $required_qty=$medicine['required_qty'];
                     }
                     $this->sales[] = [
                         'id' => $medicine['id'],
                         'item' => $medicine['item'],
                         'qty' => $medicine['available_qty'],
                         's_qty' => $sale_qty,
+                        'required_qty'=>$required_qty,
                         'retail_price' => $medicine['retail_price'],
                         'product_price' => $medicine['product_price'],
                         'supply_price' => $medicine['supply_price'],

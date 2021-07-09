@@ -115,4 +115,17 @@ Route::get('report/sale-return-transaction', function () {
     return view('pharmacy::reports.sale-return-transaction');
 });
 
+Route::get('report/sale-summary', function () {
+    return view('pharmacy::reports.sale-summary');
+});
+Route::get('report/sale-doctorwise', function () {
+    return view('pharmacy::reports.sale-doctorwise');
+});
+Route::get('report/sale-productwise', function () {
+    return view('pharmacy::reports.sale-productwise');
+});
+Route::get('report/sale-hourly-graph', function () {
+    return view('pharmacy::reports.sale-hourly-graph');
+});
+
 Route::get('print/sale/{id}', [PrintController::class, 'print']);
