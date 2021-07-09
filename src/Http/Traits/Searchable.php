@@ -49,7 +49,7 @@ trait Searchable
         $this->searchable_type = $type;
         $this->emit('focusInput');
         $this->searchable_modal = true;
-        $this->searchQuery();
+
     }
 
     public function searchableReset()
@@ -105,7 +105,7 @@ trait Searchable
                 })
                 ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
                 ->select('p.id', 'p.name', 'p.salt as generic', 'c.name as category',
-                    DB::raw("CONCAT(COALESCE(`r.name`,''),' ',COALESCE(`r.tier`,'')) AS rack")
+                    DB::raw("CONCAT(COALESCE(r.name,''),' ',COALESCE(r.tier,'')) AS rack")
                 )->get();
             if ($search->isNotEmpty()) {
                 $this->searchable_data = $search->toArray();
@@ -140,7 +140,7 @@ trait Searchable
             }
         }
 
-        if ($this->searchable_type == 'item' && strlen($value) > 1) {
+        if ($this->searchable_type == 'item' ) {
             $search = Product::from('products as p')
                 ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
                 ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
@@ -236,12 +236,12 @@ trait Searchable
 
     public function updatedSearchableQuery($value)
     {
-        $this->searchQuery($value);
-//        if (strlen($value) > 1) {
-//            $this->searchQuery($value);
-//        } else {
-//            $this->searchable_data = [];
-//        }
+
+        if (strlen($value) > 1) {
+            $this->searchQuery($value);
+        } else {
+            $this->searchable_data = [];
+        }
     }
 
 }

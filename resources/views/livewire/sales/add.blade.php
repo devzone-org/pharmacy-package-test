@@ -215,8 +215,13 @@
                         <td class="px-2  text-center  border-r text-md font-medium text-gray-900">
                             {{ $loop->iteration }}
                         </td>
-                        <td class="px-2  text-left   border-r text-md text-gray-500">
+                        <td class="px-2 text-left border-r text-md text-gray-500">
                             {{ $s['item'] }}
+                            @if(isset($s['required_qty']))
+                                @if(!empty($s['required_qty']))
+                                    <span class="text-red-500 text-sm">(Required Quantity is {{$s['required_qty']}})</span>
+                                @endif
+                            @endif
                         </td>
                         <td class="px-2   text-left   border-r  text-md text-gray-500">
                             <input type="number" wire:model.lazy="sales.{{ $key }}.s_qty" onClick="this.select();"
@@ -400,7 +405,7 @@
                         <div class="bg-white rounded-md -space-y-px">
                             @foreach($tills as $key => $t)
                                 <label
-                                    class="border-gray-200 rounded-tl-md rounded-tr-md relative border p-4 flex cursor-pointer">
+                                        class="border-gray-200 rounded-tl-md rounded-tr-md relative border p-4 flex cursor-pointer">
                                     <input type="radio" wire:model="till_id" name="till_id" value="{{ $t['id'] }}"
                                            class="h-4 w-4 mt-0.5 cursor-pointer text-indigo-600 border-gray-300 focus:ring-indigo-500"
                                            aria-labelledby="privacy-setting-0-label"
@@ -415,7 +420,8 @@
                             @endforeach
                         </div>
                     </fieldset>
-                    <button type="button" wire:click="updateTill" class="mt-3 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
+                    <button type="button" wire:click="updateTill"
+                            class="mt-3 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
                         Update Till
                     </button>
                 </div>
