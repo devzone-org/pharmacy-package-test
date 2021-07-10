@@ -127,5 +127,11 @@ Route::get('report/sale-productwise', function () {
 Route::get('report/sale-hourly-graph', function () {
     return view('pharmacy::reports.sale-hourly-graph');
 });
+Route::get('report/purchase-summary', function () {
+    return view('pharmacy::reports.purchase-summary');
+});
+Route::get('report/purchases-details', function () {
+    return view('pharmacy::reports.purchases-details');
+});
 
 Route::get('print/sale/{id}', [PrintController::class, 'print']);

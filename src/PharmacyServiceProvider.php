@@ -21,6 +21,8 @@ use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseEdit;
 use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseList;
 use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseReceive;
 use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseView;
+use Devzone\Pharmacy\Http\Livewire\Reports\PurchasesDetails;
+use Devzone\Pharmacy\Http\Livewire\Reports\PurchaseSummary;
 use Devzone\Pharmacy\Http\Livewire\Reports\SaleDoctorwise;
 use Devzone\Pharmacy\Http\Livewire\Reports\SaleHourlyGraph;
 use Devzone\Pharmacy\Http\Livewire\Reports\SaleProductwise;
@@ -109,6 +111,8 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('report.sale-doctorwise',SaleDoctorwise::class);
         Livewire::component('report.sale-productwise',SaleProductwise::class);
         Livewire::component('report.sale-hourly-graph',SaleHourlyGraph::class);
+        Livewire::component('report.purchase-summary',PurchaseSummary::class);
+        Livewire::component('report.purchases-details',PurchasesDetails::class);
         Livewire::component('sales.admission-pharmacy',\Devzone\Pharmacy\Http\Livewire\Sales\AdmissionPharmacy::class);
     }
 
