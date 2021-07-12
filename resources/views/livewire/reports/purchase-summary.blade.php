@@ -55,48 +55,48 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900   ">
                                     Sr #
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500   ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Supplier Name
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500   ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Order Placement Date
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500   ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     PO Created By
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     PO Approved By
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     PO #
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Order Receiving Date
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     GRN #
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Supplier Invoice #
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Supplier Invoice Date
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Invoice Payment Status
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Invoice Payment Date
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Total PO Value
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Total COS
                                 </th>
                             </tr>
@@ -161,10 +161,10 @@
                                     <th scope="col" colspan="12" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
 
                                     </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500">
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         {{number_format(collect($report)->sum('po_value'),2)}}
                                     </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500">
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         {{number_format(collect($report)->sum('cos'),2)}}
                                     </th>
                                 </tr>

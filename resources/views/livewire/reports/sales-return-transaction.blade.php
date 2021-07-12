@@ -72,34 +72,34 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900   ">
                                     Sr #
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900   ">
                                     Return Date
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900   ">
                                     Original Sale Date
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900   ">
                                     Invoice #
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900   ">
                                     Patient
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900    ">
                                     Product Returned
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900    ">
                                     Invoice Total Sale Value
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900    ">
                                     Qty Returned
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900    ">
                                     Qty Returned Value
                                 </th>
 
@@ -156,7 +156,7 @@
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
 
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900   ">
                                     Total
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
@@ -166,11 +166,11 @@
 
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900    ">
                                     {{ number_format(collect($report)->sum('refund_qty'),2) }}
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900    ">
                                     PKR {{ number_format(collect($report)->sum('return_total'),2) }}
 
                                 </th>

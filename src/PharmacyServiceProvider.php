@@ -29,6 +29,10 @@ use Devzone\Pharmacy\Http\Livewire\Reports\SaleProductwise;
 use Devzone\Pharmacy\Http\Livewire\Reports\SaleReturnTransaction;
 use Devzone\Pharmacy\Http\Livewire\Reports\SaleSummary;
 use Devzone\Pharmacy\Http\Livewire\Reports\SaleTransaction;
+use Devzone\Pharmacy\Http\Livewire\Reports\StockInOut;
+use Devzone\Pharmacy\Http\Livewire\Reports\StockNearExpiry;
+use Devzone\Pharmacy\Http\Livewire\Reports\StockRegister;
+use Devzone\Pharmacy\Http\Livewire\Reports\StockReorderLevel;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -113,6 +117,10 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('report.sale-hourly-graph',SaleHourlyGraph::class);
         Livewire::component('report.purchase-summary',PurchaseSummary::class);
         Livewire::component('report.purchases-details',PurchasesDetails::class);
+        Livewire::component('report.stock-register',StockRegister::class);
+        Livewire::component('report.stock-reorder-level',StockReorderLevel::class);
+        Livewire::component('report.stock-near-expiry',StockNearExpiry::class);
+        Livewire::component('report.stock-in-out',StockInOut::class);
         Livewire::component('sales.admission-pharmacy',\Devzone\Pharmacy\Http\Livewire\Sales\AdmissionPharmacy::class);
     }
 

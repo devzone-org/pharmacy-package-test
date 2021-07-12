@@ -133,5 +133,17 @@ Route::get('report/purchase-summary', function () {
 Route::get('report/purchases-details', function () {
     return view('pharmacy::reports.purchases-details');
 });
+Route::get('report/stock-register', function () {
+    return view('pharmacy::reports.stock-register');
+});
+Route::get('report/stock-reorder-level', function () {
+    return view('pharmacy::reports.stock-reorder-level');
+});
+Route::get('report/stock-near-expiry', function () {
+    return view('pharmacy::reports.stock-near-expiry');
+});
+Route::get('report/stock-in-out', function () {
+    return view('pharmacy::reports.Stock-in-out');
+});
 
 Route::get('print/sale/{id}', [PrintController::class, 'print']);
