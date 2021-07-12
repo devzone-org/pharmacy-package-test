@@ -63,27 +63,27 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900   ">
                                     Sr #
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500   ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Products
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500   ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Qty Sold
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500   ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Revenue after discount (PKR)
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     COS (PKR)
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Gross Profit (PKR)
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Gross Margin (%)
                                 </th>
                             </tr>
@@ -122,19 +122,19 @@
                                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
 
                                     </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500">
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         {{number_format(collect($report)->sum('qty'))}}
                                     </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500">
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         {{number_format(collect($report)->sum('total_after_disc'),2)}}
                                     </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500">
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         {{number_format(collect($report)->sum('cos'),2)}}
                                     </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500">
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         {{number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('cos'),2)}}
                                     </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500">
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         @php
                                             $gross_margin=((collect($report)->sum('total_after_disc')-collect($report)->sum('cos'))/collect($report)->sum('total_after_disc'))*100;
                                         @endphp

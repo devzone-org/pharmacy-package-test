@@ -47,7 +47,7 @@ class PurchaseReceive extends Component
         'order_list.*.disc' => 'nullable|numeric',
         'order_list.*.cost_of_price' => 'required|numeric',
         'order_list.*.retail_price' => 'required|numeric',
-        'order_list.*.expiry' => 'required|numeric'
+        'order_list.*.expiry' => 'required'
     ];
 
     protected $validationAttributes = [

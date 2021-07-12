@@ -127,5 +127,23 @@ Route::get('report/sale-productwise', function () {
 Route::get('report/sale-hourly-graph', function () {
     return view('pharmacy::reports.sale-hourly-graph');
 });
+Route::get('report/purchase-summary', function () {
+    return view('pharmacy::reports.purchase-summary');
+});
+Route::get('report/purchases-details', function () {
+    return view('pharmacy::reports.purchases-details');
+});
+Route::get('report/stock-register', function () {
+    return view('pharmacy::reports.stock-register');
+});
+Route::get('report/stock-reorder-level', function () {
+    return view('pharmacy::reports.stock-reorder-level');
+});
+Route::get('report/stock-near-expiry', function () {
+    return view('pharmacy::reports.stock-near-expiry');
+});
+Route::get('report/stock-in-out', function () {
+    return view('pharmacy::reports.Stock-in-out');
+});
 
 Route::get('print/sale/{id}', [PrintController::class, 'print']);

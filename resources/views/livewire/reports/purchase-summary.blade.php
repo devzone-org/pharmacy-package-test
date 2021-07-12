@@ -1,9 +1,9 @@
 <div>
     <div class="shadow mb-5 overflow-hidden border-b border-gray-200 sm:rounded-lg">
         <div class="bg-white py-6 px-4 space-y-6 sm:p-6 ">
-            <div class="grid grid-cols-8 gap-6">
+            <div class="grid grid-cols-10 gap-6">
                 <div class="col-span-8 sm:col-span-2">
-                    <label for="salesman" class="block text-sm font-medium text-gray-700">Date Range</label>
+                    <label class="block text-sm font-medium text-gray-700">Date Range</label>
                     <select wire:model="range"
                             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                         <option value="today">Today</option>
@@ -46,7 +46,7 @@
 
                         <div class="bg-white py-6 px-4 sm:p-6 ">
                             <h3 class="text-lg leading-6  text-center font-medium text-gray-900">{{ env('APP_NAME') }}</h3>
-                            <p class="text-md leading-6  text-center  text-gray-900">Sale Summary Report</p>
+                            <p class="text-md leading-6  text-center  text-gray-900">Purchase Summary Report</p>
                             <p class="text-md leading-6  text-center  text-gray-900">Statement period
                                 from {{ date('d M, Y',strtotime($from)) }} to {{ date('d M, Y',strtotime($to)) }}</p>
                         </div>
@@ -59,36 +59,45 @@
                                     Sr #
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
-                                    Sale Date
+                                    Supplier Name
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
-                                    Revenue after discount (PKR)
+                                    Order Placement Date
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
-                                    Discount (PKR)
+                                    PO Created By
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    COS (PKR)
+                                    PO Approved By
                                 </th>
 
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Gross Profit (PKR)
+                                    PO #
                                 </th>
 
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Gross Margin (%)
+                                    Order Receiving Date
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    # of Sales
+                                    GRN #
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Unique Customers
+                                    Supplier Invoice #
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Avg Sales Value (PKR)
+                                    Supplier Invoice Date
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Avg Items per sale
+                                    Invoice Payment Status
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                    Invoice Payment Date
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                    Total PO Value
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                    Total COS
                                 </th>
                             </tr>
                             </thead>
@@ -100,85 +109,71 @@
                                             {{ $loop->iteration  }}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{date('d M Y',strtotime($r['date']))}}
-                                        </td>
-                                        <td class="px-3 py-3  text-center text-sm text-gray-500">
-                                            {{number_format($r['total_after_disc'],2)}}
+                                            {{$r['supplier_name']}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            9{{number_format($r['total']-$r['total_after_disc'],2)}})
+                                            {{!empty($r['placement_date']) ? date('d M Y',strtotime($r['placement_date'])) : '-'}}
+                                        </td>
+                                        <td class="px-3 py-3  text-center text-sm text-gray-500">
+                                            {{$r['created_by']}}
+                                        </td>
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            {{$r['approved_by']}}
+                                        </td>
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            {{$r['po_no']}}
+                                        </td>
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            {{!empty($r['receiving_date']) ? date('d M Y',strtotime($r['receiving_date'])) : '-' }}
+                                        </td>
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            {{$r['grn_no']}}
+                                        </td>
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            {{$r['supplier_invoice']}}
+                                        </td>
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            {{!empty($r['invoice_date']) ? date('d M Y',strtotime($r['invoice_date'])) : '-'}}
+                                        </td>
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            @if($r['is_paid']=='t')
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                              Paid
+                                            </span>
+                                            @else
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                              Unpaid
+                                            </span>
+                                            @endif
+                                        </td>
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            {{!empty($r['payment_date']) ? date('d M Y',strtotime($r['payment_date'])) : '-'}}
+                                        </td>
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            {{number_format($r['po_value'],2)}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['cos'],2)}}
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{number_format($r['total_after_disc']-$r['cos'],2)}}
-                                        </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{number_format((($r['total_after_disc']-$r['cos'])/$r['total_after_disc'])*100,2)}}
-                                        </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{$r['no_of_sale']}}
-                                        </td>
-                                        <td class="px-3 py-3  text-center text-sm text-gray-500">
-                                            {{$r['unique_customers']}}
-                                        </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{number_format($r['total_after_disc']/$r['no_of_sale'],2)}}
-                                        </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{round($r['no_of_items']/$r['no_of_sale'])}}
-                                        </td>
                                     </tr>
                                 @endforeach
                                 <tr class="bg-gray-50">
-                                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
-
-                                    </th>
-                                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
+                                    <th scope="col" colspan="12" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
 
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_after_disc'),2)}}
-                                    </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        ({{number_format(collect($report)->sum('total')-collect($report)->sum('total_after_disc'),2)}})
+                                        {{number_format(collect($report)->sum('po_value'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         {{number_format(collect($report)->sum('cos'),2)}}
-                                    </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('cos'),2)}}
-                                    </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        @php
-                                            $gross_margin=((collect($report)->sum('total_after_disc')-collect($report)->sum('cos'))/collect($report)->sum('total_after_disc'))*100;
-                                        @endphp
-                                        {{number_format($gross_margin,2)}}
-                                    </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('no_of_sale'))}}
-                                    </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('unique_customers'))}}
-                                    </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_after_disc')/collect($report)->sum('no_of_sale'),2)}}
-                                    </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{round(collect($report)->sum('no_of_items'))}}
                                     </th>
                                 </tr>
                             </tbody>
                             @endif
                         </table>
-
-
                     </div>
                 </div>
             </div>
         </div>
-
-
     </div>
 </div>
