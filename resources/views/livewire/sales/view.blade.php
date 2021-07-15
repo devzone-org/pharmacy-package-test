@@ -6,7 +6,10 @@
         <div class="lg:flex  lg:justify-between  ">
             <div class="flex-1 min-w-0">
                 <h2 class="text-2xl mb-3 font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                    View Invoice #{{ $sale_id }}
+                   @if($admission)
+                       Inter Transfer IPD
+                       @endif
+                       Receipt  #{{ $sale_id }}
                 </h2>
 
             </div>
@@ -18,13 +21,7 @@
 
 
                 <span class="ml-3">
-{{--      <button type="button" wire:click="printSale"--}}
-{{--              class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">--}}
 
-
-
-{{--        Print Sale--}}
-{{--      </button>--}}
                    <a class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="javascript:void(0);" onclick="window.open('{{ url('pharmacy/print/sale/').'/'.$sale_id }}','receipt-print','height=150,width=400');">
                        Print Sale
                    </a>
@@ -34,44 +31,85 @@
 
         </div>
 
-        <div class="grid mb-3 bg-white gap-x-4 gap-y-8 grid-cols-4   shadow rounded-md p-3">
-            <div class="">
-                <dt class="text-sm font-medium text-gray-500">
-                    Referred By
-                </dt>
-                <dd class="mt-1 text-sm text-gray-900">
-                    {{ $referred_by_name ?? '-' }}
-                </dd>
+        @if($admission)
+            <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-5   shadow rounded-md p-3">
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Referred By
+                    </dt>
+                    <dd class="mt-1 text-lg font-medium text-gray-900">
+                        {{ $admission_details['doctor'] ?? '-' }}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Patient Name
+                    </dt>
+                    <dd class="mt-1 text-lg font-medium text-gray-900">
+                        {{  $admission_details['mr_no'].' - '.$admission_details['name'] ?? 'Walk-in' }}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Admission #
+                    </dt>
+                    <dd class="mt-1 text-lg font-medium text-gray-900">
+                        {{  $admission_details['admission_no'] ?? '' }}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Date
+                    </dt>
+                    <dd class="mt-1 text-xl font-medium text-gray-900">
+                        {{ $sale_at }}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Sale By
+                    </dt>
+                    <dd class="mt-1 text-xl font-medium text-gray-900">
+                        {{ $sale_by }}
+                    </dd>
+                </div>
             </div>
-
-            <div class="">
-                <dt class="text-sm font-medium text-gray-500">
-                    Patient Name
-                </dt>
-                <dd class="mt-1 text-sm text-gray-900">
-                    {{ $patient_name ?? '-' }}
-                </dd>
+        @else
+            <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-4   shadow rounded-md p-3">
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Referred By
+                    </dt>
+                    <dd class="mt-1 text-xl font-medium text-gray-900">
+                        {{ $referred_by_name ?? '-' }}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Patient Name
+                    </dt>
+                    <dd class="mt-1 text-xl font-medium text-gray-900">
+                        {{ $patient_name ?? 'Walk-in' }}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Date
+                    </dt>
+                    <dd class="mt-1 text-xl font-medium text-gray-900">
+                        {{ $sale_at }}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Sale By
+                    </dt>
+                    <dd class="mt-1 text-xl font-medium text-gray-900">
+                        {{ $sale_by }}
+                    </dd>
+                </div>
             </div>
-
-            <div class="">
-                <dt class="text-sm font-medium text-gray-500">
-                    Sale At
-                </dt>
-                <dd class="mt-1 text-sm text-gray-900">
-                    {{ $sale_at}}
-                </dd>
-            </div>
-
-            <div class="">
-                <dt class="text-sm font-medium text-gray-500">
-                    Sale By
-                </dt>
-                <dd class="mt-1 text-sm text-gray-900">
-                    {{ $sale_by }}
-                </dd>
-            </div>
-        </div>
-
+        @endif
 
 
 

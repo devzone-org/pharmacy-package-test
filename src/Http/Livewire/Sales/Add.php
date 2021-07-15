@@ -4,6 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
 
+use App\Models\Hospital\Admission;
 use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount;
@@ -41,16 +42,23 @@ class Add extends Component
     public $admission_id;
     public $procedure_id;
     public $admission = false;
+    public $admission_details = [];
 
     protected $listeners = ['openSearch', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
 
-    public function mount($admission_id, $procedure_id)
+    public function mount($admission_id = null, $procedure_id = null)
     {
         $this->admission_id = $admission_id;
         $this->procedure_id = $procedure_id;
         if (!empty($this->admission_id) && !empty($this->procedure_id)) {
             if (class_exists(\App\Models\Hospital\ProcedureMedicine::class)) {
                 $this->admission = true;
+                $this->admission_details = Admission::from('admissions as a')
+                    ->join('patients as p', 'p.id', '=', 'a.patient_id')
+                    ->join('employees as e', 'e.id', '=', 'a.doctor_id')
+                    ->where('a.id', $admission_id)
+                    ->select('p.mr_no', 'p.name', 'a.admission_no', 'e.name as doctor')->first()
+                    ->toArray();
                 $medicines = \App\Models\Hospital\ProcedureMedicine::from('procedure_medicines as pm')
                     ->join('products as p', 'p.id', '=', 'pm.product_id')
                     ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
@@ -63,20 +71,20 @@ class Add extends Component
                     ->groupBy('pi.retail_price')
                     ->orderBy('pi.qty', 'desc')->get()->toArray();
                 foreach ($medicines as $medicine) {
-                    $required_qty=null;
+                    $required_qty = null;
                     if ($medicine['required_qty'] <= $medicine['available_qty']) {
                         $sale_qty = $medicine['required_qty'];
 
                     } else {
                         $sale_qty = $medicine['available_qty'];
-                        $required_qty=$medicine['required_qty'];
+                        $required_qty = $medicine['required_qty'];
                     }
                     $this->sales[] = [
                         'id' => $medicine['id'],
                         'item' => $medicine['item'],
                         'qty' => $medicine['available_qty'],
                         's_qty' => $sale_qty,
-                        'required_qty'=>$required_qty,
+                        'required_qty' => $required_qty,
                         'retail_price' => $medicine['retail_price'],
                         'product_price' => $medicine['product_price'],
                         'supply_price' => $medicine['supply_price'],
@@ -108,18 +116,24 @@ class Add extends Component
 
     public function emitReferredById()
     {
-        $data = $this->searchable_data[$this->highlight_index];
-        $this->referred_by_id = $data['id'];
-        $this->referred_by_name = $data['name'];
-        $this->searchableReset();
+        if (empty($this->admission_id) && empty($this->procedure_id)) {
+            $data = $this->searchable_data[$this->highlight_index];
+            $this->referred_by_id = $data['id'];
+            $this->referred_by_name = $data['name'];
+            $this->searchableReset();
+        }
+
     }
 
     public function emitPatientId()
     {
-        $data = $this->searchable_data[$this->highlight_index];
-        $this->patient_id = $data['id'];
-        $this->patient_name = $data['mr_no'] . ' - ' . $data['name'];
-        $this->searchableReset();
+        if (empty($this->admission_id) && empty($this->procedure_id)) {
+            $data = $this->searchable_data[$this->highlight_index];
+            $this->patient_id = $data['id'];
+            $this->patient_name = $data['mr_no'] . ' - ' . $data['name'];
+            $this->searchableReset();
+        }
+
     }
 
     public function emitProductId()
@@ -222,8 +236,11 @@ class Add extends Component
             if (empty(Auth::user()->account_id)) {
                 throw new \Exception('Cash in Hand - ' . Auth::user()->name . ' not found.');
             }
-            if (empty($this->received)) {
+            if (empty($this->received) && $this->admission == false) {
                 throw new \Exception('Please enter received amount.');
+            }
+            if ((collect($this->sales)->sum('total_after_disc') > $this->received) && $this->admission == false) {
+                throw new \Exception('Received amount should be greater than PKR ' . collect($this->sales)->sum('total_after_disc') . "/-");
             }
 
             $sale_id = Sale::create([
@@ -300,22 +317,22 @@ class Add extends Component
             $accounts = ChartOfAccount::whereIn('reference', ['pharmacy-inventory-5', 'income-pharmacy-5', 'cost-of-sales-pharmacy-5'])->get();
 
             $amounts = SaleDetail::where('sale_id', $sale_id)->select(DB::raw('SUM(total_after_disc) as sale'), DB::raw('SUM(qty * supply_price) as cost'))->first();
-
-            $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " sold to the walking customer. Cash received PKR " .
+            $customer_name = $this->referred_by_name ?? 'walking customer';
+            $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} sold to the {$customer_name}. Cash received PKR " .
                 number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name;
 
             $vno = Voucher::instance()->voucher()->get();
 
             if ($this->admission) {
-                if (class_exists(\App\Models\Hospital\AdmissionJobDetail::class)){
-                    $admission_details=\App\Models\Hospital\AdmissionJobDetail::from('admission_job_details as ajd')
-                        ->join('admissions as a','a.id','=','ajd.admission_id')
-                        ->join('procedures as p','p.id','=','ajd.procedure_id')
-                        ->where('ajd.admission_id',$this->admission_id)
-                        ->where('ajd.procedure_id',$this->procedure_id)
-                        ->select('a.admission_no','a.checkout_date','p.name as procedure_name')
+                if (class_exists(\App\Models\Hospital\AdmissionJobDetail::class)) {
+                    $admission_details = \App\Models\Hospital\AdmissionJobDetail::from('admission_job_details as ajd')
+                        ->join('admissions as a', 'a.id', '=', 'ajd.admission_id')
+                        ->join('procedures as p', 'p.id', '=', 'ajd.procedure_id')
+                        ->where('ajd.admission_id', $this->admission_id)
+                        ->where('ajd.procedure_id', $this->procedure_id)
+                        ->select('a.admission_no', 'a.checkout_date', 'p.name as procedure_name')
                         ->first();
-                    if (!empty($admission_details->checkout_date)){
+                    if (!empty($admission_details->checkout_date)) {
                         throw new \Exception('Can not Issue Medicines for Closed Admission');
                     }
                 }
@@ -331,14 +348,14 @@ class Add extends Component
                     $ipd_medicine_account = ChartOfAccount::where('reference', 'payable-medicine-5')->first();
 
                     $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) .
-                        " Issued against admission # ".$admission_details->admission_no." and procedure ".$admission_details->procedure_name.". Account ".$ipd_medicine_account->name." debited with PKR " .
+                        " receipt # {$sale_id} issued against admission # " . $admission_details->admission_no . " and procedure " . $admission_details->procedure_name . ". Account " . $ipd_medicine_account->name . " debited with PKR " .
                         number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name;
-                    $account_entry=GeneralJournal::instance()->account($ipd_medicine_account->id)->debit($amounts['sale'])->voucherNo($vno)
+                    GeneralJournal::instance()->account($ipd_medicine_account->id)->debit($amounts['sale'])->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->description($description)->execute();
                 }
             }
 
-            if (!isset($account_entry)){
+            if ($this->admission == false) {
                 GeneralJournal::instance()->account(Auth::user()->account_id)->debit($amounts['sale'])->voucherNo($vno)
                     ->date(date('Y-m-d'))->approve()->description($description)->execute();
             }

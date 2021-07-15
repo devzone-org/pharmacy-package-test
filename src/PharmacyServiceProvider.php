@@ -4,6 +4,7 @@ namespace Devzone\Pharmacy;
 
 use Devzone\Pharmacy\Http\Livewire\MasterData\Category;
 use Devzone\Pharmacy\Http\Livewire\MasterData\Manufacture;
+use Devzone\Pharmacy\Http\Livewire\MasterData\Medicine;
 use Devzone\Pharmacy\Http\Livewire\MasterData\ProductsAdd;
 use Devzone\Pharmacy\Http\Livewire\MasterData\ProductsEdit;
 use Devzone\Pharmacy\Http\Livewire\MasterData\ProductsList;
@@ -121,6 +122,7 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('report.stock-reorder-level',StockReorderLevel::class);
         Livewire::component('report.stock-near-expiry',StockNearExpiry::class);
         Livewire::component('report.stock-in-out',StockInOut::class);
+        Livewire::component('master-data.medicine',Medicine::class);
         Livewire::component('sales.admission-pharmacy',\Devzone\Pharmacy\Http\Livewire\Sales\AdmissionPharmacy::class);
     }
 
