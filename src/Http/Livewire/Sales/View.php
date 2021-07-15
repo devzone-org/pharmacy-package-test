@@ -4,7 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
 
-use Devzone\Pharmacy\Http\Helper\Receipt;
+use App\Models\Hospital\Admission;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -30,8 +30,11 @@ class View extends Component
     public $sales = [];
     public $sales_ref = [];
 
+    public $admission = false;
+    public $admission_details = [];
 
-    public function mount($sale_id)
+
+    public function mount($sale_id, $admission_id = null, $procedure_id = null)
     {
         $this->sale_id = $sale_id;
 
@@ -80,6 +83,15 @@ class View extends Component
 
         }
 
+        if (!empty($admission_id) && !empty($procedure_id)) {
+            $this->admission_details = Admission::from('admissions as a')
+                ->join('patients as p', 'p.id', '=', 'a.patient_id')
+                ->join('employees as e', 'e.id', '=', 'a.doctor_id')
+                ->where('a.id', $admission_id)
+                ->select('p.mr_no', 'p.name', 'a.admission_no', 'e.name as doctor')->first()
+                ->toArray();
+            $this->admission = true;
+        }
 
     }
 

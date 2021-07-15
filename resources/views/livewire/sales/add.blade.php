@@ -6,13 +6,19 @@
         <div class="lg:flex  lg:justify-between  ">
             <div class="flex-1 min-w-0">
                 <h2 class="text-2xl mb-3 font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                    Sale Invoice
+                    @if(empty($admission_id) && empty($procedure_id))
+                        Sale Invoice
+                    @else
+                        Inter Transfer IPD Medicine
+                    @endif
                 </h2>
 
             </div>
             <div class="mt-5 flex lg:mt-0 lg:ml-4 ">
+                @if(empty($admission_id) && empty($procedure_id))
 
-                <span class="">
+
+                    <span class="">
       <button type="button" wire:click="searchableOpenModal('referred_by_id', 'referred_by_name', 'referred_by')"
               class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
 
@@ -21,7 +27,7 @@
       </button>
     </span>
 
-                <span class="ml-3">
+                    <span class="ml-3">
       <button type="button" wire:click="searchableOpenModal('patient_id', 'patient_name', 'patient')"
               class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
 
@@ -30,7 +36,7 @@
       </button>
     </span>
 
-
+                @endif
                 <span class="ml-3">
       <button type="button" wire:click="searchableOpenModal('product_id', 'product_name', 'item')"
               class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -51,49 +57,96 @@
                xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
 
-        Complete Sale (F2)
+        @if($admission)
+              Transfer Medicine (F2)
+          @else
+              Complete Sale (F2)
+          @endif
       </button>
     </span>
 
             </div>
 
         </div>
-
-        <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-4   shadow rounded-md p-3">
-            <div class="">
-                <dt class="text-sm font-medium text-gray-500">
-                    Referred By
-                </dt>
-                <dd class="mt-1 text-xl font-medium text-gray-900">
-                    {{ $referred_by_name ?? '-' }}
-                </dd>
+        @if($admission)
+            <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-5   shadow rounded-md p-3">
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Referred By
+                    </dt>
+                    <dd class="mt-1 text-lg font-medium text-gray-900">
+                        {{ $admission_details['doctor'] ?? '-' }}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Patient Name
+                    </dt>
+                    <dd class="mt-1 text-lg font-medium text-gray-900">
+                        {{  $admission_details['mr_no'].' - '.$admission_details['name'] ?? 'Walk-in' }}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Admission #
+                    </dt>
+                    <dd class="mt-1 text-lg font-medium text-gray-900">
+                        {{  $admission_details['admission_no'] ?? '' }}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Date
+                    </dt>
+                    <dd class="mt-1 text-lg font-medium text-gray-900">
+                        {{ date('d M, Y') }}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Sale By
+                    </dt>
+                    <dd class="mt-1 text-lg font-medium text-gray-900">
+                        {{ Auth::user()->name }}
+                    </dd>
+                </div>
             </div>
-            <div class="">
-                <dt class="text-sm font-medium text-gray-500">
-                    Patient Name
-                </dt>
-                <dd class="mt-1 text-xl font-medium text-gray-900">
-                    {{ $patient_name ?? 'Walk-in' }}
-                </dd>
+        @else
+            <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-4   shadow rounded-md p-3">
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Referred By
+                    </dt>
+                    <dd class="mt-1 text-xl font-medium text-gray-900">
+                        {{ $referred_by_name ?? '-' }}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Patient Name
+                    </dt>
+                    <dd class="mt-1 text-xl font-medium text-gray-900">
+                        {{ $patient_name ?? 'Walk-in' }}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Date
+                    </dt>
+                    <dd class="mt-1 text-xl font-medium text-gray-900">
+                        {{ date('d M, Y') }}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Sale By
+                    </dt>
+                    <dd class="mt-1 text-xl font-medium text-gray-900">
+                        {{ Auth::user()->name }}
+                    </dd>
+                </div>
             </div>
-            <div class="">
-                <dt class="text-sm font-medium text-gray-500">
-                    Date
-                </dt>
-                <dd class="mt-1 text-xl font-medium text-gray-900">
-                    {{ date('d M, Y') }}
-                </dd>
-            </div>
-            <div class="">
-                <dt class="text-sm font-medium text-gray-500">
-                    Sale By
-                </dt>
-                <dd class="mt-1 text-xl font-medium text-gray-900">
-                    {{ Auth::user()->name }}
-                </dd>
-            </div>
-        </div>
-
+        @endif
 
         @if(!empty($success))
             <div class="rounded-md mb-5 bg-green-50 p-4">
@@ -191,14 +244,16 @@
                         class="w-32 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
                         Total
                     </th>
-                    <th scope="col"
-                        class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
-                        Disc %
-                    </th>
-                    <th scope="col" title="Total After Disc"
-                        class="w-32 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
-                        Disc PKR
-                    </th>
+                    @if($admission==false)
+                        <th scope="col"
+                            class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
+                            Disc %
+                        </th>
+                        <th scope="col" title="Total After Disc"
+                            class="w-32 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
+                            Disc PKR
+                        </th>
+                    @endif
                     <th scope="col" title="Total After Disc"
                         class="w-32 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
                         Gross Total
@@ -219,7 +274,8 @@
                             {{ $s['item'] }}
                             @if(isset($s['required_qty']))
                                 @if(!empty($s['required_qty']))
-                                    <span class="text-red-500 text-sm">(Required Quantity is {{$s['required_qty']}})</span>
+                                    <span
+                                        class="text-red-500 text-sm">(Required Quantity is {{$s['required_qty']}})</span>
                                 @endif
                             @endif
                         </td>
@@ -238,15 +294,17 @@
                         <td class="px-2 bg-gray-50  text-center border-r text-md text-gray-500">
                             {{ number_format($s['total'],2) }}
                         </td>
-                        <td class="px-2  text-center border-r text-md text-gray-500">
-                            <input type="number" step="0.01" wire:model.lazy="sales.{{ $key }}.disc"
-                                   onClick="this.select();"
-                                   class="text-center p-0 focus:ring-0 block w-full   text-md border-0  "
-                                   autocomplete="off">
-                        </td>
-                        <td class="px-2 bg-gray-50  text-center border-r text-md text-gray-500">
-                            {{ number_format($s['total'] - $s['total_after_disc'],2) }}
-                        </td>
+                        @if($admission==false)
+                            <td class="px-2  text-center border-r text-md text-gray-500">
+                                <input type="number" step="0.01" wire:model.lazy="sales.{{ $key }}.disc"
+                                       onClick="this.select();"
+                                       class="text-center p-0 focus:ring-0 block w-full   text-md border-0  "
+                                       autocomplete="off">
+                            </td>
+                            <td class="px-2 bg-gray-50  text-center border-r text-md text-gray-500">
+                                {{ number_format($s['total'] - $s['total_after_disc'],2) }}
+                            </td>
+                        @endif
                         <td class="px-2 bg-gray-50  text-center border-r text-md text-gray-500">
                             {{ number_format($s['total_after_disc'],2) }}
                         </td>
@@ -277,17 +335,16 @@
                         class="w-7 px-2   border-r py-2 text-center text-md font-medium text-gray-500  tracking-wider">
                         {{ number_format(collect($sales)->sum('total'),2) }}
                     </th>
+                    @if($admission==false)
+                        <th scope="col"
+                            class="w-7 px-2   border-r py-2 text-right text-xs font-medium text-gray-500  tracking-wider">
+                        </th>
 
-                    <th scope="col"
-                        class="w-7 px-2   border-r py-2 text-right text-xs font-medium text-gray-500  tracking-wider">
-                    </th>
-
-                    <th scope="col"
-                        class="w-7 px-2   border-r py-2 text-center text-md font-medium text-gray-500  tracking-wider">
-                        {{ number_format(collect($sales)->sum('total') - collect($sales)->sum('total_after_disc'),2) }}
-
-                    </th>
-
+                        <th scope="col"
+                            class="w-7 px-2   border-r py-2 text-center text-md font-medium text-gray-500  tracking-wider">
+                            {{ number_format(collect($sales)->sum('total') - collect($sales)->sum('total_after_disc'),2) }}
+                        </th>
+                    @endif
 
                     <th scope="col"
                         class="w-7 px-2   border-r py-2 text-center text-md font-medium text-gray-500  tracking-wider">
@@ -300,47 +357,48 @@
                     <th class="p-2">&nbsp;</th>
                 </tr>
                 <tr class="bg-gray-50">
-                    <th rowspan="4" colspan="3"
+                    <th rowspan="{{ $admission==true? '2' : '4' }}" colspan="{{ $admission==true? '2' : '3' }}"
                         class="  border-r   bg-white text-md font-medium text-gray-500  tracking-wider">
 
                         <textarea name="" cols="30" rows="5" id="remarks"
                                   class="p-0 focus:ring-0 block w-full border-0 text-md resize-none h-40  "></textarea>
 
                     </th>
-                    <th scope="col" colspan="4"
+                    <th scope="col" colspan="{{ $admission==true? '3' : '4' }}"
                         class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
                         Sub Total
                     </th>
-                    <th scope="col" colspan="2"
+                    <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
                         class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
                         {{ number_format(collect($sales)->sum('total'),2) }}
                     </th>
                 </tr>
-
-                <tr>
-                    <th scope="col" colspan="4"
-                        class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
-                        Discount (F3) (%)
-                    </th>
-                    <th scope="col" colspan="2"
-                        class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
-                        <input type="number" wire:model.lazy="discount" min="0" max="100" onClick="this.select();"
-                               id="discount"
-                               class="p-0 focus:ring-0 block w-full  text-xl border-0 font-medium text-gray-500 text-center "
-                               autocomplete="off">
-                    </th>
-                </tr>
+                @if($admission==false)
+                    <tr>
+                        <th scope="col" colspan="4"
+                            class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
+                            Discount (F3) (%)
+                        </th>
+                        <th scope="col" colspan="2"
+                            class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
+                            <input type="number" wire:model.lazy="discount" min="0" max="100" onClick="this.select();"
+                                   id="discount"
+                                   class="p-0 focus:ring-0 block w-full  text-xl border-0 font-medium text-gray-500 text-center "
+                                   autocomplete="off">
+                        </th>
+                    </tr>
+                @endif
                 <tr class="bg-gray-50">
-                    <th scope="col" colspan="4"
+                    <th scope="col" colspan="{{ $admission==true? '3' : '4' }}"
                         class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
                         Gross Total
                     </th>
-                    <th scope="col" colspan="2"
+                    <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
                         class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
                         {{ number_format(collect($sales)->sum('total_after_disc'),2) }}
                     </th>
                 </tr>
-
+                @if($admission==false)
                 <tr>
                     <th scope="col" colspan="4"
                         class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
@@ -354,22 +412,33 @@
                                autocomplete="off">
                     </th>
                 </tr>
-
                 <tr class="bg-gray-50">
-                    <th scope="col" colspan="2"
+                    <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
                         class="w-7 px-2    py-2 text-left text-md font-medium text-gray-500  tracking-wider">
                         Remarks (F5)
                     </th>
 
-                    <th scope="col" colspan="5"
+                    <th scope="col" colspan="{{ $admission==true? '2' : '5' }}"
                         class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
                         Change
                     </th>
-                    <th scope="col" colspan="2"
+                    <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
                         class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
                         {{ number_format($payable,2) }}
                     </th>
                 </tr>
+@endif
+
+                @if($admission)
+                    <tr class="bg-gray-50">
+                        <th scope="col" colspan="8"
+                            class="w-7 px-2    py-2 text-left text-md font-medium text-gray-500  tracking-wider">
+                            Remarks (F5)
+                        </th>
+
+
+                    </tr>
+                    @endif
                 </tbody>
             </table>
         </div>
@@ -377,57 +446,57 @@
 
     </main>
 
-    <div x-data="{ open: @entangle('choose_till') }" x-cloak x-show="open"
-         class="fixed z-40 inset-0 overflow-y-auto">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div x-show="open" x-description="Background overlay, show/hide based on modal state."
-                 x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
-                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-                 class="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
+{{--    <div x-data="{ open: @entangle('choose_till') }" x-cloak x-show="open"--}}
+{{--         class="fixed z-40 inset-0 overflow-y-auto">--}}
+{{--        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">--}}
+{{--            <div x-show="open" x-description="Background overlay, show/hide based on modal state."--}}
+{{--                 x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"--}}
+{{--                 x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"--}}
+{{--                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"--}}
+{{--                 class="fixed inset-0 transition-opacity" aria-hidden="true">--}}
+{{--                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>--}}
+{{--            </div>--}}
 
-            <!-- This element is to trick the browser into centering the modal contents. -->
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true"></span>
-            <div @click.away="open = false;" x-show="open" x-description="Modal panel, show/hide based on modal state."
-                 x-transition:enter="ease-out duration-300"
-                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                 x-transition:leave="ease-in duration-200"
-                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                 class="h-1/3 inline-block align-bottom bg-white rounded-lg  text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full  "
-                 role="dialog" aria-modal="true" aria-labelledby="modal-headline">
-                <div class="p-3">
-                    <fieldset>
-                        <h3 class="mb-3 text-md font-medium text-gray-500">List of All Tills</h3>
-                        <div class="bg-white rounded-md -space-y-px">
-                            @foreach($tills as $key => $t)
-                                <label
-                                        class="border-gray-200 rounded-tl-md rounded-tr-md relative border p-4 flex cursor-pointer">
-                                    <input type="radio" wire:model="till_id" name="till_id" value="{{ $t['id'] }}"
-                                           class="h-4 w-4 mt-0.5 cursor-pointer text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                                           aria-labelledby="privacy-setting-0-label"
-                                           aria-describedby="privacy-setting-0-description">
-                                    <div class="ml-3 flex flex-col">
-                                        <span id="till-{{ $key }}-label"
-                                              class="text-gray-900 block text-sm font-medium">
-                                          {{ $t['name'] }}
-                                        </span>
-                                    </div>
-                                </label>
-                            @endforeach
-                        </div>
-                    </fieldset>
-                    <button type="button" wire:click="updateTill"
-                            class="mt-3 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
-                        Update Till
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+{{--            <!-- This element is to trick the browser into centering the modal contents. -->--}}
+{{--            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true"></span>--}}
+{{--            <div @click.away="open = false;" x-show="open" x-description="Modal panel, show/hide based on modal state."--}}
+{{--                 x-transition:enter="ease-out duration-300"--}}
+{{--                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"--}}
+{{--                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"--}}
+{{--                 x-transition:leave="ease-in duration-200"--}}
+{{--                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"--}}
+{{--                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"--}}
+{{--                 class="h-1/3 inline-block align-bottom bg-white rounded-lg  text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full  "--}}
+{{--                 role="dialog" aria-modal="true" aria-labelledby="modal-headline">--}}
+{{--                <div class="p-3">--}}
+{{--                    <fieldset>--}}
+{{--                        <h3 class="mb-3 text-md font-medium text-gray-500">List of All Tills</h3>--}}
+{{--                        <div class="bg-white rounded-md -space-y-px">--}}
+{{--                            @foreach($tills as $key => $t)--}}
+{{--                                <label--}}
+{{--                                    class="border-gray-200 rounded-tl-md rounded-tr-md relative border p-4 flex cursor-pointer">--}}
+{{--                                    <input type="radio" wire:model="till_id" name="till_id" value="{{ $t['id'] }}"--}}
+{{--                                           class="h-4 w-4 mt-0.5 cursor-pointer text-indigo-600 border-gray-300 focus:ring-indigo-500"--}}
+{{--                                           aria-labelledby="privacy-setting-0-label"--}}
+{{--                                           aria-describedby="privacy-setting-0-description">--}}
+{{--                                    <div class="ml-3 flex flex-col">--}}
+{{--                                        <span id="till-{{ $key }}-label"--}}
+{{--                                              class="text-gray-900 block text-sm font-medium">--}}
+{{--                                          {{ $t['name'] }}--}}
+{{--                                        </span>--}}
+{{--                                    </div>--}}
+{{--                                </label>--}}
+{{--                            @endforeach--}}
+{{--                        </div>--}}
+{{--                    </fieldset>--}}
+{{--                    <button type="button" wire:click="updateTill"--}}
+{{--                            class="mt-3 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">--}}
+{{--                        Update Till--}}
+{{--                    </button>--}}
+{{--                </div>--}}
+{{--            </div>--}}
+{{--        </div>--}}
+{{--    </div>--}}
     @include('pharmacy::include.searchable')
 </div>
 
