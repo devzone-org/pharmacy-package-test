@@ -26,7 +26,7 @@
                                 </th>
                                 <th scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Narcotics
+                                    Type
                                 </th>
                                 <th scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
@@ -55,7 +55,7 @@
                                         {{!empty($r['manufacturer']) ? $r['manufacturer'] : '-'}}
                                     </td>
                                     <td class="px-3 py-3  text-center text-sm text-gray-500">
-                                        {{$r['narcotics']=='f' ? 'No' : 'Yes'}}
+                                        @if($r['type']=='s') Sound alike @elseif($r['type']=='l') Look alike @else - @endif
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{$r['stock_in_hand']}}
