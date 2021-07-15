@@ -43,12 +43,12 @@
                            class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 </div>
                 <div class="col-span-6 sm:col-span-2">
-                    <label  class="block text-sm font-medium text-gray-700">Norcotics</label>
-                    <select wire:model="norcotics"
+                    <label  class="block text-sm font-medium text-gray-700">Type</label>
+                    <select wire:model="type"
                             class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                         <option value="">All</option>
-                        <option value="t">Yes</option>
-                        <option value="f">No</option>
+                        <option value="s">Sound alike</option>
+                        <option value="l">Look alike</option>
                     </select>
                 </div>
                 <div class="col-span-8 sm:col-span-2">
@@ -108,11 +108,15 @@
                                 </th>
                                 <th scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Narcotics
+                                    Type
                                 </th>
                                 <th scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Stock in Quantity
+                                </th>
+                                <th scope="col"
+                                    class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                    Expiry Date
                                 </th>
                                 <th scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
@@ -149,10 +153,13 @@
                                         {{$r['supplier']}}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{$r['narcotics']=='f' ? 'No' : 'Yes'}}
+                                        @if($r['type']=='s') Sound alike @elseif($r['type']=='l') Look alike @else - @endif
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{$r['stock_in_hand']}}
+                                    </td>
+                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        {{!empty($r['expiry']) ? date('d M Y',strtotime($r['expiry'])) : 'Not Defined'}}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         @if($r['expired'])
@@ -174,7 +181,7 @@
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                     {{number_format(collect($report)->sum('stock_in_hand'))}}
                                 </th>
-                                <th scope="col" colspan="2"
+                                <th scope="col" colspan="3"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                 </th>
                             </tr>

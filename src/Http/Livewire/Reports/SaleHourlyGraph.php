@@ -8,7 +8,10 @@ use Livewire\Component;
 
 class SaleHourlyGraph extends Component
 {
-    public $date;
+    public $range;
+    public $from;
+    public $to;
+    public $date_range = false;
     public $report = [];
     public $labels = [];
     public $labels_value = [];
@@ -16,7 +19,9 @@ class SaleHourlyGraph extends Component
     public $char_data_value = [];
     public $hour_format = [];
     public function mount(){
-        $this->date=date('Y-m-d');
+        $this->from = date('Y-m-d', strtotime('-7 days'));
+        $this->to = date('Y-m-d');
+        $this->range = 'seven_days';
         $this->search();
     }
     public function render(){
@@ -30,8 +35,11 @@ class SaleHourlyGraph extends Component
             $this->hour_format[]=$iHours;
         }
         $this->report = Sale::from('sales as s')
-            ->when(!empty($this->date), function ($q) {
-                return $q->whereDate('s.sale_at', $this->date);
+            ->when(!empty($this->to), function ($q) {
+                return $q->whereDate('s.sale_at', '<=', $this->to);
+            })
+            ->when(!empty($this->from), function ($q) {
+                return $q->whereDate('s.sale_at', '>=', $this->from);
             })
             ->select(
                 DB::raw('hour(s.sale_at) as hour'),
@@ -41,6 +49,7 @@ class SaleHourlyGraph extends Component
             ->groupBy('hour')
             ->get()
             ->toArray();
+
         foreach ($this->hour_format as $key=>$r){
             $get_data=collect($this->report)->where('hour','=',$r)->first();
             if(!empty($get_data)){
@@ -50,6 +59,33 @@ class SaleHourlyGraph extends Component
                 $this->char_data[$key]=0;
                 $this->char_data_value[$key]=0;
             }
+        }
+    }
+    public function updatedRange($val)
+    {
+        if ($val == 'custom_range') {
+            $this->date_range = true;
+
+        } elseif ($val == 'seven_days') {
+            $this->date_range = false;
+            $this->from = date('Y-m-d', strtotime('-7 days'));
+            $this->to = date('Y-m-d');
+            $this->search();
+        } elseif ($val == 'thirty_days') {
+            $this->date_range = false;
+            $this->from = date('Y-m-d', strtotime('-30 days'));
+            $this->to = date('Y-m-d');
+            $this->search();
+        } elseif ($val == 'yesterday') {
+            $this->date_range = false;
+            $this->from = date('Y-m-d', strtotime('-1 days'));
+            $this->to = date('Y-m-d', strtotime('-1 days'));
+            $this->search();
+        } elseif ($val == 'today') {
+            $this->date_range = false;
+            $this->from = date('Y-m-d');
+            $this->to = date('Y-m-d');
+            $this->search();
         }
     }
 }

@@ -23,7 +23,7 @@ class StockNearExpiry extends Component
     public $category_name;
     public $supplier_id;
     public $supplier_name;
-    public $norcotics;
+    public $type;
     public $report = [];
 
     public function mount()
@@ -65,19 +65,19 @@ class StockNearExpiry extends Component
             ->when(!empty($this->supplier_id), function ($q) {
                 return $q->where('pur.supplier_id', $this->supplier_id);
             })
-            ->when(!empty($this->norcotics), function ($q) {
-                return $q->where('p.narcotics', $this->norcotics);
+            ->when(!empty($this->type), function ($q) {
+                return $q->where('p.type', $this->type);
             })
             ->orderBy('p.id', 'ASC')
             ->select(
-                'p.id', 'pi.id as pi_id', 'p.name as item', 'p.narcotics', 'm.name as manufacturer', 'c.name as category', 'pi.qty', 'pi.po_id', 'pi.expiry', 'r.name as rack',
+                'p.id', 'pi.id as pi_id', 'p.name as item', 'p.type', 'm.name as manufacturer', 'c.name as category', 'pi.qty', 'pi.po_id', 'pi.expiry', 'r.name as rack',
                 's.name as supplier_name',
             )
             ->get();
         foreach ($products as $key => $product) {
             $this->report[$key]['id'] = $product->id;
             $this->report[$key]['item'] = $product->item;
-            $this->report[$key]['narcotics'] = $product->narcotics;
+            $this->report[$key]['type'] = $product->type;
             $this->report[$key]['manufacturer'] = $product->manufacturer;
             $this->report[$key]['category'] = $product->category;
             $this->report[$key]['supplier'] = $product->supplier_name;

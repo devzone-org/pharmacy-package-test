@@ -66,13 +66,13 @@ class StockRegister extends Component
             ->groupBy('pi.product_id')
             ->orderBy('p.id', 'ASC')
             ->select(
-                'p.id', 'p.name as item', 'p.narcotics', 'm.name as manufacturer', 'c.name as category', 'pi.barcode', 'r.name as rack',
+                'p.id', 'p.name as item', 'p.type', 'm.name as manufacturer', 'c.name as category', 'pi.barcode', 'r.name as rack',
             )
             ->get();
         foreach ($products as $key => $product) {
             $this->report[$key]['id'] = $product->id;
             $this->report[$key]['item'] = $product->item;
-            $this->report[$key]['narcotics'] = $product->narcotics;
+            $this->report[$key]['type'] = $product->type;
             $this->report[$key]['manufacturer'] = $product->manufacturer;
             $this->report[$key]['category'] = $product->category;
             $this->report[$key]['barcode'] = $product->barcode;
@@ -98,8 +98,13 @@ class StockRegister extends Component
 
             $this->report[$key]['discount'] = 0;
             foreach ($product->purchases_receive as $receive) {
-                $inventory_qty=$product->inventories->where('po_id',$receive->purchase_id)->first()->qty;
-                 $this->report[$key]['discount'] = $this->report[$key]['discount'] + (($receive->cost_of_price * $inventory_qty) - ($receive->after_disc_cost * $inventory_qty));
+                $inventory_qty=$product->inventories->where('po_id',$receive->purchase_id)->first();
+                if (!empty($inventory_qty)){
+                    $this->report[$key]['discount'] = $this->report[$key]['discount'] + (($receive->cost_of_price * $inventory_qty->qty) - ($receive->after_disc_cost * $inventory_qty->qty));
+                }
+                else{
+                    $this->report[$key]['discount']=0;
+                }
 //                 $this->report[$key]['discount'] = $this->report[$key]['discount'] + (($receive->cost_of_price * $receive->qty) - ($receive->after_disc_cost * $receive->qty));
             }
             $this->report[$key]['gross_margin']=0;

@@ -69,7 +69,17 @@
             $first=collect($po)->first();
             $total_discount_value=0;
         @endphp
-        <dl class="grid grid-cols-1 @if($loop->first) rounded-t-lg @endif bg-white overflow-hidden shadow divide-y divide-gray-200 md:grid-cols-7 md:divide-y-0 md:divide-x">
+        <dl class="grid grid-cols-1  rounded-t-lg bg-white overflow-hidden shadow divide-y divide-gray-200 md:grid-cols-7 md:divide-y-0 md:divide-x">
+            <div class="px-4 py-5 sm:p-6">
+                <dt class="text-base font-semibold text-gray-900">
+                    Supplier Name
+                </dt>
+                <dd class="mt-1 flex justify-between items-baseline md:block lg:flex">
+                    <div class="flex items-baseline text-2xl font-semibold text-gray-900">
+                        {{$first['supplier_name']}}
+                    </div>
+                </dd>
+            </div>
             <div class="px-4 py-5 sm:p-6">
                 <dt class="text-base font-semibold text-gray-900">
                     PO #
@@ -98,16 +108,6 @@
                 <dd class="mt-1 flex justify-between items-baseline md:block lg:flex">
                     <div class="flex items-baseline text-2xl font-semibold text-gray-900">
                         {{$first['grn_no']}}
-                    </div>
-                </dd>
-            </div>
-            <div class="px-4 py-5 sm:p-6">
-                <dt class="text-base font-semibold text-gray-900">
-                    Supplier Name
-                </dt>
-                <dd class="mt-1 flex justify-between items-baseline md:block lg:flex">
-                    <div class="flex items-baseline text-2xl font-semibold text-gray-900">
-                        {{$first['supplier_name']}}
                     </div>
                 </dd>
             </div>
@@ -142,7 +142,7 @@
                 </dd>
             </div>
         </dl>
-        <div class="bg-white">
+        <div class="bg-white mb-4 pb-2 rounded-b-lg">
             <table class="min-w-full  divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                 <tr>
