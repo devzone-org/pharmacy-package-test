@@ -5,6 +5,7 @@ namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
 
 use App\Models\Hospital\Admission;
+use App\Models\Hospital\Hospital;
 use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount;
@@ -13,6 +14,7 @@ use Devzone\Pharmacy\Models\InventoryLedger;
 use Devzone\Pharmacy\Models\ProductInventory;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Sale\SaleDetail;
+use Devzone\Pharmacy\Models\Sale\SaleIssuance;
 use Devzone\Pharmacy\Models\Sale\UserTill;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -43,6 +45,8 @@ class Add extends Component
     public $procedure_id;
     public $admission = false;
     public $admission_details = [];
+    public $hospital_info = [];
+    public $handed_over;
 
     protected $listeners = ['openSearch', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
 
@@ -60,16 +64,19 @@ class Add extends Component
                     ->select('p.mr_no', 'p.name', 'a.admission_no', 'e.name as doctor')->first()
                     ->toArray();
                 $medicines = \App\Models\Hospital\ProcedureMedicine::from('procedure_medicines as pm')
+                    ->join('procedures as pro','pro.id','=','pm.procedure_id')
                     ->join('products as p', 'p.id', '=', 'pm.product_id')
                     ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
                     ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
                     ->where('pm.procedure_id', $this->procedure_id)
                     ->select('p.name as item', 'p.retail_price as product_price', 'pm.qty as required_qty',
-                        'pi.qty as available_qty', 'pi.retail_price',
+                        'pi.qty as available_qty', 'pi.retail_price','pro.name as procedure_name',
                         'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'r.name as rack', 'r.tier')
                     ->groupBy('p.id')
                     ->groupBy('pi.retail_price')
                     ->orderBy('pi.qty', 'desc')->get()->toArray();
+                $this->admission_details['procedure_name']=collect($medicines)->first()['procedure_name'];
+                $this->hospital_info = Hospital::first()->toArray();
                 foreach ($medicines as $medicine) {
                     $required_qty = null;
                     if ($medicine['required_qty'] <= $medicine['available_qty']) {
@@ -78,6 +85,9 @@ class Add extends Component
                     } else {
                         $sale_qty = $medicine['available_qty'];
                         $required_qty = $medicine['required_qty'];
+                    }
+                    if ($this->hospital_info['transfer_medicine'] == 'cost_of_price') {
+                        $medicine['retail_price'] = $medicine['supply_price'];
                     }
                     $this->sales[] = [
                         'id' => $medicine['id'],
@@ -143,6 +153,11 @@ class Add extends Component
             $check = collect($this->sales)->where('id', $data['id'])->all();
 
             if (empty($check)) {
+                if ($this->admission) {
+                    if ($this->hospital_info['transfer_medicine'] == 'cost_of_price') {
+                        $data['retail_price'] = $data['supply_price'];
+                    }
+                }
                 $data['s_qty'] = 1;
                 $data['disc'] = 0;
                 $data['total'] = $data['retail_price'];
@@ -242,6 +257,11 @@ class Add extends Component
             if ((collect($this->sales)->sum('total_after_disc') > $this->received) && $this->admission == false) {
                 throw new \Exception('Received amount should be greater than PKR ' . collect($this->sales)->sum('total_after_disc') . "/-");
             }
+            if ($this->admission==true){
+                if (empty($this->handed_over)){
+                    throw new \Exception('Handed over field is required.');
+                }
+            }
 
             $sale_id = Sale::create([
                 'patient_id' => $this->patient_id,
@@ -258,7 +278,6 @@ class Add extends Component
             ])->id;
 
             foreach ($this->sales as $s) {
-
                 $inv = ProductInventory::where('product_id', $s['product_id'])
                     ->where('supply_price', $s['supply_price'])
                     ->where('qty', '>', 0)->orderBy('id', 'asc')->get();
@@ -374,12 +393,19 @@ class Add extends Component
                         ->date(date('Y-m-d'))->approve()->description($description)->execute();
                 }
             }
-
-
+            if($this->admission==true){
+                SaleIssuance::create([
+                    'sale_id'=>$sale_id,
+                    'handed_over_to'=>$this->handed_over,
+                ]);
+            }
             $this->resetAll();
             $this->searchableReset();
             $this->success = 'Sale has been complete with receipt #' . $sale_id;
             DB::commit();
+            if ($this->admission) {
+                return redirect()->to('pharmacy/sales/view' . '/' . $sale_id . '?admission_id=' . $this->admission_id . '&procedure_id=' . $this->procedure_id);
+            }
         } catch (\Exception $e) {
             $this->error = $e->getMessage();
             DB::rollBack();
