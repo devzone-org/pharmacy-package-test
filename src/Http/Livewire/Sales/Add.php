@@ -143,6 +143,9 @@ class Add extends Component
             $check = collect($this->sales)->where('id', $data['id'])->all();
 
             if (empty($check)) {
+
+
+
                 $data['s_qty'] = 1;
                 $data['disc'] = 0;
                 $data['total'] = $data['retail_price'];

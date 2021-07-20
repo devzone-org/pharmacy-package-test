@@ -13,15 +13,31 @@
             </a>
             <span class="ml-4">Product List</span>
         </h3>
+
     </div>
 
 
     <form wire:submit.prevent="preCreate">
         <div class="shadow sm:rounded-md sm:overflow-hidden">
             <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
-                <div>
+                <div class="flex justify-between items-center">
                     <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Product</h3>
-
+                    <div class="">
+                        @if(!empty($previous))
+                        <a href="{{ url('pharmacy/master-data/products/edit') }}/{{ $previous }}"
+                           class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50  focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                            <span class="sr-only">Previous</span>
+                            Previous
+                        </a>
+                        @endif
+                        @if(!empty($next))
+                            <a href="{{ url('pharmacy/master-data/products/edit') }}/{{ $next }}"
+                               class="-ml-px relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                                <span class="sr-only">Next</span>
+                                Next
+                            </a>
+                        @endif
+                    </div>
                 </div>
 
                 @if ($errors->any())
@@ -189,7 +205,8 @@
                     </div>
 
                     <div class="col-span-6 sm:col-span-2">
-                        <label for="control_medicine" class="block text-sm font-medium text-gray-700">Control Medicine</label>
+                        <label for="control_medicine" class="block text-sm font-medium text-gray-700">Control
+                            Medicine</label>
                         <select wire:model="control_medicine" id="control_medicine"
                                 class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                             <option value=""></option>
@@ -261,7 +278,12 @@
                     <div>
                         <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
 
-                            <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd"
+                                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                      clip-rule="evenodd"></path>
+                            </svg>
                         </div>
                         <div class="mt-3 text-center sm:mt-5">
                             <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
