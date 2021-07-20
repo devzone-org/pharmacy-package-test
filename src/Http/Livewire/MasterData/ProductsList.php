@@ -28,7 +28,7 @@ class ProductsList extends Component
             ->when(!empty($this->salt),function($q){
                 return $q->where('p.salt','LIKE','%'.$this->salt.'%');
             })
-            ->orderBy('p.id','desc')
+            ->orderBy('p.id','asc')
             ->paginate(20);
 
         return view('pharmacy::livewire.master-data.products-list', ['products' => $products]);

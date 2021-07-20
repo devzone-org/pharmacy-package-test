@@ -153,11 +153,13 @@ class Add extends Component
             $check = collect($this->sales)->where('id', $data['id'])->all();
 
             if (empty($check)) {
+ 
                 if ($this->admission) {
                     if ($this->hospital_info['transfer_medicine'] == 'cost_of_price') {
                         $data['retail_price'] = $data['supply_price'];
                     }
                 }
+ 
                 $data['s_qty'] = 1;
                 $data['disc'] = 0;
                 $data['total'] = $data['retail_price'];

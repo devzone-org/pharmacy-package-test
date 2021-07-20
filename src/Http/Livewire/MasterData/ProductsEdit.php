@@ -35,6 +35,8 @@ class ProductsEdit extends Component
     public $type;
     public $control_medicine;
     public $temperature;
+    public $previous;
+    public $next;
 
     protected $rules = [
         'name' => 'required|string',
@@ -84,6 +86,12 @@ class ProductsEdit extends Component
             $this->control_medicine = $products['control_medicine'];
             $this->narcotics = $products['narcotics'] == 't' ? true : false;
             $this->temperature=$products['temperature'];
+
+            // get previous user id
+            $this->previous = Product::where('id', '<', $products['id'])->max('id');
+
+            // get next user id
+            $this->next = Product::where('id', '>', $products['id'])->min('id');
 
         }
     }
