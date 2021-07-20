@@ -19,51 +19,52 @@
 
 
                     <span class="">
-      <button type="button" wire:click="searchableOpenModal('referred_by_id', 'referred_by_name', 'referred_by')"
-              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-
-
-        Add Referred By
-      </button>
-    </span>
+                  <button type="button"
+                          wire:click="searchableOpenModal('referred_by_id', 'referred_by_name', 'referred_by')"
+                          class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Add Referred By
+                  </button>
+                </span>
 
                     <span class="ml-3">
-      <button type="button" wire:click="searchableOpenModal('patient_id', 'patient_name', 'patient')"
-              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                      <button type="button" wire:click="searchableOpenModal('patient_id', 'patient_name', 'patient')"
+                              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
 
 
-        Add Patient
-      </button>
-    </span>
+                        Add Patient
+                      </button>
+                    </span>
 
                 @endif
                 <span class="ml-3">
-      <button type="button" wire:click="searchableOpenModal('product_id', 'product_name', 'item')"
-              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-        <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-             xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                  <button type="button" wire:click="searchableOpenModal('product_id', 'product_name', 'item')"
+                          class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                         xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round"
+                                                                  stroke-width="2"
+                                                                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
 
-        Search Item (F1)
-      </button>
-    </span>
+                    Search Item (F1)
+                  </button>
+                </span>
 
 
                 <span class="ml-3">
-      <button type="button" wire:click="saleComplete"
-              class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                  <button type="button" wire:click="saleComplete"
+                          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
 
-          <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-               xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                      <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                           xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
 
-        @if($admission)
-              Transfer Medicine (F2)
-          @else
-              Complete Sale (F2)
-          @endif
-      </button>
-    </span>
+                    @if($admission)
+                          Transfer Medicine (F2)
+                      @else
+                          Complete Sale (F2)
+                      @endif
+                  </button>
+                </span>
 
             </div>
 
@@ -88,10 +89,10 @@
                 </div>
                 <div class="">
                     <dt class="text-sm font-medium text-gray-500">
-                        Admission #
+                        Admission # - Procedure
                     </dt>
                     <dd class="mt-1 text-lg font-medium text-gray-900">
-                        {{  $admission_details['admission_no'] ?? '' }}
+                        {{  $admission_details['admission_no'] ?? '' }} - {{$admission_details['procedure_name']}}
                     </dd>
                 </div>
                 <div class="">
@@ -104,7 +105,7 @@
                 </div>
                 <div class="">
                     <dt class="text-sm font-medium text-gray-500">
-                        Sale By
+                        Issued By
                     </dt>
                     <dd class="mt-1 text-lg font-medium text-gray-900">
                         {{ Auth::user()->name }}
@@ -275,7 +276,7 @@
                             @if(isset($s['required_qty']))
                                 @if(!empty($s['required_qty']))
                                     <span
-                                        class="text-red-500 text-sm">(Required Quantity is {{$s['required_qty']}})</span>
+                                            class="text-red-500 text-sm">(Required Quantity is {{$s['required_qty']}})</span>
                                 @endif
                             @endif
                         </td>
@@ -337,7 +338,7 @@
                     </th>
                     @if($admission==false)
                         <th scope="col"
-                            class="w-7 px-2   border-r py-2 text-right text-xs font-medium text-gray-500  tracking-wider">
+                            class="w-7 px-2  border-r py-2 text-right text-xs font-medium text-gray-500  tracking-wider">
                         </th>
 
                         <th scope="col"
@@ -354,7 +355,17 @@
                 </tr>
 
                 <tr>
-                    <th class="p-2">&nbsp;</th>
+                    <th colspan="5" class="text-left p-2 text-sm text-red-600">
+                        @if($admission)
+                            @if($hospital_info['transfer_medicine']=='cost_of_price')
+                                Note: Medicines will be issued on Supply Price.
+                            @else
+                                Note: Medicines will be issued on Retail Price.
+                            @endif
+                        @else
+                            &nbsp;
+                        @endif
+                    </th>
                 </tr>
                 <tr class="bg-gray-50">
                     <th rowspan="{{ $admission==true? '2' : '4' }}" colspan="{{ $admission==true? '2' : '3' }}"
@@ -399,46 +410,53 @@
                     </th>
                 </tr>
                 @if($admission==false)
-                <tr>
-                    <th scope="col" colspan="4"
-                        class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
-                        Received Amount (F4)
-                    </th>
-                    <th scope="col" colspan="2"
-                        class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
-                        <input type="number" wire:model.debounce.300ms="received" onClick="this.select();" id="received"
-                               wire:keydown.enter="saleComplete"
-                               class="p-0 focus:ring-0 block w-full  text-xl border-0 font-medium text-gray-500 text-center "
-                               autocomplete="off">
-                    </th>
-                </tr>
-                <tr class="bg-gray-50">
-                    <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
-                        class="w-7 px-2    py-2 text-left text-md font-medium text-gray-500  tracking-wider">
-                        Remarks (F5)
-                    </th>
-
-                    <th scope="col" colspan="{{ $admission==true? '2' : '5' }}"
-                        class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
-                        Change
-                    </th>
-                    <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
-                        class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
-                        {{ number_format($payable,2) }}
-                    </th>
-                </tr>
-@endif
-
-                @if($admission)
+                    <tr>
+                        <th scope="col" colspan="4"
+                            class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
+                            Received Amount (F4)
+                        </th>
+                        <th scope="col" colspan="2"
+                            class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
+                            <input type="number" wire:model.debounce.300ms="received" onClick="this.select();"
+                                   id="received"
+                                   wire:keydown.enter="saleComplete"
+                                   class="p-0 focus:ring-0 block w-full  text-xl border-0 font-medium text-gray-500 text-center "
+                                   autocomplete="off">
+                        </th>
+                    </tr>
                     <tr class="bg-gray-50">
-                        <th scope="col" colspan="8"
+                        <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
                             class="w-7 px-2    py-2 text-left text-md font-medium text-gray-500  tracking-wider">
                             Remarks (F5)
                         </th>
 
-
+                        <th scope="col" colspan="{{ $admission==true? '2' : '5' }}"
+                            class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
+                            Change
+                        </th>
+                        <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
+                            class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
+                            {{ number_format($payable,2) }}
+                        </th>
                     </tr>
-                    @endif
+                @endif
+                @if($admission)
+                    <tr class="bg-gray-50">
+                        <th scope="col" colspan="2"
+                            class="w-7 px-2    py-2 text-left text-md font-medium text-gray-500  tracking-wider">
+                            Remarks (F5)
+                        </th>
+                        <td scope="col" colspan="5"
+                            class="w-10 bg-gray-50 border-0 text-center text-sm  text-gray-500  tracking-wider">
+                            <div class="flex -m-1">
+                                <span class="inline-flex items-center px-3 bg-gray-50 text-gray-500 text-xl font-medium">
+                                  Handed over to
+                                </span>
+                                <input type="text"  wire:model.defer="handed_over" onClick="this.select();" class="flex-1 border-0 min-w-0 block w-full px-3 py-2 rounded-none focus:ring-0 text-xl placeholder-gray-500 placeholder-opacity-50" placeholder="Enter here">
+                            </div>
+                        </td>
+                    </tr>
+                @endif
                 </tbody>
             </table>
         </div>
@@ -446,57 +464,57 @@
 
     </main>
 
-{{--    <div x-data="{ open: @entangle('choose_till') }" x-cloak x-show="open"--}}
-{{--         class="fixed z-40 inset-0 overflow-y-auto">--}}
-{{--        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">--}}
-{{--            <div x-show="open" x-description="Background overlay, show/hide based on modal state."--}}
-{{--                 x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"--}}
-{{--                 x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"--}}
-{{--                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"--}}
-{{--                 class="fixed inset-0 transition-opacity" aria-hidden="true">--}}
-{{--                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>--}}
-{{--            </div>--}}
+    {{--    <div x-data="{ open: @entangle('choose_till') }" x-cloak x-show="open"--}}
+    {{--         class="fixed z-40 inset-0 overflow-y-auto">--}}
+    {{--        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">--}}
+    {{--            <div x-show="open" x-description="Background overlay, show/hide based on modal state."--}}
+    {{--                 x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"--}}
+    {{--                 x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"--}}
+    {{--                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"--}}
+    {{--                 class="fixed inset-0 transition-opacity" aria-hidden="true">--}}
+    {{--                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>--}}
+    {{--            </div>--}}
 
-{{--            <!-- This element is to trick the browser into centering the modal contents. -->--}}
-{{--            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true"></span>--}}
-{{--            <div @click.away="open = false;" x-show="open" x-description="Modal panel, show/hide based on modal state."--}}
-{{--                 x-transition:enter="ease-out duration-300"--}}
-{{--                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"--}}
-{{--                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"--}}
-{{--                 x-transition:leave="ease-in duration-200"--}}
-{{--                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"--}}
-{{--                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"--}}
-{{--                 class="h-1/3 inline-block align-bottom bg-white rounded-lg  text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full  "--}}
-{{--                 role="dialog" aria-modal="true" aria-labelledby="modal-headline">--}}
-{{--                <div class="p-3">--}}
-{{--                    <fieldset>--}}
-{{--                        <h3 class="mb-3 text-md font-medium text-gray-500">List of All Tills</h3>--}}
-{{--                        <div class="bg-white rounded-md -space-y-px">--}}
-{{--                            @foreach($tills as $key => $t)--}}
-{{--                                <label--}}
-{{--                                    class="border-gray-200 rounded-tl-md rounded-tr-md relative border p-4 flex cursor-pointer">--}}
-{{--                                    <input type="radio" wire:model="till_id" name="till_id" value="{{ $t['id'] }}"--}}
-{{--                                           class="h-4 w-4 mt-0.5 cursor-pointer text-indigo-600 border-gray-300 focus:ring-indigo-500"--}}
-{{--                                           aria-labelledby="privacy-setting-0-label"--}}
-{{--                                           aria-describedby="privacy-setting-0-description">--}}
-{{--                                    <div class="ml-3 flex flex-col">--}}
-{{--                                        <span id="till-{{ $key }}-label"--}}
-{{--                                              class="text-gray-900 block text-sm font-medium">--}}
-{{--                                          {{ $t['name'] }}--}}
-{{--                                        </span>--}}
-{{--                                    </div>--}}
-{{--                                </label>--}}
-{{--                            @endforeach--}}
-{{--                        </div>--}}
-{{--                    </fieldset>--}}
-{{--                    <button type="button" wire:click="updateTill"--}}
-{{--                            class="mt-3 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">--}}
-{{--                        Update Till--}}
-{{--                    </button>--}}
-{{--                </div>--}}
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>--}}
+    {{--            <!-- This element is to trick the browser into centering the modal contents. -->--}}
+    {{--            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true"></span>--}}
+    {{--            <div @click.away="open = false;" x-show="open" x-description="Modal panel, show/hide based on modal state."--}}
+    {{--                 x-transition:enter="ease-out duration-300"--}}
+    {{--                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"--}}
+    {{--                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"--}}
+    {{--                 x-transition:leave="ease-in duration-200"--}}
+    {{--                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"--}}
+    {{--                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"--}}
+    {{--                 class="h-1/3 inline-block align-bottom bg-white rounded-lg  text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full  "--}}
+    {{--                 role="dialog" aria-modal="true" aria-labelledby="modal-headline">--}}
+    {{--                <div class="p-3">--}}
+    {{--                    <fieldset>--}}
+    {{--                        <h3 class="mb-3 text-md font-medium text-gray-500">List of All Tills</h3>--}}
+    {{--                        <div class="bg-white rounded-md -space-y-px">--}}
+    {{--                            @foreach($tills as $key => $t)--}}
+    {{--                                <label--}}
+    {{--                                    class="border-gray-200 rounded-tl-md rounded-tr-md relative border p-4 flex cursor-pointer">--}}
+    {{--                                    <input type="radio" wire:model="till_id" name="till_id" value="{{ $t['id'] }}"--}}
+    {{--                                           class="h-4 w-4 mt-0.5 cursor-pointer text-indigo-600 border-gray-300 focus:ring-indigo-500"--}}
+    {{--                                           aria-labelledby="privacy-setting-0-label"--}}
+    {{--                                           aria-describedby="privacy-setting-0-description">--}}
+    {{--                                    <div class="ml-3 flex flex-col">--}}
+    {{--                                        <span id="till-{{ $key }}-label"--}}
+    {{--                                              class="text-gray-900 block text-sm font-medium">--}}
+    {{--                                          {{ $t['name'] }}--}}
+    {{--                                        </span>--}}
+    {{--                                    </div>--}}
+    {{--                                </label>--}}
+    {{--                            @endforeach--}}
+    {{--                        </div>--}}
+    {{--                    </fieldset>--}}
+    {{--                    <button type="button" wire:click="updateTill"--}}
+    {{--                            class="mt-3 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">--}}
+    {{--                        Update Till--}}
+    {{--                    </button>--}}
+    {{--                </div>--}}
+    {{--            </div>--}}
+    {{--        </div>--}}
+    {{--    </div>--}}
     @include('pharmacy::include.searchable')
 </div>
 

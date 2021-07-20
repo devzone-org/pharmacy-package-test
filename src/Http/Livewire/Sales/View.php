@@ -3,9 +3,8 @@
 
 namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
-
-use App\Models\Hospital\Admission;
 use Devzone\Pharmacy\Models\Sale\Sale;
+use Devzone\Pharmacy\Models\Sale\SaleIssuance;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -32,6 +31,7 @@ class View extends Component
 
     public $admission = false;
     public $admission_details = [];
+    public $handed_over;
 
 
     public function mount($sale_id, $admission_id = null, $procedure_id = null)
@@ -84,12 +84,20 @@ class View extends Component
         }
 
         if (!empty($admission_id) && !empty($procedure_id)) {
-            $this->admission_details = Admission::from('admissions as a')
+
+            $this->admission_details = \App\Models\Hospital\Admission::from('admissions as a')
                 ->join('patients as p', 'p.id', '=', 'a.patient_id')
                 ->join('employees as e', 'e.id', '=', 'a.doctor_id')
                 ->where('a.id', $admission_id)
                 ->select('p.mr_no', 'p.name', 'a.admission_no', 'e.name as doctor')->first()
                 ->toArray();
+
+            $procedure_name=\App\Models\Hospital\Procedure::where('id',$procedure_id)->first('name');
+            $sale_handed_over=SaleIssuance::where('sale_id',$this->sale_id)->get();
+            foreach ($sale_handed_over as $sho){
+                $this->handed_over.=$sho->handed_over_to;
+            }
+            $this->admission_details['procedure_name']=$procedure_name->name;
             $this->admission = true;
         }
 
