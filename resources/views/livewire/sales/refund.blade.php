@@ -1,83 +1,131 @@
 <div class="max-w-3xl mx-auto    lg:max-w-7xl   lg:grid lg:grid-cols-12 lg:gap-4">
-
     <main class="col-span-12 ">
-
-
         <div class="lg:flex  lg:justify-between ">
             <div class="flex-1 min-w-0">
                 <h2 class="text-2xl mb-3 font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                    Refund Invoice # {{ $sale_id }}
+                    @if(empty($admission_id) && empty($procedure_id))
+                        Refund Invoice # {{ $sale_id }}
+                    @else
+                        Inter Transfer IPD Medicine Receipt # {{ $sale_id }}
+                    @endif
                 </h2>
-
             </div>
             <div class="mt-5 flex lg:mt-0 lg:ml-4 ">
-
-
-
-
                 <span class="ml-3">
-      <button type="button" wire:click="searchableOpenModal('product_id', 'product_name', 'item')"
-              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-        <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-             xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-
-        Search Item (F1)
-      </button>
-    </span>
-
-
+                    @if($type=='issue')
+                        <button type="button" wire:click="searchableOpenModal('product_id', 'product_name', 'item')"
+                                class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor"
+                                 viewBox="0 0 24 24"
+                                 xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round"
+                                                                          stroke-width="2"
+                                                                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            Search Item (F1)
+                        </button>
+                    @endif
+                </span>
                 <span class="ml-3">
-      <button type="button" wire:click="saleComplete"
-              class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-
-          <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-               xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-
-        Refund Sale (F2)
-      </button>
-    </span>
-
+                  <button type="button" wire:click="saleComplete"
+                          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                      <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                           xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                      @if(empty($admission_id) && empty($procedure_id))
+                          Refund Sale (F2)
+                      @else
+                          @if($type=='refund')
+                              Refund Transfer Medicines (F2)
+                          @elseif($type=='issue')
+                              Transfer More Medicines (F2)
+                          @endif
+                      @endif
+                  </button>
+                </span>
             </div>
         </div>
-        <div class="grid mb-3 bg-white gap-x-4 gap-y-8 grid-cols-4   shadow rounded-md p-3">
-            <div class="">
-                <dt class="text-sm font-medium text-gray-500">
-                    Referred By
-                </dt>
-                <dd class="mt-1 text-sm text-gray-900">
-                    {{ $referred_by_name ?? '-' }}
-                </dd>
+        @if(!empty($admission_id) && !empty($procedure_id))
+            <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-5   shadow rounded-md p-3">
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Referred By
+                    </dt>
+                    <dd class="mt-1 text-lg font-medium text-gray-900">
+                        {{ $admission_details['doctor'] ?? '-' }}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Patient Name
+                    </dt>
+                    <dd class="mt-1 text-lg font-medium text-gray-900">
+                        {{  $admission_details['mr_no'].' - '.$admission_details['name'] ?? 'Walk-in' }}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Admission # - Procedure
+                    </dt>
+                    <dd class="mt-1 text-lg font-medium text-gray-900">
+                        {{  $admission_details['admission_no'] ?? '' }} - {{$admission_details['procedure_name']}}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Date
+                    </dt>
+                    <dd class="mt-1 text-lg font-medium text-gray-900">
+                        {{ date('d M, Y') }}
+                    </dd>
+                </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Issued By
+                    </dt>
+                    <dd class="mt-1 text-lg font-medium text-gray-900">
+                        {{ Auth::user()->name }}
+                    </dd>
+                </div>
             </div>
+        @else
+            <div class="grid mb-3 bg-white gap-x-4 gap-y-8 grid-cols-4   shadow rounded-md p-3">
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Referred By
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {{ $referred_by_name ?? '-' }}
+                    </dd>
+                </div>
 
-            <div class="">
-                <dt class="text-sm font-medium text-gray-500">
-                    Patient Name
-                </dt>
-                <dd class="mt-1 text-sm text-gray-900">
-                    {{ $patient_name ?? '-' }}
-                </dd>
-            </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Patient Name
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {{ $patient_name ?? '-' }}
+                    </dd>
+                </div>
 
-            <div class="">
-                <dt class="text-sm font-medium text-gray-500">
-                    Date
-                </dt>
-                <dd class="mt-1 text-sm text-gray-900">
-                    {{ date('d M, Y') }}
-                </dd>
-            </div>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Date
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {{ date('d M, Y') }}
+                    </dd>
+                </div>
 
-            <div class="">
-                <dt class="text-sm font-medium text-gray-500">
-                    Refund By
-                </dt>
-                <dd class="mt-1 text-sm text-gray-900">
-                    {{ Auth::user()->name }}
-                </dd>
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Refund By
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {{ Auth::user()->name }}
+                    </dd>
+                </div>
             </div>
-        </div>
+        @endif
         @if(!empty($success))
             <div class="rounded-md mb-5 bg-green-50 p-4">
                 <div class="flex">
@@ -174,16 +222,18 @@
                         class="w-32 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
                         Total
                     </th>
-                    <th scope="col"
-                        class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
-                        Disc %
-                    </th>
+                    @if(empty($admission_id) && empty($procedure_id))
+                        <th scope="col"
+                            class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
+                            Disc %
+                        </th>
+                    @endif
                     <th scope="col" title="Total After Disc"
                         class="w-32 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
                         Gross Total
                     </th>
                     <th scope="col"
-                        class="w-10 cursor-pointer px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        class="w-12 cursor-pointer px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
 
                     </th>
                 </tr>
@@ -210,20 +260,24 @@
                         <td class="px-2   text-center border-r text-md text-gray-500">
                             {{ number_format($s['total'],2) }}
                         </td>
-                        <td class="px-2  text-center border-r text-md text-gray-500">
-                            {{ number_format($s['disc'],2) }}
-
-                        </td>
+                        @if(empty($admission_id) && empty($procedure_id))
+                            <td class="px-2  text-center border-r text-md text-gray-500">
+                                {{ number_format($s['disc'],2) }}
+                            </td>
+                        @endif
                         <td class="px-2    text-center border-r text-md text-gray-500">
                             {{ number_format($s['total_after_disc'],2) }}
                         </td>
-                        <td class="  w-10 cursor-pointer px-2 py-3   border-r text-center text-md font-medium text-red-700  tracking-wider  ">
-                            <svg wire:click="refundEntry('{{ $key }}')" class="w-5 h-5 " fill="none"
-                                 stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
-                            </svg>
-
+                        <td class="  w-12 cursor-pointer px-2 py-3   border-r text-center text-md font-medium text-red-700  tracking-wider">
+                            @if($type=='refund')
+                                <svg wire:click="refundEntry('{{ $key }}')" class="w-5 h-5 " fill="none"
+                                     stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                                </svg>
+                            @else
+                                &nbsp;
+                            @endif
                         </td>
                     </tr>
                 @endforeach
@@ -247,42 +301,40 @@
                         <td class="px-2   text-center   border-r  text-md text-gray-500">
                             @if(isset($s['restrict']))
                                 {{ $s['qty'] }}
-                                @else
-                                <input type="number" wire:model.debounce.500ms="refunds.{{ $key }}.qty" onClick="this.select();"
+                            @else
+                                <input type="number" wire:model.debounce.500ms="refunds.{{ $key }}.qty"
+                                       onClick="this.select();"
                                        class="p-0 focus:ring-0 block w-full  text-md border-0 text-center "
                                        autocomplete="off">
-                                @endif
-
+                            @endif
                         </td>
                         <td class="px-2  text-center  border-r text-md text-gray-500">
-
                             {{ number_format($s['retail_price'],2) }}
-
                         </td>
                         <td class="px-2    text-center border-r text-md text-gray-500">
-
-                                {{ number_format($s['total'],2) }}
-
+                            {{ number_format($s['total'],2) }}
                         </td>
-                        <td class="px-2  text-center border-r text-md text-gray-500">
-                            {{ number_format($s['disc'],2) }}
-
-                        </td>
+                        @if(empty($admission_id) && empty($procedure_id))
+                            <td class="px-2  text-center border-r text-md text-gray-500">
+                                {{ number_format($s['disc'],2) }}
+                            </td>
+                        @endif
                         <td class="px-2   text-center border-r text-md text-gray-500">
                             {{ number_format($s['total_after_disc'],2) }}
                         </td>
-                        <td class="  w-10 cursor-pointer px-2 py-3   border-r text-center text-md font-medium text-red-700  tracking-wider  ">
+                        <td class="  w-12 cursor-pointer px-2 py-3   border-r text-center text-md font-medium text-red-700  tracking-wider  ">
                             @if(isset($s['restrict']))
                                 &nbsp;
-                                @else
-                            <svg wire:click="removeRefundEntry('{{ $key }}')" class="w-5 h-5 " fill="currentColor"
-                                 viewBox="0 0 20 20"
-                                 xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd"
-                                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                      clip-rule="evenodd"></path>
-                            </svg>
-                                @endif
+                            @else
+                                <svg wire:click="removeRefundEntry('{{ $key }}')" class="w-5 h-5 "
+                                     fill="currentColor"
+                                     viewBox="0 0 20 20"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd"
+                                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                          clip-rule="evenodd"></path>
+                                </svg>
+                            @endif
                         </td>
                     </tr>
                 @endforeach
@@ -294,7 +346,6 @@
                         </th>
                     </tr>
                 @endif
-
                 @foreach($sales as $key => $s)
                     <tr>
                         <td class="px-2  text-center  border-r text-md font-medium text-gray-900">
@@ -304,7 +355,8 @@
                             {{ $s['item'] }}
                         </td>
                         <td class="px-2   text-left   border-r  text-md text-gray-500">
-                            <input type="number" wire:model.debounce.500ms="sales.{{ $key }}.s_qty" onClick="this.select();"
+                            <input type="number" wire:model.debounce.500ms="sales.{{ $key }}.s_qty"
+                                   onClick="this.select();"
                                    class="p-0 focus:ring-0 block w-full  text-md border-0 text-center "
                                    autocomplete="off">
                         </td>
@@ -318,12 +370,14 @@
                         <td class="px-2 bg-gray-50  text-center border-r text-md text-gray-500">
                             {{ number_format($s['total'],2) }}
                         </td>
-                        <td class="px-2  text-center border-r text-md text-gray-500">
-                            <input type="number" step="0.01" wire:model.debounce.500ms="sales.{{ $key }}.disc"
-                                   onClick="this.select();"
-                                   class="text-center p-0 focus:ring-0 block w-full   text-md border-0  "
-                                   autocomplete="off">
-                        </td>
+                        @if(empty($admission_id) && empty($procedure_id))
+                            <td class="px-2  text-center border-r text-md text-gray-500">
+                                <input type="number" step="0.01" wire:model.debounce.500ms="sales.{{ $key }}.disc"
+                                       onClick="this.select();"
+                                       class="text-center p-0 focus:ring-0 block w-full   text-md border-0  "
+                                       autocomplete="off">
+                            </td>
+                        @endif
                         <td class="px-2 bg-gray-50  text-center border-r text-md text-gray-500">
                             {{ number_format($s['total_after_disc'],2) }}
                         </td>
@@ -338,10 +392,18 @@
                         </td>
                     </tr>
                 @endforeach
-
-
                 <tr>
-                    <th class="p-2">&nbsp;</th>
+                    <th colspan="5" class="text-left p-2 text-sm text-red-600">
+                        @if(!empty($admission_id) && !empty($procedure_id))
+                            @if($hospital_info['transfer_medicine']=='cost_of_price')
+                                Note: Medicines will be issued on Supply Price.
+                            @else
+                                Note: Medicines will be issued on Retail Price.
+                            @endif
+                        @else
+                            &nbsp;
+                        @endif
+                    </th>
                 </tr>
                 <tr>
                     <th scope="col" colspan="6"
@@ -349,63 +411,62 @@
                         Paid Bill
                     </th>
                     <th scope="col" colspan="2"
-                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        class="w-12 px-2 py-2 border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
                         {{ number_format(collect($old_sales)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }}
                     </th>
                 </tr>
                 <tr class="bg-gray-50">
-                    <th rowspan="4" colspan="3"
+                    <th rowspan="@if(empty($admission_id) && empty($procedure_id)) 4 @else 3 @endif" colspan="3"
                         class="  border-r   bg-white text-md font-medium text-gray-500  tracking-wider">
-
-                        <textarea name="" cols="30" rows="5" id="remarks"
+                        <textarea name="" cols="30" rows="5"
                                   class="p-0 focus:ring-0 block w-full border-0 text-md resize-none h-40  "></textarea>
-
                     </th>
                     <th scope="col" colspan="3"
                         class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
                         New Sub Total
                     </th>
                     <th scope="col" colspan="2"
-                        class="w-10 cursor-pointer px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        class="w-12 cursor-pointer px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
                         {{ number_format(collect($sales)->sum('total'),2) }}
                     </th>
                 </tr>
-
-                <tr>
-                    <th scope="col" colspan="3"
-                        class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
-                        Discount(%) (F3)
-                    </th>
-                    <th scope="col" colspan="2"
-                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        <input type="number" wire:model.debounce.500ms="discount" min="0" max="100" onClick="this.select();"
-                               id="discount"
-                               class="p-0 focus:ring-0 block w-full  text-md border-0 font-medium text-gray-500 text-center "
-                               autocomplete="off">
-                    </th>
-                </tr>
+                @if(empty($admission_id) && empty($procedure_id))
+                    <tr>
+                        <th scope="col" colspan="3"
+                            class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
+                            Discount(%) (F3)
+                        </th>
+                        <th scope="col" colspan="2"
+                            class="w-12   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                            <input type="number" wire:model.debounce.500ms="discount" min="0" max="100"
+                                   onClick="this.select();"
+                                   id="discount"
+                                   class="p-0 focus:ring-0 block w-full  text-md border-0 font-medium text-gray-500 text-center "
+                                   autocomplete="off">
+                        </th>
+                    </tr>
+                @endif
                 <tr class="bg-gray-50">
                     <th scope="col" colspan="3"
                         class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
                         Gross Total
                     </th>
                     <th scope="col" colspan="2"
-                        class="w-10 cursor-pointer px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        class="w-12 cursor-pointer px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
                         {{ number_format(collect($sales)->sum('total_after_disc'),2) }}
                     </th>
                 </tr>
-
                 <tr>
                     <th scope="col" colspan="3"
                         class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
                         Refunded
                     </th>
                     <th scope="col" colspan="2"
-                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        ({{ number_format(collect($refunds)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }})
+                        class="w-12   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        ({{ number_format(collect($refunds)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }}
+                        )
                     </th>
                 </tr>
-
                 <tr class="bg-gray-50">
                     <th scope="col" colspan="2"
                         class="w-7 px-2    py-2 text-left text-md font-medium text-gray-500  tracking-wider">
@@ -414,23 +475,40 @@
                     @php
                         $dif = collect($sales)->sum('total_after_disc') +collect($refunds)->where('restrict',true)->sum('total_after_disc') - collect($refunds)->sum('total_after_disc');
                     @endphp
-                    <th scope="col" colspan="4"
-                        class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
-                        @if($dif>0)
-                            Receivable
-                        @else
-                            Payable
-                        @endif
-                    </th>
-                    <th scope="col" colspan="2"
-                        class="w-10 cursor-pointer px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                    @if(!empty($admission_id) && !empty($procedure_id))
 
-                        @if($dif>0)
-                            {{ number_format($dif,2) }}
-                        @else
-                            ({{ number_format(abs($dif),2) }})
-                        @endif
-                    </th>
+                        <td scope="col" colspan="@if($type=='issue') 4 @else 5 @endif"
+                            class="w-10 bg-gray-50 border-0 text-center text-sm  text-gray-500  tracking-wider">
+                            @if($type=='issue')
+                                <div class="flex -m-1">
+                                <span class="inline-flex items-center px-3 bg-gray-50 text-gray-500 text-xl font-medium">
+                                  Handed over to
+                                </span>
+                                    <input type="text" wire:model.defer="handed_over" onClick="this.select();"
+                                           class="flex-1 border-0 min-w-0 block w-full px-3 py-2 rounded-none focus:ring-0 text-xl placeholder-gray-500 placeholder-opacity-50"
+                                           placeholder="Enter here">
+                                </div>
+                            @endif
+                        </td>
+                    @else
+                        <th scope="col" colspan="4"
+                            class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
+                            @if($dif>0)
+                                Receivable
+                            @else
+                                Payable
+                            @endif
+                        </th>
+                        <th scope="col" colspan="2"
+                            class="w-10 cursor-pointer px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+
+                            @if($dif>0)
+                                {{ number_format($dif,2) }}
+                            @else
+                                ({{ number_format(abs($dif),2) }})
+                            @endif
+                        </th>
+                    @endif
                 </tr>
 
                 </tbody>
@@ -451,6 +529,12 @@
                 document.getElementById('searchable_query').focus();
             }, 100);
         });
+    });
+    Livewire.on('printInvoice', (saleId, admissionId, procedureId) => {
+        window.open('{{ url('pharmacy/print/sale')}}' + '/' + saleId, 'receipt-print', 'height=150,width=400');
+        if (admissionId !=null && procedureId!=null) {
+            window.location = '{{url('pharmacy/sales/refund')}}' + '/' + saleId + '?type=issue&admission_id=' + admissionId + '&procedure_id='+procedureId;
+        }
     });
 
     document.addEventListener("keydown", event => {

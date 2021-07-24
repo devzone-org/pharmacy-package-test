@@ -10,20 +10,16 @@ use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class AdmissionPharmacy extends Component
 {
-    use Searchable;
+    use Searchable,WithPagination;
     public $admission_no;
     public $patients;
     public $patient;
     public $from;
     public $to;
-
-    public function mount()
-    {
-    }
-
     public function render()
     {
         $admissions = AdmissionJobDetail::from('admission_job_details as ajd')
@@ -71,9 +67,10 @@ class AdmissionPharmacy extends Component
 
     public function search()
     {
-
+        $this->resetPage();
     }
     public function resetSearch(){
         $this->reset('admission_no','from','to','patient');
+        $this->resetPage();
     }
 }
