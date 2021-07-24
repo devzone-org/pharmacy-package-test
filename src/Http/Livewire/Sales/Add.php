@@ -57,25 +57,25 @@ class Add extends Component
         if (!empty($this->admission_id) && !empty($this->procedure_id)) {
             if (class_exists(\App\Models\Hospital\ProcedureMedicine::class)) {
                 $this->admission = true;
-                $this->admission_details = Admission::from('admissions as a')
+                $this->admission_details = \App\Models\Hospital\Admission::from('admissions as a')
                     ->join('patients as p', 'p.id', '=', 'a.patient_id')
                     ->join('employees as e', 'e.id', '=', 'a.doctor_id')
                     ->where('a.id', $admission_id)
                     ->select('p.mr_no', 'p.name', 'a.admission_no', 'e.name as doctor')->first()
                     ->toArray();
                 $medicines = \App\Models\Hospital\ProcedureMedicine::from('procedure_medicines as pm')
-                    ->join('procedures as pro','pro.id','=','pm.procedure_id')
+                    ->join('procedures as pro', 'pro.id', '=', 'pm.procedure_id')
                     ->join('products as p', 'p.id', '=', 'pm.product_id')
                     ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
                     ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
                     ->where('pm.procedure_id', $this->procedure_id)
                     ->select('p.name as item', 'p.retail_price as product_price', 'pm.qty as required_qty',
-                        'pi.qty as available_qty', 'pi.retail_price','pro.name as procedure_name',
+                        'pi.qty as available_qty', 'pi.retail_price', 'pro.name as procedure_name',
                         'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'r.name as rack', 'r.tier')
                     ->groupBy('p.id')
                     ->groupBy('pi.retail_price')
                     ->orderBy('pi.qty', 'desc')->get()->toArray();
-                $this->admission_details['procedure_name']=collect($medicines)->first()['procedure_name'];
+                $this->admission_details['procedure_name'] = collect($medicines)->first()['procedure_name'];
                 $this->hospital_info = Hospital::first()->toArray();
                 foreach ($medicines as $medicine) {
                     $required_qty = null;
@@ -153,13 +153,13 @@ class Add extends Component
             $check = collect($this->sales)->where('id', $data['id'])->all();
 
             if (empty($check)) {
- 
+
                 if ($this->admission) {
                     if ($this->hospital_info['transfer_medicine'] == 'cost_of_price') {
                         $data['retail_price'] = $data['supply_price'];
                     }
                 }
- 
+
                 $data['s_qty'] = 1;
                 $data['disc'] = 0;
                 $data['total'] = $data['retail_price'];
@@ -259,8 +259,8 @@ class Add extends Component
             if ((collect($this->sales)->sum('total_after_disc') > $this->received) && $this->admission == false) {
                 throw new \Exception('Received amount should be greater than PKR ' . collect($this->sales)->sum('total_after_disc') . "/-");
             }
-            if ($this->admission==true){
-                if (empty($this->handed_over)){
+            if ($this->admission == true) {
+                if (empty($this->handed_over)) {
                     throw new \Exception('Handed over field is required.');
                 }
             }
@@ -395,19 +395,17 @@ class Add extends Component
                         ->date(date('Y-m-d'))->approve()->description($description)->execute();
                 }
             }
-            if($this->admission==true){
+            if ($this->admission == true) {
                 SaleIssuance::create([
-                    'sale_id'=>$sale_id,
-                    'handed_over_to'=>$this->handed_over,
+                    'sale_id' => $sale_id,
+                    'handed_over_to' => $this->handed_over,
                 ]);
             }
             $this->resetAll();
             $this->searchableReset();
             $this->success = 'Sale has been complete with receipt #' . $sale_id;
             DB::commit();
-            if ($this->admission) {
-                return redirect()->to('pharmacy/sales/view' . '/' . $sale_id . '?admission_id=' . $this->admission_id . '&procedure_id=' . $this->procedure_id);
-            }
+            $this->emit('printInvoice', $sale_id, $this->admission_id, $this->procedure_id);
         } catch (\Exception $e) {
             $this->error = $e->getMessage();
             DB::rollBack();

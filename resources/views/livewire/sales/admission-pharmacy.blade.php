@@ -137,7 +137,7 @@
                                         <div>
                                             <button type="button" x-on:click="open=true;" @click.away="open=false;"
                                                     class="  rounded-full flex items-center text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
-                                                    id="menu-button" aria-expanded="true" aria-haspopup="true">
+                                                    aria-expanded="true" aria-haspopup="true">
                                                 <span class="sr-only">Open options</span>
                                                 <!-- Heroicon name: solid/dots-vertical -->
                                                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg"
@@ -163,7 +163,10 @@
                                                        class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                                        role="menuitem" tabindex="-1">View</a>
                                                     @if(empty($admission->checkout_date))
-                                                        <a href="{{url('pharmacy/sales/refund/'.$admission->sale_id.'?admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id)}}"
+                                                        <a href="{{url('pharmacy/sales/refund/'.$admission->sale_id.'?type=issue&admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id)}}"
+                                                           class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                                           role="menuitem" tabindex="-1">Issue More</a>
+                                                        <a href="{{url('pharmacy/sales/refund/'.$admission->sale_id.'?type=refund&admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id)}}"
                                                            class="text-red-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                                            role="menuitem" tabindex="-1">Refund</a>
                                                     @endif

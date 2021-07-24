@@ -29,6 +29,8 @@ class History extends Component
             ->join('users as u', 'u.id', '=', 's.sale_by')
             ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
             ->leftJoin('patients as p', 'p.id', '=', 's.patient_id')
+            ->whereNull('admission_id')
+            ->whereNull('procedure_id')
             ->when(!empty($this->receipt),function($q){
                 return $q->where('s.id',$this->receipt);
             })

@@ -16,15 +16,13 @@
             </div>
             <div class="mt-5 flex lg:mt-0 lg:ml-4 ">
                 @if(empty($admission_id) && empty($procedure_id))
-
-
                     <span class="">
-                  <button type="button"
-                          wire:click="searchableOpenModal('referred_by_id', 'referred_by_name', 'referred_by')"
-                          class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Add Referred By
-                  </button>
-                </span>
+                      <button type="button"
+                              wire:click="searchableOpenModal('referred_by_id', 'referred_by_name', 'referred_by')"
+                              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Add Referred By
+                      </button>
+                    </span>
 
                     <span class="ml-3">
                       <button type="button" wire:click="searchableOpenModal('patient_id', 'patient_name', 'patient')"
@@ -452,7 +450,9 @@
                                 <span class="inline-flex items-center px-3 bg-gray-50 text-gray-500 text-xl font-medium">
                                   Handed over to
                                 </span>
-                                <input type="text"  wire:model.defer="handed_over" onClick="this.select();" class="flex-1 border-0 min-w-0 block w-full px-3 py-2 rounded-none focus:ring-0 text-xl placeholder-gray-500 placeholder-opacity-50" placeholder="Enter here">
+                                <input type="text" wire:model.defer="handed_over" onClick="this.select();"
+                                       class="flex-1 border-0 min-w-0 block w-full px-3 py-2 rounded-none focus:ring-0 text-xl placeholder-gray-500 placeholder-opacity-50"
+                                       placeholder="Enter here">
                             </div>
                         </td>
                     </tr>
@@ -525,6 +525,12 @@
                 document.getElementById('searchable_query').focus();
             }, 100);
         });
+    });
+    Livewire.on('printInvoice', (saleId, admissionId, procedureId) => {
+        window.open('{{ url('pharmacy/print/sale')}}' + '/' + saleId, 'receipt-print', 'height=150,width=400');
+        if (admissionId !=null && procedureId!=null) {
+            window.location = '{{url('pharmacy/sales/view')}}' + '/' + saleId + '?admission_id=' + admissionId + '&procedure_id='+procedureId;
+        }
     });
 
     document.addEventListener("keydown", event => {
