@@ -284,28 +284,26 @@
                         {{ number_format(abs(collect($sales_ref)->sum('total_after_disc')),2) }}
                     </th>
                 </tr>
-                @if($admission)
-                    <tr class="bg-gray-50">
-                        <th scope="col" colspan="2"
-                            class="w-7 px-2    py-2 text-left text-md font-medium text-gray-500  tracking-wider">
-                            Remarks (F5)
-                        </th>
-                        <td scope="col" colspan="5"
-                            class="w-10 bg-gray-50 border-0 text-center text-sm  text-gray-500  tracking-wider">
-                            <div class="flex -m-1">
-                                <span class="inline-flex items-center px-3 bg-gray-50 text-gray-500 text-xl font-medium">
-                                  Handed over to
-                                </span>
-                                <input type="text" wire:model.defer="handed_over" onClick="this.select();" disabled readonly
-                                       class="flex-1 border-0 min-w-0 block w-full px-3 py-2 rounded-none focus:ring-0 text-xl placeholder-gray-500 placeholder-opacity-50"
-                                     >
-                            </div>
-                        </td>
-                    </tr>
-                @endif
+
+
                 </tbody>
             </table>
+            @if($admission)
+                <div>
+                    <p class="p-2">Handed over to
+
+                    @foreach($handed_over as $ho)
+                            {{ $ho['handed_over_to'] }}
+                        @if(!$loop->last) ,
+                            @endif
+                        @endforeach
+
+                    </p>
+                </div>
+            @endif
+
         </div>
+
 
 
     </main>

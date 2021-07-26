@@ -81,14 +81,15 @@ class Add extends Component
                     $required_qty = null;
                     if ($medicine['required_qty'] <= $medicine['available_qty']) {
                         $sale_qty = $medicine['required_qty'];
-
                     } else {
                         $sale_qty = $medicine['available_qty'];
                         $required_qty = $medicine['required_qty'];
                     }
-                    if ($this->hospital_info['transfer_medicine'] == 'cost_of_price') {
+
+                    if ($this->hospital_info['transfer_medicine'] == 'cost_of_price' && !empty($this->admission_id)) {
                         $medicine['retail_price'] = $medicine['supply_price'];
                     }
+
                     $this->sales[] = [
                         'id' => $medicine['id'],
                         'item' => $medicine['item'],

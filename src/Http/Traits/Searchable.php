@@ -63,6 +63,51 @@ trait Searchable
         $this->searchable_data = [];
     }
 
+    public function incrementHighlight()
+    {
+        if ($this->highlight_index === count($this->searchable_data) - 1) {
+            $this->highlight_index = 0;
+            return;
+        }
+        $this->highlight_index++;
+    }
+
+    public function decrementHighlight()
+    {
+        if ($this->highlight_index === 0) {
+            $this->highlight_index = count($this->searchable_data) - 1;
+            return;
+        }
+        $this->highlight_index--;
+    }
+
+    public function searchableSelection($key = null)
+    {
+        if (!empty($key)) {
+            $this->highlight_index = $key;
+        }
+        if ($this->searchable_emit_only) {
+            $this->emitSelf(Str::camel('emit_' . $this->searchable_id));
+        } else {
+            $data = $this->searchable_data[$this->highlight_index] ?? null;
+            $this->{$this->searchable_id} = $data['id'];
+            $this->{$this->searchable_name} = $data['name'];
+            $this->emitSelf(Str::camel('emit_' . $this->searchable_id));
+            $this->searchableReset();
+        }
+
+    }
+
+    public function updatedSearchableQuery($value)
+    {
+
+        if (strlen($value) > 1) {
+            $this->searchQuery($value);
+        } else {
+            $this->searchable_data = [];
+        }
+    }
+
     private function searchQuery($value = null)
     {
         $this->highlight_index = 0;
@@ -140,7 +185,7 @@ trait Searchable
             }
         }
 
-        if ($this->searchable_type == 'item' ) {
+        if ($this->searchable_type == 'item') {
             $search = Product::from('products as p')
                 ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
                 ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
@@ -148,8 +193,8 @@ trait Searchable
                     return $q->orWhere('p.name', 'LIKE', '%' . $value . '%')
                         ->orWhere('p.salt', 'LIKE', '%' . $value . '%');
                 })->select('p.name as item', DB::raw('SUM(qty) as qty'),
-                    'pi.retail_price','p.retail_price as product_price',
-                    'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id','p.type', 'r.name as rack', 'r.tier')
+                    'pi.retail_price', 'p.retail_price as product_price',
+                    'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'r.name as rack', 'r.tier')
                 ->groupBy('p.id')
                 ->groupBy('pi.retail_price')->orderBy('qty', 'desc')->get();
             if ($search->isNotEmpty()) {
@@ -175,7 +220,7 @@ trait Searchable
                 return $q->orWhere('name', 'LIKE', '%' . $value . '%')
                     ->orWhere('mr_no', 'LIKE', '%' . $value . '%')
                     ->orWhere('phone', 'LIKE', '%' . $value . '%');
-            })->select('mr_no','name', 'phone', 'id')->get();
+            })->select('mr_no', 'name', 'phone', 'id')->get();
             if ($search->isNotEmpty()) {
                 $this->searchable_data = $search->toArray();
             } else {
@@ -197,51 +242,6 @@ trait Searchable
             }
         }
         $this->searchable_loading = false;
-    }
-
-    public function incrementHighlight()
-    {
-        if ($this->highlight_index === count($this->searchable_data) - 1) {
-            $this->highlight_index = 0;
-            return;
-        }
-        $this->highlight_index++;
-    }
-
-    public function decrementHighlight()
-    {
-        if ($this->highlight_index === 0) {
-            $this->highlight_index = count($this->searchable_data) - 1;
-            return;
-        }
-        $this->highlight_index--;
-    }
-
-    public function searchableSelection($key = null)
-    {
-        if (!empty($key)) {
-            $this->highlight_index = $key;
-        }
-        if ($this->searchable_emit_only) {
-            $this->emitSelf(Str::camel('emit_' . $this->searchable_id));
-        } else {
-            $data = $this->searchable_data[$this->highlight_index] ?? null;
-            $this->{$this->searchable_id} = $data['id'];
-            $this->{$this->searchable_name} = $data['name'];
-            $this->emitSelf(Str::camel('emit_' . $this->searchable_id));
-            $this->searchableReset();
-        }
-
-    }
-
-    public function updatedSearchableQuery($value)
-    {
-
-        if (strlen($value) > 1) {
-            $this->searchQuery($value);
-        } else {
-            $this->searchable_data = [];
-        }
     }
 
 }

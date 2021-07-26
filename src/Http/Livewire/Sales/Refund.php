@@ -63,16 +63,17 @@ class Refund extends Component
                 , 's.patient_id', 's.referred_by', 's.admission_id', 's.procedure_id', 'e.name as referred_by_name', 'p.mr_no', 'p.name as patient_name',
                 'pro.name as procedure_name'
             )
-            ->groupBy('sd.product_id')
+            ->groupBy('sd.id')
+            ->orderBy('sd.product_id')
             ->get()
             ->toArray();
 
         $first = collect($this->old_sales)->first();
         $this->admission_id = $first['admission_id'];
         $this->procedure_id = $first['procedure_id'];
-
+        $this->hospital_info = \App\Models\Hospital\Hospital::first()->toArray();
         if (!empty($this->admission_id) && !empty($this->procedure_id)) {
-            $this->hospital_info = \App\Models\Hospital\Hospital::first()->toArray();
+
             $this->admission_details = \App\Models\Hospital\Admission::from('admissions as a')
                 ->join('patients as p', 'p.id', '=', 'a.patient_id')
                 ->join('employees as e', 'e.id', '=', 'a.doctor_id')
@@ -82,7 +83,8 @@ class Refund extends Component
             $this->admission_details['procedure_name'] = collect($this->old_sales)->first()['procedure_name'];
         }
         foreach ($this->old_sales as $s) {
-            $check = SaleRefund::where('sale_id', $s['sale_id'])->where('product_id', $s['product_id'])
+            $check = SaleRefund::where('sale_id', $s['sale_id'])->where('sale_detail_id', $s['id'])
+                ->where('product_id', $s['product_id'])
                 ->sum('refund_qty');
             if (!empty($check)) {
                 $s['qty'] = $check;
@@ -119,14 +121,21 @@ class Refund extends Component
     public function emitProductId()
     {
         $data = $this->searchable_data[$this->highlight_index];
+
         if ($data['qty'] > 0) {
             $check = collect($this->sales)->where('id', $data['id'])->all();
+            $price = $data['retail_price'];
+
+            if ($this->hospital_info['transfer_medicine'] == 'cost_of_price' && !empty($this->admission_id)) {
+                $price = $data['supply_price'];
+                $data['retail_price'] = $price;
+            }
 
             if (empty($check)) {
                 $data['s_qty'] = 1;
                 $data['disc'] = 0;
-                $data['total'] = $data['retail_price'];
-                $data['total_after_disc'] = $data['retail_price'];
+                $data['total'] = $price;
+                $data['total_after_disc'] = $price;
                 $this->sales[] = $data;
             } else {
                 $key = array_keys($check)[0];
@@ -268,7 +277,7 @@ class Refund extends Component
                 throw new \Exception('Cash in Hand - ' . Auth::user()->name . ' not found.');
             }
             if (!empty($this->admission_id) && !empty($this->procedure_id)) {
-                if (empty($this->handed_over) && $this->type=='issue') {
+                if (empty($this->handed_over) && $this->type == 'issue') {
                     throw new \Exception('Handed over field is required.');
                 }
             }
@@ -287,6 +296,7 @@ class Refund extends Component
                 $sales_cost = $sales_cost + ($r['s_qty'] * $r['supply_price']);
                 $sales_retail = $sales_retail + ($r['total_after_disc']);
             }
+
             DB::beginTransaction();
             $refund = false;
 
@@ -424,10 +434,12 @@ class Refund extends Component
                     $description = $this->getDescriptionAdmissionProcedure($refund_retail, $sales_retail, $admission_details->admission_no, $admission_details->procedure_name, $ipd_medicine_account->name);
                     $cash_acount = $ipd_medicine_account->id;
                 }
-                SaleIssuance::create([
-                    'sale_id' => $this->sale_id,
-                    'handed_over_to' => $this->handed_over,
-                ]);
+                if (!empty($this->handed_over)) {
+                    SaleIssuance::create([
+                        'sale_id' => $this->sale_id,
+                        'handed_over_to' => $this->handed_over,
+                    ]);
+                }
             } else {
                 $description = $this->getDescription($refund_retail, $sales_retail);
             }
@@ -484,7 +496,7 @@ class Refund extends Component
                 if ($this->type == 'refund') {
                     return redirect()->to('pharmacy/sales/refund/' . $this->sale_id . '?type=refund&admission_id=' . $this->admission_id . '&procedure_id=' . $this->procedure_id);
                 } elseif ($this->type == 'issue') {
-                    $this->emit('printInvoice',$this->sale_id, $this->admission_id, $this->procedure_id);
+                    $this->emit('printInvoice', $this->sale_id, $this->admission_id, $this->procedure_id);
 //                    return redirect()->to('pharmacy/sales/refund/' . $this->sale_id . '?type=issue&admission_id=' . $this->admission_id . '&procedure_id=' . $this->procedure_id);
                 }
             }
@@ -495,6 +507,17 @@ class Refund extends Component
         }
     }
 
+    public function getDescriptionAdmissionProcedure($refund_retail, $sales_retail, $admission_no, $procedure_name, $account_name)
+    {
+        if ($this->type == 'refund') {
+            $description = 'Refunded: PKR ' . number_format($refund_retail, 2) . ' ';
+        }
+        if ($this->type == 'issue') {
+            $description = 'Being goods worth PKR ' . number_format($sales_retail, 2) . ' ';
+        }
+        $description .= ' issued against Admission # ' . $admission_no . ' and procedure ' . $procedure_name . " on " . date('d M, Y h:i A') . " by " . Auth::user()->name;
+        return $description;
+    }
 
     public function getDescription($refund_retail, $sales_retail)
     {
@@ -522,18 +545,6 @@ class Refund extends Component
         }
 
         $description .= " on " . date('d M, Y') . " by " . Auth::user()->name;
-        return $description;
-    }
-
-    public function getDescriptionAdmissionProcedure($refund_retail, $sales_retail, $admission_no, $procedure_name, $account_name)
-    {
-        if ($this->type=='refund') {
-            $description = 'Refunded: PKR ' . number_format($refund_retail, 2) . ' ';
-        }
-        if ($this->type=='issue') {
-            $description = 'Being goods worth PKR ' . number_format($sales_retail, 2) . ' ';
-        }
-        $description .= ' issued against Admission # ' . $admission_no . ' and procedure ' . $procedure_name . " on " . date('d M, Y h:i A') . " by " . Auth::user()->name;
         return $description;
     }
 

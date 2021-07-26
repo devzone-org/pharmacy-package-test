@@ -12,7 +12,7 @@
             </div>
             <div class="mt-5 flex lg:mt-0 lg:ml-4 ">
                 <span class="ml-3">
-                    @if($type=='issue')
+                    @if($type=='issue' || empty($admission_id))
                         <button type="button" wire:click="searchableOpenModal('product_id', 'product_name', 'item')"
                                 class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor"
@@ -254,8 +254,6 @@
                         </td>
                         <td class="px-2  text-center  border-r text-md text-gray-500">
                             {{ number_format($s['retail_price'],2) }}
-
-
                         </td>
                         <td class="px-2   text-center border-r text-md text-gray-500">
                             {{ number_format($s['total'],2) }}
@@ -406,9 +404,9 @@
                     </th>
                 </tr>
                 <tr>
-                    <th scope="col" colspan="6"
+                    <th scope="col" colspan="5"
                         class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
-                        Paid Bill
+                        Invoice Total
                     </th>
                     <th scope="col" colspan="2"
                         class="w-12 px-2 py-2 border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
@@ -416,10 +414,9 @@
                     </th>
                 </tr>
                 <tr class="bg-gray-50">
-                    <th rowspan="@if(empty($admission_id) && empty($procedure_id)) 4 @else 3 @endif" colspan="3"
+                    <th rowspan="@if(empty($admission_id) && empty($procedure_id)) 4 @else 3 @endif" colspan="2"
                         class="  border-r   bg-white text-md font-medium text-gray-500  tracking-wider">
-                        <textarea name="" cols="30" rows="5"
-                                  class="p-0 focus:ring-0 block w-full border-0 text-md resize-none h-40  "></textarea>
+
                     </th>
                     <th scope="col" colspan="3"
                         class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
@@ -463,14 +460,13 @@
                     </th>
                     <th scope="col" colspan="2"
                         class="w-12   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        ({{ number_format(collect($refunds)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }}
-                        )
+                        ({{ number_format(collect($refunds)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }})
                     </th>
                 </tr>
                 <tr class="bg-gray-50">
                     <th scope="col" colspan="2"
                         class="w-7 px-2    py-2 text-left text-md font-medium text-gray-500  tracking-wider">
-                        Remarks (F5)
+
                     </th>
                     @php
                         $dif = collect($sales)->sum('total_after_disc') +collect($refunds)->where('restrict',true)->sum('total_after_disc') - collect($refunds)->sum('total_after_disc');
@@ -491,7 +487,7 @@
                             @endif
                         </td>
                     @else
-                        <th scope="col" colspan="4"
+                        <th scope="col" colspan="3"
                             class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
                             @if($dif>0)
                                 Receivable

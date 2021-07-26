@@ -50,6 +50,7 @@ class View extends Component
                 , 's.sale_at', 's.remarks', 'pt.name as patient_name', 's.is_refund', 'u.name as sale_by',
                 DB::raw('sum(sr.refund_qty) as refund_qty'), 'e.name as referred_by')
             ->groupBy('sd.product_id')
+            ->groupBy('sd.retail_price')
             ->orderBy('sd.product_id')->get()->toArray();
 
         foreach ($this->sales as $key => $s) {
@@ -79,8 +80,6 @@ class View extends Component
                 $array['total_after_disc'] = -$this->sales[$key]['total_after_disc'];
                 $this->sales_ref[] = $array;
             }
-
-
         }
 
         if (!empty($admission_id) && !empty($procedure_id)) {
@@ -92,12 +91,10 @@ class View extends Component
                 ->select('p.mr_no', 'p.name', 'a.admission_no', 'e.name as doctor')->first()
                 ->toArray();
 
-            $procedure_name=\App\Models\Hospital\Procedure::where('id',$procedure_id)->first('name');
-            $sale_handed_over=SaleIssuance::where('sale_id',$this->sale_id)->get();
-            foreach ($sale_handed_over as $sho){
-                $this->handed_over.=$sho->handed_over_to;
-            }
-            $this->admission_details['procedure_name']=$procedure_name->name;
+            $procedure_name = \App\Models\Hospital\Procedure::where('id', $procedure_id)->first('name');
+            $sale_handed_over = SaleIssuance::where('sale_id', $this->sale_id)->get();
+            $this->handed_over = $sale_handed_over->toArray();
+            $this->admission_details['procedure_name'] = $procedure_name->name;
             $this->admission = true;
         }
 
