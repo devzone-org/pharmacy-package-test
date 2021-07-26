@@ -21,7 +21,7 @@ class CreateProductInventories extends Migration
             $table->decimal('retail_price','10','2');
             $table->decimal('supply_price','10','2');
             $table->date('expiry')->nullable();
-            $table->integer('po_id');
+            $table->integer('po_id')->nullable();
             $table->string('type','10')->nullable();
             $table->string('batch_no',30)->nullable();
             $table->timestamps();
