@@ -2,13 +2,14 @@
 
 namespace Devzone\Pharmacy\Http\Livewire\MasterData;
 
+use Devzone\Pharmacy\Http\Traits\WithSorting;
 use Devzone\Pharmacy\Models\Product;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class ProductsList extends Component
 {
-    use WithPagination;
+    use WithPagination,WithSorting;
 
     public $success = '';
     public $name;
@@ -28,7 +29,9 @@ class ProductsList extends Component
             ->when(!empty($this->salt),function($q){
                 return $q->where('p.salt','LIKE','%'.$this->salt.'%');
             })
-            ->orderBy('p.id','asc')
+            ->when(!empty($this->sortBy),function($q){
+                $q->orderBy($this->sortBy,$this->sortDirection);
+            })
             ->paginate(20);
 
         return view('pharmacy::livewire.master-data.products-list', ['products' => $products]);
