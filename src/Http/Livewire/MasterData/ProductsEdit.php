@@ -141,9 +141,12 @@ class ProductsEdit extends Component
         ]);
         if ($this->force_update) {
             $this->retail_price_old = $this->retail_price;
-            ProductInventory::where('product_id', $pro->id)->update([
-                'retail_price' => $this->retail_price
-            ]);
+            if($this->packing>0){
+                ProductInventory::where('product_id', $pro->id)->update([
+                    'retail_price' => $this->retail_price / $this->packing
+                ]);
+            }
+
         }
         $this->success = 'Record has been updated.';
         $this->reset(['retail_price_notification', 'force_update']);
