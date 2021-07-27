@@ -78,7 +78,9 @@
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                                     Sale at
                                 </th>
-
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                    Patient
+                                </th>
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                                     Referred by
                                 </th>
@@ -115,11 +117,13 @@
                                         {{ date('d M, y h:i A') }} <br>
                                         {{ $h->sale_by }}
                                     </td>
-
-
                                     <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{ $h->referred_by }} <br> {{ $h->patient_name }}
+                                        {{ !empty($h->patient_name) ? $h->patient_name : 'Walk in' }}
                                     </td>
+                                    <td class="px-3 py-3   text-sm text-gray-500">
+                                        {{ $h->referred_by }}
+                                    </td>
+
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         @if($h->is_refund == 'f')
                                             <span

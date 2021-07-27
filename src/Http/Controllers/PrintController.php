@@ -21,7 +21,9 @@ class PrintController extends Controller
             ->where('s.id', $id)
             ->select('p.name as item', DB::raw('sum(sd.qty) as sale_qty'), 'sd.retail_price', 'sd.disc'
                 , 's.sale_at', 's.remarks', 'pt.name as patient_name', 's.is_refund', 'u.name as sale_by',
-                DB::raw('sum(sr.refund_qty) as refund_qty'), 'e.name as referred_by')
+                DB::raw('sum(sr.refund_qty) as refund_qty'), 'e.name as referred_by',
+                'pt.name as patient_name','pt.mr_no','pt.father_husband_name','pt.gender','pt.phone'
+            )
             ->groupBy('sd.product_id')
             ->orderBy('sd.product_id')->get()->toArray();
         $sales_ref = [];
@@ -56,6 +58,25 @@ class PrintController extends Controller
         $print['developer'] = env('RECEIPT_PRINTER_DEVELOPER');
         $print['developer_phone'] = env('RECEIPT_PRINTER_DEVELOPER_PHONE');
         $print['invoice_no'] = 'SALES INVOICE #' . $id;
+        $patient_name=!empty($sale['patient_name']) ? $sale['patient_name']: 'Walk in';
+        $mr_no=!empty($sale['mr_no']) ? $sale['mr_no'] : 'Walk in';
+        $husband_father=!empty($sale['father_husband_name']) ? $sale['father_husband_name'] : 'Walk in';
+        if (!empty($sale['gender'])){
+            if ($sale['gender']=='f'){
+                $print['gender'] = str_pad("Gender : " . 'Female', 48, " ");
+            }elseif ($sale['gender']=='m'){
+                $print['gender'] = str_pad("Gender : " . 'Male', 48, " ");
+            }
+            else{
+                $print['gender'] =str_pad("Gender : " . 'Others', 48, " ");
+            }
+        }
+        else{
+            $print['gender']=str_pad("Gender : " . 'Walk in', 48, " ");
+        }
+        $print['patient_name'] = str_pad("Patient Name : " . $patient_name, 48, " ");
+        $print['patient_mr_no'] = str_pad("Mr# : " .$mr_no , 48, " ");
+        $print['father_husband_name'] = str_pad("Father/ Husband Name : " . $husband_father, 48, " ");
 
         $print['sale_by'] = str_pad("Sale By : " . $sale['sale_by'], 48, " ");
         $print['sale_at'] = str_pad("Sale At : " . date('d M Y h:i A', strtotime($sale['sale_at'])), 48, " ",);

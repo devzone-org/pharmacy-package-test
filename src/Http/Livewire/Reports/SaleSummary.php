@@ -40,18 +40,14 @@ class SaleSummary extends Component
             ->when(!empty($this->from), function ($q) {
                 return $q->whereDate('s.sale_at', '>=', $this->from);
             })
-
             ->select(
                 DB::raw('DATE(s.sale_at) as date'),
                 DB::raw('sum(sd.total) as total'),
-//                DB::raw('sum((sd.total/sd.qty)*sf.refund_qty) as refunded_total'),
                 DB::raw('sum(sd.qty*sd.supply_price) as cos'),
-//                DB::raw('sum(sd.supply_price*sf.refund_qty) as refunded_cos'),
                 DB::raw('count(DISTINCT(s.id)) as no_of_sale'),
                 DB::raw('count(DISTINCT(s.patient_id)) as unique_customers'),
                 DB::raw('count(DISTINCT(sd.product_id)) as no_of_items'),
                 DB::raw('sum(sd.total_after_disc) as total_after_disc'),
-//                DB::raw('sum((sd.total_after_disc/sd.qty)*sf.refund_qty) as refunded')
             )
             ->groupBy('date')
             ->get()

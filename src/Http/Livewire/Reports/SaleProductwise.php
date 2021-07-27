@@ -53,6 +53,7 @@ class SaleProductwise extends Component
                 DB::raw('sum(sd.total_after_disc) as total_after_disc'),
             )
             ->groupBy('sd.product_id')
+            ->orderBy('qty','DESC')
             ->get()
             ->toArray();
     }

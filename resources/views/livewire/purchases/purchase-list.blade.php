@@ -65,10 +65,10 @@
                     PO - Unapproved
                 </dt>
                 <dd class="mt-1 text-xl text-md text-gray-900">
-                    # {{ number_format($stats->where('status','approval-awaiting')->sum('total')) }}
+                    # {{ number_format($po_unapproved->sum('total')) }}
                 </dd>
                 <dd class="mt-1 text-xl text-md text-gray-900">
-                    PKR {{ number_format($stats->where('status','approval-awaiting')->sum('total_cost_order')) }}
+                    PKR {{ number_format($po_unapproved->sum('total_cost_order')) }}
                 </dd>
             </div>
             <div class="col-span-1">
@@ -76,10 +76,10 @@
                     PO - Approved
                 </dt>
                 <dd class="mt-1  text-xl text-md text-gray-900">
-                    {{ number_format($stats->where('status','awaiting-delivery')->sum('total')) }}
+                    {{ number_format($po_approved->sum('total')) }}
                 </dd>
                 <dd class="mt-1 text-xl text-md text-gray-900">
-                    PKR {{ number_format($stats->where('status','awaiting-delivery')->sum('total_cost_order')) }}
+                    PKR {{ number_format($po_approved->sum('total_cost_order')) }}
                 </dd>
             </div>
 
@@ -88,11 +88,11 @@
                     Stock Receiving In-process
                 </dt>
                 <dd class="mt-1   text-xl text-md text-gray-900">
-                   # {{ number_format($stats->where('status','receiving')->sum('total')) }}
+                   # {{ number_format($stock_receiving_in_process->sum('total')) }}
                 </dd>
 
                 <dd class="mt-1   text-xl text-md text-gray-900">
-                   PKR {{ number_format($stats->where('status','receiving')->sum('total_cost')) }}
+                   PKR {{ number_format($stock_receiving_in_process->sum('total_cost_order')) }}
                 </dd>
             </div>
 
@@ -101,10 +101,10 @@
                     Unpaid Invoices
                 </dt>
                 <dd class="mt-1 text-xl text-md text-gray-900">
-                   # {{ number_format($stats->where('status','received')->where('is_paid','f')->sum('total')) }}
+                   # {{ number_format($unpaid_invoices->sum('total')) }}
                 </dd>
                 <dd class="mt-1 text-xl text-md text-gray-900">
-                   PKR {{ number_format($stats->where('status','received')->where('is_paid','f')->sum('total_cost')) }}
+                   PKR {{ number_format($unpaid_invoices->sum('total_cost_order')) }}
                 </dd>
             </div>
 
@@ -113,10 +113,10 @@
                     Order Completed
                 </dt>
                 <dd class="mt-1 text-xl text-md text-gray-900">
-                    # {{ number_format($stats->where('status','received')->where('is_paid','t')->sum('total')) }}
+                    # {{ number_format($order_completed->sum('total')) }}
                 </dd>
                 <dd class="mt-1 text-xl text-md text-gray-900">
-                    PKR {{ number_format($stats->where('status','received')->where('is_paid','t')->sum('total_cost')) }}
+                    PKR {{ number_format($order_completed->sum('total_cost_order')) }}
                 </dd>
             </div>
         </div>

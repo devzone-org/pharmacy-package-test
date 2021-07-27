@@ -32,13 +32,15 @@ class PurchaseAdd extends Component
         'supplier_id' => 'required|integer',
         'expected_date' => 'required|date',
         'supplier_invoice' => 'nullable|string',
+        'order_list' => 'required',
         'order_list.*.qty' => 'required|integer',
         'order_list.*.cost_of_price' => 'required|numeric',
         'order_list.*.retail_price' => 'required|numeric'
     ];
 
     protected $validationAttributes = [
-        'supplier_id' => 'supplier'
+        'supplier_id' => 'supplier',
+        'order_list' => 'Products',
     ];
 
     public function render()
@@ -90,7 +92,6 @@ class PurchaseAdd extends Component
                 $this->product_data = [];
             }
 
-
         } else {
             $this->product_data = [];
         }
@@ -121,12 +122,8 @@ class PurchaseAdd extends Component
                 $this->order_list[$key]['qty'] = $qty + 1;
                 $this->order_list[$key]['total_cost'] = $this->order_list[$key]['qty'] * $this->order_list[$key]['cost_of_price'];
             }
-
         }
-
-
     }
-
 
     public function create()
     {
@@ -157,7 +154,7 @@ class PurchaseAdd extends Component
             }
             DB::commit();
             $this->success = 'Purchase order has been created and awaiting for approval.';
-            $this->reset(['order_list','expected_date', 'supplier_id', 'supplier_name', 'supplier_invoice', 'delivery_date']);
+            $this->reset(['order_list', 'expected_date', 'supplier_id', 'supplier_name', 'supplier_invoice', 'delivery_date']);
         } catch (\Exception $e) {
             $this->addError('supplier_name', $e->getMessage());
             DB::rollBack();

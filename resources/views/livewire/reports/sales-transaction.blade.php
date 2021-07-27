@@ -71,85 +71,70 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900   ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Sr #
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900   ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Sale Date
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900   ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Invoice #
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900   ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Patient
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Sales Value After Discount
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Discount
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Created By
                                 </th>
-
-
                             </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($report as $h)
                                 <tr>
-                                    <td class="px-3 py-3   text-sm font-medium text-gray-500">
+                                    <td class="px-3 py-3 text-center  text-sm font-medium text-gray-500">
                                         {{ $loop->iteration  }}
                                     </td>
-                                    <td class="px-3 py-3   text-sm text-gray-500">
+                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{ date('d M, Y h:i A',strtotime($h['sale_at'])) }}
                                     </td>
-                                    <td class="px-3 py-3   text-sm text-gray-500">
+                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{ $h['id']  }}
                                     </td>
-                                    <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{ $h['patient_name']  }}
+                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        {{ !empty($h['patient_name']) ? $h['patient_name'] :'Walk in'  }}
                                     </td>
-                                    <td class="px-3 py-3   text-sm text-gray-500">
+                                    <td class="px-3 py-3  text-center text-sm text-gray-500">
                                         {{ number_format($h['total_after_disc'],2) }}
                                     </td>
-
-
-                                    <td class="px-3 py-3   text-sm text-gray-500">
+                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         ({{ number_format($h['total'] - $h['total_after_disc'],2) }})
                                     </td>
-
-
-                                    <td class="px-3 py-3   text-sm text-gray-500">
+                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{ $h['sale_by'] }}
                                     </td>
-
                                 </tr>
                             @endforeach
                             <tr class="bg-gray-50">
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                                <th scope="col" colspan="3" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
 
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900   ">
-                                    Total
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900   ">
-
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     {{ number_format(collect($report)->sum('total_after_disc'),2) }}
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900    ">
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     ({{ number_format(collect($report)->sum('total') - collect($report)->sum('total_after_disc'),2) }})
                                 </th>
-
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                                 </th>
 
