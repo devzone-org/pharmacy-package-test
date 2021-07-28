@@ -22,6 +22,7 @@ use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseEdit;
 use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseList;
 use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseReceive;
 use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseView;
+use Devzone\Pharmacy\Http\Livewire\Reports\InterTransferIPDMedicines;
 use Devzone\Pharmacy\Http\Livewire\Reports\PurchasesDetails;
 use Devzone\Pharmacy\Http\Livewire\Reports\PurchaseSummary;
 use Devzone\Pharmacy\Http\Livewire\Reports\SaleDoctorwise;
@@ -122,6 +123,7 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('report.stock-reorder-level',StockReorderLevel::class);
         Livewire::component('report.stock-near-expiry',StockNearExpiry::class);
         Livewire::component('report.stock-in-out',StockInOut::class);
+        Livewire::component('report.inter-transfer-IPD-medicines',InterTransferIPDMedicines::class);
         Livewire::component('master-data.medicine',Medicine::class);
         Livewire::component('sales.admission-pharmacy',\Devzone\Pharmacy\Http\Livewire\Sales\AdmissionPharmacy::class);
     }

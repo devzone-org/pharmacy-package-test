@@ -111,7 +111,7 @@
                                             {{number_format($r['total_after_disc']-$r['cos'],2)}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{number_format((($r['total_after_disc']-$r['cos'])/$r['total_after_disc'])*100,2)}}
+                                            {{number_format((($r['total_after_disc']-$r['cos'])/$r['total_after_disc'])*100,2)}} %
                                         </td>
                                     </tr>
                                 @endforeach

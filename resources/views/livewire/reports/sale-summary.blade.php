@@ -62,10 +62,13 @@
                                     Sale Date
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
-                                    Revenue after discount (PKR)
+                                    Revenue (PKR)
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Discount (PKR)
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
+                                    Revenue after discount (PKR)
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     COS (PKR)
@@ -103,11 +106,15 @@
                                             {{date('d M Y',strtotime($r['date']))}}
                                         </td>
                                         <td class="px-3 py-3  text-center text-sm text-gray-500">
-                                            {{number_format($r['total_after_disc'],2)}}
+                                            {{number_format($r['total'],2)}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            9{{number_format($r['total']-$r['total_after_disc'],2)}})
+                                            ({{number_format($r['total']-$r['total_after_disc'],2)}})
                                         </td>
+                                        <td class="px-3 py-3  text-center text-sm text-gray-500">
+                                            {{number_format($r['total_after_disc'],2)}}
+                                        </td>
+
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['cos'],2)}}
                                         </td>
@@ -127,23 +134,24 @@
                                             {{number_format($r['total_after_disc']/$r['no_of_sale'],2)}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{round($r['no_of_items']/$r['no_of_sale'])}}
+                                            {{number_format($r['no_of_sale']/$r['no_of_items'],2)}}
                                         </td>
                                     </tr>
                                 @endforeach
                                 <tr class="bg-gray-50">
-                                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
-
-                                    </th>
-                                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
+                                    <th scope="col" colspan="2" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
 
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_after_disc'),2)}}
+                                        {{number_format(collect($report)->sum('total'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         ({{number_format(collect($report)->sum('total')-collect($report)->sum('total_after_disc'),2)}})
                                     </th>
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                        {{number_format(collect($report)->sum('total_after_disc'),2)}}
+                                    </th>
+
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         {{number_format(collect($report)->sum('cos'),2)}}
                                     </th>
@@ -166,7 +174,7 @@
                                         {{number_format(collect($report)->sum('total_after_disc')/collect($report)->sum('no_of_sale'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{round(collect($report)->sum('no_of_items'))}}
+                                        {{number_format(collect($report)->sum('no_of_sale')/collect($report)->sum('no_of_items'),2)}}
                                     </th>
                                 </tr>
                             </tbody>

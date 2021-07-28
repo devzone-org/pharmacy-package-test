@@ -145,5 +145,8 @@ Route::get('report/stock-near-expiry', function () {
 Route::get('report/stock-in-out', function () {
     return view('pharmacy::reports.Stock-in-out');
 });
+Route::get('report/inter-transfer-IPD-medicines', function () {
+    return view('pharmacy::reports.inter-transfer-IPD-medicines');
+});
 
 Route::get('print/sale/{id}', [PrintController::class, 'print']);

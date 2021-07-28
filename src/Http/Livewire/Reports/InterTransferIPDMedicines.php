@@ -5,14 +5,11 @@ namespace Devzone\Pharmacy\Http\Livewire\Reports;
 
 
 use Devzone\Pharmacy\Models\Sale\Sale;
-use Devzone\Pharmacy\Models\Sale\SaleRefund;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
-class SaleReturnTransaction extends Component
+class InterTransferIPDMedicines extends Component
 {
-    public $salemen = [];
-    public $salesman_id;
     public $range;
     public $from;
     public $to;
@@ -21,12 +18,6 @@ class SaleReturnTransaction extends Component
 
     public function mount()
     {
-        $this->salemen = Sale::from('sales as s')
-            ->join('users as u', 'u.id', '=', 's.sale_by')
-            ->groupBy('s.sale_by')
-            ->select('u.id', 'u.name')
-            ->get()
-            ->toArray();
         $this->from = date('Y-m-d', strtotime('-7 days'));
         $this->to = date('Y-m-d');
         $this->range = 'seven_days';
@@ -35,37 +26,43 @@ class SaleReturnTransaction extends Component
 
     public function render()
     {
-        return view('pharmacy::livewire.reports.sales-return-transaction');
+        return view('pharmacy::livewire.reports.inter-transfer-IPD-medicines');
     }
 
     public function search()
     {
-        $this->report = SaleRefund::from('sale_refunds as sr')
-            ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
-            ->join('sales as s', 's.id', '=', 'sr.sale_id')
-            ->join('products as pr', 'pr.id', '=', 'sd.product_id')
-            ->leftJoin('patients as p', 'p.id', '=', 's.patient_id')
-            ->when(!empty($this->salesman_id), function ($q) {
-                return $q->where('s.sale_by', $this->salesman_id);
+        $this->report = Sale::from('sales as s')
+            ->join('admissions as a','a.id','=','s.admission_id')
+            ->join('admission_job_details as ajd',function ($q){
+                return $q->on('ajd.admission_id','=','a.id')
+                    ->on('ajd.procedure_id','=','s.procedure_id');
             })
+            ->join('employees as emp','emp.id','=','ajd.doctor_id')
+            ->join('patients as p','p.id','=','a.patient_id')
+            ->join('procedures as pro','pro.id','=','s.procedure_id')
+            ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
+            ->leftJoin('sale_refunds as sf','sf.sale_detail_id','=','sd.id')
+            ->join('users as u','u.id','=','s.sale_by')
+
+            ->whereNotNull('s.admission_id')
+            ->whereNotNull('s.procedure_id')
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('sr.updated_at', '<=', $this->to);
+                return $q->whereDate('s.sale_at', '<=', $this->to);
             })
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('sr.updated_at', '>=', $this->from);
+                return $q->whereDate('s.sale_at', '>=', $this->from);
             })
-            ->select('s.sale_at', 'sd.sale_id', 'sr.id', 'pr.name as product_name',
-                'sr.updated_at as return_date',
-                DB::raw("(SELECT SUM(sale_details.total_after_disc) FROM sale_details
-                                WHERE sale_details.sale_id = sr.sale_id) as total"),
-                DB::raw('sum(sd.total_after_disc) as return_total'), 'sr.refund_qty',
-                'p.name as patient_name')
-            ->groupBy('sr.sale_detail_id')->get()->toArray();
-    }
-
-    public function resetSearch()
-    {
-        $this->reset('salesman_id');
+            ->select(
+                's.sale_at','a.admission_no','p.name as patient_name','emp.name as doctor_name','pro.name as procedure_name','u.name as issued_by',
+                DB::raw('sum(sd.total) as total'),
+                DB::raw('sum(sd.qty*sd.supply_price) as cos'),
+                DB::raw('sum(sf.refund_qty*sd.retail_price) as refunded_retail'),
+                DB::raw('sum(sf.refund_qty*sd.supply_price) as refunded_cos'),
+                DB::raw('sum(sd.total_after_disc) as total_after_disc'),
+            )
+            ->groupBy('s.id')
+            ->get()
+            ->toArray();
     }
 
     public function updatedRange($val)
