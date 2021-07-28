@@ -2,6 +2,30 @@
     <div class="shadow mb-5 overflow-hidden border-b border-gray-200 sm:rounded-lg">
         <div class="bg-white py-6 px-4 space-y-6 sm:p-6 ">
             <div class="grid grid-cols-10 gap-6">
+                <div class="col-span-8 sm:col-span-2">
+                    <label for="salesman" class="block text-sm font-medium text-gray-700">Date Range</label>
+                    <select wire:model="range"
+                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="seven_days">Last 7 Days</option>
+                        <option value="thirty_days">Last 30 Days</option>
+                        <option value="custom_range">Custom Range</option>
+                    </select>
+                </div>
+                @if($date_range==true)
+                    <div class="col-span-8 sm:col-span-2">
+                        <label for="from" class="block text-sm font-medium text-gray-700">Sale From</label>
+                        <input type="date" wire:model="from" autocomplete="off"
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+
+                    <div class="col-span-8 sm:col-span-2">
+                        <label for="to" class="block text-sm font-medium text-gray-700">Sale To</label>
+                        <input type="date" wire:model="to" autocomplete="off"
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+                @endif
                 <div class="col-span-6 sm:col-span-2">
                     <label class="block text-sm font-medium text-gray-700">Product</label>
                     <input wire:model="product_name" readonly
@@ -35,12 +59,10 @@
                            class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 </div>
                 <div class="col-span-6 sm:col-span-2">
-                    <label  class="block text-sm font-medium text-gray-700">Norcotics</label>
-                    <select wire:model="norcotics"
-                            class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        <option value="">All</option>
-                        <option value="t">Yes</option>
-                        <option value="f">No</option>
+                    <label class="block text-sm font-medium text-gray-700">Zero Stock item</label>
+                    <select wire:model="zero_stock" class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="t">Show</option>
+                        <option value="f">Hide</option>
                     </select>
                 </div>
                 <div class="col-span-8 sm:col-span-2">
@@ -92,7 +114,7 @@
                                 </th>
                                 <th scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Narcotics
+                                    Type
                                 </th>
                                 <th scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
@@ -131,40 +153,40 @@
                                         {{$loop->iteration}}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-
+                                        {{$r['item']}}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-
+                                        {{$r['manufacturer']}}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-
+                                        {{$r['category']}}
                                     </td>
                                     <td class="px-3 py-3  text-center text-sm text-gray-500">
-
+                                        {{$r['rack']}}
                                     </td>
                                     <td class="px-3 py-3  text-center text-sm text-gray-500">
-
+                                        @if($r['type']=='s') Sound alike @elseif($r['type']=='l') Look alike @else - @endif
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-
+                                        {{$r['opening_stock']}}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-
+                                        {{$r['sales']}}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-
+                                        {{$r['sale_return']}}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-
+                                        {{$r['purchases']}}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-
+                                        {{$r['purchase_return']}}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-
+                                        -
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-
+                                        {{$r['closing_stock']}}
                                     </td>
                                 </tr>
                             @endforeach

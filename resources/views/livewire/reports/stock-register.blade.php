@@ -35,8 +35,8 @@
                            class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 </div>
                 <div class="col-span-6 sm:col-span-2">
-                    <label for="control_medicine" class="block text-sm font-medium text-gray-700">Zero Stock item</label>
-                    <select wire:model="control_medicine" id="control_medicine" class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <label class="block text-sm font-medium text-gray-700">Zero Stock item</label>
+                    <select wire:model="zero_stock" class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                         <option value="t">Show</option>
                         <option value="f">Hide</option>
                     </select>

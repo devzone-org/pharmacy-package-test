@@ -3,16 +3,19 @@
 
 namespace Devzone\Pharmacy\Http\Livewire\Reports;
 
-use Carbon\Carbon;
 use Devzone\Pharmacy\Http\Traits\Searchable;
-use Devzone\Pharmacy\Models\Product;
-use Devzone\Pharmacy\Models\Sale\SaleDetail;
+use Devzone\Pharmacy\Models\InventoryLedger;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class StockInOut extends Component
 {
     use Searchable;
-
+    public $range;
+    public $from;
+    public $to;
+    public $report = [];
+    public $date_range = false;
     public $product_id;
     public $product_name;
     public $manufacture_id;
@@ -21,11 +24,15 @@ class StockInOut extends Component
     public $rack_name;
     public $category_id;
     public $category_name;
-    public $norcotics;
-    public $report = [];
+    public $zero_stock;
 
     public function mount()
     {
+        $this->date_range=false;
+        $this->from = date('Y-m-d', strtotime('-7 days'));
+        $this->to = date('Y-m-d');
+        $this->range = 'seven_days';
+        $this->zero_stock = 'f';
         $this->search();
     }
 
@@ -37,14 +44,8 @@ class StockInOut extends Component
     public function search()
     {
         $this->reset('report');
-        $products = Product::from('products as p')
-            ->join('product_inventories as pi', function ($q) {
-                return $q->on('pi.product_id', '=', 'p.id')
-                    ->where('pi.qty', '>', '0')
-                    ->where('pi.expiry', '<=', date('Y-m-d', strtotime('+3 months')));
-            })
-            ->join('purchases as pur', 'pur.id', '=', 'pi.po_id')
-            ->join('suppliers as s', 's.id', '=', 'pur.supplier_id')
+        $products=InventoryLedger::from('inventory_ledgers as il')
+            ->join('products as p','p.id','=','il.product_id')
             ->leftJoin('manufactures as m', 'm.id', '=', 'p.manufacture_id')
             ->leftJoin('categories as c', 'c.id', '=', 'p.category_id')
             ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
@@ -60,52 +61,68 @@ class StockInOut extends Component
             ->when(!empty($this->category_id), function ($q) {
                 return $q->where('p.category_id', $this->category_id);
             })
-            ->when(!empty($this->norcotics), function ($q) {
-                return $q->where('p.narcotics', $this->norcotics);
+            ->when(!empty($this->to), function ($q) {
+                return $q->whereDate('il.created_at', '<=', $this->to);
             })
-            ->orderBy('p.id', 'ASC')
-            ->select(
-                'p.id', 'pi.id as pi_id', 'p.name as item', 'p.narcotics', 'm.name as manufacturer', 'c.name as category', 'pi.qty', 'pi.po_id', 'pi.expiry', 'r.name as rack',
-                's.name as supplier_name',
-            )
+            ->when(!empty($this->from), function ($q) {
+                return $q->whereDate('il.created_at', '>=', $this->from);
+            })
+            ->select('p.id as product_id', 'p.name as item', 'p.type as product_type', 'm.name as manufacturer', 'c.name as category', 'r.name as rack',
+                'il.increase','il.decrease','il.type')
             ->get();
-        foreach ($products as $key => $product) {
-            $this->report[$key]['id'] = $product->id;
+        $previous=InventoryLedger::whereDate('created_at','<',$this->from)
+            ->groupBy('product_id')
+            ->select('product_id',DB::raw('sum(decrease) as decrease'),DB::raw('sum(increase) as increase'))
+            ->get();
+
+        foreach ($products->groupBy('product_id') as $key => $product_grouped) {
+            $product=$product_grouped->first();
+            $this->report[$key]['id'] = $product->product_id;
             $this->report[$key]['item'] = $product->item;
-            $this->report[$key]['narcotics'] = $product->narcotics;
             $this->report[$key]['manufacturer'] = $product->manufacturer;
             $this->report[$key]['category'] = $product->category;
-            $this->report[$key]['supplier'] = $product->supplier_name;
             $this->report[$key]['rack'] = $product->rack;
-            $this->report[$key]['expiry'] = $product->expiry;
-            $this->report[$key]['po_id'] = $product->po_id;
-            $this->report[$key]['stock_in_hand'] = $product->qty;
-            $last_sold = SaleDetail::from('sale_details as sd')
-                ->join('sales as s', 's.id', '=', 'sd.sale_id')
-                ->where('sd.product_inventory_id', $product->pi_id)
-                ->select('s.sale_at')
-                ->orderBy('sd.id', 'DESC')
-                ->first();
-            $this->report[$key]['last_sold'] = null;
-            if (!empty($last_sold)) {
-                $this->report[$key]['last_sold'] = $last_sold->sale_at;
-            }
-
-            $this->report[$key]['expired'] = false;
-            if ($product->expiry <= date('Y-m-d')) {
-                $this->report[$key]['expired'] = true;
-            } elseif ($product->expiry > date('Y-m-d')) {
-                $from = Carbon::parse(date('Y-m-d'));
-                $to = Carbon::parse($product->expiry);
-                $diff = $from->diff($to);
-                $this->report[$key]['expiring_in'] = $diff->format("%m months, %d days");
-            }
+            $this->report[$key]['type'] = $product->product_type;
+            $this->report[$key]['sales'] = $product_grouped->where('type','sale')->sum('decrease');
+            $this->report[$key]['sale_return'] = $product_grouped->where('type','sale')->sum('increase');
+            $this->report[$key]['purchases'] = $product_grouped->where('type','purchase')->sum('increase')+$product_grouped->where('type','purchase-bonus')->sum('increase');
+            $this->report[$key]['purchase_return'] = $product_grouped->where('type','purchase-refund')->sum('decrease');
+            $this->report[$key]['opening_stock'] = $previous->where('product_id',$product->product_id)->sum('increase')-$previous->where('product_id',$product->product_id)->sum('decrease');
+            $closing=($this->report[$key]['opening_stock']-($this->report[$key]['sales']+$this->report[$key]['purchase_return']))+$this->report[$key]['sale_return']+$this->report[$key]['purchases'];
+            $this->report[$key]['closing_stock']=$closing;
         }
+//        $this->report=collect($this->report)->sortByDesc('opening_stock');
     }
 
     public function resetSearch()
     {
-        $this->reset('norcotics','product_id', 'product_name', 'rack_id', 'rack_name', 'category_id', 'category_name', 'manufacture_id', 'manufacture_name', 'supplier_id', 'supplier_name');
+        $this->reset('product_id', 'product_name', 'rack_id', 'rack_name', 'category_id', 'category_name', 'manufacture_id', 'manufacture_name');
         $this->search();
+    }
+    public function updatedRange($val)
+    {
+        if ($val == 'custom_range') {
+            $this->date_range = true;
+        } elseif ($val == 'seven_days') {
+            $this->date_range = false;
+            $this->from = date('Y-m-d', strtotime('-7 days'));
+            $this->to = date('Y-m-d');
+            $this->search();
+        } elseif ($val == 'thirty_days') {
+            $this->date_range = false;
+            $this->from = date('Y-m-d', strtotime('-30 days'));
+            $this->to = date('Y-m-d');
+            $this->search();
+        } elseif ($val == 'yesterday') {
+            $this->date_range = false;
+            $this->from = date('Y-m-d', strtotime('-1 days'));
+            $this->to = date('Y-m-d', strtotime('-1 days'));
+            $this->search();
+        } elseif ($val == 'today') {
+            $this->date_range = false;
+            $this->from = date('Y-m-d');
+            $this->to = date('Y-m-d');
+            $this->search();
+        }
     }
 }
