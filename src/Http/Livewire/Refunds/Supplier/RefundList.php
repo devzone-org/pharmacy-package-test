@@ -96,6 +96,7 @@ class RefundList extends Component
                     'product_id' => $product_inv->product_id,
                     'order_id' => $product_inv->po_id,
                     'decrease' => $rd->return,
+                    'type'=>'purchase-refund',
                     'description' => "Refunded on dated " . date('d M, Y') .
                 " against PO # " . $product_inv->po_id. " to supplier " . $supplier['name']
                 ]);

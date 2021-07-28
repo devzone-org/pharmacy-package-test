@@ -535,14 +535,20 @@
 
     document.addEventListener("keydown", event => {
         if (event.keyCode == 112) {
+            event.preventDefault();
+            event.stopPropagation();
             window.livewire.emit('openSearch');
         }
 
         if (event.keyCode == 113) {
+            event.preventDefault();
+            event.stopPropagation();
             window.livewire.emit('saleComplete');
         }
 
         if (event.keyCode == 114) {
+            event.preventDefault();
+            event.stopPropagation();
             const input = document.getElementById('discount');
             input.focus();
             input.select();
@@ -550,13 +556,16 @@
         }
 
         if (event.keyCode == 115) {
-
+            event.preventDefault();
+            event.stopPropagation();
             const input = document.getElementById('received');
             input.focus();
             input.select();
         }
 
         if (event.keyCode == 116) {
+            event.preventDefault();
+            event.stopPropagation();
             const input = document.getElementById('remarks');
             input.focus();
             input.select();

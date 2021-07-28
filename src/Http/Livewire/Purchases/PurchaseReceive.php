@@ -329,6 +329,7 @@ class PurchaseReceive extends Component
                         'product_id' => $r->product_id,
                         'order_id' => $this->purchase_id,
                         'increase' => $r->qty,
+                        'type'=>'purchase',
                         'description' => 'Inventory increase'
                     ]);
                     if ($r->bonus > 0) {
@@ -346,6 +347,7 @@ class PurchaseReceive extends Component
                             'product_id' => $r->product_id,
                             'order_id' => $this->purchase_id,
                             'increase' => $r->bonus,
+                            'type'=>'purchase-bonus',
                             'description' => 'Inventory increase by bonus'
                         ]);
                     }

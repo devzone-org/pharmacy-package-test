@@ -335,6 +335,7 @@ class Refund extends Component
                             InventoryLedger::create([
                                 'product_id' => $r['product_id'],
                                 'increase' => $dec,
+                                'type'=>'sale-refund',
                                 'description' => "Refund on dated " . date('d M, Y') .
                                     " against receipt #" . $this->sale_id
                             ]);
@@ -371,6 +372,7 @@ class Refund extends Component
                                     'product_id' => $product_inv->product_id,
                                     'order_id' => $product_inv->po_id,
                                     'decrease' => $sale_qty,
+                                    'type'=>'sale',
                                     'description' => "Sale on dated " . date('d M, Y') .
                                         " against receipt #" . $this->sale_id
                                 ]);
@@ -384,6 +386,7 @@ class Refund extends Component
                                     'product_id' => $product_inv->product_id,
                                     'order_id' => $product_inv->po_id,
                                     'decrease' => $dec,
+                                    'type'=>'sale',
                                     'description' => "Sale on dated " . date('d M, Y') .
                                         " against receipt #" . $this->sale_id
                                 ]);
