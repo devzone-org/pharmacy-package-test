@@ -144,7 +144,10 @@
                                         {{number_format($h['total_after_disc']-$h['cos'],2)}}
                                     </td>
                                     <td class="px-3 py-3  text-center text-sm text-gray-500">
-                                        {{number_format((($h['total_after_disc']-$h['cos'])/$h['total_after_disc'])*100,2)}} %
+                                        @php
+                                            $total_after_disc=$h['total_after_disc']==0 ? 1 : $h['total_after_disc'];
+                                        @endphp
+                                        {{number_format((($h['total_after_disc']-$h['cos'])/$total_after_disc)*100,2)}} %
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{ $h['sale_by'] }}
@@ -172,8 +175,11 @@
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                     {{number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('cos')-collect($report)->sum('sale_return'),2)}}
                                 </th>
+                                @php
+                                    $grand_total_after_disc=collect($report)->sum('total_after_disc')==0 ? 1 : collect($report)->sum('total_after_disc');
+                                @endphp
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                    {{number_format(((collect($report)->sum('total_after_disc')-collect($report)->sum('cos')-collect($report)->sum('sale_return'))/collect($report)->sum('total_after_disc'))*100,2)}} %
+                                    {{number_format(((collect($report)->sum('total_after_disc')-collect($report)->sum('cos')-collect($report)->sum('sale_return'))/$grand_total_after_disc)*100,2)}} %
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                 </th>
