@@ -38,7 +38,7 @@
     <div class="mb-3 shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
         <div class="bg-white py-6 px-4 sm:p-6 ">
             <h3 class="text-lg leading-6  text-center font-medium text-gray-900">{{ env('APP_NAME') }}</h3>
-            <p class="text-md leading-6  text-center  text-gray-900">Hourly Sale Graph</p>
+            <p class="text-md leading-6  text-center  text-gray-900">Pharmacy Hourly Sale Graph</p>
             <p class="text-md leading-6  text-center  text-gray-900">Statement period
                 from {{ date('d M, Y',strtotime($from)) }} to {{ date('d M, Y',strtotime($to)) }}</p>
         </div>
@@ -116,7 +116,7 @@
                 <div class="max-w-full mx-auto">
                     <div class="shadow p-6 rounded-lg bg-white">
                         <div class="text-center">
-                            <h2 class="text-xl text-gray-800 font-bold leading-tight">Hourly Sales Invoices</h2>
+                            <h2 class="text-xl text-gray-800 font-bold leading-tight"> Hourly Sales Invoices</h2>
                         </div>
                         <div class="line mt-16 mb-8 relative ">
                             <!-- Tooltip -->
@@ -144,7 +144,7 @@
                                 @endphp
                                 @foreach($char_data as $cd)
                                     <div class="px-8" style="width: 4.12%">
-                                        <div style="height: {{(int)(($cd/$max2)*10)}}px;width:15px"
+                                        <div style="height: {{(int)(($cd/$max2)*75)}}px;width:15px"
                                              class="transition ease-in duration-200 bg-blue-600 hover:bg-blue-400 relative"
                                              @mouseenter="showTooltip($event); tooltipOpen = true"
                                              @mouseleave="hideTooltip($event)">

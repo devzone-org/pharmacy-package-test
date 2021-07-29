@@ -302,7 +302,7 @@
                         </svg>
                         <div class="ml-4">
                             <p class="text-base font-medium text-gray-900">
-                                Stock In and Out
+                                Stock Movement
                             </p>
                         </div>
                     </a>

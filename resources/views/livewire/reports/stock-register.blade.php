@@ -63,7 +63,7 @@
 
                         <div class="bg-white py-6 px-4 sm:p-6 ">
                             <h3 class="text-lg leading-6  text-center font-medium text-gray-900">{{ env('APP_NAME') }}</h3>
-                            <p class="text-md leading-6  text-center  text-gray-900">Stock Register Report</p>
+                            <p class="text-md leading-6  text-center  text-gray-900">Pharmacy Stock Register Report</p>
                         </div>
                         <table class="min-w-full  divide-y divide-gray-200">
                             <thead class="bg-gray-50">
