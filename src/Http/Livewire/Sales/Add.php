@@ -48,7 +48,7 @@ class Add extends Component
     public $hospital_info = [];
     public $handed_over;
 
-    protected $listeners = ['openSearch', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
+    protected $listeners = ['openSearch','searchReferredBy','searchPatient', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
 
     public function mount($admission_id = null, $procedure_id = null)
     {
@@ -181,6 +181,14 @@ class Add extends Component
     public function openSearch()
     {
         $this->searchableOpenModal('product_id', 'product_name', 'item');
+    }
+    public function searchReferredBy()
+    {
+        $this->searchableOpenModal('referred_by_id', 'referred_by_name', 'referred_by');
+    }
+    public function searchPatient()
+    {
+        $this->searchableOpenModal('patient_id', 'patient_name', 'patient');
     }
 
     public function render()
@@ -341,10 +349,9 @@ class Add extends Component
             $accounts = ChartOfAccount::whereIn('reference', ['pharmacy-inventory-5', 'income-pharmacy-5', 'cost-of-sales-pharmacy-5'])->get();
 
             $amounts = SaleDetail::where('sale_id', $sale_id)->select(DB::raw('SUM(total_after_disc) as sale'), DB::raw('SUM(qty * supply_price) as cost'))->first();
-            $customer_name = $this->referred_by_name ?? 'walking customer';
-            $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} sold to the {$customer_name}. Cash received PKR " .
+            $customer_name = $this->patient_name ?? 'walking customer';
+            $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} sold to Patient {$customer_name}. Cash received PKR " .
                 number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name;
-
             $vno = Voucher::instance()->voucher()->get();
 
             if ($this->admission) {

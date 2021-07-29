@@ -46,7 +46,7 @@
 
                         <div class="bg-white py-6 px-4 sm:p-6 ">
                             <h3 class="text-lg leading-6  text-center font-medium text-gray-900">{{ env('APP_NAME') }}</h3>
-                            <p class="text-md leading-6  text-center  text-gray-900">Sale Summary Report</p>
+                            <p class="text-md leading-6  text-center  text-gray-900">Pharmacy Sale Summary Report</p>
                             <p class="text-md leading-6  text-center  text-gray-900">Statement period
                                 from {{ date('d M, Y',strtotime($from)) }} to {{ date('d M, Y',strtotime($to)) }}</p>
                         </div>
@@ -62,13 +62,13 @@
                                     Sale Date
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
-                                    Revenue (PKR)
+                                    Sales (PKR)
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Discount (PKR)
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
-                                    Revenue after discount (PKR)
+                                    Sales after discount (PKR)
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     COS (PKR)
