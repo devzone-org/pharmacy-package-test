@@ -78,6 +78,9 @@ class SaleTransaction extends Component
             if ($sale_return->isNotEmpty()){
                 $this->report[$key]['sale_return']=$sale_return->where('sale_id',$rep['id'])->sum('return_total');
             }
+            else{
+                $this->report[$key]['sale_return']=0;
+            }
         }
     }
     public function resetSearch(){
