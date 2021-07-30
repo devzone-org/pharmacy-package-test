@@ -83,27 +83,33 @@
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Patient
                                 </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                    Sale (PKR)
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                    Discount (PKR)
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                    Sale Return (PKR)
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                    Net Sale (PKR)
+                                    <br>
+                                    (A)
+                                </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
-                                    COS
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Sale
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Discount
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Sale Return
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Net Sale
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Gross Profit (PKR)
+                                    COS (PKR)
+                                    <br>
+                                    (B)
                                 </th>
 
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Gross Margin (%)
+                                    Gross Profit (PKR)<br> (A-B)
+                                </th>
+
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                    Gross Margin
+                                    <br> (A-B)/A
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Sold By
@@ -126,9 +132,6 @@
                                         {{ !empty($h['patient_name']) ? $h['patient_name'] :'Walk in'  }}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{ number_format($h['cos'],2) }}
-                                    </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{ number_format($h['total'],2) }}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
@@ -138,16 +141,19 @@
                                         ({{ number_format($h['sale_return'],2) }})
                                     </td>
                                     <td class="px-3 py-3  text-center text-sm text-gray-500">
-                                        {{ number_format($h['total_after_disc'],2) }}
+                                        {{ number_format($h['total_after_disc']-$h['sale_return'],2) }}
+                                    </td>
+                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        {{ number_format($h['cos'],2) }}
                                     </td>
                                     <td class="px-3 py-3  text-center text-sm text-gray-500">
-                                        {{number_format($h['total_after_disc']-$h['cos'],2)}}
+                                        {{number_format($h['total_after_disc']-$h['sale_return']-$h['cos'],2)}}
                                     </td>
                                     <td class="px-3 py-3  text-center text-sm text-gray-500">
                                         @php
-                                            $total_after_disc=$h['total_after_disc']==0 ? 1 : $h['total_after_disc'];
+                                            $total_after_disc=$h['total_after_disc']==0 ? 1 : $h['total_after_disc']-$h['sale_return'];
                                         @endphp
-                                        {{number_format((($h['total_after_disc']-$h['cos'])/$total_after_disc)*100,2)}} %
+                                        {{number_format((($h['total_after_disc']-$h['sale_return']-$h['cos'])/$total_after_disc)*100,2)}} %
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{ $h['sale_by'] }}
@@ -156,9 +162,6 @@
                             @endforeach
                             <tr class="bg-gray-50">
                                 <th scope="col" colspan="4" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                    {{ number_format(collect($report)->sum('cos'),2) }}
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                     {{ number_format(collect($report)->sum('total'),2) }}
@@ -173,13 +176,17 @@
                                     {{ number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return'),2) }}
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                    {{number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('cos')-collect($report)->sum('sale_return'),2)}}
+                                    {{ number_format(collect($report)->sum('cos'),2) }}
+                                </th>
+
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                    {{number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos'),2)}}
                                 </th>
                                 @php
-                                    $grand_total_after_disc=collect($report)->sum('total_after_disc')==0 ? 1 : collect($report)->sum('total_after_disc');
+                                    $grand_total_after_disc=collect($report)->sum('total_after_disc')==0 ? 1 : collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return');
                                 @endphp
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                    {{number_format(((collect($report)->sum('total_after_disc')-collect($report)->sum('cos')-collect($report)->sum('sale_return'))/$grand_total_after_disc)*100,2)}} %
+                                    {{number_format(((collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos'))/$grand_total_after_disc)*100,2)}} %
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                 </th>

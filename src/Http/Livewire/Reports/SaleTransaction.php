@@ -53,7 +53,7 @@ class SaleTransaction extends Component
             ->when(!empty($this->from),function ($q){
                 return $q->whereDate('s.sale_at', '>=', $this->from);
             })
-            ->select('s.sale_at', 's.id', 'p.name as patient_name', DB::raw('sum(sd.supply_price) as cos'),
+            ->select('s.sale_at', 's.id', 'p.name as patient_name', DB::raw('sum(sd.qty*sd.supply_price) as cos'),
                 DB::raw('sum(sd.total) as total'),DB::raw('sum(sd.total_after_disc) as total_after_disc'),
                 'u.name as sale_by')
             ->orderBy('s.id','desc')
@@ -71,12 +71,14 @@ class SaleTransaction extends Component
             ->when(!empty($this->from), function ($q) {
                 return $q->whereDate('sr.updated_at', '>=', $this->from);
             })
-            ->select('sd.sale_id',DB::raw('sum(sd.total_after_disc) as return_total')
+            ->select('sd.sale_id',DB::raw('sum((sd.total_after_disc/sd.qty)*sr.refund_qty) as return_total'),
+                DB::raw('sum(sd.supply_price*sr.refund_qty) as return_cos')
                 )
             ->groupBy('sr.sale_detail_id')->get();
         foreach ($this->report as $key=>$rep){
             if ($sale_return->isNotEmpty()){
                 $this->report[$key]['sale_return']=$sale_return->where('sale_id',$rep['id'])->sum('return_total');
+                $this->report[$key]['cos']=$this->report[$key]['cos']-$sale_return->where('sale_id',$rep['id'])->sum('return_cos');
             }
             else{
                 $this->report[$key]['sale_return']=0;
