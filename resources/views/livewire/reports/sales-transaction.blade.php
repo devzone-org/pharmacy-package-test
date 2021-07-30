@@ -151,9 +151,10 @@
                                     </td>
                                     <td class="px-3 py-3  text-center text-sm text-gray-500">
                                         @php
-                                            $total_after_disc=$h['total_after_disc']==0 ? 1 : $h['total_after_disc']-$h['sale_return'];
+                                            $total_after_disc=empty($h['total_after_disc']) ? 1 : $h['total_after_disc']-$h['sale_return'];
                                         @endphp
-                                        {{number_format((($h['total_after_disc']-$h['sale_return']-$h['cos'])/$total_after_disc)*100,2)}} %
+-
+{{--                                        {{number_format((($h['total_after_disc']-$h['sale_return']-$h['cos'])/$total_after_disc)*100,2)}} %--}}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{ $h['sale_by'] }}
