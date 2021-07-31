@@ -151,10 +151,11 @@
                                     </td>
                                     <td class="px-3 py-3  text-center text-sm text-gray-500">
                                         @php
-                                            $total_after_disc=empty($h['total_after_disc']) ? 1 : $h['total_after_disc']-$h['sale_return'];
+                                            $total_after_disc=$h['total_after_disc']-$h['sale_return'];
+                                            $total_after_disc=empty($total_after_disc) ? 1 : $total_after_disc
                                         @endphp
--
-{{--                                        {{number_format((($h['total_after_disc']-$h['sale_return']-$h['cos'])/$total_after_disc)*100,2)}} %--}}
+
+                                        {{number_format((($h['total_after_disc']-$h['sale_return']-$h['cos'])/$total_after_disc)*100,2)}} %
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{ $h['sale_by'] }}
@@ -184,7 +185,8 @@
                                     {{number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos'),2)}}
                                 </th>
                                 @php
-                                    $grand_total_after_disc=collect($report)->sum('total_after_disc')==0 ? 1 : collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return');
+                                    $grand_total_after_disc=collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return');
+                                       $grand_total_after_disc= empty($grand_total_after_disc) ? 1 :$grand_total_after_disc;
                                 @endphp
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                     {{number_format(((collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos'))/$grand_total_after_disc)*100,2)}} %

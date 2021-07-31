@@ -128,7 +128,8 @@
                                         </td>
 
                                         @php
-                                            $total_after_disc=$r['total_after_disc']==0 ? 1 : $r['total_after_disc']-$r['sale_return'];
+                                            $total_after_disc=$r['total_after_disc']-$r['sale_return'];
+                                            $total_after_disc=empty($total_after_disc) ? 1 :$total_after_disc;
                                         @endphp
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format((($r['total_after_disc']-$r['sale_return']-$r['cos'])/$total_after_disc)*100,2)}}
@@ -175,7 +176,8 @@
 
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         @php
-                                            $grand_total_after_disc=collect($report)->sum('total_after_disc')==0 ? 1: collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return');
+                                            $grand_total_after_disc= collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return');
+                                             $grand_total_after_disc=empty($grand_total_after_disc) ? 1: $grand_total_after_disc;
                                             $gross_margin=((collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos'))/$grand_total_after_disc)*100;
                                         @endphp
                                         {{number_format($gross_margin,2)}}
