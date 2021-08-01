@@ -290,7 +290,7 @@ class Add extends Component
 
             foreach ($this->sales as $s) {
                 $inv = ProductInventory::where('product_id', $s['product_id'])
-                    ->where('supply_price', $s['supply_price'])
+
                     ->where('qty', '>', 0)->orderBy('id', 'asc')->get();
 
                 if ($inv->sum('qty') < $s['s_qty']) {
