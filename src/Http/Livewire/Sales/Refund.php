@@ -452,39 +452,39 @@ class Refund extends Component
             $dif = $refund_retail - $sales_retail;
             if ($dif > 0) {
                 GeneralJournal::instance()->account($cash_acount)->credit(abs($dif))->voucherNo($vno)
-                    ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
             } else {
                 GeneralJournal::instance()->account($cash_acount)->debit(abs($dif))->voucherNo($vno)
-                    ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
             }
             foreach ($accounts as $a) {
                 if ($sales_retail > 0) {
                     if ($a->reference == 'cost-of-sales-pharmacy-5') {
                         GeneralJournal::instance()->account($a->id)->debit($sales_cost)->voucherNo($vno)
-                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                     }
                     if ($a->reference == 'pharmacy-inventory-5') {
                         GeneralJournal::instance()->account($a->id)->credit($sales_cost)->voucherNo($vno)
-                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                     }
                     if ($a->reference == 'income-pharmacy-5') {
                         GeneralJournal::instance()->account($a->id)->credit($sales_retail)->voucherNo($vno)
-                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                     }
                 }
 
                 if ($refund_retail > 0) {
                     if ($a->reference == 'cost-of-sales-pharmacy-5') {
                         GeneralJournal::instance()->account($a->id)->credit($refund_cost)->voucherNo($vno)
-                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                     }
                     if ($a->reference == 'pharmacy-inventory-5') {
                         GeneralJournal::instance()->account($a->id)->debit($refund_cost)->voucherNo($vno)
-                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                     }
                     if ($a->reference == 'income-return-pharmacy-5') {
                         GeneralJournal::instance()->account($a->id)->debit($refund_retail)->voucherNo($vno)
-                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                     }
                 }
             }

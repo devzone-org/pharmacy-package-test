@@ -382,27 +382,27 @@ class Add extends Component
                         " receipt # {$sale_id} issued against admission # " . $admission_details->admission_no . " and procedure " . $admission_details->procedure_name . ". Account " . $ipd_medicine_account->name . " debited with PKR " .
                         number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name;
                     GeneralJournal::instance()->account($ipd_medicine_account->id)->debit($amounts['sale'])->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                 }
             }
 
             if ($this->admission == false) {
                 GeneralJournal::instance()->account(Auth::user()->account_id)->debit($amounts['sale'])->voucherNo($vno)
-                    ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
             }
 
             foreach ($accounts as $a) {
                 if ($a->reference == 'pharmacy-inventory-5') {
                     GeneralJournal::instance()->account($a->id)->credit($amounts['cost'])->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                 }
                 if ($a->reference == 'income-pharmacy-5') {
                     GeneralJournal::instance()->account($a->id)->credit($amounts['sale'])->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                 }
                 if ($a->reference == 'cost-of-sales-pharmacy-5') {
                     GeneralJournal::instance()->account($a->id)->debit($amounts['cost'])->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                 }
             }
             if ($this->admission == true) {
