@@ -81,20 +81,21 @@ class PrintController extends Controller
         $print['sale_by'] = str_pad("Sale By : " . $sale['sale_by'], 48, " ");
         $print['sale_at'] = str_pad("Sale At : " . date('d M Y h:i A', strtotime($sale['sale_at'])), 48, " ",);
 
-        $print['heading'] = str_pad("Item", 20, " ") . str_pad("Qty", 6, " ", STR_PAD_LEFT) . str_pad("Unit", 10, " ", STR_PAD_LEFT) . str_pad("Total", 12, " ", STR_PAD_LEFT);
+        $print['heading'] = str_pad("#", 3, " ").str_pad("Item", 17, " ") . str_pad("Qty", 6, " ", STR_PAD_LEFT) . str_pad("Unit", 10, " ", STR_PAD_LEFT) . str_pad("Total", 12, " ", STR_PAD_LEFT);
         $inner = "";
         foreach ($sales_ref as $key => $s) {
-            $item = substr($s['item'], 0, 20);
-            $item = str_pad($item, 20, " ");
+            $sr=str_pad(++$key, 3, " ");
+            $item = substr($s['item'], 0, 17);
+            $item = str_pad($item, 17, " ");
             $qty = str_pad($s['sale_qty'], 6, " ",STR_PAD_LEFT);
             $retail = str_pad($s['retail_price'], 9, " ",STR_PAD_LEFT);
             $total = str_pad($s['total'], 11, " ", STR_PAD_LEFT);
-            $inner .= $item . $qty . " " . $retail . " " . $total;
+            $inner .= $sr. $item . $qty . " " . $retail . " " . $total;
         }
 
         $collect = collect($sales_ref);
         $print['inner'] = $inner;
-
+        $print['footer']=str_pad("total Qty", 20, " ", STR_PAD_LEFT).str_pad($collect->sum('sale_qty'), 5, " ", STR_PAD_LEFT).str_pad("", 20, " ", STR_PAD_LEFT);
         $print['sub_total'] = str_pad("Sub Total", 33, " ", STR_PAD_LEFT) .
             str_pad(number_format($collect->where('sale_qty', '>', 0)->sum('total'), 2), 15, " ", STR_PAD_LEFT);
         $print['discount'] = str_pad("Discount (PKR)", 33, " ", STR_PAD_LEFT) .
