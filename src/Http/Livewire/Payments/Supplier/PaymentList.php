@@ -41,8 +41,8 @@ class PaymentList extends Component
             ->join('suppliers as s', 's.id', 'sp.supplier_id')
             ->join('chart_of_accounts as coa', 'coa.id', '=', 'sp.pay_from')
             ->join('supplier_payment_details as spd', 'spd.supplier_payment_id', '=', 'sp.id')
-
             ->join('purchase_receives as pr', 'pr.purchase_id', '=', 'spd.order_id')
+            ->join('purchases as p', 'p.id', '=', 'spd.order_id')
             ->join('users as c', 'c.id', '=', 'sp.added_by')
             ->leftJoin('users as a', 'a.id', '=', 'sp.approved_by')
             ->when(!empty($this->supplier_id_s), function ($q) {
@@ -59,11 +59,10 @@ class PaymentList extends Component
                 }
 
             })
-            ->select('s.name as supplier_name', 'sp.id', 'sp.description', 'coa.name as account_name', 'sp.payment_date',
-                DB::raw('sum(pr.total_cost) as total_cost'),'sp.created_at', 'c.name as created_by',
+            ->select('p.advance_tax', 's.name as supplier_name', 'sp.id', 'sp.description', 'coa.name as account_name', 'sp.payment_date',
+                DB::raw('sum(pr.total_cost) as total_cost'), 'sp.created_at', 'c.name as created_by',
                 'a.name as approved_by', 'sp.approved_at', 'spd.order_id')
             ->groupBy('sp.id')
-
             ->orderBy('sp.id', 'desc')
             ->paginate(20);
         return view('pharmacy::livewire.payments.supplier.payment-list', ['payments' => $payments]);
@@ -100,7 +99,10 @@ class PaymentList extends Component
             if (!empty($supplier_payment->approved_at)) {
                 throw new \Exception('Payment already approved.');
             }
-
+            $tax = ChartOfAccount::where('reference', 'advance-tax-236')->first();
+            if (empty($tax)) {
+                throw new \Exception('Advance tax account not found in chart of accounts.');
+            }
             $orders = SupplierPaymentDetail::where('supplier_payment_id', $id)->get()->pluck('order_id')->toArray();
             if (Purchase::whereIn('id', $orders)->where('is_paid', 't')->exists()) {
                 throw new \Exception('Purchase order that you select already mark as paid.');
@@ -115,22 +117,33 @@ class PaymentList extends Component
             $pay_from = ChartOfAccount::findOrFail($supplier_payment->pay_from);
             $supplier = Supplier::findOrFail($supplier_payment->supplier_id);
 
+            $advance_tax = Purchase::whereIn('id', $orders)->first()->advance_tax;
 
             $amount = PurchaseReceive::whereIn('purchase_id', $orders)->sum('total_cost');
             $return_amount = SupplierRefund::whereIn('id', $returns)->sum('total_amount');
             $diff = $amount - $return_amount;
-            $description = "Amounting total PKR " . number_format($amount, 2) . "/- paid on dated " . date('d M, Y', strtotime($supplier_payment->payment_date)) .
-                " against PO # " . implode(', ', $orders) . " to supplier " . $supplier['name'] . " by " . Auth::user()->name . " " . $supplier_payment->description;
+            $tax_amount = 0;
+            if (!empty($advance_tax)) {
+                $tax_amount = $diff * (abs($advance_tax) / 100);
+            }
+            $diff = $diff + $tax_amount;
 
 
             $vno = Voucher::instance()->voucher()->get();
             $bank = GeneralJournal::instance()->account($pay_from['id']);
             if ($diff > 0) {
                 $bank = $bank->credit($diff);
+                $des = "paid";
             } else {
                 $bank = $bank->debit(abs($diff));
+                $des = "received";
             }
-            $bank->voucherNo($vno)->date($this->payment_date)->approve()->description($description)->execute();
+            $description = "Amounting total PKR " . number_format(abs($diff), 2) .
+            "/- " . $des . " on dated " . date('d M, Y', strtotime($supplier_payment->payment_date)) .
+                " against PO # " . implode(', ', $orders) . " to supplier " . $supplier['name'] . " by " . Auth::user()->name . " " . $supplier_payment->description;
+
+            $bank->voucherNo($vno)->date($this->payment_date)
+                ->approve()->description($description)->execute();
 
             $sp = GeneralJournal::instance()->account($supplier['account_id']);
             if ($diff > 0) {
@@ -138,7 +151,8 @@ class PaymentList extends Component
             } else {
                 $sp = $sp->credit(abs($diff));
             }
-            $sp->voucherNo($vno)->date($this->payment_date)->approve()->description($description)->execute();
+            $sp->voucherNo($vno)->date($this->payment_date)->approve()
+                ->description($description)->execute();
 
             Purchase::whereIn('id', $orders)->update([
                 'is_paid' => 't'

@@ -18,7 +18,6 @@
             <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
                 <div>
                     <h3 class="text-lg leading-6 font-medium text-gray-900">Receive Purchase Order</h3>
-
                 </div>
 
                 @include('pharmacy::include.errors')
@@ -269,8 +268,44 @@
                         <span class="sr-only">Edit</span>
                     </th>
                 </tr>
+                <tr>
+                    <th colspan="12">&nbsp;</th>
+                </tr>
+
+                <tr>
+                    <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Total Cost</th>
+                    <th colspan="3" class="px-3 py-3    text-left text-lg font-medium text-gray-900   ">
+                        {{ number_format(collect($order_list)->sum('total_cost'),2) }}
+                    </th>
+                </tr>
+
+                <tr>
+                    <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Recoverable Advance Tax u/s 236(H)</th>
+                    <th colspan="3" class="px-3 py-3    text-left text-lg font-medium text-gray-900   ">
+                        <select name="" wire:model="advance_tax"
+                        class="block w-full   border border-gray-300 rounded-md shadow-sm py-1 px-1 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500  text-lg">
+                            <option value=""></option>
+                            <option value="0.5">0.5%</option>
+                            <option value="1">1%</option>
+                        </select>
+                    </th>
+                </tr>
+
+                <tr>
+                    <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Taxable Amount</th>
+                    <th colspan="3" class="px-3 py-3    text-left text-lg font-medium text-gray-900   ">
+                        {{ number_format($advance_tax_amount,2) }}
+                    </th>
+                </tr>
+                <tr>
+                    <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Gross Cost</th>
+                    <th colspan="3" class="px-3 py-3    text-left text-lg font-medium text-gray-900   ">
+                        {{ number_format(collect($order_list)->sum('total_cost') + $advance_tax_amount,2) }}
+                    </th>
+                </tr>
                 </tbody>
             </table>
+
 
             <div class="px-4 py-3 bg-gray-50 text-right sm:px-6 border-t">
                 <button type="submit"
