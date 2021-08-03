@@ -58,7 +58,8 @@ class PurchaseCompare extends Component
                 'c.name as created_by',
                 'a.name as approved_by',
                 'p.approved_at',
-                'c.created_at'
+                'c.created_at',
+                'p.advance_tax'
             )->orderBy('p.id', 'desc')->first();
 
         $order = PurchaseOrder::from('purchase_orders as po')
@@ -147,14 +148,25 @@ class PurchaseCompare extends Component
             if (empty($this->purchase->delivery_date)) {
                 throw new \Exception("Delivery date not updated.");
             }
-
+            if(Purchase::where('status', 'received')->where('id', $this->purchase_id)->exists()){
+                throw new \Exception("Already receive order.");
+            }
             $inventory = ChartOfAccount::where('reference', 'pharmacy-inventory-5')->first();
-            if(empty($inventory)){
+            if (empty($inventory)) {
                 throw new \Exception('Inventory account not found in chart of accounts.');
             }
             $supplier = Supplier::find($this->purchase->supplier_id);
             $amount = $this->receive->sum('total_cost');
-            $description = "Inventory amounting total PKR " . number_format($amount, 2) . "/- received on dated " . date('d M, Y', strtotime($this->purchase->delivery_date)) .
+
+            $tax = ChartOfAccount::where('reference', 'advance-tax-236')->first();
+            if (empty($tax)) {
+                throw new \Exception('Advance tax account not found in chart of accounts.');
+            }
+            $advance_tax_amount = 0;
+            if (!empty($this->purchase['advance_tax'])) {
+                $advance_tax_amount = $amount * ($this->purchase['advance_tax'] / 100);
+            }
+            $description = "Inventory amounting total PKR " . number_format($amount, 2) . "/- + taxable amount PKR " . number_format($advance_tax_amount, 2) . "/- gross total PKR " . number_format($amount + $advance_tax_amount, 2) . " received on dated " . date('d M, Y', strtotime($this->delivery_date)) .
                 " against PO # " . $this->purchase_id . " from supplier " . $supplier['name'] . " by " . Auth::user()->name;
 
 
@@ -163,7 +175,8 @@ class PurchaseCompare extends Component
                 ->date($this->purchase->delivery_date)->approve()->description($description)->execute();
             GeneralJournal::instance()->account($supplier['account_id'])->credit($amount)->voucherNo($vno)
                 ->date($this->purchase->delivery_date)->approve()->description($description)->execute();
-
+            GeneralJournal::instance()->account($tax['id'])->debit($advance_tax_amount)->voucherNo($vno)
+                ->date($this->delivery_date)->approve()->description($description)->execute();
 
             $id = Purchase::where('status', 'receiving')->where('id', $this->purchase_id)->update([
                 'is_paid' => 'f',
@@ -187,7 +200,7 @@ class PurchaseCompare extends Component
                     'product_id' => $r->product_id,
                     'order_id' => $this->purchase_id,
                     'increase' => $r->qty,
-                    'type'=>'purchase',
+                    'type' => 'purchase',
                     'description' => 'Inventory increase'
                 ]);
                 if ($r->bonus > 0) {
@@ -199,13 +212,13 @@ class PurchaseCompare extends Component
                         'po_id' => $this->purchase_id,
                         'type' => 'bonus',
                         'expiry' => !empty($r->expiry) ? $r->expiry : null,
-                        'batch_no' =>!empty($r->batch_no) ? $r->batch_no : null,
+                        'batch_no' => !empty($r->batch_no) ? $r->batch_no : null,
                     ]);
                     InventoryLedger::create([
                         'product_id' => $r->product_id,
                         'order_id' => $this->purchase_id,
                         'increase' => $r->bonus,
-                        'type'=>'purchase-bonus',
+                        'type' => 'purchase-bonus',
                         'description' => 'Inventory increase by bonus'
                     ]);
                 }

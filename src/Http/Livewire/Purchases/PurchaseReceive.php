@@ -35,6 +35,8 @@ class PurchaseReceive extends Component
     public $order_list = [];
     public $grn_no;
     public $purchase_id;
+    public $advance_tax;
+    public $advance_tax_amount = 0;
     public $deleted = [];
     public $success;
 
@@ -57,6 +59,7 @@ class PurchaseReceive extends Component
 
     public function mount($purchase_id)
     {
+
         $this->purchase_id = $purchase_id;
         if (\Devzone\Pharmacy\Models\PurchaseReceive::where('purchase_id', $purchase_id)->exists()) {
             return redirect()->to('pharmacy/purchases/compare/' . $purchase_id);
@@ -150,7 +153,7 @@ class PurchaseReceive extends Component
 
             if ($array[2] == 'bonus') {
 
-                $this->order_list[$array[1]]['total_qty'] = round(($this->order_list[$array[1]]['bonus'] + $this->order_list[$array[1]]['qty']) , 2);
+                $this->order_list[$array[1]]['total_qty'] = round(($this->order_list[$array[1]]['bonus'] + $this->order_list[$array[1]]['qty']), 2);
             }
 
             if ($array[2] == 'cost_of_price' || $array[2] == 'disc') {
@@ -167,6 +170,15 @@ class PurchaseReceive extends Component
                 $this->order_list[$array[1]]['after_disc_cost'] = round($cost_of_price - $discount_value, 2);
                 $this->order_list[$array[1]]['total_cost'] = round($this->order_list[$array[1]]['qty'] * $this->order_list[$array[1]]['after_disc_cost'], 2);
 
+            }
+        }
+
+        if ($name == 'advance_tax') {
+            $total_amount = collect($this->order_list)->sum('total_cost');
+            if (!empty($this->advance_tax)) {
+                $this->advance_tax_amount = $total_amount * ($this->advance_tax / 100);
+            } else {
+                $this->advance_tax_amount = 0;
             }
         }
     }
@@ -244,7 +256,8 @@ class PurchaseReceive extends Component
                 'supplier_invoice' => $this->supplier_invoice,
                 'delivery_date' => $this->delivery_date,
                 'status' => 'receiving',
-                'grn_no' => $this->grn_no
+                'grn_no' => $this->grn_no,
+                'advance_tax' => $this->advance_tax
             ]);
             foreach ($this->order_list as $o) {
 
@@ -285,7 +298,9 @@ class PurchaseReceive extends Component
                     ->select('po.*', 'p.name', 'p.salt', 'p.packing')
                     ->get();
 
-
+                if(Purchase::where('status', 'received')->where('id', $this->purchase_id)->exists()){
+                    throw new \Exception("Already receive order.");
+                }
                 if (empty($this->delivery_date)) {
                     throw new \Exception("Delivery date not updated.");
                 }
@@ -296,14 +311,19 @@ class PurchaseReceive extends Component
                 }
                 $supplier = Supplier::find($this->supplier_id);
                 $amount = $receive->sum('total_cost');
-                $description = "Inventory amounting total PKR " . number_format($amount, 2) . "/- received on dated " . date('d M, Y', strtotime($this->delivery_date)) .
+                $description = "Inventory amounting total PKR " . number_format($amount, 2) . "/- + taxable amount PKR ".number_format($this->advance_tax_amount,2)."/- gross total PKR ".number_format($amount + $this->advance_tax_amount,2)." received on dated " . date('d M, Y', strtotime($this->delivery_date)) .
                     " against PO # " . $this->purchase_id . " from supplier " . $supplier['name'] . " by " . Auth::user()->name;
 
-
+                $tax = ChartOfAccount::where('reference','advance-tax-236')->first();
+                if(empty($tax)){
+                    throw new \Exception('Advance tax account not found in chart of accounts.');
+                }
                 $vno = Voucher::instance()->voucher()->get();
                 GeneralJournal::instance()->account($inventory['id'])->debit($amount)->voucherNo($vno)
                     ->date($this->delivery_date)->approve()->description($description)->execute();
-                GeneralJournal::instance()->account($supplier['account_id'])->credit($amount)->voucherNo($vno)
+                GeneralJournal::instance()->account($tax['id'])->debit($this->advance_tax_amount)->voucherNo($vno)
+                    ->date($this->delivery_date)->approve()->description($description)->execute();
+                GeneralJournal::instance()->account($supplier['account_id'])->credit($amount + $this->advance_tax_amount)->voucherNo($vno)
                     ->date($this->delivery_date)->approve()->description($description)->execute();
 
 
@@ -329,7 +349,7 @@ class PurchaseReceive extends Component
                         'product_id' => $r->product_id,
                         'order_id' => $this->purchase_id,
                         'increase' => $r->qty,
-                        'type'=>'purchase',
+                        'type' => 'purchase',
                         'description' => 'Inventory increase'
                     ]);
                     if ($r->bonus > 0) {
@@ -347,7 +367,7 @@ class PurchaseReceive extends Component
                             'product_id' => $r->product_id,
                             'order_id' => $this->purchase_id,
                             'increase' => $r->bonus,
-                            'type'=>'purchase-bonus',
+                            'type' => 'purchase-bonus',
                             'description' => 'Inventory increase by bonus'
                         ]);
                     }

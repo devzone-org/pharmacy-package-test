@@ -208,11 +208,17 @@
                         {{ $m->account_name }}
                     </td>
                     <td class="px-3 py-3   text-sm text-gray-500">
+                        @php
+                            $tax = 0;
+                            if(!empty($m->advance_tax)){
+                                $tax = $total * ($m->advance_tax/100);
+                            }
+                        @endphp
 
                         @if($total>0)
-                            ({{ number_format($total ,2) }})
+                            ({{ number_format($total + $tax ,2) }})
                         @else
-                            {{ number_format(abs($total) ,2) }}
+                            {{ number_format(abs($total + $tax) ,2) }}
                         @endif
 
                     </td>
@@ -229,10 +235,10 @@
 
 
                             @if($total>0)
-                               Paid
-                            @else
-                                Received
-                            @endif
+                                    Paid
+                                @else
+                                    Received
+                                @endif
                             </span>
                         @endif
 

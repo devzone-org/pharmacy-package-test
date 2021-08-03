@@ -105,7 +105,7 @@
             <table class="min-w-full divide-y divide-gray-200 rounded-md ">
                 <thead  class="bg-white">
                 <tr  >
-                    <th scope="col" colspan="7" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="9" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         <i>Un Paid Purchase Orders</i>
                     </th>
                 </tr>
@@ -133,6 +133,14 @@
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                         Amount
+                    </th>
+
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                        Tax
+                    </th>
+
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                        Gross Amount
                     </th>
 
                 </tr>
@@ -170,17 +178,29 @@
                         <td class="px-3 py-3    text-sm text-gray-500">
                             {{ number_format($m['total_cost'],2) }}
                         </td>
+                        <td class="px-3 py-3    text-sm text-gray-500">
+                            @php
+                            $tax = 0;
+                            if(!empty($m['advance_tax'])){
+                                $tax = $m['total_cost'] * ($m['advance_tax']/100);
+                            }
+                            @endphp
+                            {{ number_format($tax,2) }}
+                        </td>
+                        <td class="px-3 py-3    text-sm text-gray-500">
+                            {{ number_format($m['total_cost'] + $tax,2) }}
+                        </td>
 
 
                     </tr>
                 @endforeach
                 <tr  class="bg-white">
-                    <th scope="col" colspan="7" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="9" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         &nbsp;
                     </th>
                 </tr>
                 <tr  class="bg-white">
-                    <th scope="col" colspan="7" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="9" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         <i>Un Adjusted Returns</i>
                     </th>
                 </tr>
@@ -194,7 +214,7 @@
                         #
                     </th>
 
-                    <th scope="col"  colspan="4" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col"  colspan="6" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Description
                     </th>
 
@@ -214,7 +234,7 @@
                         <td class="px-3 py-3   text-sm font-medium text-gray-500">
                             {{ $loop->iteration }}
                         </td>
-                        <td  colspan="4" class="px-3 py-3   text-sm text-gray-500">
+                        <td  colspan="6" class="px-3 py-3   text-sm text-gray-500">
                             {{ $m['description'] }}
                         </td>
 
@@ -228,10 +248,10 @@
                     </tr>
                 @endforeach
                 <tr>
-                    <th colspan="7">&nbsp;</th>
+                    <th colspan="9">&nbsp;</th>
                 </tr>
                 <tr  >
-                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="8" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
                         Selected Orders
                     </th>
                     <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
@@ -239,15 +259,18 @@
                     </th>
                 </tr>
                 <tr  >
-                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="8" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
                         (Payable Amount)
                     </th>
                     <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
-                        ({{ number_format(collect($purchase_orders)->whereIn('id',$selected_orders)->sum('total_cost'),2) }})
+                        @php
+                            $total_payable= collect($purchase_orders)->whereIn('id',$selected_orders)->sum('total_cost') + collect($purchase_orders)->whereIn('id',$selected_orders)->sum('tax_amount');
+                        @endphp
+                        ({{ number_format($total_payable,2) }})
                     </th>
                 </tr>
                 <tr  >
-                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="8" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
                         Selected Returns
                     </th>
                     <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
@@ -255,7 +278,7 @@
                     </th>
                 </tr>
                 <tr  >
-                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="8" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
                         Receivable Amount
                     </th>
                     <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
@@ -265,15 +288,15 @@
 
 
                 <tr  >
-                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="8" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
                         (Net Payable) / Receivable
                     </th>
                     <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
-                        {{ \Devzone\Ams\Helper\GeneralJournal::numberFormat(-collect($purchase_orders)->whereIn('id',$selected_orders)->sum('total_cost') + collect($returns)->whereIn('id',$selected_returns)->sum('total'),2) }}
+                        {{ \Devzone\Ams\Helper\GeneralJournal::numberFormat(-$total_payable + collect($returns)->whereIn('id',$selected_returns)->sum('total'),2) }}
                     </th>
                 </tr>
                 <tr>
-                    <th colspan="7">&nbsp;</th>
+                    <th colspan="9">&nbsp;</th>
                 </tr>
                 </tbody>
             </table>
