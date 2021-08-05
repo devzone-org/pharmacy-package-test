@@ -273,7 +273,7 @@ class Add extends Component
                     throw new \Exception('Handed over field is required.');
                 }
             }
-
+            $sale_receipt_no=Voucher::instance()->advances()->get();
             $sale_id = Sale::create([
                 'patient_id' => $this->patient_id,
                 'referred_by' => $this->referred_by_id,
@@ -286,6 +286,7 @@ class Add extends Component
                 'gross_total' => collect($this->sales)->sum('total_after_disc'),
                 'admission_id' => $this->admission_id ?? null,
                 'procedure_id' => $this->procedure_id ?? null,
+                'receipt_no'=>$sale_receipt_no,
             ])->id;
 
             foreach ($this->sales as $s) {
