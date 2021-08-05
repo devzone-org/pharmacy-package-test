@@ -197,6 +197,7 @@
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                     Total Amount
                 </th>
+
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                     Status
                 </th>

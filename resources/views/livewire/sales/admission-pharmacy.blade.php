@@ -154,19 +154,19 @@
                                             <div class="py-1" role="none">
 
                                                 @if(empty($admission->sale_id) && empty($admission->checkout_date))
-                                                    <a href="{{url('pharmacy/sales/add?admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id)}}"
+                                                    <a href="{{url('pharmacy/sales/add?admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id.'&doctor_id='.$admission->doctor_id)}}"
                                                        class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                                        role="menuitem" tabindex="-1">Issue Medicines</a>
                                                 @endif
                                                 @if(!empty($admission->sale_id))
-                                                    <a href="{{url('pharmacy/sales/view/'.$admission->sale_id.'?admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id)}}"
+                                                    <a href="{{url('pharmacy/sales/view/'.$admission->sale_id.'?admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id.'&doctor_id='.$admission->doctor_id)}}"
                                                        class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                                        role="menuitem" tabindex="-1">View</a>
                                                     @if(empty($admission->checkout_date))
-                                                        <a href="{{url('pharmacy/sales/refund/'.$admission->sale_id.'?type=issue&admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id)}}"
+                                                        <a href="{{url('pharmacy/sales/refund/'.$admission->sale_id.'?type=issue&admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id.'&doctor_id='.$admission->doctor_id)}}"
                                                            class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                                            role="menuitem" tabindex="-1">Issue More</a>
-                                                        <a href="{{url('pharmacy/sales/refund/'.$admission->sale_id.'?type=refund&admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id)}}"
+                                                        <a href="{{url('pharmacy/sales/refund/'.$admission->sale_id.'?type=refund&admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id.'&doctor_id='.$admission->doctor_id)}}"
                                                            class="text-red-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                                            role="menuitem" tabindex="-1">Refund</a>
                                                     @endif

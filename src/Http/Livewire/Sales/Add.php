@@ -5,6 +5,7 @@ namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
 
 use App\Models\Hospital\Admission;
+use App\Models\Hospital\AdmissionJobDetail;
 use App\Models\Hospital\Hospital;
 use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
@@ -50,19 +51,28 @@ class Add extends Component
 
     protected $listeners = ['openSearch','searchReferredBy','searchPatient', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
 
-    public function mount($admission_id = null, $procedure_id = null)
+    public function mount($admission_id = null, $procedure_id = null, $doctor_id = null)
     {
         $this->admission_id = $admission_id;
         $this->procedure_id = $procedure_id;
         if (!empty($this->admission_id) && !empty($this->procedure_id)) {
             if (class_exists(\App\Models\Hospital\ProcedureMedicine::class)) {
+
                 $this->admission = true;
-                $this->admission_details = \App\Models\Hospital\Admission::from('admissions as a')
-                    ->join('patients as p', 'p.id', '=', 'a.patient_id')
+                $this->admission_details = AdmissionJobDetail::from('admission_job_details as a')
+
                     ->join('employees as e', 'e.id', '=', 'a.doctor_id')
-                    ->where('a.id', $admission_id)
-                    ->select('p.mr_no', 'p.name', 'a.admission_no', 'e.name as doctor')->first()
-                    ->toArray();
+                    ->join('admissions as ad','ad.id','=','a.admission_id')
+                    ->join('patients as p', 'p.id', '=', 'ad.patient_id')
+                    ->where('a.admission_id', $admission_id)
+                    ->where('a.procedure_id', $procedure_id)
+                    ->where('a.doctor_id', $doctor_id)
+                    ->select('p.mr_no', 'p.name', 'ad.admission_no', 'e.name as doctor')->first();
+
+                if(!empty($this->admission_details)){
+                    $this->admission_details = $this->admission_details->toArray();
+                }
+
                 $medicines = \App\Models\Hospital\ProcedureMedicine::from('procedure_medicines as pm')
                     ->join('procedures as pro', 'pro.id', '=', 'pm.procedure_id')
                     ->join('products as p', 'p.id', '=', 'pm.product_id')

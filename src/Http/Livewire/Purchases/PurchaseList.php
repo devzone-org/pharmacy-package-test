@@ -111,6 +111,7 @@ class PurchaseList extends Component
             })
             ->select(
                 'p.id',
+                'p.advance_tax',
                 'p.supplier_id',
                 's.name as supplier_name',
                 'p.supplier_invoice',

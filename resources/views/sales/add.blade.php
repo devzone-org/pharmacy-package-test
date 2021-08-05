@@ -4,6 +4,6 @@
 
 @section('content')
 
-    @livewire('sales.add',['admission_id'=>request('admission_id'),'procedure_id'=>request('procedure_id')])
+    @livewire('sales.add',['admission_id'=>request('admission_id'),'procedure_id'=>request('procedure_id'),'doctor_id'=>request('doctor_id')])
 
 @endsection
