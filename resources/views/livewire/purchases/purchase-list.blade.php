@@ -1,5 +1,4 @@
 <div>
-
     <div class="mb-5 shadow sm:rounded-md sm:overflow-hidden">
         <!-- This example requires Tailwind CSS v2.0+ -->
         <div class="flex flex-col">
@@ -88,11 +87,11 @@
                     Stock Receiving In-process
                 </dt>
                 <dd class="mt-1   text-xl text-md text-gray-900">
-                   # {{ number_format($stock_receiving_in_process->sum('total')) }}
+                    # {{ number_format($stock_receiving_in_process->sum('total')) }}
                 </dd>
 
                 <dd class="mt-1   text-xl text-md text-gray-900">
-                   PKR {{ number_format($stock_receiving_in_process->sum('total_cost_order')) }}
+                    PKR {{ number_format($stock_receiving_in_process->sum('total_cost_order')) }}
                 </dd>
             </div>
 
@@ -101,10 +100,10 @@
                     Unpaid Invoices
                 </dt>
                 <dd class="mt-1 text-xl text-md text-gray-900">
-                   # {{ number_format($unpaid_invoices->sum('total')) }}
+                    # {{ number_format($unpaid_invoices->sum('total')) }}
                 </dd>
                 <dd class="mt-1 text-xl text-md text-gray-900">
-                   PKR {{ number_format($unpaid_invoices->sum('total_cost_order')) }}
+                    PKR {{ number_format($unpaid_invoices->sum('total_cost_order')) }}
                 </dd>
             </div>
 
@@ -195,13 +194,18 @@
                 </th>
 
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Total Amount
+                    Inventory Amount
+                    <br>(A)
                 </th>
-
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    Advance tax<br>(B)
+                </th>
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    Gross Payable Amount<br>(A+B)
+                </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                     Status
                 </th>
-
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                     PO Created By
                 </th>
@@ -240,52 +244,59 @@
                             {{ date('d M Y',strtotime($m->delivery_date)) }}
                         @endif
                     </td>
-
-
+                    @php
+                        if($m->status == 'received'){
+                             $received=$purchase_receives->where('id',$m->id)->first()->cost_after_receiving;
+                             $tax=($m->advance_tax/100)*$received;
+                             $received_after_tax=$tax+$received;
+                        }else{
+                            $received=$m->cost_before_receiving;
+                            $tax=($m->advance_tax/100)*$received;
+                            $received_after_tax=$tax+$received;
+                        }
+                    @endphp
                     <td class="px-3 py-3   text-sm text-gray-500">
-                        {{ number_format($m->cost_before_receiving,2) }}
+                        {{ number_format($received,2) }}
+                    </td>
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        {{ number_format($tax,2) }}
+                    </td>
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        {{ number_format($received_after_tax,2) }}
                     </td>
 
                     <td class="px-3 py-3   text-sm text-gray-500">
                         @if($m->status == 'approval-awaiting')
-                            <span
-                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
                               PO - Unapproved
                             </span>
                         @elseif($m->status == 'awaiting-delivery')
-                            <span
-                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
                                PO - Approved
                             </span>
                         @elseif($m->status == 'receiving')
-
                             <span
-                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
                                Stock Receiving <br>In-process
                             </span>
-
                         @elseif($m->status == 'received')
                             @if($m->is_paid=='f')
-                                <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                             Stock Received
-                            </span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                 Stock Received
+                                </span>
                                 <br>
 
-                                <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                               Invoice Unpaid
-                            </span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                   Invoice Unpaid
+                                </span>
                             @else
-                                <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                             Order Complete
-                            </span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                    Order Complete
+                                </span>
                                 <br>
-                                <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                             Invoice Paid
-                            </span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                    Invoice Paid
+                                </span>
                             @endif
 
                         @endif
@@ -318,7 +329,7 @@
                                     <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                          fill="currentColor" aria-hidden="true">
                                         <path
-                                            d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
+                                                d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
                                     </svg>
                                 </button>
                             </div>

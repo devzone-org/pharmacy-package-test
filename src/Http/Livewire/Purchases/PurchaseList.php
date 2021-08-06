@@ -29,66 +29,7 @@ class PurchaseList extends Component
 
     public function render()
     {
-        $this->po_unapproved = Purchase::from('purchases as p')
-            ->leftJoin('purchase_orders as po', 'po.purchase_id', '=', 'p.id')
-            ->when(!empty($this->supplier_id_s), function ($q) {
-                return $q->where('p.supplier_id', $this->supplier_id_s);
-            })
-            ->where('p.status', 'approval-awaiting')
-            ->select(
-                'p.id', 'p.status', 'p.is_paid',
-                 DB::raw('count(distinct p.id) as total')
-                ,DB::raw('sum(po.qty * po.cost_of_price) as total_cost_order'))
-            ->groupBy('p.id')
-            ->get();
-        $this->po_approved = Purchase::from('purchases as p')
-            ->leftJoin('purchase_orders as po', 'po.purchase_id', '=', 'p.id')
-            ->when(!empty($this->supplier_id_s), function ($q) {
-                return $q->where('p.supplier_id', $this->supplier_id_s);
-            })
-            ->where('p.status', 'awaiting-delivery')
-            ->select(
-                'p.id', 'p.status', 'p.is_paid',DB::raw('count(distinct p.id) as total')
-                , DB::raw('sum(po.qty * po.cost_of_price) as total_cost_order'))
-            ->groupBy('p.id')
-            ->get();
-        $this->stock_receiving_in_process=Purchase::from('purchases as p')
-            ->leftJoin('purchase_receives as pr', 'pr.purchase_id', '=', 'p.id')
-            ->when(!empty($this->supplier_id_s), function ($q) {
-                return $q->where('p.supplier_id', $this->supplier_id_s);
-            })
-            ->where('p.status','receiving')
-            ->select(
-                'p.id', 'p.status', 'p.is_paid',DB::raw('count(distinct p.id) as total')
-                , DB::raw('sum(pr.qty * pr.after_disc_cost) as total_cost_order'))
-            ->groupBy('p.id')
-            ->get();
-        $this->unpaid_invoices=Purchase::from('purchases as p')
-            ->leftJoin('purchase_receives as pr', 'pr.purchase_id', '=', 'p.id')
-            ->when(!empty($this->supplier_id_s), function ($q) {
-                return $q->where('p.supplier_id', $this->supplier_id_s);
-            })
-            ->where('p.status','received')
-            ->where('p.is_paid','f')
-            ->select(
-                'p.id', 'p.status', 'p.is_paid',DB::raw('count(distinct p.id) as total')
-                ,  DB::raw('sum(pr.qty * pr.after_disc_cost) as total_cost_order'))
-            ->groupBy('p.id')
-            ->get();
-        $this->order_completed=Purchase::from('purchases as p')
-            ->leftJoin('purchase_receives as pr', 'pr.purchase_id', '=', 'p.id')
-            ->when(!empty($this->supplier_id_s), function ($q) {
-                return $q->where('p.supplier_id', $this->supplier_id_s);
-            })
-            ->where('p.status','received')
-            ->where('p.is_paid','t')
-            ->select(
-                'p.id', 'p.status', 'p.is_paid',DB::raw('count(distinct p.id) as total')
-                ,  DB::raw('sum(pr.qty * pr.after_disc_cost) as total_cost_order'))
-            ->groupBy('p.id')
-            ->get();
-
-
+        $this->stats();
         $purchase = Purchase::from('purchases as p')
             ->join('purchase_orders as po', 'po.purchase_id', '=', 'p.id')
             ->join('suppliers as s', 's.id', '=', 'p.supplier_id')
@@ -110,25 +51,97 @@ class PurchaseList extends Component
                 }
             })
             ->select(
-                'p.id',
-                'p.advance_tax',
-                'p.supplier_id',
-                's.name as supplier_name',
-                'p.supplier_invoice',
-                'p.grn_no',
-                'p.is_paid',
-                'p.delivery_date',
-                'p.expected_date',
-                'p.status',
-                'c.name as created_by',
-                'a.name as approved_by',
-                'p.approved_at',
-                'p.created_at',
+                'p.id','p.advance_tax','p.supplier_id','p.supplier_invoice','p.grn_no','p.is_paid','p.delivery_date','p.expected_date','p.status',
+                'p.approved_at','p.created_at',
+                'a.name as approved_by','s.name as supplier_name','c.name as created_by',
                 DB::raw('SUM(po.total_cost) as cost_before_receiving')
-            )->groupBy('p.id')->orderBy('p.id', 'desc')->paginate(20);
+            )
+            ->groupBy('p.id')
+            ->orderBy('p.id', 'desc')
+            ->paginate(20);
+        $purchase_receives=Purchase::from('purchases as p')
+            ->join('purchase_receives as pr', 'pr.purchase_id', '=', 'p.id')
+            ->when(!empty($this->supplier_id_s), function ($q) {
+                return $q->where('p.supplier_id', $this->supplier_id_s);
+            })
+            ->when(!empty($this->supplier_invoice), function ($q) {
+                return $q->where('p.supplier_invoice', $this->supplier_invoice);
+            })
+            ->when(!empty($this->status), function ($q) {
+                if ($this->status == 'received-f') {
+                    return $q->where('p.status', 'received')->where('is_paid', 'f');
+                } else if ($this->status == 'received-t') {
+                    return $q->where('p.status', 'received')->where('is_paid', 't');
+                } else {
+                    return $q->where('p.status', $this->status);
+                }
+            })
+            ->select('p.id',DB::raw('SUM(pr.total_cost) as cost_after_receiving'))
+            ->groupBy('p.id')
+            ->get();
+        return view('pharmacy::livewire.purchases.purchase-list', ['purchase' => $purchase,'purchase_receives'=>$purchase_receives]);
+    }
 
-
-        return view('pharmacy::livewire.purchases.purchase-list', ['purchase' => $purchase]);
+    private function stats()
+    {
+        $this->po_unapproved = Purchase::from('purchases as p')
+            ->leftJoin('purchase_orders as po', 'po.purchase_id', '=', 'p.id')
+            ->when(!empty($this->supplier_id_s), function ($q) {
+                return $q->where('p.supplier_id', $this->supplier_id_s);
+            })
+            ->where('p.status', 'approval-awaiting')
+            ->select(
+                'p.id', 'p.status', 'p.is_paid',
+                DB::raw('count(distinct p.id) as total')
+                , DB::raw('sum(po.qty * po.cost_of_price) as total_cost_order'))
+            ->groupBy('p.id')
+            ->get();
+        $this->po_approved = Purchase::from('purchases as p')
+            ->leftJoin('purchase_orders as po', 'po.purchase_id', '=', 'p.id')
+            ->when(!empty($this->supplier_id_s), function ($q) {
+                return $q->where('p.supplier_id', $this->supplier_id_s);
+            })
+            ->where('p.status', 'awaiting-delivery')
+            ->select(
+                'p.id', 'p.status', 'p.is_paid', DB::raw('count(distinct p.id) as total')
+                , DB::raw('sum(po.qty * po.cost_of_price) as total_cost_order'))
+            ->groupBy('p.id')
+            ->get();
+        $this->stock_receiving_in_process = Purchase::from('purchases as p')
+            ->leftJoin('purchase_receives as pr', 'pr.purchase_id', '=', 'p.id')
+            ->when(!empty($this->supplier_id_s), function ($q) {
+                return $q->where('p.supplier_id', $this->supplier_id_s);
+            })
+            ->where('p.status', 'receiving')
+            ->select(
+                'p.id', 'p.status', 'p.is_paid', DB::raw('count(distinct p.id) as total')
+                , DB::raw('sum(pr.qty * pr.after_disc_cost) as total_cost_order'))
+            ->groupBy('p.id')
+            ->get();
+        $this->unpaid_invoices = Purchase::from('purchases as p')
+            ->leftJoin('purchase_receives as pr', 'pr.purchase_id', '=', 'p.id')
+            ->when(!empty($this->supplier_id_s), function ($q) {
+                return $q->where('p.supplier_id', $this->supplier_id_s);
+            })
+            ->where('p.status', 'received')
+            ->where('p.is_paid', 'f')
+            ->select(
+                'p.id', 'p.status', 'p.is_paid', DB::raw('count(distinct p.id) as total')
+                , DB::raw('sum(pr.qty * pr.after_disc_cost) as total_cost_order'))
+            ->groupBy('p.id')
+            ->get();
+        $this->order_completed = Purchase::from('purchases as p')
+            ->leftJoin('purchase_receives as pr', 'pr.purchase_id', '=', 'p.id')
+            ->when(!empty($this->supplier_id_s), function ($q) {
+                return $q->where('p.supplier_id', $this->supplier_id_s);
+            })
+            ->where('p.status', 'received')
+            ->where('p.is_paid', 't')
+            ->select(
+                'p.id', 'p.status', 'p.is_paid', DB::raw('count(distinct p.id) as total')
+                , DB::raw('sum(pr.qty * pr.after_disc_cost) as total_cost_order'))
+            ->groupBy('p.id')
+            ->get();
     }
 
     public function markAsApproved($id)

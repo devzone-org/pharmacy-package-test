@@ -301,7 +301,6 @@ class Add extends Component
 
             foreach ($this->sales as $s) {
                 $inv = ProductInventory::where('product_id', $s['product_id'])
-
                     ->where('qty', '>', 0)->orderBy('id', 'asc')->get();
 
                 if ($inv->sum('qty') < $s['s_qty']) {
@@ -361,8 +360,8 @@ class Add extends Component
 
             $amounts = SaleDetail::where('sale_id', $sale_id)->select(DB::raw('SUM(total_after_disc) as sale'), DB::raw('SUM(qty * supply_price) as cost'))->first();
             $customer_name = $this->patient_name ?? 'walking customer';
-            $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} sold to Patient {$customer_name}. Cash received PKR " .
-                number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name;
+            $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} sold to Patient {$customer_name}. Cash received PKR " .
+                number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name." at ".date('h:i A');
             $vno = Voucher::instance()->voucher()->get();
 
             if ($this->admission) {
@@ -390,7 +389,7 @@ class Add extends Component
                     $ipd_medicine_account = ChartOfAccount::where('reference', 'payable-medicine-5')->first();
 
                     $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) .
-                        " receipt # {$sale_id} issued against admission # " . $admission_details->admission_no . " and procedure " . $admission_details->procedure_name . ". Account " . $ipd_medicine_account->name . " debited with PKR " .
+                        " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} issued against admission # " . $admission_details->admission_no . " and procedure " . $admission_details->procedure_name . ". Account " . $ipd_medicine_account->name . " debited with PKR " .
                         number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name;
                     GeneralJournal::instance()->account($ipd_medicine_account->id)->debit($amounts['sale'])->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();

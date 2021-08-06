@@ -76,7 +76,6 @@ class PurchaseAdd extends Component
     public function updatedSearchProducts($value)
     {
         if (strlen($value) > 1) {
-
             $this->highlight_index = 0;
             $search = Product::from('products as p')
                 ->where('p.status', 't')
@@ -130,7 +129,6 @@ class PurchaseAdd extends Component
         $this->validate();
         try {
             DB::beginTransaction();
-
             $purchase_id = Purchase::create([
                 'supplier_id' => $this->supplier_id,
                 'supplier_invoice' => $this->supplier_invoice,
@@ -139,10 +137,7 @@ class PurchaseAdd extends Component
                 'created_by' => Auth::user()->id,
                 'status' => 'approval-awaiting'
             ])->id;
-
-
             foreach ($this->order_list as $o) {
-
                 PurchaseOrder::create([
                     'purchase_id' => $purchase_id,
                     'product_id' => $o['id'],
