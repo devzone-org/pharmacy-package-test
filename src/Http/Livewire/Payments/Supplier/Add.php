@@ -2,6 +2,7 @@
 
 namespace Devzone\Pharmacy\Http\Livewire\Payments\Supplier;
 
+use Devzone\Ams\Helper\Voucher;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Payments\SupplierPayment;
 use Devzone\Pharmacy\Models\Payments\SupplierPaymentDetail;
@@ -59,12 +60,13 @@ class Add extends Component
                 if (empty(Auth::user()->account_id)) {
                     throw new \Exception('Cash in Hand - ' . Auth::user()->name . ' account not found.');
                 }
+//                $supplier_receipt_no=Voucher::instance()->advances()->get();
                 $id = SupplierPayment::create([
                     'supplier_id' => $this->supplier_id,
                     'description' => $this->description,
                     'pay_from' => Auth::user()->account_id,
                     'payment_date' => $this->payment_date,
-                    'added_by' => Auth::user()->id
+                    'added_by' => Auth::user()->id,
                 ])->id;
 
                 foreach ($this->selected_orders as $o) {

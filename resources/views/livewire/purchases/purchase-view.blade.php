@@ -155,26 +155,25 @@
                                 @if($purchase->is_paid=='f')
                                     <span
                                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                             Stock Received
-                            </span>
+                                     Stock Received
+                                    </span>
                                     <br>
 
                                     <span
                                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                               Invoice Unpaid
-                            </span>
+                                       Invoice Unpaid
+                                    </span>
                                 @else
                                     <span
                                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                             Order Complete
-                            </span>
+                                     Order Complete
+                                    </span>
                                     <br>
                                     <span
                                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                             Invoice Paid
-                            </span>
+                                     Invoice Paid
+                                    </span>
                                 @endif
-
                             @endif
                         </dd>
                     </div>
@@ -289,11 +288,12 @@
                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
                         Retail Price
                     </th>
-
+                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
+                        Disc (%)
+                    </th>
                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
                         Total Cost
                     </th>
-
                 </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -313,41 +313,40 @@
                         </td>
                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                             {{ number_format($m->cost_of_price,2) }}
-
                         </td>
                         <td class="px-3 py-3  text-center text-sm text-gray-500">
                             {{ number_format($m->retail_price,2) }}
                         </td>
-
-
+                        <td class="px-3 py-3  text-center text-sm text-gray-500">
+                            {{ $m->discount ?? 0.00 }}
+                        </td>
                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                             {{ number_format($m->total_cost,2) }}
                         </td>
-
-
                     </tr>
                 @endforeach
                 <tr class="bg-gray-50 border-b">
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
 
                     </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
 
                     </th>
-                    <th scope="col" class="px-3 py-3  text-md font-medium text-gray-500   ">
+                    <th scope="col" class="px-3 py-3  text-md font-medium text-gray-500">
                         Total
                     </th>
-                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500   ">
+                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500">
                         {{ number_format($details->sum('qty'),2) }}
                     </th>
-                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500   ">
+                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500">
                         {{ number_format($details->sum('cost_of_price'),2) }}
                     </th>
-                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500    ">
+                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500">
                         {{ number_format($details->sum('retail_price'),2) }}
                     </th>
-
-                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500    ">
+                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500">
+                    </th>
+                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500">
                         {{ number_format($details->sum('total_cost'),2) }}
                     </th>
 

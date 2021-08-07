@@ -22,7 +22,16 @@
                                     <input type="text" wire:model.defer="supplier_invoice" id="salt" autocomplete="off"
                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 </div>
-
+                                <div class="col-span-8 sm:col-span-2">
+                                    <label for="from" class="block text-sm font-medium text-gray-700">From</label>
+                                    <input type="date" wire:model.defer="from" autocomplete="off"
+                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                </div>
+                                <div class="col-span-8 sm:col-span-2">
+                                    <label for="to" class="block text-sm font-medium text-gray-700">To</label>
+                                    <input type="date" wire:model.defer="to" autocomplete="off"
+                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                </div>
                                 <div class="col-span-8 sm:col-span-2">
                                     <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
                                     <select wire:model.defer="status"
@@ -178,27 +187,21 @@
                     #
                 </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Order #
+                    PO #
                 </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                     Supplier
-                </th>
-                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Supplier Invoice #
-                </th>
-                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Expected Date
+                    (Inv #)
                 </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                     Delivery Date
                 </th>
-
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Inventory Amount
+                    Inv Amount
                     <br>(A)
                 </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Advance tax<br>(B)
+                    Adv tax<br>(B)
                 </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                     Gross Payable Amount<br>(A+B)
@@ -211,6 +214,12 @@
                 </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                     PO Approved By
+                </th>
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                    Payment Created By
+                </th>
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                    Payment Approved By
                 </th>
                 <th scope="col" class="relative px-3 py-3">
                     <span class="sr-only">Edit</span>
@@ -228,21 +237,17 @@
                     </td>
                     <td class="px-3 py-3   text-sm text-gray-500">
                         {{ $m->supplier_name }}
+                        <br>{{ !empty($m->supplier_invoice) ? '('.$m->supplier_invoice.')' : '' }}
                     </td>
-                    <td class="px-3 py-3   text-sm text-gray-500">
-                        {{ $m->supplier_invoice }}
-                    </td>
-
-                    <td class="px-3 py-3   text-sm text-gray-500">
-                        @if(!empty($m->expected_date))
-                            {{ date('d M Y',strtotime($m->expected_date)) }}
-                        @endif
-                    </td>
-
                     <td class="px-3 py-3   text-sm text-gray-500">
                         @if(!empty($m->delivery_date))
                             {{ date('d M Y',strtotime($m->delivery_date)) }}
                         @endif
+                        @if(!empty($m->expected_date))
+                                <br>
+                            (Exp. {{ date('d M Y',strtotime($m->expected_date)) }})
+                        @endif
+
                     </td>
                     @php
                         if($m->status == 'received'){
@@ -307,18 +312,29 @@
                         {{ date('d M Y h:i A',strtotime($m->created_at)) }}
                     </td>
 
-
                     <td class="px-3 py-3   text-sm text-gray-500">
                         @if(!empty($m->approved_by))
                             {{ $m->approved_by }} <br>
                             {{ date('d M Y h:i A',strtotime($m->approved_at)) }}
                         @endif
                     </td>
-
+                    @php
+                        $p=$payments->where('order_id',$m->id)->first();
+                    @endphp
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        @if(!empty($p))
+                            {{$p->added_by}} <br>
+                            {{ !empty($p->created_at) ? date('d M Y h:i A',strtotime($p->created_at)) : '' }}
+                        @endif
+                    </td>
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        @if(!empty($p))
+                            {{$p->approved_by}} <br>
+                            {{ !empty($p->approved_at) ? date('d M Y h:i A',strtotime($p->approved_at)) : '' }}
+                        @endif
+                    </td>
 
                     <td class="px-3 py-3 w-7   text-right text-sm font-medium">
-
-
                         <div class="relative inline-block text-left" x-data="{open:false}">
                             <div>
                                 <button type="button" x-on:click="open=true;" @click.away="open=false;"

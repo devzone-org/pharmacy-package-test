@@ -69,11 +69,7 @@
                             <a href="#" wire:click="removePurchase('{{ $purchase_id }}')"
                                class="text-red-700 block w-full text-left px-4 py-2 text-sm hover:bg-red-200"
                                role="menuitem" tabindex="-1">Remove Order</a>
-                        @else
-
                         @endif
-
-
                     </div>
                 </div>
             </div>
@@ -215,6 +211,32 @@
                         @endif
                     </dd>
                 </div>
+                <div class="sm:col-span-1">
+                    <dt class="text-sm  font-medium  text-gray-500">
+                        Payment Created By
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        @if(!empty($supplier_payment_details))
+                            {{ $supplier_payment_details->added_by }} <br>
+                            {{ !empty($supplier_payment_details->created_at) ? date('d M Y h:i A',strtotime($supplier_payment_details->created_at)) : '-' }}
+                        @else
+                            -
+                        @endif
+                    </dd>
+                </div>
+                <div class="sm:col-span-1">
+                    <dt class="text-sm  font-medium text-gray-500">
+                        Payment Approved By
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        @if(!empty($supplier_payment_details))
+                            {{ $supplier_payment_details->approved_by }} <br>
+                            {{ !empty($supplier_payment_details->approved_at) ? date('d M Y h:i A',strtotime($supplier_payment_details->approved_at)) : '-' }}
+                        @else
+                            -
+                        @endif
+                    </dd>
+                </div>
 
             </dl>
         </div>
@@ -267,7 +289,6 @@
                         $record = $o->where('type',$m)->first();
                     @endphp
                     <tr>
-
                         <td colspan="2" class="px-3 py-3   border   text-sm text-gray-500">
                             {{ ucfirst($m) }}
                         </td>
@@ -282,8 +303,6 @@
                         <td class="px-3 py-3  text-center  border  text-sm text-gray-500">
                             {{  $record['bonus'] + $record['qty'] }}
                         </td>
-
-
                         <td class="px-3 py-3 text-center   border  text-sm text-gray-500">
                             {{ $record['cost_of_price'] }}
                         </td>
