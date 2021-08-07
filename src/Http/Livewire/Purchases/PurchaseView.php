@@ -4,9 +4,11 @@
 namespace Devzone\Pharmacy\Http\Livewire\Purchases;
 
 
+use Devzone\Pharmacy\Models\Payments\SupplierPaymentDetail;
 use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\PurchaseOrder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class PurchaseView extends Component
@@ -36,28 +38,34 @@ class PurchaseView extends Component
             ->leftJoin('users as a', 'a.id', '=', 'p.approved_by')
             ->where('p.id', $this->purchase_id)
             ->select(
-                'p.id',
-                'p.supplier_id',
-                's.name as supplier_name',
-                'p.supplier_invoice',
-                'p.grn_no',
-                'p.is_paid',
-                'p.delivery_date',
-                'p.status',
-                'c.name as created_by',
-                'a.name as approved_by',
-                'p.approved_at',
-                'c.created_at'
-            )->orderBy('p.id', 'desc')->first();
-
-
-        $details = PurchaseOrder::from('purchase_orders as po')
-            ->join('products as p', 'p.id', '=', 'po.product_id')
-            ->where('po.purchase_id', $this->purchase_id)
-            ->select('po.*', 'p.name', 'p.salt')
-            ->get();
-
-        return view('pharmacy::livewire.purchases.purchase-view', ['purchase' => $purchase, 'details' => $details]);
+                'p.id', 'p.supplier_invoice', 'p.grn_no', 'p.is_paid', 'p.delivery_date', 'p.status', 'p.supplier_id', 'p.approved_at', 'p.advance_tax', 'p.created_at',
+                's.name as supplier_name', 'a.name as approved_by', 'c.name as created_by')
+            ->first();
+        if ($purchase->status == 'received') {
+            $details = \Devzone\Pharmacy\Models\PurchaseReceive::from('purchase_receives as pr')
+                ->join('products as p', 'p.id', '=', 'pr.product_id')
+                ->where('pr.purchase_id', $this->purchase_id)
+                ->select('pr.*', 'p.name', 'p.salt')
+                ->get();
+        } else {
+            $details = PurchaseOrder::from('purchase_orders as po')
+                ->join('products as p', 'p.id', '=', 'po.product_id')
+                ->where('po.purchase_id', $this->purchase_id)
+                ->select('po.*', 'p.name', 'p.salt')
+                ->get();
+        }
+        $purchase_receive = \Devzone\Pharmacy\Models\PurchaseReceive::where('purchase_id', $this->purchase_id)
+            ->select(DB::raw('sum(total_cost) as total_receive'))
+            ->groupBy('purchase_id')
+            ->first();
+        $supplier_payment_details = SupplierPaymentDetail::from('supplier_payment_details as spd')
+            ->join('supplier_payments as sp', 'sp.id', '=', 'spd.supplier_payment_id')
+            ->join('users as u', 'u.id', '=', 'sp.added_by')
+            ->leftJoin('users as us', 'us.id', '=', 'sp.approved_by')
+            ->where('spd.order_id', $this->purchase_id)
+            ->select('sp.created_at', 'sp.approved_at', 'u.name as added_by', 'us.name as approved_by')
+            ->first();
+        return view('pharmacy::livewire.purchases.purchase-view', ['purchase' => $purchase, 'details' => $details, 'purchase_receive' => $purchase_receive, 'supplier_payment_details' => $supplier_payment_details]);
     }
 
     public function markAsApproved($id)

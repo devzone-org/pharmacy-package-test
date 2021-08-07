@@ -1,5 +1,4 @@
 <div>
-
     <div class="mb-5 shadow sm:rounded-md sm:overflow-hidden">
         <!-- This example requires Tailwind CSS v2.0+ -->
         <div class="flex flex-col">
@@ -23,7 +22,16 @@
                                     <input type="text" wire:model.defer="supplier_invoice" id="salt" autocomplete="off"
                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 </div>
-
+                                <div class="col-span-8 sm:col-span-2">
+                                    <label for="from" class="block text-sm font-medium text-gray-700">From</label>
+                                    <input type="date" wire:model.defer="from" autocomplete="off"
+                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                </div>
+                                <div class="col-span-8 sm:col-span-2">
+                                    <label for="to" class="block text-sm font-medium text-gray-700">To</label>
+                                    <input type="date" wire:model.defer="to" autocomplete="off"
+                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                </div>
                                 <div class="col-span-8 sm:col-span-2">
                                     <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
                                     <select wire:model.defer="status"
@@ -88,11 +96,11 @@
                     Stock Receiving In-process
                 </dt>
                 <dd class="mt-1   text-xl text-md text-gray-900">
-                   # {{ number_format($stock_receiving_in_process->sum('total')) }}
+                    # {{ number_format($stock_receiving_in_process->sum('total')) }}
                 </dd>
 
                 <dd class="mt-1   text-xl text-md text-gray-900">
-                   PKR {{ number_format($stock_receiving_in_process->sum('total_cost_order')) }}
+                    PKR {{ number_format($stock_receiving_in_process->sum('total_cost_order')) }}
                 </dd>
             </div>
 
@@ -101,10 +109,10 @@
                     Unpaid Invoices
                 </dt>
                 <dd class="mt-1 text-xl text-md text-gray-900">
-                   # {{ number_format($unpaid_invoices->sum('total')) }}
+                    # {{ number_format($unpaid_invoices->sum('total')) }}
                 </dd>
                 <dd class="mt-1 text-xl text-md text-gray-900">
-                   PKR {{ number_format($unpaid_invoices->sum('total_cost_order')) }}
+                    PKR {{ number_format($unpaid_invoices->sum('total_cost_order')) }}
                 </dd>
             </div>
 
@@ -179,34 +187,39 @@
                     #
                 </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Order #
+                    PO #
                 </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                     Supplier
-                </th>
-                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Supplier Invoice #
-                </th>
-                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Expected Date
+                    (Inv #)
                 </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                     Delivery Date
                 </th>
-
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Total Amount
+                    Inv Amount
+                    <br>(A)
                 </th>
-
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    Adv tax<br>(B)
+                </th>
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    Gross Payable Amount<br>(A+B)
+                </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                     Status
                 </th>
-
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                     PO Created By
                 </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                     PO Approved By
+                </th>
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                    Payment Created By
+                </th>
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                    Payment Approved By
                 </th>
                 <th scope="col" class="relative px-3 py-3">
                     <span class="sr-only">Edit</span>
@@ -224,68 +237,71 @@
                     </td>
                     <td class="px-3 py-3   text-sm text-gray-500">
                         {{ $m->supplier_name }}
+                        <br>{{ !empty($m->supplier_invoice) ? '('.$m->supplier_invoice.')' : '' }}
                     </td>
-                    <td class="px-3 py-3   text-sm text-gray-500">
-                        {{ $m->supplier_invoice }}
-                    </td>
-
-                    <td class="px-3 py-3   text-sm text-gray-500">
-                        @if(!empty($m->expected_date))
-                            {{ date('d M Y',strtotime($m->expected_date)) }}
-                        @endif
-                    </td>
-
                     <td class="px-3 py-3   text-sm text-gray-500">
                         @if(!empty($m->delivery_date))
                             {{ date('d M Y',strtotime($m->delivery_date)) }}
                         @endif
+                        @if(!empty($m->expected_date))
+                                <br>
+                            (Exp. {{ date('d M Y',strtotime($m->expected_date)) }})
+                        @endif
+
                     </td>
-
-
+                    @php
+                        if($m->status == 'received'){
+                             $received=$purchase_receives->where('id',$m->id)->first()->cost_after_receiving;
+                             $tax=($m->advance_tax/100)*$received;
+                             $received_after_tax=$tax+$received;
+                        }else{
+                            $received=$m->cost_before_receiving;
+                            $tax=($m->advance_tax/100)*$received;
+                            $received_after_tax=$tax+$received;
+                        }
+                    @endphp
                     <td class="px-3 py-3   text-sm text-gray-500">
-                        {{ number_format($m->cost_before_receiving,2) }}
+                        {{ number_format($received,2) }}
+                    </td>
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        {{ number_format($tax,2) }}
+                    </td>
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        {{ number_format($received_after_tax,2) }}
                     </td>
 
                     <td class="px-3 py-3   text-sm text-gray-500">
                         @if($m->status == 'approval-awaiting')
-                            <span
-                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
                               PO - Unapproved
                             </span>
                         @elseif($m->status == 'awaiting-delivery')
-                            <span
-                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
                                PO - Approved
                             </span>
                         @elseif($m->status == 'receiving')
-
                             <span
-                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
                                Stock Receiving <br>In-process
                             </span>
-
                         @elseif($m->status == 'received')
                             @if($m->is_paid=='f')
-                                <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                             Stock Received
-                            </span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                 Stock Received
+                                </span>
                                 <br>
 
-                                <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                               Invoice Unpaid
-                            </span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                   Invoice Unpaid
+                                </span>
                             @else
-                                <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                             Order Complete
-                            </span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                    Order Complete
+                                </span>
                                 <br>
-                                <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                             Invoice Paid
-                            </span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                    Invoice Paid
+                                </span>
                             @endif
 
                         @endif
@@ -296,18 +312,29 @@
                         {{ date('d M Y h:i A',strtotime($m->created_at)) }}
                     </td>
 
-
                     <td class="px-3 py-3   text-sm text-gray-500">
                         @if(!empty($m->approved_by))
                             {{ $m->approved_by }} <br>
                             {{ date('d M Y h:i A',strtotime($m->approved_at)) }}
                         @endif
                     </td>
-
+                    @php
+                        $p=$payments->where('order_id',$m->id)->first();
+                    @endphp
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        @if(!empty($p))
+                            {{$p->added_by}} <br>
+                            {{ !empty($p->created_at) ? date('d M Y h:i A',strtotime($p->created_at)) : '' }}
+                        @endif
+                    </td>
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        @if(!empty($p))
+                            {{$p->approved_by}} <br>
+                            {{ !empty($p->approved_at) ? date('d M Y h:i A',strtotime($p->approved_at)) : '' }}
+                        @endif
+                    </td>
 
                     <td class="px-3 py-3 w-7   text-right text-sm font-medium">
-
-
                         <div class="relative inline-block text-left" x-data="{open:false}">
                             <div>
                                 <button type="button" x-on:click="open=true;" @click.away="open=false;"
@@ -318,7 +345,7 @@
                                     <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                          fill="currentColor" aria-hidden="true">
                                         <path
-                                            d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
+                                                d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
                                     </svg>
                                 </button>
                             </div>

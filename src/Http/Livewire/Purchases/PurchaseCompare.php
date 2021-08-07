@@ -8,6 +8,7 @@ use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount;
 use Devzone\Pharmacy\Models\InventoryLedger;
+use Devzone\Pharmacy\Models\Payments\SupplierPaymentDetail;
 use Devzone\Pharmacy\Models\ProductInventory;
 use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\PurchaseOrder;
@@ -48,19 +49,10 @@ class PurchaseCompare extends Component
             ->leftJoin('users as a', 'a.id', '=', 'p.approved_by')
             ->where('p.id', $this->purchase_id)
             ->select(
-                'p.id',
-                'p.supplier_id',
-                's.name as supplier_name',
-                'p.supplier_invoice',
-                'p.grn_no',
-                'p.delivery_date',
-                'p.status',
-                'c.name as created_by',
-                'a.name as approved_by',
-                'p.approved_at',
-                'c.created_at',
-                'p.advance_tax'
-            )->orderBy('p.id', 'desc')->first();
+                'p.id','p.supplier_id','p.supplier_invoice','p.grn_no','p.delivery_date','p.status','p.approved_at','p.advance_tax',
+                's.name as supplier_name','c.name as created_by','a.name as approved_by','c.created_at')
+            ->orderBy('p.id', 'desc')
+            ->first();
 
         $order = PurchaseOrder::from('purchase_orders as po')
             ->join('products as p', 'p.id', '=', 'po.product_id')
@@ -73,6 +65,13 @@ class PurchaseCompare extends Component
             ->where('po.purchase_id', $this->purchase_id)
             ->select('po.*', 'p.name', 'p.salt', 'p.packing')
             ->get();
+        $supplier_payment_details=SupplierPaymentDetail::from('supplier_payment_details as spd')
+            ->join('supplier_payments as sp','sp.id','=','spd.supplier_payment_id')
+            ->join('users as u','u.id','=','sp.added_by')
+            ->leftJoin('users as us','us.id','=','sp.approved_by')
+            ->where('spd.order_id',$this->purchase_id)
+            ->select('sp.created_at','sp.approved_at','u.name as added_by','us.name as approved_by')
+            ->first();
 
         $this->purchase = $purchase;
         $this->receive = $receive;
@@ -114,7 +113,7 @@ class PurchaseCompare extends Component
 
         $overall = collect($overall);
 
-        return view('pharmacy::livewire.purchases.purchase-compare', ['purchase' => $purchase, 'overall' => $overall]);
+        return view('pharmacy::livewire.purchases.purchase-compare', ['purchase' => $purchase, 'overall' => $overall,'supplier_payment_details'=>$supplier_payment_details]);
     }
 
 

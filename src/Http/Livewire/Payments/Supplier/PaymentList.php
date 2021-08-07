@@ -113,7 +113,7 @@ class PaymentList extends Component
                 throw new \Exception('Un adjusted returns that you select already mark as settled.');
             }
 
-
+            $supplier_payment_receipt_no=Voucher::instance()->advances()->get();
             $pay_from = ChartOfAccount::findOrFail($supplier_payment->pay_from);
             $supplier = Supplier::findOrFail($supplier_payment->supplier_id);
 
@@ -138,9 +138,10 @@ class PaymentList extends Component
                 $bank = $bank->debit(abs($diff));
                 $des = "received";
             }
-            $description = "Amounting total PKR " . number_format(abs($diff), 2) .
-            "/- " . $des . " on dated " . date('d M, Y', strtotime($supplier_payment->payment_date)) .
-                " against PO # " . implode(', ', $orders) . " to supplier " . $supplier['name'] . " by " . Auth::user()->name . " " . $supplier_payment->description;
+
+            $description = "PAYMENT Amounting total PKR " . number_format(abs($diff), 2) .
+            "/- to supplier '".$supplier['name']."' against PO # " . implode(', ', $orders). " & invoice # inv-". $supplier_payment_receipt_no .
+                  ". Payment from '".$pay_from['name']."' by user " . Auth::user()->name . " on dated ".date('d M, Y h:i A');
 
             $bank->voucherNo($vno)->date($this->payment_date)
                 ->approve()->description($description)->execute();
@@ -165,6 +166,7 @@ class PaymentList extends Component
                 'approved_by' => Auth::user()->id,
                 'approved_at' => date('Y-m-d H:i:s'),
                 'payment_date' => $this->payment_date,
+                'receipt_no'=>$supplier_payment_receipt_no,
             ]);
 
             DB::commit();

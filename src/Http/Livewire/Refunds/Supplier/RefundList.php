@@ -85,7 +85,6 @@ class RefundList extends Component
                 ->get();
             $orders = array_unique($refund_details->pluck('po_id')->toArray());
             foreach ($refund_details as $rd) {
-
                 if ($rd->return > $rd->qty) {
                     throw new \Exception('Unable to refund because system does not have much inventory.');
                 }
@@ -102,9 +101,9 @@ class RefundList extends Component
                 ]);
             }
 
-
+            $supplier_refund_receipt_no=Voucher::instance()->advances()->get();
             $description = "Amounting total PKR " . number_format($supplier_refund->total_amount, 2) . "/- refunded on dated " . date('d M, Y') .
-                " against PO # " . implode(', ', $orders) . " to supplier " . $supplier['name'] . " by " . Auth::user()->name . " " . $supplier_refund->description;
+                " against PO # " . implode(', ', $orders) . " & invoice # inv-".$supplier_refund_receipt_no." to supplier " . $supplier['name'] . " by " . Auth::user()->name . " " . $supplier_refund->description;
 
             $inventory = ChartOfAccount::where('reference', 'pharmacy-inventory-5')->first();
             $vno = Voucher::instance()->voucher()->get();
@@ -116,7 +115,8 @@ class RefundList extends Component
 
             $supplier_refund->update([
                 'approved_by' => Auth::user()->id,
-                'approved_at' => date('Y-m-d H:i:s')
+                'approved_at' => date('Y-m-d H:i:s'),
+                'receipt_no'=>$supplier_refund_receipt_no,
             ]);
 
             DB::commit();

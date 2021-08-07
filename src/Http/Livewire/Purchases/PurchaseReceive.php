@@ -237,10 +237,7 @@ class PurchaseReceive extends Component
                 $this->order_list[$key]['qty'] = $qty + 1;
                 $this->order_list[$key]['total_qty'] = $this->order_list[$key]['qty'];
             }
-
         }
-
-
     }
 
 
@@ -248,19 +245,18 @@ class PurchaseReceive extends Component
     {
         $this->validate();
         try {
-
             DB::beginTransaction();
-
+            $purchase_receipt_no=Voucher::instance()->advances()->get();
             Purchase::where('id', $this->purchase_id)->update([
                 'supplier_id' => $this->supplier_id,
                 'supplier_invoice' => $this->supplier_invoice,
                 'delivery_date' => $this->delivery_date,
                 'status' => 'receiving',
                 'grn_no' => $this->grn_no,
-                'advance_tax' => $this->advance_tax
+                'advance_tax' => $this->advance_tax,
+                'receipt_no'=>$purchase_receipt_no
             ]);
             foreach ($this->order_list as $o) {
-
                 \Devzone\Pharmacy\Models\PurchaseReceive::create([
                     'purchase_id' => $this->purchase_id,
                     'product_id' => $o['id'],
@@ -309,10 +305,12 @@ class PurchaseReceive extends Component
                 if (empty($inventory)) {
                     throw new \Exception('Inventory account not found in chart of accounts.');
                 }
+                $get_purchase=Purchase::where('id', $this->purchase_id)->first();
                 $supplier = Supplier::find($this->supplier_id);
                 $amount = $receive->sum('total_cost');
-                $description = "Inventory amounting total PKR " . number_format($amount, 2) . "/- + taxable amount PKR ".number_format($this->advance_tax_amount,2)."/- gross total PKR ".number_format($amount + $this->advance_tax_amount,2)." received on dated " . date('d M, Y', strtotime($this->delivery_date)) .
-                    " against PO # " . $this->purchase_id . " from supplier " . $supplier['name'] . " by " . Auth::user()->name;
+                $description = "RECEIVED INVENTORY amounting total PKR " . number_format($amount, 2) . "/- + Advance tax u/s 236(h)(".$get_purchase->advance_tax."%) amount PKR ".
+                    number_format($this->advance_tax_amount,2)."/- + net Payable to supplier '". $supplier['name'] ."' PKR ".number_format($amount + $this->advance_tax_amount,2).
+                    "/- against PO # " . $this->purchase_id ." & invoice # inv-".$purchase_receipt_no." & GRN # ".empty($get_purchase->grn_no) ? '-' : $get_purchase->grn_no ." received by ".Auth::user()->name." on dated " . date('d M, Y h:i A');
 
                 $tax = ChartOfAccount::where('reference','advance-tax-236')->first();
                 if(empty($tax)){
@@ -372,8 +370,6 @@ class PurchaseReceive extends Component
                         ]);
                     }
                 }
-
-
             }
 
             DB::commit();

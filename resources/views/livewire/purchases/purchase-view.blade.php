@@ -6,9 +6,9 @@
                class="p-3 bg-gray-200 border-2 rounded-md  border-gray-400 cursor-pointer hover:bg-gray-300 ">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                     <path
-                        fill-rule="evenodd"
-                        d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                        clip-rule="evenodd"></path>
+                            fill-rule="evenodd"
+                            d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                            clip-rule="evenodd"></path>
                 </svg>
             </a>
             <span class="ml-4">Purchase Orders</span>
@@ -26,7 +26,10 @@
                 </div>
                 <div class="flex items-center">
                     @if(empty($purchase->approved_by))
-                        <button type="button" wire:click="markAsApproved('{{ $purchase_id }}')" class="mr-4 bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">Mark as Approve</button>
+                        <button type="button" wire:click="markAsApproved('{{ $purchase_id }}')"
+                                class="mr-4 bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
+                            Mark as Approve
+                        </button>
                     @endif
                     <div class="relative inline-block text-left" x-data="{open:false}">
                         <div>
@@ -38,7 +41,7 @@
                                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                      fill="currentColor" aria-hidden="true">
                                     <path
-                                        d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
+                                            d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
                                 </svg>
                             </button>
                         </div>
@@ -133,46 +136,80 @@
                         <dd class="mt-1 text-sm font-medium text-gray-900">
                             @if($purchase->status == 'approval-awaiting')
                                 <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
                               PO - Unapproved
                             </span>
                             @elseif($purchase->status == 'awaiting-delivery')
                                 <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
                                PO - Approved
                             </span>
                             @elseif($purchase->status == 'receiving')
 
                                 <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
                                Stock Receiving <br>In-process
                             </span>
 
                             @elseif($purchase->status == 'received')
                                 @if($purchase->is_paid=='f')
                                     <span
-                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                             Stock Received
-                            </span>
+                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                     Stock Received
+                                    </span>
                                     <br>
 
                                     <span
-                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                               Invoice Unpaid
-                            </span>
+                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                       Invoice Unpaid
+                                    </span>
                                 @else
                                     <span
-                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                             Order Complete
-                            </span>
+                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                     Order Complete
+                                    </span>
                                     <br>
                                     <span
-                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                             Invoice Paid
-                            </span>
+                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                     Invoice Paid
+                                    </span>
                                 @endif
-
                             @endif
+                        </dd>
+                    </div>
+                    @php
+                        if ($purchase->status == 'received'){
+                            $received=$purchase_receive->total_receive;
+                            $tax=($purchase->advance_tax/100)*$received;
+                            $received_after_tax=$received+$tax;
+                        }else{
+                            $received=$details->sum('total_cost');
+                            $tax=($purchase->advance_tax/100)*$received;
+                            $received_after_tax=$received+$tax;
+                        }
+                    @endphp
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">
+                            PO Inventory Amount (A)
+                        </dt>
+                        <dd class="mt-1 text-sm  font-medium text-gray-900">
+                            {{number_format($received,2)}}
+                        </dd>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">
+                            PO Advance Tax (B)
+                        </dt>
+                        <dd class="mt-1 text-sm  font-medium text-gray-900">
+                            {{number_format($tax,2)}}
+                        </dd>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">
+                            PO Gross Payable Amount (A+B)
+                        </dt>
+                        <dd class="mt-1 text-sm  font-medium text-gray-900">
+                            {{number_format($received_after_tax,2)}}
                         </dd>
                     </div>
                     <div class="sm:col-span-1">
@@ -189,10 +226,36 @@
                         <dt class="text-sm  font-medium font-medium text-gray-500">
                             PO Approved By
                         </dt>
-                        <dd class="mt-1 text-sm text-gray-900">
+                        <dd class="mt-1 text-sm font-medium text-gray-900">
                             @if(!empty($purchase->approved_by))
                                 {{ $purchase->approved_by }} <br>
                                 {{ date('d M Y h:i A',strtotime($purchase->approved_at)) }}
+                            @else
+                                -
+                            @endif
+                        </dd>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm  font-medium  text-gray-500">
+                            Payment Created By
+                        </dt>
+                        <dd class="mt-1 text-sm font-medium text-gray-900">
+                            @if(!empty($supplier_payment_details))
+                                {{ $supplier_payment_details->added_by }} <br>
+                                {{ !empty($supplier_payment_details->created_at) ? date('d M Y h:i A',strtotime($supplier_payment_details->created_at)) : '-' }}
+                            @else
+                                -
+                            @endif
+                        </dd>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm  font-medium font-medium text-gray-500">
+                            Payment Approved By
+                        </dt>
+                        <dd class="mt-1 text-sm font-medium text-gray-900">
+                            @if(!empty($supplier_payment_details))
+                                {{ $supplier_payment_details->approved_by }} <br>
+                                {{ !empty($supplier_payment_details->approved_at) ? date('d M Y h:i A',strtotime($supplier_payment_details->approved_at)) : '-' }}
                             @else
                                 -
                             @endif
@@ -225,11 +288,12 @@
                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
                         Retail Price
                     </th>
-
+                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
+                        Disc (%)
+                    </th>
                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
                         Total Cost
                     </th>
-
                 </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -249,41 +313,40 @@
                         </td>
                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                             {{ number_format($m->cost_of_price,2) }}
-
                         </td>
                         <td class="px-3 py-3  text-center text-sm text-gray-500">
                             {{ number_format($m->retail_price,2) }}
                         </td>
-
-
+                        <td class="px-3 py-3  text-center text-sm text-gray-500">
+                            {{ $m->discount ?? 0.00 }}
+                        </td>
                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                             {{ number_format($m->total_cost,2) }}
                         </td>
-
-
                     </tr>
                 @endforeach
                 <tr class="bg-gray-50 border-b">
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
 
                     </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
 
                     </th>
-                    <th scope="col" class="px-3 py-3  text-md font-medium text-gray-500   ">
+                    <th scope="col" class="px-3 py-3  text-md font-medium text-gray-500">
                         Total
                     </th>
-                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500   ">
+                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500">
                         {{ number_format($details->sum('qty'),2) }}
                     </th>
-                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500   ">
+                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500">
                         {{ number_format($details->sum('cost_of_price'),2) }}
                     </th>
-                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500    ">
+                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500">
                         {{ number_format($details->sum('retail_price'),2) }}
                     </th>
-
-                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500    ">
+                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500">
+                    </th>
+                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500">
                         {{ number_format($details->sum('total_cost'),2) }}
                     </th>
 
@@ -304,7 +367,7 @@
                         <a href="#" class="relative flex items-center group">
                             <span class="h-9 flex items-center">
           <span
-              class="relative z-10 w-8 h-8 flex items-center justify-center bg-indigo-600 rounded-full group-hover:bg-indigo-800">
+                  class="relative z-10 w-8 h-8 flex items-center justify-center bg-indigo-600 rounded-full group-hover:bg-indigo-800">
             <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                  aria-hidden="true">
               <path fill-rule="evenodd"
@@ -327,7 +390,7 @@
                             <a href="#" class="relative flex items-center group">
                             <span class="h-9 flex items-center">
           <span
-              class="relative z-10 w-8 h-8 flex items-center justify-center bg-indigo-600 rounded-full group-hover:bg-indigo-800">
+                  class="relative z-10 w-8 h-8 flex items-center justify-center bg-indigo-600 rounded-full group-hover:bg-indigo-800">
             <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                  aria-hidden="true">
               <path fill-rule="evenodd"
@@ -346,7 +409,7 @@
                             <a href="#" class="relative flex items-center group" aria-current="step">
                                 <span class="h-9 flex items-center" aria-hidden="true">
                                   <span
-                                      class="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-indigo-600 rounded-full">
+                                          class="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-indigo-600 rounded-full">
                                     <span class="h-2.5 w-2.5 bg-indigo-600 rounded-full"></span>
                                   </span>
                                 </span>
@@ -360,7 +423,7 @@
                             <a href="#" class="relative flex items-center group">
                                 <span class="h-9 flex items-center" aria-hidden="true">
                                   <span
-                                      class="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-gray-300 rounded-full group-hover:border-gray-400">
+                                          class="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-gray-300 rounded-full group-hover:border-gray-400">
                                     <span class="h-2.5 w-2.5 bg-transparent rounded-full group-hover:bg-gray-300"></span>
                                   </span>
                                 </span>
@@ -380,7 +443,7 @@
                             <a href="#" class="relative flex items-center group">
                             <span class="h-9 flex items-center">
           <span
-              class="relative z-10 w-8 h-8 flex items-center justify-center bg-indigo-600 rounded-full group-hover:bg-indigo-800">
+                  class="relative z-10 w-8 h-8 flex items-center justify-center bg-indigo-600 rounded-full group-hover:bg-indigo-800">
             <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                  aria-hidden="true">
               <path fill-rule="evenodd"
@@ -399,7 +462,7 @@
                             <a href="#" class="relative flex items-center group" aria-current="step">
                                 <span class="h-9 flex items-center" aria-hidden="true">
                                   <span
-                                      class="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-indigo-600 rounded-full">
+                                          class="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-indigo-600 rounded-full">
                                     <span class="h-2.5 w-2.5 bg-indigo-600 rounded-full"></span>
                                   </span>
                                 </span>
@@ -413,7 +476,7 @@
                             <a href="#" class="relative flex items-center group">
                                 <span class="h-9 flex items-center" aria-hidden="true">
                                   <span
-                                      class="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-gray-300 rounded-full group-hover:border-gray-400">
+                                          class="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-gray-300 rounded-full group-hover:border-gray-400">
                                     <span class="h-2.5 w-2.5 bg-transparent rounded-full group-hover:bg-gray-300"></span>
                                   </span>
                                 </span>
@@ -433,7 +496,7 @@
                             <a href="#" class="relative flex items-center group">
                             <span class="h-9 flex items-center">
           <span
-              class="relative z-10 w-8 h-8 flex items-center justify-center bg-indigo-600 rounded-full group-hover:bg-indigo-800">
+                  class="relative z-10 w-8 h-8 flex items-center justify-center bg-indigo-600 rounded-full group-hover:bg-indigo-800">
             <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                  aria-hidden="true">
               <path fill-rule="evenodd"
@@ -452,7 +515,7 @@
                             <a href="#" class="relative flex items-center group" aria-current="step">
                                 <span class="h-9 flex items-center" aria-hidden="true">
                                   <span
-                                      class="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-indigo-600 rounded-full">
+                                          class="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-indigo-600 rounded-full">
                                     <span class="h-2.5 w-2.5 bg-indigo-600 rounded-full"></span>
                                   </span>
                                 </span>
@@ -466,7 +529,7 @@
                             <a href="#" class="relative flex items-center group">
                                 <span class="h-9 flex items-center" aria-hidden="true">
                                   <span
-                                      class="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-gray-300 rounded-full group-hover:border-gray-400">
+                                          class="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-gray-300 rounded-full group-hover:border-gray-400">
                                     <span class="h-2.5 w-2.5 bg-transparent rounded-full group-hover:bg-gray-300"></span>
                                   </span>
                                 </span>
@@ -483,7 +546,7 @@
                             <a href="#" class="relative flex items-center group">
                             <span class="h-9 flex items-center">
           <span
-              class="relative z-10 w-8 h-8 flex items-center justify-center bg-indigo-600 rounded-full group-hover:bg-indigo-800">
+                  class="relative z-10 w-8 h-8 flex items-center justify-center bg-indigo-600 rounded-full group-hover:bg-indigo-800">
             <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                  aria-hidden="true">
               <path fill-rule="evenodd"
@@ -501,7 +564,7 @@
                             <a href="#" class="relative flex items-center group">
                                 <span class="h-9 flex items-center" aria-hidden="true">
                                   <span
-                                      class="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-gray-300 rounded-full group-hover:border-gray-400">
+                                          class="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-gray-300 rounded-full group-hover:border-gray-400">
                                     <span class="h-2.5 w-2.5 bg-transparent rounded-full group-hover:bg-gray-300"></span>
                                   </span>
                                 </span>
