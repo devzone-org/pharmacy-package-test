@@ -49,7 +49,7 @@ class Add extends Component
     public $hospital_info = [];
     public $handed_over;
 
-    protected $listeners = ['openSearch','searchReferredBy','searchPatient', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
+    protected $listeners = ['openSearch', 'searchReferredBy', 'searchPatient', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
 
     public function mount($admission_id = null, $procedure_id = null, $doctor_id = null)
     {
@@ -60,31 +60,34 @@ class Add extends Component
 
                 $this->admission = true;
                 $this->admission_details = AdmissionJobDetail::from('admission_job_details as a')
-
                     ->join('employees as e', 'e.id', '=', 'a.doctor_id')
-                    ->join('admissions as ad','ad.id','=','a.admission_id')
+                    ->join('admissions as ad', 'ad.id', '=', 'a.admission_id')
                     ->join('patients as p', 'p.id', '=', 'ad.patient_id')
                     ->where('a.admission_id', $admission_id)
                     ->where('a.procedure_id', $procedure_id)
                     ->where('a.doctor_id', $doctor_id)
                     ->select('p.mr_no', 'p.name', 'ad.admission_no', 'e.name as doctor')->first();
 
-                if(!empty($this->admission_details)){
+                if (!empty($this->admission_details)) {
                     $this->admission_details = $this->admission_details->toArray();
                 }
 
                 $medicines = \App\Models\Hospital\ProcedureMedicine::from('procedure_medicines as pm')
                     ->join('procedures as pro', 'pro.id', '=', 'pm.procedure_id')
                     ->join('products as p', 'p.id', '=', 'pm.product_id')
-                    ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
+                    ->leftJoin('product_inventories as pi', function ($q) {
+                        return $q->on('p.id', '=', 'pi.product_id');
+                    })
                     ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
                     ->where('pm.procedure_id', $this->procedure_id)
+                    ->where('pi.qty','>',0)
                     ->select('p.name as item', 'p.retail_price as product_price', 'pm.qty as required_qty',
                         'pi.qty as available_qty', 'pi.retail_price', 'pro.name as procedure_name',
                         'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'r.name as rack', 'r.tier')
                     ->groupBy('p.id')
-                    ->groupBy('pi.retail_price')
+
                     ->orderBy('pi.qty', 'desc')->get()->toArray();
+
                 $this->admission_details['procedure_name'] = collect($medicines)->first()['procedure_name'];
                 $this->hospital_info = Hospital::first()->toArray();
                 foreach ($medicines as $medicine) {
@@ -192,10 +195,12 @@ class Add extends Component
     {
         $this->searchableOpenModal('product_id', 'product_name', 'item');
     }
+
     public function searchReferredBy()
     {
         $this->searchableOpenModal('referred_by_id', 'referred_by_name', 'referred_by');
     }
+
     public function searchPatient()
     {
         $this->searchableOpenModal('patient_id', 'patient_name', 'patient');
@@ -300,7 +305,6 @@ class Add extends Component
 
             foreach ($this->sales as $s) {
                 $inv = ProductInventory::where('product_id', $s['product_id'])
-
                     ->where('qty', '>', 0)->orderBy('id', 'asc')->get();
 
                 if ($inv->sum('qty') < $s['s_qty']) {
@@ -319,7 +323,7 @@ class Add extends Component
                                 'product_id' => $product_inv->product_id,
                                 'order_id' => $product_inv->po_id,
                                 'decrease' => $sale_qty,
-                                'type'=>'sale',
+                                'type' => 'sale',
                                 'description' => "Sale on dated " . date('d M, Y') .
                                     " against receipt #" . $sale_id
                             ]);
@@ -332,7 +336,7 @@ class Add extends Component
                                 'product_id' => $product_inv->product_id,
                                 'order_id' => $product_inv->po_id,
                                 'decrease' => $product_inv->qty,
-                                'type'=>'sale',
+                                'type' => 'sale',
                                 'description' => "Sale on dated " . date('d M, Y') .
                                     " against receipt #" . $sale_id
                             ]);
