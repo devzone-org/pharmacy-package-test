@@ -76,7 +76,7 @@ class Refund extends Component
 
             $this->admission_details = \App\Models\Hospital\Admission::from('admissions as a')
                 ->join('patients as p', 'p.id', '=', 'a.patient_id')
-                ->join('employees as e', 'e.id', '=', 'a.doctor_id')
+                ->leftJoin('employees as e', 'e.id', '=', 'a.doctor_id')
                 ->where('a.id', $this->admission_id)
                 ->select('p.mr_no', 'p.name', 'a.admission_no', 'e.name as doctor')->first()
                 ->toArray();
