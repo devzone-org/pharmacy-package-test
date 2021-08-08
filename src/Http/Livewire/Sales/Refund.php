@@ -332,6 +332,8 @@ class Refund extends Component
                             ], [
                                 'refund_qty' => $dec + $l->refund_qty
                             ]);
+
+                            ProductInventory::find($r['product_inventory_id'])->increment('qty', $dec);
                             InventoryLedger::create([
                                 'product_id' => $r['product_id'],
                                 'increase' => $dec,
