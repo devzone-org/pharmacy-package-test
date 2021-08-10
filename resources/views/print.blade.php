@@ -93,6 +93,7 @@
                         .feed()
 
                         .text("{{ $print['invoice_no']  }}")
+                        .text("{{ $print['reprint']  }}")
                         .style([escpos.FontStyle.Normal])
                         .feed()
                         .align()
