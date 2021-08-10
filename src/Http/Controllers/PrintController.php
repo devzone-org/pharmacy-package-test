@@ -6,10 +6,11 @@ namespace Devzone\Pharmacy\Http\Controllers;
 
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class PrintController extends Controller
 {
-    public function print($id)
+    public function print(Request $request, $id)
     {
         $sales = Sale::from('sales as s')
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
@@ -29,8 +30,6 @@ class PrintController extends Controller
         $sales_ref = [];
         foreach ($sales as $key => $s) {
             $array = [];
-
-
             $sales[$key]['total'] = $s['sale_qty'] * $s['retail_price'];
             $sales[$key]['total_after_disc'] = $sales[$key]['total'];
             if ($s['disc'] > 0) {
@@ -73,6 +72,11 @@ class PrintController extends Controller
         }
         else{
             $print['gender']=str_pad("Gender : " . 'Walk in', 48, " ");
+        }
+        if (!empty($request['reprint']) && $request['reprint']==true){
+            $print['reprint']='Reprinted';
+        }else{
+            $print['reprint']='';
         }
         $print['patient_name'] = str_pad("Patient Name : " . $patient_name, 48, " ");
         $print['patient_mr_no'] = str_pad("Mr# : " .$mr_no , 48, " ");
