@@ -39,12 +39,18 @@ class PrintController extends Controller
 
             $sales_ref[] = $sales[$key];
             if ($s['refund_qty'] > 0) {
-                $array['item'] = ' -' . $sales[$key]['item'];
-                $array['sale_qty'] = -$sales[$key]['sale_qty'];
-                $array['retail_price'] = -$sales[$key]['retail_price'];
-                $array['total'] = -$sales[$key]['total'];
-                $array['disc'] = -$sales[$key]['disc'];
-                $array['total_after_disc'] = -$sales[$key]['total_after_disc'];
+                $array['item'] = 'Refunded - ' . $s['item'];
+                $array['sale_qty'] = -$s['refund_qty'];
+                $array['retail_price'] = -$s['retail_price'];
+                $array['total'] = - round($s['retail_price'] * $s['refund_qty'],2);
+                if ($s['disc'] > 0) {
+                    $discount = round(($s['disc'] / 100) * abs($array['total']), 2);
+                    $array['total_after_disc'] = - (abs($array['total']) - $discount);
+                } else {
+                    $array['total_after_disc'] = - abs($array['total']);
+                }
+                $array['disc'] = $s['disc'];
+
                 $sales_ref[] = $array;
             }
         }

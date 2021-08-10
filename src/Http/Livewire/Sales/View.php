@@ -72,14 +72,22 @@ class View extends Component
 
             $this->sales_ref[] = $this->sales[$key];
             if ($s['refund_qty'] > 0) {
-                $array['item'] = 'Refunded - ' . $this->sales[$key]['item'];
-                $array['sale_qty'] = -$this->sales[$key]['sale_qty'];
-                $array['retail_price'] = -$this->sales[$key]['retail_price'];
-                $array['total'] = -$this->sales[$key]['total'];
-                $array['disc'] = -$this->sales[$key]['disc'];
-                $array['total_after_disc'] = -$this->sales[$key]['total_after_disc'];
+                $array['item'] = 'Refunded - ' . $s['item'];
+                $array['sale_qty'] = -$s['refund_qty'];
+                $array['retail_price'] = -$s['retail_price'];
+                $array['total'] = - round($s['retail_price'] * $s['refund_qty'],2);
+                if ($s['disc'] > 0) {
+                    $discount = round(($s['disc'] / 100) * abs($array['total']), 2);
+                    $array['total_after_disc'] = - (abs($array['total']) - $discount);
+                } else {
+                    $array['total_after_disc'] = - abs($array['total']);
+                }
+                $array['disc'] = $s['disc'];
+
                 $this->sales_ref[] = $array;
             }
+
+
         }
 
         if (!empty($admission_id) && !empty($procedure_id)) {

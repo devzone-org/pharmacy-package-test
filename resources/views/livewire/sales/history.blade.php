@@ -114,7 +114,7 @@
 
 
                                     <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{ date('d M, y h:i A') }} <br>
+                                        {{ date('d M, y h:i A',strtotime($h->sale_at)) }} <br>
                                         {{ $h->sale_by }}
                                     </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
