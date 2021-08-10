@@ -213,12 +213,17 @@
                             if(!empty($m->advance_tax)){
                                 $tax = $total * ($m->advance_tax/100);
                             }
+                            if($total>0){
+                                $amt=$total + $tax;
+                            }else{
+                                $amt=abs($total + $tax);
+                            }
                         @endphp
 
                         @if($total>0)
-                            ({{ number_format($total + $tax ,2) }})
+                            ({{ number_format($amt,2) }})
                         @else
-                            {{ number_format(abs($total + $tax) ,2) }}
+                            {{ number_format($amt,2) }}
                         @endif
 
                     </td>
@@ -227,8 +232,8 @@
                         @if(empty($m->approved_by))
                             <span
                                 class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
-  In process
-</span>
+                              In process
+                            </span>
                         @else
                             <span
                                 class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
@@ -264,7 +269,7 @@
                             <div>
                                 <button type="button" x-on:click="open=true;" @click.away="open=false;"
                                         class="  rounded-full flex items-center text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
-                                        id="menu-button" aria-expanded="true" aria-haspopup="true">
+                                        aria-expanded="true" aria-haspopup="true">
                                     <span class="sr-only">Open options</span>
                                     <!-- Heroicon name: solid/dots-vertical -->
                                     <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
@@ -285,18 +290,17 @@
                                        role="menuitem" tabindex="-1">View</a>
 
                                     @if(empty($m->approved_by))
-                                        <a href="#" wire:click="markAsApproved('{{ $m->id }}','{{ $m->payment_date }}')"
-                                           class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                        <p wire:click="markAsApproved('{{ $m->id }}','{{ $m->payment_date }}','{{$m->supplier_name}}','{{$amt}}','{{$m->account_name}}')"
+                                           class="text-gray-700 cursor-pointer block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                            role="menuitem" tabindex="-1">Mark as Approve
-                                        </a>
-
+                                        </p>
                                         <a href="{{ url('pharmacy/purchases/payments/edit') }}/{{$m->id}}"
                                            class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                            role="menuitem" tabindex="-1">Edit</a>
 
-                                        <a href="#" wire:click="removePurchase('{{ $m->id }}')"
-                                           class="text-red-700 block w-full text-left px-4 py-2 text-sm hover:bg-red-200"
-                                           role="menuitem" tabindex="-1">Remove</a>
+                                        <p wire:click="removePurchase('{{ $m->id }}')"
+                                           class="text-red-700 cursor-pointer block w-full text-left px-4 py-2 text-sm hover:bg-red-200"
+                                           role="menuitem" tabindex="-1">Remove</p>
                                     @endif
 
 
@@ -344,14 +348,10 @@
                  class="h-1/3 inline-block align-bottom bg-white rounded-lg  text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full  "
                  role="dialog" aria-modal="true" aria-labelledby="modal-headline">
 
-                <div class="  px-2 pt-2 pb-2">
-
-                    <div class="">
-                        <label for="date" class="block text-sm font-medium text-gray-700">Payment Date</label>
-                        <input type="date" wire:model="payment_date"
-
-                               id="date" autocomplete="off"
-                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <div class="p-4">
+                    <div class="text-justify">
+                        A payment of Amount <strong> PKR {{number_format($amt,2)}} </strong> will be deducted from <strong>{{$paid_from}}</strong> against supplier <strong> {{$approval_supplier_name}} </strong> on dated <strong>{{date('d M,Y',strtotime($payment_date))}}</strong>.
+                        Are you sure you want to proceed?
                     </div>
                     @error('payment_date')
                     <p class="mt-2 text-sm text-red-600" id="">{{ $message }}</p>

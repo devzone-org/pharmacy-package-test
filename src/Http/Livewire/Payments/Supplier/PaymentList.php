@@ -25,6 +25,7 @@ class PaymentList extends Component
     public $supplier_id;
     public $supplier_id_s;
     public $supplier_name;
+    public $approval_supplier_name;
     public $confirm_dialog = false;
     public $pay_from;
     public $pay_from_s;
@@ -32,6 +33,8 @@ class PaymentList extends Component
     public $status;
     public $payment_date;
     public $primary_id;
+    public $amt;
+    public $paid_from;
 
 
     public function render()
@@ -68,11 +71,14 @@ class PaymentList extends Component
         return view('pharmacy::livewire.payments.supplier.payment-list', ['payments' => $payments]);
     }
 
-    public function markAsApproved($id, $date)
+    public function markAsApproved($id, $date,$supplier_name,$amt,$paid_from)
     {
-        $this->confirm_dialog = true;
         $this->payment_date = $date;
         $this->primary_id = $id;
+        $this->approval_supplier_name=$supplier_name;
+        $this->amt=$amt;
+        $this->paid_from=$paid_from;
+        $this->confirm_dialog = true;
     }
 
     public function proceed()
@@ -84,7 +90,7 @@ class PaymentList extends Component
         ]);
 
         $this->markAsApprovedConfirm();
-        $this->reset(['payment_date', 'primary_id']);
+        $this->reset(['payment_date', 'primary_id','approval_supplier_name','amt','paid_from']);
         $this->confirm_dialog = false;
     }
 
