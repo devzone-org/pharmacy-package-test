@@ -6,6 +6,9 @@
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         @livewire('dashboard.date')
         @livewire('dashboard.customised-sales-summary')
+        @livewire('dashboard.customised-sales-summary-userwise')
+        @livewire('dashboard.top-selling-products',['report_type' => 'revenue'])
+        @livewire('dashboard.top-selling-products',['report_type' => 'profit'])
         <div>
             <h3 class="text-lg leading-6 font-medium text-gray-900">
                 Last 30 days

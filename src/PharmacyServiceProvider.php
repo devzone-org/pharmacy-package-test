@@ -3,7 +3,10 @@
 namespace Devzone\Pharmacy;
 
 use Devzone\Pharmacy\Http\Livewire\Dashboard\CustomisedSalesSummary;
+use Devzone\Pharmacy\Http\Livewire\Dashboard\CustomisedSalesSummaryUserwise;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\Date;
+use Devzone\Pharmacy\Http\Livewire\Dashboard\TopSellingProductsProfitwise;
+use Devzone\Pharmacy\Http\Livewire\Dashboard\TopSellingProducts;
 use Devzone\Pharmacy\Http\Livewire\MasterData\Category;
 use Devzone\Pharmacy\Http\Livewire\MasterData\Manufacture;
 use Devzone\Pharmacy\Http\Livewire\MasterData\Medicine;
@@ -130,6 +133,8 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('sales.admission-pharmacy',\Devzone\Pharmacy\Http\Livewire\Sales\AdmissionPharmacy::class);
         Livewire::component('dashboard.date',Date::class);
         Livewire::component('dashboard.customised-sales-summary',CustomisedSalesSummary::class);
+        Livewire::component('dashboard.customised-sales-summary-userwise',CustomisedSalesSummaryUserwise::class);
+        Livewire::component('dashboard.top-selling-products',TopSellingProducts::class);
     }
 
     /**
