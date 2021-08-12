@@ -23,7 +23,7 @@ trait DashboardDate
             $this->from=$this->to->copy()->subDays(5);
             $result = CarbonPeriod::create($this->from, '1 day', $this->to);
             foreach ($result as $key=>$dt) {
-                $this->label[$key]['label']=$dt->format("d M");
+                $this->label[$key]['label']=$dt->format("d, M");
                 $this->label[$key]['format']=$dt->format("Y-m-d");
             }
         }elseif ($this->type=='week'){
@@ -40,7 +40,7 @@ trait DashboardDate
             $this->from=$this->to->copy()->subMonth(5)->firstOfMonth();
             $result = CarbonPeriod::create($this->from, '1 month', $this->to);
             foreach ($result as $key=>$dt) {
-                $this->label[$key]['label']=$dt->format("M y");
+                $this->label[$key]['label']=$dt->format("M, Y");
                 $this->label[$key]['format']=$dt->month;
             }
         }

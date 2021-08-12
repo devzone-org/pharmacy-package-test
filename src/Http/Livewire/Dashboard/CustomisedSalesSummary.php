@@ -13,9 +13,11 @@ use Livewire\Component;
 class CustomisedSalesSummary extends Component
 {
     use DashboardDate;
+    public $data=[];
     public function mount()
     {
         $this->prepareDate();
+        dd($this->from,$this->to);
     }
 
     public function render()
@@ -95,6 +97,7 @@ class CustomisedSalesSummary extends Component
                 $sale[$key]['return_cos']=$first['return_cos'];
             }
         }
-        dump($sale);
+        dd($sale);
+        $this->data=$sale;
     }
 }

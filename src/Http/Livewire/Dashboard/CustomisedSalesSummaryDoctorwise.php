@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
-class CustomisedSalesSummaryUserwise extends Component
+class CustomisedSalesSummaryDoctorwise extends Component
 {
     use DashboardDate;
     public $data=[];
@@ -22,18 +22,18 @@ class CustomisedSalesSummaryUserwise extends Component
     public function render()
     {
         $this->search();
-        return view('pharmacy::livewire.dashboard.customised-sales-summary-userwise');
+        return view('pharmacy::livewire.dashboard.customised-sales-summary-doctorwise');
     }
 
     public function search()
     {
         $sale = Sale::from('sales as s')
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
-            ->join('users as u','u.id','=','s.sale_by')
+            ->leftJoin('employees as e','e.id','=','s.referred_by')
             ->whereBetween('s.sale_at', [$this->from, $this->to])
-            ->groupBy('s.sale_by')
+            ->groupBy('s.referred_by')
             ->select(
-                's.sale_by','u.name as user',
+                's.referred_by','e.name as doctor',
                 DB::raw('DATE(s.sale_at) as date'),
                 DB::raw('MONTH(s.sale_at) as month'),
                 DB::raw('WEEK(s.sale_at) as week'),
@@ -60,16 +60,15 @@ class CustomisedSalesSummaryUserwise extends Component
             ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
             ->join('sales as s', 's.id', '=', 'sr.sale_id')
             ->whereBetween('s.sale_at', [$this->from, $this->to])
-            ->groupBy('s.sale_by')
+            ->groupBy('s.referred_by')
             ->select(
                 'sd.sale_id',
-                's.sale_by',
+                's.referred_by',
                 DB::raw('DATE(s.sale_at) as date'),
                 DB::raw('MONTH(s.sale_at) as month'),
                 DB::raw('WEEK(s.sale_at) as week'),
                 DB::raw('sum((sd.total_after_disc/sd.qty)*sr.refund_qty) as return_total'),
-                DB::raw('sum(sd.supply_price*sr.refund_qty) as return_cos',
-                )
+                DB::raw('sum(sd.supply_price*sr.refund_qty) as return_cos')
             )
             ->when($this->type == 'month', function ($q) {
                 return $q->groupBy('month')
@@ -88,19 +87,20 @@ class CustomisedSalesSummaryUserwise extends Component
 
         foreach ($sale as $key=>$s){
             if ($this->type=='month'){
-                $first=collect($sale_return)->where('month',$s['month'])->where('sale_by',$s['sale_by'])->first();
+                $first=collect($sale_return)->where('month',$s['month'])->where('referred_by',$s['referred_by'])->first();
                 $sale[$key]['return_total']=$first['return_total'];
                 $sale[$key]['return_cos']=$first['return_cos'];
             }elseif ($this->type=='week'){
-                $first=collect($sale_return)->where('week',$s['week'])->where('sale_by',$s['sale_by'])->first();
+                $first=collect($sale_return)->where('week',$s['week'])->where('referred_by',$s['referred_by'])->first();
                 $sale[$key]['return_total']=$first['return_total'];
                 $sale[$key]['return_cos']=$first['return_cos'];
             }elseif ($this->type=='date'){
-                $first=collect($sale_return)->where('date',$s['date'])->where('sale_by',$s['sale_by'])->first();
+                $first=collect($sale_return)->where('date',$s['date'])->where('referred_by',$s['referred_by'])->first();
                 $sale[$key]['return_total']=$first['return_total'];
                 $sale[$key]['return_cos']=$first['return_cos'];
             }
         }
         $this->data=$sale;
+
     }
 }
