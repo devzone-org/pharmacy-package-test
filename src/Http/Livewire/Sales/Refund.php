@@ -495,6 +495,8 @@ class Refund extends Component
             $this->searchableReset();
             $this->success = 'Refund has been complete with receipt #' . $this->sale_id;
             DB::commit();
+
+
             if (empty($this->admission_id) && empty($this->procedure_id)) {
                 return redirect()->to('pharmacy/sales/refund/' . $this->sale_id . '?type=refund');
             } else {
@@ -558,4 +560,6 @@ class Refund extends Component
         $this->reset(['sales', 'referred_by_id', 'referred_by_name', 'success', 'patient_id', 'patient_name',
             'payable', 'received', 'remarks', 'discount', 'error']);
     }
+
+
 }

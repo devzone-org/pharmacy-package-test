@@ -91,6 +91,14 @@ Route::get('purchases/refund/edit/{id}', function ($id) {
 Route::get('purchases/refund/view/{id}', function ($id) {
     return view('pharmacy::refunds.supplier.view', compact('id'));
 });
+
+Route::get('purchases/stock-adjustment/add', function () {
+    return view('pharmacy::purchases.stock-adjustment');
+});
+
+Route::get('purchases/stock-adjustment', function () {
+    return view('pharmacy::purchases.stock-adjustment-listing');
+});
 Route::get('sales', function () {
     return view('pharmacy::sales.history');
 });
