@@ -8,6 +8,7 @@ use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount;
 use Devzone\Pharmacy\Http\Traits\Searchable;
+use Devzone\Pharmacy\Models\InventoryLedger;
 use Devzone\Pharmacy\Models\ProductInventory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -91,6 +92,14 @@ class StockAdjustment extends Component
                     'remarks' => $this->remarks,
                     'added_by' => Auth::id(),
                     'voucher_no' => $vno
+                ]);
+                InventoryLedger::create([
+                    'product_id' => $find['product_id'],
+                    'order_id' => $find['po_id'],
+                    'increase' => $a['indicator'] == 'i' ? $a['qty']: 0,
+                    'decrease' => $a['indicator'] == 'd' ? $a['qty']: 0,
+                    'type' => 'adjustment',
+                    'description' => "adjustment"
                 ]);
                 if ($a['indicator'] == 'i') {
                     $increase = $increase + ($a['a_qty'] * $find['supply_price']);
