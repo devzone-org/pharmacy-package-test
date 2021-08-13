@@ -20,6 +20,10 @@
                             </th>
                             <th scope="col"
                                 class=" border-r px-6 py-3 text-center text-xs font-bold text-gray-900 uppercase tracking-wider">
+                                Supplier
+                            </th>
+                            <th scope="col"
+                                class=" border-r px-6 py-3 text-center text-xs font-bold text-gray-900 uppercase tracking-wider">
                                 No of Sales
                             </th>
                             <th scope="col"
@@ -44,19 +48,22 @@
                                     {{$loop->iteration}}
                                 </td>
                                 <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {{$d['product']}}
+                                    {{$d->name}}
                                 </td>
                                 <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {{number_format($d['no_of_products'])}}
+                                    {{!empty($d->supplier) ? $d->supplier : '-'}}
                                 </td>
                                 <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {{number_format($d['total_after_disc'],2)}}
+                                    {{number_format($d->count_product)}}
                                 </td>
                                 <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {{number_format($d['cos'],2)}}
+                                    {{number_format($d->total_after_refund,2)}}
                                 </td>
                                 <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {{number_format($d['total_after_disc']-$d['cos'],2)}}
+                                    {{number_format($d->cos,2)}}
+                                </td>
+                                <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {{number_format($d->total_after_refund-$d->cos,2)}}
                                 </td>
                             </tr>
                         @endforeach

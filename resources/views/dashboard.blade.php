@@ -12,6 +12,7 @@
         @livewire('dashboard.customised-sales-summary-doctorwise')
         @livewire('dashboard.top-selling-products',['report_type' => 'revenue'])
         @livewire('dashboard.top-selling-products',['report_type' => 'profit'])
+        @livewire('dashboard.expired-products')
 
 {{--        <div>--}}
 {{--            <h3 class="text-lg leading-6 font-medium text-gray-900">--}}

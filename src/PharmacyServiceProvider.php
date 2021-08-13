@@ -6,6 +6,7 @@ use Devzone\Pharmacy\Http\Livewire\Dashboard\CustomisedSalesSummary;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\CustomisedSalesSummaryDoctorwise;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\CustomisedSalesSummaryUserwise;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\Date;
+use Devzone\Pharmacy\Http\Livewire\Dashboard\ExpiredProducts;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\TopSellingProductsProfitwise;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\TopSellingProducts;
 use Devzone\Pharmacy\Http\Livewire\MasterData\Category;
@@ -137,6 +138,7 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('dashboard.customised-sales-summary-userwise',CustomisedSalesSummaryUserwise::class);
         Livewire::component('dashboard.customised-sales-summary-doctorwise',CustomisedSalesSummaryDoctorwise::class);
         Livewire::component('dashboard.top-selling-products',TopSellingProducts::class);
+        Livewire::component('dashboard.expired-products',ExpiredProducts::class);
     }
 
     /**

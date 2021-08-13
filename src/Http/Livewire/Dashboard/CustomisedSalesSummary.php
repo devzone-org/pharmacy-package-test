@@ -17,7 +17,6 @@ class CustomisedSalesSummary extends Component
     public function mount()
     {
         $this->prepareDate();
-        dd($this->from,$this->to);
     }
 
     public function render()
@@ -64,8 +63,7 @@ class CustomisedSalesSummary extends Component
                 DB::raw('MONTH(s.sale_at) as month'),
                 DB::raw('WEEK(s.sale_at) as week'),
                 DB::raw('sum((sd.total_after_disc/sd.qty)*sr.refund_qty) as return_total'),
-                DB::raw('sum(sd.supply_price*sr.refund_qty) as return_cos',
-                )
+                DB::raw('sum(sd.supply_price*sr.refund_qty) as return_cos')
             )
             ->when($this->type == 'month', function ($q) {
                 return $q->groupBy('month')
@@ -97,7 +95,6 @@ class CustomisedSalesSummary extends Component
                 $sale[$key]['return_cos']=$first['return_cos'];
             }
         }
-        dd($sale);
         $this->data=$sale;
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Devzone\Pharmacy\Http\Livewire\Dashboard;
 
-use Devzone\Pharmacy\Models\Sale\SaleDetail;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -11,24 +10,26 @@ class TopSellingProducts extends Component
 {
     public $date;
     public $type;
+    public $pre_to;
     public $to;
     public $from;
     public $report_type;
-    public $data=[];
+    public $data = [];
 
     public function mount($report_type)
     {
         $this->report_type = $report_type;
-        $this->date = '2021-08-11';
-        $this->type = 'month';
-        $this->to = new Carbon($this->date);
+        $this->date = '2021-08-10';
+        $this->type = 'week';
+        $this->pre_to = new Carbon($this->date);
         if ($this->type == 'date') {
-            $this->from = $this->to->copy();
+            $this->from = $this->pre_to->copy();
         } elseif ($this->type == 'week') {
-            $this->from = $this->to->copy()->startOfWeek();
+            $this->from = $this->pre_to->copy()->startOfWeek();
         } elseif ($this->type == 'month') {
-            $this->from = $this->to->copy()->firstOfMonth();
+            $this->from = $this->pre_to->copy()->firstOfMonth();
         }
+        $this->to = $this->pre_to->copy()->endOfDay();
     }
 
     public function render()
@@ -39,28 +40,59 @@ class TopSellingProducts extends Component
 
     public function search()
     {
-        $sale = SaleDetail::from('sale_details as sd', 'sd.sale_id', '=', 's.id')
-            ->join('products as p', 'p.id', '=', 'sd.product_id')
-            ->whereBetween('sd.created_at', [$this->from, $this->to])
-            ->groupBy('sd.product_id')
-            ->select(
-                'p.name as product', 'sd.product_id',
-                'sd.created_at',
-                DB::raw('sum(sd.total) as total'),
-                DB::raw('sum(sd.qty*sd.supply_price) as cos'),
-                DB::raw('count(sd.product_id) as no_of_products'),
-                DB::raw('sum(sd.total_after_disc) as total_after_disc'),
-                DB::raw('sum(sd.total_after_disc-(sd.qty*sd.supply_price)) as total_profit'),
-            )
-            ->when($this->report_type == 'revenue', function ($q) {
-                return $q->orderBy('total_after_disc', 'DESC');
-            })
-            ->when($this->report_type == 'profit', function ($q) {
-                return $q->orderBy('total_profit', 'DESC');
-            })
-            ->limit(10)
-            ->get()
-            ->toArray();
-        $this->data=$sale;
+        if ($this->report_type == 'revenue') {
+            $sale = DB::select("SELECT
+                    sum(sd.total_after_disc) AS total,
+                    p. `name`,s.`name` AS supplier,
+                    count('sd.product_id') AS count_product,
+                    sum(sr.refund_qty) AS refund,
+                    sum(sd.qty) AS total_sale_qty,
+                    sum((sd.qty - coalesce(sr.refund_qty,0)) * sd.supply_price) as cos,
+                    sum(sd.total_after_disc) / sum(sd.qty) AS unit,
+                    sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0)) AS total_refund,
+                    sum(sd.total_after_disc) - (sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0))) AS total_after_refund,
+                    sum(sd.total_after_disc) - (sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0))) - (sum((sd.qty - coalesce(sr.refund_qty,0)) * sd.supply_price)) AS total_profit
+                    FROM
+                    sale_details AS sd
+                    LEFT JOIN sale_refunds AS sr ON sd.id = sr.sale_detail_id
+                    JOIN product_inventories AS pv ON pv.id = sd.product_inventory_id
+                    LEFT JOIN purchases AS pur ON pur.id = pv.po_id
+                    LEFT JOIN suppliers AS s ON s.id = pur.supplier_id 
+                    JOIN products AS p ON p.id = sd.product_id
+                    where sd.created_at BETWEEN '" . $this->from . "' AND '" . $this->to . "'
+
+                GROUP BY
+                    sd.product_id
+                ORDER BY
+                    total_after_refund DESC
+                LIMIT 10;");
+        } elseif ($this->report_type == 'profit') {
+            $sale = DB::select("SELECT
+                    sum(sd.total_after_disc) AS total,
+                    p. `name`,s.`name` AS supplier,
+                    count('sd.product_id') AS count_product,
+                    sum(sr.refund_qty) AS refund,
+                    sum(sd.qty) AS total_sale_qty,
+                    sum((sd.qty - coalesce(sr.refund_qty,0)) * sd.supply_price) as cos,
+                    sum(sd.total_after_disc) / sum(sd.qty) AS unit,
+                    sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0)) AS total_refund,
+                    sum(sd.total_after_disc) - (sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0))) AS total_after_refund,
+                    sum(sd.total_after_disc) - (sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0))) - (sum((sd.qty - coalesce(sr.refund_qty,0)) * sd.supply_price)) AS total_profit
+                    FROM
+                    sale_details AS sd
+                    LEFT JOIN sale_refunds AS sr ON sd.id = sr.sale_detail_id
+                    JOIN product_inventories AS pv ON pv.id = sd.product_inventory_id
+                    LEFT JOIN purchases AS pur ON pur.id = pv.po_id
+                    LEFT JOIN suppliers AS s ON s.id = pur.supplier_id 
+                    JOIN products AS p ON p.id = sd.product_id
+                    where sd.created_at BETWEEN '" . $this->from . "' AND '" . $this->to . "'
+
+                GROUP BY
+                    sd.product_id
+                ORDER BY
+                    total_profit DESC
+                LIMIT 10;");
+        }
+        $this->data = $sale;
     }
 }
