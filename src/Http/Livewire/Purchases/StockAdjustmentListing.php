@@ -9,13 +9,15 @@ use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class StockAdjustmentListing extends Component
 {
 
-    use Searchable;
+    use Searchable,WithPagination;
 
     public $product_id;
+    public $product_id_id;
     public $product_name;
     public $indicator;
     public $from;
@@ -30,8 +32,8 @@ class StockAdjustmentListing extends Component
         $stock = \Devzone\Pharmacy\Models\StockAdjustment::from('stock_adjustments as sa')
             ->join('products as p', 'p.id', '=', 'sa.product_id')
             ->join('users as u', 'u.id', '=', 'sa.added_by')
-            ->when(!empty($this->product_id), function ($q) {
-                return $q->where('sa.product_id', $this->product_id);
+            ->when(!empty($this->product_id_id), function ($q) {
+                return $q->where('sa.product_id', $this->product_id_id);
             })
             ->when(!empty($this->indicator), function ($q) {
                 return $q->where('sa.indicator', $this->indicator);
@@ -48,6 +50,13 @@ class StockAdjustmentListing extends Component
     }
 
     public function search(){
-
+        $this->product_id_id = $this->product_id;
     }
+
+    public function resetSearch(){
+        $this->reset(['product_id_id','product_id','product_name','from','to','indicator']);
+        $this->resetPage();
+    }
+
+
 }
