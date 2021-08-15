@@ -39,6 +39,18 @@ class StockAdjustment extends Component
         unset($this->adjustments[$key]);
     }
 
+    public function updated($name, $value)
+    {
+        $array = explode('.', $name);
+        if (count($array) == 3) {
+            if ($array[0] == 'adjustments') {
+                if ($array[2] == 'a_qty' && empty($value)) {
+                    $this->adjustments[$array[1]][$array[2]] = 0;
+                }
+            }
+        }
+    }
+
     public function emitProductId()
     {
         $data = $this->searchable_data[$this->highlight_index];
@@ -96,8 +108,8 @@ class StockAdjustment extends Component
                 InventoryLedger::create([
                     'product_id' => $find['product_id'],
                     'order_id' => $find['po_id'],
-                    'increase' => $a['indicator'] == 'i' ? $a['qty']: 0,
-                    'decrease' => $a['indicator'] == 'd' ? $a['qty']: 0,
+                    'increase' => $a['indicator'] == 'i' ? $a['qty'] : 0,
+                    'decrease' => $a['indicator'] == 'd' ? $a['qty'] : 0,
                     'type' => 'adjustment',
                     'description' => "adjustment"
                 ]);
@@ -117,7 +129,7 @@ class StockAdjustment extends Component
             $cos_account = ChartOfAccount::where('reference', 'cost-of-sales-pharmacy-5')->first();
 
 
-            $description = "Decrease inventory PKR" . $decrease . "/- " . "Increase inventory PKR" . $increase . "/- " . $description . ". by " . Auth::user()->name . " @ " . date('d M, Y h:i A');
+            $description = "Gross decrease inventory PKR" . $decrease . "/- " . "Gross increase inventory PKR" . $increase . "/- " . $description . ". by " . Auth::user()->name . " @ " . date('d M, Y h:i A');
 
             if ($decrease > 0) {
                 GeneralJournal::instance()->account($inventory_account['id'])->credit($decrease)->voucherNo($vno)

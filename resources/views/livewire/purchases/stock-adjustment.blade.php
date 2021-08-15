@@ -79,9 +79,9 @@
                                 {{ $a['expiry'] }}
                             </td>
 
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class=" px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <select name="" wire:model="adjustments.{{ $key }}.indicator"
-                                        class="inline-flex   px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        class=" w-48  px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                     <option value="i">Increase</option>
                                     <option value="d">Decrease</option>
                                 </select>
@@ -89,8 +89,8 @@
 
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
 
-                                <input type="number" wire:model="adjustments.{{ $key }}.a_qty"
-                                       class="inline-flex   px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <input type="number" wire:model.lazy="adjustments.{{ $key }}.a_qty"
+                                       class="  w-48  px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             </td>
 
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
