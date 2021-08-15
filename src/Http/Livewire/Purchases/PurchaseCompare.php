@@ -49,7 +49,7 @@ class PurchaseCompare extends Component
             ->leftJoin('users as a', 'a.id', '=', 'p.approved_by')
             ->where('p.id', $this->purchase_id)
             ->select(
-                'p.id','p.supplier_id','p.supplier_invoice','p.grn_no','p.delivery_date','p.status','p.approved_at','p.advance_tax',
+                'p.id','p.supplier_id','p.supplier_invoice','p.grn_no','p.delivery_date','p.status','p.approved_at','p.advance_tax','p.receipt_no',
                 's.name as supplier_name','c.name as created_by','a.name as approved_by','c.created_at')
             ->orderBy('p.id', 'desc')
             ->first();
@@ -165,14 +165,19 @@ class PurchaseCompare extends Component
             if (!empty($this->purchase['advance_tax'])) {
                 $advance_tax_amount = $amount * ($this->purchase['advance_tax'] / 100);
             }
-            $description = "Inventory amounting total PKR " . number_format($amount, 2) . "/- + taxable amount PKR " . number_format($advance_tax_amount, 2) . "/- gross total PKR " . number_format($amount + $advance_tax_amount, 2) . " received on dated " . date('d M, Y', strtotime($this->delivery_date)) .
-                " against PO # " . $this->purchase_id . " from supplier " . $supplier['name'] . " by " . Auth::user()->name;
+            $grn_no = empty($this->purchase['grn_no']) ? '-' : $this->purchase['grn_no'];
+            $description = "RECEIVED INVENTORY amounting total PKR " . number_format($amount, 2) . "/- + Recoverable Advance Tax u/s 236(h)(" . $this->purchase['advance_tax'] . "%) amount PKR " .
+                number_format($advance_tax_amount, 2) . "/- = Net Payable to supplier '" . $supplier['name'] . "' PKR " . number_format($amount + $advance_tax_amount, 2) .
+                "/- against PO # " . $this->purchase_id . " & invoice # INV-" . $this->purchase->receipt_no . " & GRN # " . $grn_no . " received by " . Auth::user()->name . " on dated " . date('d M, Y h:i A');
+
+
+
 
 
             $vno = Voucher::instance()->voucher()->get();
             GeneralJournal::instance()->account($inventory['id'])->debit($amount)->voucherNo($vno)
                 ->date($this->purchase->delivery_date)->approve()->description($description)->execute();
-            GeneralJournal::instance()->account($supplier['account_id'])->credit($amount)->voucherNo($vno)
+            GeneralJournal::instance()->account($supplier['account_id'])->credit($amount + $advance_tax_amount)->voucherNo($vno)
                 ->date($this->purchase->delivery_date)->approve()->description($description)->execute();
             GeneralJournal::instance()->account($tax['id'])->debit($advance_tax_amount)->voucherNo($vno)
                 ->date($this->delivery_date)->approve()->description($description)->execute();
