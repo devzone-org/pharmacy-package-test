@@ -14,6 +14,7 @@ trait DashboardDate
     public $from;
     public $type;
     public $label=[];
+    public $label_plucked;
 
     public function prepareDate(){
         $this->date='2021-08-10';
@@ -24,7 +25,7 @@ trait DashboardDate
             $this->from=$this->pre_to->copy()->subDays(5);
             $result = CarbonPeriod::create($this->from, '1 day', $this->pre_to);
             foreach ($result as $key=>$dt) {
-                $this->label[$key]['label']=$dt->format("d, M");
+                $this->label[$key]['label']=$dt->format("d, M Y");
                 $this->label[$key]['format']=$dt->format("Y-m-d");
             }
         }elseif ($this->type=='week'){
@@ -46,5 +47,7 @@ trait DashboardDate
             }
         }
         $this->to=$this->pre_to->copy()->endOfDay();
+       $this->label_plucked=json_encode(collect($this->label)->pluck('label')->toArray());
+      // dd($this->label_plucked);
     }
 }

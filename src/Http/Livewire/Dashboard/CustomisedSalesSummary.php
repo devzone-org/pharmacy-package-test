@@ -84,15 +84,24 @@ class CustomisedSalesSummary extends Component
             if ($this->type=='month'){
                 $first=collect($sale_return)->where('month',$s['month'])->first();
                 $sale[$key]['return_total']=$first['return_total'];
+                $sale[$key]['net_sale']=$sale[$key]['total_after_disc']-$first['return_total'];
                 $sale[$key]['return_cos']=$first['return_cos'];
+                $sale[$key]['net_cos']=$sale[$key]['cos']-$first['return_cos'];
+                $sale[$key]['gross_profit']=$sale[$key]['net_sale']-$sale[$key]['net_cos'];
             }elseif ($this->type=='week'){
                 $first=collect($sale_return)->where('week',$s['week'])->first();
                 $sale[$key]['return_total']=$first['return_total'];
+                $sale[$key]['net_sale']=$sale[$key]['total_after_disc']-$first['return_total'];
                 $sale[$key]['return_cos']=$first['return_cos'];
+                $sale[$key]['net_cos']=$sale[$key]['cos']-$first['return_cos'];
+                $sale[$key]['gross_profit']=$sale[$key]['net_sale']-$sale[$key]['net_cos'];
             }elseif ($this->type=='date'){
                 $first=collect($sale_return)->where('date',$s['date'])->first();
                 $sale[$key]['return_total']=$first['return_total'];
+                $sale[$key]['net_sale']=$sale[$key]['total_after_disc']-$first['return_total'];
                 $sale[$key]['return_cos']=$first['return_cos'];
+                $sale[$key]['net_cos']=$sale[$key]['cos']-$first['return_cos'];
+                $sale[$key]['gross_profit']=$sale[$key]['net_sale']-$sale[$key]['net_cos'];
             }
         }
         $this->data=$sale;
