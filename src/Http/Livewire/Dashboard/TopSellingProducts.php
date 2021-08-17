@@ -65,7 +65,7 @@ class TopSellingProducts extends Component
                     sd.product_id
                 ORDER BY
                     total_after_refund DESC
-                LIMIT 10;");
+                LIMIT 5;");
         } elseif ($this->report_type == 'profit') {
             $sale = DB::select("SELECT
                     sum(sd.total_after_disc) AS total,
@@ -91,7 +91,7 @@ class TopSellingProducts extends Component
                     sd.product_id
                 ORDER BY
                     total_profit DESC
-                LIMIT 10;");
+                LIMIT 5;");
         }
         $this->data = $sale;
     }

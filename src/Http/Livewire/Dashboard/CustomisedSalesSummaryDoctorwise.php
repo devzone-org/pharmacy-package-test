@@ -56,6 +56,7 @@ class CustomisedSalesSummaryDoctorwise extends Component
             })
             ->get()
             ->toArray();
+
         $sale_return = SaleRefund::from('sale_refunds as sr')
             ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
             ->join('sales as s', 's.id', '=', 'sr.sale_id')
@@ -101,6 +102,5 @@ class CustomisedSalesSummaryDoctorwise extends Component
             }
         }
         $this->data=$sale;
-
     }
 }

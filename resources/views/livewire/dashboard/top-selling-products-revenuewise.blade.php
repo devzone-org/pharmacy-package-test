@@ -1,7 +1,6 @@
 <div class="bg-white pt-6 mt-6 shadow sm:rounded-md sm:overflow-hidden">
     <div class="px-4 sm:px-6">
-        <h2 class="text-lg leading-6 font-medium text-gray-900">Top 10 Selling Products {{ucfirst($report_type)}}
-            wise</h2>
+        <h2 class="text-lg leading-6 font-medium text-gray-900">Top 5 Selling Products - {{ucfirst($report_type)}} wise</h2>
     </div>
     <div class="mt-6 flex flex-col">
         <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -24,7 +23,7 @@
                             </th>
                             <th scope="col"
                                 class=" border-r px-6 py-3 text-center text-xs font-bold text-gray-900 uppercase tracking-wider">
-                                No of Sales
+                                # Sales
                             </th>
                             <th scope="col"
                                 class=" border-r px-6 py-3 text-center text-xs font-bold text-gray-900 uppercase tracking-wider">
@@ -36,7 +35,7 @@
                             </th>
                             <th scope="col"
                                 class=" border-r px-6 py-3 text-center text-xs font-bold text-gray-900 uppercase tracking-wider">
-                               Gross Profit
+                               G.Profit
                             </th>
                         </tr>
                         </thead>

@@ -15,7 +15,7 @@
                             </th>
                             @foreach($label as $l)
                                 <th scope="col" colspan="2"
-                                    class="@if(!$loop->last) border-r @endif w-1/6 px-6 py-3 text-center text-xs font-bold text-gray-900 uppercase tracking-wider">
+                                    class="@if(!$loop->last) border-r @endif px-6 py-3 text-center text-xs font-bold text-gray-900 uppercase tracking-wider">
                                     {{$l['label']}}
                                 </th>
                             @endforeach
@@ -23,12 +23,12 @@
                         <tr>
                             @foreach($label as $i=>$l)
                                 <th scope="col"
-                                    class="@if(count($label)!=$i++) border-r @endif w-1/6 px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
+                                    class="@if(count($label)!=$i++) border-r @endif px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
                                     Sale
                                 </th>
                                 <th scope="col"
-                                    class="@if(count($label)!=$i++) border-r @endif w-1/6 px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                    Profit
+                                    class="@if(count($label)!=$i++) border-r @endif px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
+                                    # Sales
                                 </th>
                             @endforeach
                         </tr>
@@ -56,7 +56,8 @@
                                         {{!empty($sale) ? number_format($sale['total_after_disc']-$sale['return_total'],2) : '-'}}
                                     </td>
                                     <td class="@if(count($label)!=$index++) border-r @endif font-medium text-center whitespace-nowrap text-sm @if(empty($d->first()['doctor'])) text-yellow-600  @else text-gray-800 @endif">
-                                        {{!empty($sale) ? number_format(($sale['total_after_disc']-$sale['return_total'])-($sale['cos']-$sale['return_cos']),2) : '-'}}
+{{--                                        {{!empty($sale) ? number_format(($sale['total_after_disc']-$sale['return_total'])-($sale['cos']-$sale['return_cos']),2) : '-'}}--}}
+                                        {{!empty($sale) ? number_format(($sale['no_of_sale'])) : '-'}}
                                     </td>
                                 @endforeach
                             </tr>
