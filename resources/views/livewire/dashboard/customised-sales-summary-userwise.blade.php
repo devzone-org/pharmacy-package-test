@@ -96,7 +96,7 @@
         };
 
 
-        var chartBar = new Chart(
+        var chartBarUser = new Chart(
             document.getElementById('chartBarUserwise'),
             configUserwise
         );

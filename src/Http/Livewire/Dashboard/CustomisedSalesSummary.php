@@ -14,13 +14,13 @@ class CustomisedSalesSummary extends Component
 {
     use DashboardDate;
     public $data=[];
-
     public function mount()
     {
-        $this->type='week';
+        $this->type='date';
         $this->date=date('Y-m-d');
 //        $this->date='2021-08-10';
         $this->prepareDate();
+
     }
 
     public function render()
@@ -108,13 +108,7 @@ class CustomisedSalesSummary extends Component
                 $sale[$key]['gross_profit']=$sale[$key]['net_sale']-$sale[$key]['net_cos'];
             }
         }
-        $result = CarbonPeriod::create($this->from, '7 day', $this->to);
-        foreach ($result as $key=>$dt) {
-//            $sale->
-//            $this->label[$key]['format']=$dt->weekOfYear;
-        }
         $this->data=$sale;
-//        dd($this->data);
     }
 
 }

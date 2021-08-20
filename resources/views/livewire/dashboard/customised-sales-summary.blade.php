@@ -57,69 +57,82 @@
         <canvas class="p-10 " id="chartBar"></canvas>
     </div>
     <script>
-        var labels = "{{$label_plucked}}";
-
-        labels = JSON.parse(labels.replace(/&quot;/g, '"'));
-        var net_sale = "{{collect($data)->pluck('net_sale')}}";
-        net_sale = JSON.parse(net_sale.replace(/&quot;/g, '"'));
-        var cos = "{{collect($data)->pluck('net_cos')}}";
-        cos = JSON.parse(cos.replace(/&quot;/g, '"'));
-        var gross_profit = "{{collect($data)->pluck('net_cos')}}";
-        gross_profit = JSON.parse(gross_profit.replace(/&quot;/g, '"'));
-        const data = {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Sale',
-                    data: net_sale,
-                    borderColor: '#5bd6aa',
-                    backgroundColor: '#5bd6aa',
-                },
-                {
-                    label: 'COS',
-                    data: cos,
-                    borderColor: '#5dc2df',
-                    backgroundColor: '#5dc2df',
-
-                },
-                {
-                    label: 'Gross Profit',
-                    data: gross_profit,
-                    borderColor: '#fcb37b',
-                    backgroundColor: '#fcb37b',
-                },
-
-            ]
-        };
-
-        const config = {
-            type: 'bar',
-            data: data,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: {
-                            font: {
-                                size: 16,
-                                weight: 'Bold',
-                            }
-                        }
-                    },
-                    title: {
-                        display: false,
-                        text: 'Bar Chart'
-                    },
-
-                }
-            },
-        };
-
-
-        var chartBar = new Chart(
+        var chartBar;
+        var config;
+        var data;
+        makeChart('parse','{{$label_plucked}}','{{collect($data)->pluck('net_sale')}}','{{collect($data)->pluck('net_cos')}}','{{collect($data)->pluck('gross_profit')}}');
+        chartBar = new Chart(
             document.getElementById('chartBar'),
             config
         );
+        function makeChart(q,l,s,c,g) {
+            var labels = l;
+
+            labels = JSON.parse(labels.replace(/&quot;/g, '"'));
+            var net_sale = s;
+            var cos = c;
+            var gross_profit = g;
+            if (q=='parse'){
+                net_sale = JSON.parse(net_sale.replace(/&quot;/g, '"'));
+                cos = JSON.parse(cos.replace(/&quot;/g, '"'));
+                gross_profit = JSON.parse(gross_profit.replace(/&quot;/g, '"'));
+            }
+            var data = {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Sale',
+                        data: net_sale,
+                        borderColor: '#5bd6aa',
+                        backgroundColor: '#5bd6aa',
+                    },
+                    {
+                        label: 'COS',
+                        data: cos,
+                        borderColor: '#5dc2df',
+                        backgroundColor: '#5dc2df',
+
+                    },
+                    {
+                        label: 'Gross Profit',
+                        data: gross_profit,
+                        borderColor: '#fcb37b',
+                        backgroundColor: '#fcb37b',
+                    },
+
+                ]
+            };
+
+            config = {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 16,
+                                    weight: 'Bold',
+                                }
+                            }
+                        },
+                        title: {
+                            display: false,
+                            text: 'Bar Chart'
+                        },
+
+                    }
+                },
+            };
+        }
+
+        Livewire.on('updateData', function (l,s,c,g) {
+            // chartBar.destroy();
+            console.log(l,s,c,g)
+            makeChart('not_parse',l,s,c,g);
+            chartBar.update();
+        });
     </script>
 </div>
