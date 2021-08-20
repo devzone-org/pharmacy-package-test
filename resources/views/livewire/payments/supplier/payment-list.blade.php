@@ -214,16 +214,16 @@
                                 $tax = $total * ($m->advance_tax/100);
                             }
                             if($total>0){
-                                $amt=$total + $tax;
+                                $amts=$total + $tax;
                             }else{
-                                $amt=abs($total + $tax);
+                                $amts=abs($total + $tax);
                             }
                         @endphp
 
                         @if($total>0)
-                            ({{ number_format($amt,2) }})
+                            ({{ number_format($amts,2) }})
                         @else
-                            {{ number_format($amt,2) }}
+                            {{ number_format($amts,2) }}
                         @endif
 
                     </td>
@@ -290,7 +290,7 @@
                                        role="menuitem" tabindex="-1">View</a>
 
                                     @if(empty($m->approved_by))
-                                        <p wire:click="markAsApproved('{{ $m->id }}','{{ $m->payment_date }}','{{$m->supplier_name}}','{{$amt}}','{{$m->account_name}}')"
+                                        <p wire:click="markAsApproved('{{ $m->id }}','{{ $m->payment_date }}','{{$m->supplier_name}}','{{$amts}}','{{$m->account_name}}')"
                                            class="text-gray-700 cursor-pointer block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                            role="menuitem" tabindex="-1">Mark as Approve
                                         </p>
@@ -358,7 +358,7 @@
                     @enderror
 
                     <div class=" ">
-                        <button type="button" wire:click="proceed"
+                        <button type="button" wire:click="proceed" wire:loading.attr="disabled"
                                 class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             Proceed
                         </button>

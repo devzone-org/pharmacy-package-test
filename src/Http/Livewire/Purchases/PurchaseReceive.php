@@ -246,7 +246,7 @@ class PurchaseReceive extends Component
         $this->validate();
         try {
             DB::beginTransaction();
-            $purchase_receipt_no=Voucher::instance()->advances()->get();
+            $purchase_receipt_no = Voucher::instance()->advances()->get();
             Purchase::where('id', $this->purchase_id)->update([
                 'supplier_id' => $this->supplier_id,
                 'supplier_invoice' => $this->supplier_invoice,
@@ -254,7 +254,7 @@ class PurchaseReceive extends Component
                 'status' => 'receiving',
                 'grn_no' => $this->grn_no,
                 'advance_tax' => $this->advance_tax,
-                'receipt_no'=>$purchase_receipt_no
+                'receipt_no' => $purchase_receipt_no
             ]);
             foreach ($this->order_list as $o) {
                 \Devzone\Pharmacy\Models\PurchaseReceive::create([
@@ -294,7 +294,7 @@ class PurchaseReceive extends Component
                     ->select('po.*', 'p.name', 'p.salt', 'p.packing')
                     ->get();
 
-                if(Purchase::where('status', 'received')->where('id', $this->purchase_id)->exists()){
+                if (Purchase::where('status', 'received')->where('id', $this->purchase_id)->exists()) {
                     throw new \Exception("Already receive order.");
                 }
                 if (empty($this->delivery_date)) {
@@ -305,15 +305,16 @@ class PurchaseReceive extends Component
                 if (empty($inventory)) {
                     throw new \Exception('Inventory account not found in chart of accounts.');
                 }
-                $get_purchase=Purchase::where('id', $this->purchase_id)->first();
+                $get_purchase = Purchase::where('id', $this->purchase_id)->first();
                 $supplier = Supplier::find($this->supplier_id);
                 $amount = $receive->sum('total_cost');
-                $description = "RECEIVED INVENTORY amounting total PKR " . number_format($amount, 2) . "/- + Advance tax u/s 236(h)(".$get_purchase->advance_tax."%) amount PKR ".
-                    number_format($this->advance_tax_amount,2)."/- + net Payable to supplier '". $supplier['name'] ."' PKR ".number_format($amount + $this->advance_tax_amount,2).
-                    "/- against PO # " . $this->purchase_id ." & invoice # inv-".$purchase_receipt_no." & GRN # ".empty($get_purchase->grn_no) ? '-' : $get_purchase->grn_no ." received by ".Auth::user()->name." on dated " . date('d M, Y h:i A');
+                $grn_no = empty($get_purchase->grn_no) ? '-' : $get_purchase->grn_no;
+                $description = "RECEIVED INVENTORY amounting total PKR " . number_format($amount, 2) . "/- + Recoverable Advance Tax u/s 236(h)(" . $get_purchase->advance_tax . "%) amount PKR " .
+                    number_format($this->advance_tax_amount, 2) . "/- = Net Payable to supplier '" . $supplier['name'] . "' PKR " . number_format($amount + $this->advance_tax_amount, 2) .
+                    "/- against PO # " . $this->purchase_id . " & invoice # INV-" . $purchase_receipt_no . " & GRN # " . $grn_no . " received by " . Auth::user()->name . " on dated " . date('d M, Y h:i A');
 
-                $tax = ChartOfAccount::where('reference','advance-tax-236')->first();
-                if(empty($tax)){
+                $tax = ChartOfAccount::where('reference', 'advance-tax-236')->first();
+                if (empty($tax)) {
                     throw new \Exception('Advance tax account not found in chart of accounts.');
                 }
                 $vno = Voucher::instance()->voucher()->get();

@@ -36,7 +36,8 @@ trait Searchable
         'receiving_account' => ['name', 'code'],
         'patient' => ['mr_no', 'name', 'phone'],
         'referred_by' => ['name'],
-        'item' => ['item', 'qty', 'retail_price', 'rack', 'tier', 'packing']
+        'item' => ['item', 'qty', 'retail_price', 'rack', 'tier', 'packing'],
+        'adjustment_items' => ['item', 'qty', 'expiry']
     ];
 
 
@@ -197,6 +198,24 @@ trait Searchable
                     'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'r.name as rack', 'r.tier')
                 ->groupBy('p.id')
                 ->groupBy('pi.retail_price')->orderBy('qty', 'desc')->get();
+            if ($search->isNotEmpty()) {
+                $this->searchable_data = $search->toArray();
+            } else {
+                $this->searchable_data = [];
+            }
+        }
+
+        if ($this->searchable_type == 'adjustment_items')
+        {
+            $search = Product::from('products as p')
+                ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
+                ->where(function ($q) use ($value) {
+                    return $q->orWhere('p.name', 'LIKE', '%' . $value . '%')
+                        ->orWhere('p.salt', 'LIKE', '%' . $value . '%');
+                })->select('p.name as item', DB::raw('SUM(qty) as qty'),'p.id',
+                      'pi.expiry')
+                ->groupBy('p.id')
+                ->groupBy('pi.expiry')->orderBy('qty', 'desc')->orderBy('p.name', 'asc')->get();
             if ($search->isNotEmpty()) {
                 $this->searchable_data = $search->toArray();
             } else {
