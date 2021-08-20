@@ -16,6 +16,9 @@ class CustomisedSalesSummaryDoctorwise extends Component
     public $data=[];
     public function mount()
     {
+        $this->type='week';
+//        $this->date=date('Y-m-d');
+        $this->date='2021-08-10';
         $this->prepareDate();
     }
 
