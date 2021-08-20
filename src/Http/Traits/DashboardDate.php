@@ -15,10 +15,9 @@ trait DashboardDate
     public $type;
     public $label=[];
     public $label_plucked;
+    public $display_date;
 
     public function prepareDate(){
-        $this->date='2021-08-10';
-        $this->type = 'date';
         $this->pre_to=new Carbon($this->date);
         if ($this->type=='date'){
             $this->reset('label');
@@ -28,6 +27,7 @@ trait DashboardDate
                 $this->label[$key]['label']=$dt->format("d, M Y");
                 $this->label[$key]['format']=$dt->format("Y-m-d");
             }
+            $this->display_date=date('d M Y',strtotime($this->pre_to));
         }elseif ($this->type=='week'){
             $this->reset('label');
             $this->from=$this->pre_to->copy()->subWeek(5)->startOfWeek();
@@ -37,6 +37,7 @@ trait DashboardDate
                 $this->label[$key]['label']=$dt->format("d M").' - '.$last_date->format("d M");
                 $this->label[$key]['format']=$dt->weekOfYear;
             }
+            $this->display_date=date('d M Y',strtotime($this->from)).'-'.date('d M Y',strtotime($this->pre_to));
         }elseif ($this->type=='month'){
             $this->reset('label');
             $this->from=$this->pre_to->copy()->subMonth(5)->firstOfMonth();
@@ -45,9 +46,36 @@ trait DashboardDate
                 $this->label[$key]['label']=$dt->format("M, Y");
                 $this->label[$key]['format']=$dt->month;
             }
+            $this->display_date=date('M, Y',strtotime($this->from)).'-'.date('M, Y',strtotime($this->pre_to));
         }
         $this->to=$this->pre_to->copy()->endOfDay();
-       $this->label_plucked=json_encode(collect($this->label)->pluck('label')->toArray());
-      // dd($this->label_plucked);
+        $this->label_plucked=json_encode(collect($this->label)->pluck('label')->toArray());
+//        dd($this->from,$this->to);
+    }
+    public function changeType($type){
+        $this->type=$type;
+        $this->prepareDate();
+    }
+
+    public function changeDate($direction){
+        if ($direction=='prev'){
+            if ($this->type=='date'){
+                $this->date=date('Y-m-d', strtotime('-1 day', strtotime($this->date)));
+            }elseif ($this->type=='week'){
+                $this->date=date('Y-m-d', strtotime('-1 week', strtotime($this->date)));
+            }elseif ($this->type=='month'){
+                $this->date=date('Y-m-d', strtotime('-1 month', strtotime($this->date)));
+            }
+
+        }elseif($direction=='next'){
+            if ($this->type=='date'){
+                $this->date=date('Y-m-d', strtotime('+1 day', strtotime($this->date)));
+            }elseif ($this->type=='week'){
+                $this->date=date('Y-m-d', strtotime('+1 week', strtotime($this->date)));
+            }elseif ($this->type=='month'){
+                $this->date=date('Y-m-d', strtotime('+1 month', strtotime($this->date)));
+            }
+        }
+        $this->prepareDate();
     }
 }

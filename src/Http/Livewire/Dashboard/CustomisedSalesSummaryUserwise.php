@@ -18,6 +18,9 @@ class CustomisedSalesSummaryUserwise extends Component
 
     public function mount()
     {
+        $this->type='week';
+//        $this->date=date('Y-m-d');
+        $this->date='2021-08-10';
         $this->prepareDate();
     }
 
@@ -106,8 +109,8 @@ class CustomisedSalesSummaryUserwise extends Component
                 $sale[$key]['net_sale'] = $sale[$key]['total_after_disc'] - $first['return_total'];
             }
         }
-        $this->data = collect($sale)->groupBy('sale_by')->toArray();
-        $color=['#5bd6aa','#fcb37b','#5dc2df','#d9534f','#047857','#fca5a5'];
+        $this->data = array_values(collect($sale)->groupBy('sale_by')->toArray());
+        $color=['#5bd6aa','#5dc2df','#fcb37b','#d9534f','#047857','#fca5a5'];
         foreach ($this->data as $key=>$d) {
             $first = collect($d)->first();
             $net_sale = collect($d)->pluck('net_sale')->toArray();
