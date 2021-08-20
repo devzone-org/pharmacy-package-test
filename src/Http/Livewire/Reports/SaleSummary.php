@@ -34,7 +34,6 @@ class SaleSummary extends Component
     {
         $this->report = Sale::from('sales as s')
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
-            ->leftJoin('sale_refunds as sf','sf.sale_detail_id','=','sd.id')
             ->when(!empty($this->to), function ($q) {
                 return $q->whereDate('s.sale_at', '<=', $this->to);
             })
