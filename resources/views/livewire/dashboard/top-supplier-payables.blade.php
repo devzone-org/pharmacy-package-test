@@ -1,6 +1,6 @@
 <div class="bg-white pt-6 mt-2 shadow sm:rounded-md sm:overflow-hidden">
     <div class="px-4 sm:px-6">
-        <h2 class="text-lg leading-6 font-medium text-gray-900">Expired Products</h2>
+        <h2 class="text-lg leading-6 font-medium text-gray-900">Top 5 Supplier Payables</h2>
     </div>
     <div class="mt-6 flex flex-col">
         <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -15,23 +15,11 @@
                             </th>
                             <th scope="col"
                                 class=" border-r px-6 py-3 text-center text-xs font-bold text-gray-900 uppercase tracking-wider">
-                                Product
-                            </th>
-                            <th scope="col"
-                                class=" border-r px-6 py-3 text-center text-xs font-bold text-gray-900 uppercase tracking-wider">
                                 Supplier
                             </th>
                             <th scope="col"
                                 class=" border-r px-6 py-3 text-center text-xs font-bold text-gray-900 uppercase tracking-wider">
-                                Expiry Date
-                            </th>
-                            <th scope="col"
-                                class=" border-r px-6 py-3 text-center text-xs font-bold text-gray-900 uppercase tracking-wider">
-                                Last Sold
-                            </th>
-                            <th scope="col"
-                                class=" border-r px-6 py-3 text-center text-xs font-bold text-gray-900 uppercase tracking-wider">
-                                Quantity
+                                Payable Amt (PKR)
                             </th>
                         </tr>
                         </thead>
@@ -43,19 +31,10 @@
                                     {{$loop->iteration}}
                                 </td>
                                 <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {{$d['product']}}
+                                    {{$d['supplier']}}
                                 </td>
                                 <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm text-gray-700">
-                                    {{!empty($d['supplier']) ? $d['supplier'] : '-'}}
-                                </td>
-                                <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm  text-gray-700">
-                                    {{!empty($d['expiry']) ? date('d M Y',strtotime($d['expiry'])) : '-'}}
-                                </td>
-                                <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm  text-gray-700">
-                                    {{!empty($d['sale_at']) ? date('d M Y',strtotime($d['sale_at'])) : '-'}}
-                                </td>
-                                <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm  text-gray-700">
-                                    {{number_format($d['qty'])}}
+                                    {{number_format($d['total'],2)}}
                                 </td>
                             </tr>
                         @endforeach

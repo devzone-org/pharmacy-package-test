@@ -1,6 +1,5 @@
 <div>
-
-    <dl class="mt-5 grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-7">
+    <dl class="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-7">
         <div class="relative bg-white shadow rounded-lg overflow-hidden">
             <div class="top-0 bg-gray-50 px-5 py-4">
                 <div class="text-sm">

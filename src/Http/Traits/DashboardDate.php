@@ -17,6 +17,7 @@ trait DashboardDate
     public $label_plucked;
     public $display_date;
 
+
     public function prepareDate(){
         $this->pre_to=new Carbon($this->date);
         if ($this->type=='date'){
@@ -50,7 +51,8 @@ trait DashboardDate
         }
         $this->to=$this->pre_to->copy()->endOfDay();
         $this->label_plucked=json_encode(collect($this->label)->pluck('label')->toArray());
-//        dd($this->from,$this->to);
+//        $this->emit('updateData',$this->label_plucked,collect($this->data)->pluck('net_sale'),collect($this->data)->pluck('net_cos'),collect($this->data)->pluck('gross_profit'));
+        $this->dispatchBrowserEvent('updateData');
     }
     public function changeType($type){
         $this->type=$type;

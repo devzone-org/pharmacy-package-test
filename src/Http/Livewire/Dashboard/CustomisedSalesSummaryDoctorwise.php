@@ -32,19 +32,26 @@ class CustomisedSalesSummaryDoctorwise extends Component
     {
         $sale = Sale::from('sales as s')
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
+            ->leftJoin('sale_refunds as sr','sr.sale_detail_id','=','sd.id')
             ->leftJoin('employees as e','e.id','=','s.referred_by')
             ->whereBetween('s.sale_at', [$this->from, $this->to])
             ->groupBy('s.referred_by')
             ->select(
+                DB::raw('DATE(s.sale_at) as date'),
+                DB::raw('MONTH(s.sale_at) as month'),
+                DB::raw('WEEK(s.sale_at) as week'),
+                DB::raw('sum(sd.total_after_disc) as total'),
+                DB::raw('count(DISTINCT(s.id)) as no_of_sales'),
+                DB::raw('sum(sr.refund_qty) as refund_qty'),
+                DB::raw('sum(sd.qty) as total_sale_qty'),
+                DB::raw('sum((sd.qty - coalesce(sr.refund_qty,0)) * sd.supply_price) as cos'),
+                DB::raw('sum(sd.total_after_disc) / sum(sd.qty) as unit'),
+                DB::raw('sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0)) as total_refund'),
+                DB::raw('sum(sd.total_after_disc) - (sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0))) as total_after_refund'),
+                DB::raw('sum(sd.total_after_disc) - (sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0))) - (sum((sd.qty - coalesce(sr.refund_qty,0)) * sd.supply_price)) as total_profit'),
                 's.referred_by','e.name as doctor',
-                DB::raw('DATE(s.sale_at) as date'),
-                DB::raw('MONTH(s.sale_at) as month'),
-                DB::raw('WEEK(s.sale_at) as week'),
-                DB::raw('sum(sd.total) as total'),
-                DB::raw('sum(sd.qty*sd.supply_price) as cos'),
-                DB::raw('count(DISTINCT(s.id)) as no_of_sale'),
-                DB::raw('sum(sd.total_after_disc) as total_after_disc'),
             )
+
             ->when($this->type == 'month', function ($q) {
                 return $q->groupBy('month')
                     ->orderBy('month');
@@ -57,53 +64,13 @@ class CustomisedSalesSummaryDoctorwise extends Component
                 return $q->groupBy('date')
                     ->orderBy('date');
             })
+            ->orderBy('total_after_refund','DESC')
             ->get()
             ->toArray();
-
-        $sale_return = SaleRefund::from('sale_refunds as sr')
-            ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
-            ->join('sales as s', 's.id', '=', 'sr.sale_id')
-            ->whereBetween('s.sale_at', [$this->from, $this->to])
-            ->groupBy('s.referred_by')
-            ->select(
-                'sd.sale_id',
-                's.referred_by',
-                DB::raw('DATE(s.sale_at) as date'),
-                DB::raw('MONTH(s.sale_at) as month'),
-                DB::raw('WEEK(s.sale_at) as week'),
-                DB::raw('sum((sd.total_after_disc/sd.qty)*sr.refund_qty) as return_total'),
-                DB::raw('sum(sd.supply_price*sr.refund_qty) as return_cos')
-            )
-            ->when($this->type == 'month', function ($q) {
-                return $q->groupBy('month')
-                    ->orderBy('month');
-            })
-            ->when($this->type == 'week', function ($q) {
-                return $q->groupBy('week')
-                    ->orderBy('week');
-            })
-            ->when($this->type == 'date', function ($q) {
-                return $q->groupBy('date')
-                    ->orderBy('date');
-            })
-            ->get()
-            ->toArray();
-
-        foreach ($sale as $key=>$s){
-            if ($this->type=='month'){
-                $first=collect($sale_return)->where('month',$s['month'])->where('referred_by',$s['referred_by'])->first();
-                $sale[$key]['return_total']=$first['return_total'];
-                $sale[$key]['return_cos']=$first['return_cos'];
-            }elseif ($this->type=='week'){
-                $first=collect($sale_return)->where('week',$s['week'])->where('referred_by',$s['referred_by'])->first();
-                $sale[$key]['return_total']=$first['return_total'];
-                $sale[$key]['return_cos']=$first['return_cos'];
-            }elseif ($this->type=='date'){
-                $first=collect($sale_return)->where('date',$s['date'])->where('referred_by',$s['referred_by'])->first();
-                $sale[$key]['return_total']=$first['return_total'];
-                $sale[$key]['return_cos']=$first['return_cos'];
+        foreach(collect($sale)->groupBy($this->type) as $s){
+            foreach($s->take(5) as $f){
+                $this->data[]=$f;
             }
         }
-        $this->data=$sale;
     }
 }

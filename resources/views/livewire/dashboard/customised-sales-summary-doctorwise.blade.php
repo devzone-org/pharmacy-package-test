@@ -1,4 +1,4 @@
-<div class="bg-white pt-6 mt-6 shadow sm:rounded-md sm:overflow-hidden">
+<div class="bg-white pt-6 mt-2 shadow sm:rounded-md sm:overflow-hidden">
     <div class="px-4 sm:px-6">
         <h2 class="text-lg leading-6 font-medium text-gray-900">Sales Summary Doctor Wise </h2>
     </div>
@@ -34,9 +34,9 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach(collect($data)->sortBy('doctor')->groupBy('referred_by') as $key=>$d)
+                        @foreach(collect($data)->sortByDesc('total_after_refund')->groupBy('referred_by') as $key=>$d)
                             <!-- Odd row -->
-                            <tr class="@if($loop->odd) bg-white @else bg-gray-50 @endif">
+                            <tr class="@if($loop->odd) bg-white @else bg-gray-50 @endif hover:bg-gray-200 ">
                                 <td class="border-r px-6 py-4 whitespace-nowrap text-sm font-medium @if(empty($d->first()['doctor'])) text-yellow-600  @else text-gray-900 @endif">
                                     {{!empty($d->first()['doctor']) ? $d->first()['doctor'] : 'External Doctors'}}
                                 </td>
@@ -52,12 +52,12 @@
                                             $sale=collect($data)->where('referred_by',$key)->where('month',$l['format'])->first();
                                         }
                                     @endphp
-                                    <td class="@if(count($label)!=$index++) border-r @endif font-medium text-center whitespace-nowrap text-sm @if(empty($d->first()['doctor'])) text-yellow-600  @else text-gray-800 @endif ">
-                                        {{!empty($sale) ? number_format($sale['total_after_disc']-$sale['return_total'],2) : '-'}}
+                                    <td class="@if(count($label)!=$index++) border-r @endif  text-center whitespace-nowrap text-sm @if(empty($d->first()['doctor'])) text-yellow-700  @else text-gray-700 @endif">
+                                        {{!empty($sale) ? number_format($sale['total_after_refund'],2) : '-'}}
                                     </td>
-                                    <td class="@if(count($label)!=$index++) border-r @endif font-medium text-center whitespace-nowrap text-sm @if(empty($d->first()['doctor'])) text-yellow-600  @else text-gray-800 @endif">
+                                    <td class="@if(count($label)!=$index++) border-r @endif  text-center whitespace-nowrap text-sm @if(empty($d->first()['doctor'])) text-yellow-700  @else text-gray-700 @endif">
 {{--                                        {{!empty($sale) ? number_format(($sale['total_after_disc']-$sale['return_total'])-($sale['cos']-$sale['return_cos']),2) : '-'}}--}}
-                                        {{!empty($sale) ? number_format(($sale['no_of_sale'])) : '-'}}
+                                        {{!empty($sale) ? number_format(($sale['no_of_sales'])) : '-'}}
                                     </td>
                                 @endforeach
                             </tr>
