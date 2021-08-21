@@ -7,7 +7,7 @@
     <div class="max-w-full mx-auto py-6 sm:px-6 lg:px-8">
 
 {{--        @livewire('dashboard.date')--}}
-        <div class="grid grid-cols-6 gap-2">
+        <div class="grid grid-cols-6 gap-3">
             <div class="col-span-6">
                 @livewire('dashboard.monthwise-sales-summary')
             </div>

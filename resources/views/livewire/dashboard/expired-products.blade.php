@@ -1,4 +1,4 @@
-<div class="bg-white pt-6 mt-6 shadow sm:rounded-md sm:overflow-hidden">
+<div class="bg-white pt-6 mt-2 shadow sm:rounded-md sm:overflow-hidden">
     <div class="px-4 sm:px-6">
         <h2 class="text-lg leading-6 font-medium text-gray-900">Expired Products</h2>
     </div>

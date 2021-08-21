@@ -1,4 +1,4 @@
-<div class="bg-white pt-6 mt-6 shadow sm:rounded-md sm:overflow-hidden">
+<div class="bg-white pt-6 mt-2 shadow sm:rounded-md sm:overflow-hidden">
     <div class="px-5 pb-5 border-b border-gray-200 sm:flex sm:items-center sm:justify-between">
         <h2 class="text-lg leading-6 font-medium text-gray-900">
             Sales Summary Salesman Wise
