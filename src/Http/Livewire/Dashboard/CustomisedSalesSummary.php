@@ -2,23 +2,23 @@
 
 namespace Devzone\Pharmacy\Http\Livewire\Dashboard;
 
-use Carbon\CarbonPeriod;
 use Devzone\Pharmacy\Http\Traits\DashboardDate;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Sale\SaleRefund;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class CustomisedSalesSummary extends Component
 {
     use DashboardDate;
-    public $data=[];
+
+    public $data = [];
+    public $result = [];
+
     public function mount()
     {
-        $this->type='date';
-        $this->date=date('Y-m-d');
-//        $this->date='2021-08-10';
+        $this->type = 'date';
+        $this->date = date('Y-m-d');
         $this->prepareDate();
 
     }
@@ -31,6 +31,7 @@ class CustomisedSalesSummary extends Component
 
     public function search()
     {
+        $this->reset(['result', 'data']);
         $sale = Sale::from('sales as s')
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
             ->whereBetween('s.sale_at', [$this->from, $this->to])
@@ -84,31 +85,50 @@ class CustomisedSalesSummary extends Component
             ->get()
             ->toArray();
 
-        foreach ($sale as $key=>$s){
-            if ($this->type=='month'){
-                $first=collect($sale_return)->where('month',$s['month'])->first();
-                $sale[$key]['return_total']=$first['return_total'];
-                $sale[$key]['net_sale']=$sale[$key]['total_after_disc']-$first['return_total'];
-                $sale[$key]['return_cos']=$first['return_cos'];
-                $sale[$key]['net_cos']=$sale[$key]['cos']-$first['return_cos'];
-                $sale[$key]['gross_profit']=$sale[$key]['net_sale']-$sale[$key]['net_cos'];
-            }elseif ($this->type=='week'){
-                $first=collect($sale_return)->where('week',$s['week'])->first();
-                $sale[$key]['return_total']=$first['return_total'];
-                $sale[$key]['net_sale']=$sale[$key]['total_after_disc']-$first['return_total'];
-                $sale[$key]['return_cos']=$first['return_cos'];
-                $sale[$key]['net_cos']=$sale[$key]['cos']-$first['return_cos'];
-                $sale[$key]['gross_profit']=$sale[$key]['net_sale']-$sale[$key]['net_cos'];
-            }elseif ($this->type=='date'){
-                $first=collect($sale_return)->where('date',$s['date'])->first();
-                $sale[$key]['return_total']=$first['return_total'];
-                $sale[$key]['net_sale']=$sale[$key]['total_after_disc']-$first['return_total'];
-                $sale[$key]['return_cos']=$first['return_cos'];
-                $sale[$key]['net_cos']=$sale[$key]['cos']-$first['return_cos'];
-                $sale[$key]['gross_profit']=$sale[$key]['net_sale']-$sale[$key]['net_cos'];
+        foreach ($sale as $key => $s) {
+            $first = collect($sale_return)->where($this->type, $s[$this->type])->first();
+            $sale[$key]['return_total'] = $first['return_total'];
+            $sale[$key]['net_sale'] = $sale[$key]['total_after_disc'] - $first['return_total'];
+            $sale[$key]['return_cos'] = $first['return_cos'];
+            $sale[$key]['net_cos'] = $sale[$key]['cos'] - $first['return_cos'];
+            $sale[$key]['gross_profit'] = $sale[$key]['net_sale'] - $sale[$key]['net_cos'];
+        }
+
+        foreach ($this->label as $l) {
+            $record = collect($sale)->where($this->type, $l['format'])->first();
+            if (empty($record)) {
+                $this->data[] = [
+                    "{$this->type}" => $l['format'],
+                    'cos' => 0,
+                    'net_sale' => 0,
+                    'gross_profit' => 0
+                ];
+            } else {
+                $this->data[] = [
+                    "{$this->type}" => $l['format'],
+                    'cos' => round($record['cos']),
+                    'net_sale' => round($record['net_sale']),
+                    'gross_profit' => round($record['gross_profit'])
+                ];
             }
         }
-        $this->data=$sale;
+
+
+        $this->result[] = [
+            'name' => 'Sale',
+            'data' => collect($this->data)->pluck('net_sale')->toArray()
+        ];
+        $this->result[] = [
+            'name' => 'Cost of Sale',
+            'data' => collect($this->data)->pluck('cos')->toArray()
+        ];
+        $this->result[] = [
+            'name' => 'Gross Profit',
+            'data' => collect($this->data)->pluck('gross_profit')->toArray()
+        ];
+        $this->result = json_encode($this->result);
+
+        $this->dispatchBrowserEvent('sale-summary', ['result' => $this->result, 'label' => $this->label_plucked]);
     }
 
 }

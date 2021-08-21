@@ -9,7 +9,6 @@
     <script>
 
         var labels = "{{$label_plucked}}";
-
         labels = JSON.parse(labels.replace(/&quot;/g, '"'));
         var sale_refund ="{{collect($data)->pluck('return_total')}}";
         sale_refund = JSON.parse(sale_refund.replace(/&quot;/g,'"'));
