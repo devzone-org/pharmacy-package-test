@@ -42,26 +42,26 @@
                         <tbody>
                         <!-- Odd row -->
                         @foreach($data as $d)
-                            <tr class="@if($loop->odd) bg-white @else bg-gray-50 @endif">
+                            <tr class="@if($loop->odd) bg-white @else bg-gray-50 @endif hover:bg-gray-200">
                                 <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">
                                     {{$loop->iteration}}
                                 </td>
                                 <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">
                                     {{$d->name}}
                                 </td>
-                                <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">
+                                <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm  text-gray-700">
                                     {{!empty($d->supplier) ? $d->supplier : '-'}}
                                 </td>
-                                <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">
+                                <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm  text-gray-700">
                                     {{number_format($d->count_product)}}
                                 </td>
-                                <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">
+                                <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm text-gray-700">
                                     {{number_format($d->total_after_refund,2)}}
                                 </td>
-                                <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">
+                                <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm  text-gray-700">
                                     {{number_format($d->cos,2)}}
                                 </td>
-                                <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">
+                                <td class="border-r px-6 py-4 text-center whitespace-nowrap text-sm text-gray-700">
                                     {{number_format($d->total_after_refund-$d->cos,2)}}
                                 </td>
                             </tr>
