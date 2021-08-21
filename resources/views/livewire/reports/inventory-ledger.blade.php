@@ -5,7 +5,7 @@
                 <div class="col-span-6 sm:col-span-2">
                     <label class="block text-sm font-medium text-gray-700">Product</label>
                     <input wire:model="product_name" readonly
-                    wire:click="searchableOpenModal('product_id', 'product_name', 'product')"
+                           wire:click="searchableOpenModal('product_id', 'product_name', 'product')"
                            type="text"
                            autocomplete="off"
                            class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
@@ -54,7 +54,9 @@
 
                         <div class="bg-white py-6 px-4 sm:p-6 ">
                             <h3 class="text-lg leading-6  text-center font-medium text-gray-900">{{ env('APP_NAME') }}</h3>
-                            <p class="text-md leading-6  text-center  text-gray-900">Pharmacy Sale Product wise Report</p>
+                            <p class="text-md leading-6  text-center  text-gray-900">Pharmacy Inventory Ledger
+                                Report</p>
+                            <h3 class="text-lg leading-6  text-center font-medium text-gray-900">{{!empty($report) ? $report['0']['item'] : '-'}}</h3>
                             <p class="text-md leading-6  text-center  text-gray-900">Statement period
                                 from {{ date('d M, Y',strtotime($from)) }} to {{ date('d M, Y',strtotime($to)) }}</p>
                         </div>
@@ -63,85 +65,70 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900   ">
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900">
                                     Sr #
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
-                                    Products
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                    Date
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
-                                    Qty Sold
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                    Description
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
-                                    Sales after discount (PKR)
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                    Decrease
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    COS (PKR)
-                                </th>
-
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Gross Profit (PKR)
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                    Increase
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Gross Margin (%)
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                    Closing Inventory
                                 </th>
                             </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                             @if(!empty($report))
+                                <tr class="bg-gray-50">
+                                    <th scope="col" colspan="5" class="px-3 py-3 text-right text-sm font-medium text-gray-900">
+                                        Opening Inventory
+                                    </th>
+                                    <th scope="col"  class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                         {{!empty($opening_inv) ? $opening_inv->closing_inventory : 0}}
+                                    </th>
+                                </tr>
                                 @foreach($report as $r)
                                     <tr>
                                         <td class="px-3 py-3   text-sm font-medium text-gray-500">
                                             {{ $loop->iteration  }}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{$r['product_name']}}
+                                            {{date('d M Y h:i A',strtotime($r['created_at']))}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{$r['qty']}}
+                                            {{$r['description']}}
                                         </td>
                                         <td class="px-3 py-3  text-center text-sm text-gray-500">
-                                            {{$r['total_after_disc']}}
+                                            {{$r['decrease']}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{number_format($r['cos'],2)}}
+                                            {{$r['increase']}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{number_format($r['total_after_disc']-$r['cos'],2)}}
-                                        </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            @php
-                                                $total_after_dis=$r['total_after_disc']== 0 ? 1 : $r['total_after_disc'];
-                                            @endphp
-                                            {{number_format((($r['total_after_disc']-$r['cos'])/$total_after_dis)*100,2)}} %
+                                            {{$r['increase']-$r['decrease']}}
                                         </td>
                                     </tr>
                                 @endforeach
                                 <tr class="bg-gray-50">
-                                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
-
-                                    </th>
-                                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
-
-                                    </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('qty'))}}
-                                    </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_after_disc'),2)}}
-                                    </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('cos'),2)}}
-                                    </th>
-                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('cos'),2)}}
+                                    <th scope="col" colspan="5"
+                                        class="px-3 py-3 text-right text-sm font-medium text-gray-900">
+                                        Closing Inventory
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         @php
-                                            $gross_margin=((collect($report)->sum('total_after_disc')-collect($report)->sum('cos'))/collect($report)->sum('total_after_disc'))*100;
+                                            $opening=!empty($opening_inv) ? $opening_inv->closing_inventory : 0;
+                                            $closing=collect($report)->sum('increase')-collect($report)->sum('descrese');
                                         @endphp
-                                        {{number_format($gross_margin,2)}}
+                                        {{$closing+$opening}}
                                     </th>
                                 </tr>
                             </tbody>
@@ -154,3 +141,12 @@
     </div>
     @include('pharmacy::include.searchable')
 </div>
+<script>
+    document.addEventListener('livewire:load', () => {
+        Livewire.on('focusInput', postId => {
+            setTimeout(() => {
+                document.getElementById('searchable_query').focus();
+            }, 100);
+        });
+    });
+</script>

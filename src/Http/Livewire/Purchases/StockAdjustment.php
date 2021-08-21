@@ -42,6 +42,7 @@ class StockAdjustment extends Component
     public function updated($name, $value)
     {
         $array = explode('.', $name);
+
         if (count($array) == 3) {
             if ($array[0] == 'adjustments') {
                 if ($array[2] == 'a_qty' && empty($value)) {
@@ -65,6 +66,7 @@ class StockAdjustment extends Component
             $qty = $this->adjustments[$key]['a_qty'];
             $this->adjustments[$key]['a_qty'] = $qty + 1;
         }
+
     }
 
     public function proceed()
@@ -108,8 +110,8 @@ class StockAdjustment extends Component
                 InventoryLedger::create([
                     'product_id' => $find['product_id'],
                     'order_id' => $find['po_id'],
-                    'increase' => $a['indicator'] == 'i' ? $a['qty'] : 0,
-                    'decrease' => $a['indicator'] == 'd' ? $a['qty'] : 0,
+                    'increase' => $a['indicator'] == 'i' ? $a['a_qty'] : 0,
+                    'decrease' => $a['indicator'] == 'd' ? $a['a_qty'] : 0,
                     'type' => 'adjustment',
                     'description' => "adjustment"
                 ]);
