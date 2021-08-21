@@ -28,19 +28,22 @@
                                   class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-900 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
                             <span class="sr-only">Previous</span>
                               <!-- Heroicon name: solid/chevron-left -->
-                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                 fill="currentColor"
                                  aria-hidden="true">
                               <path fill-rule="evenodd"
                                     d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
                                     clip-rule="evenodd"/>
                             </svg>
                           </button>
-                          <input type="text" wire:model="display_date" disabled class="relative inline-flex items-center text-center px-2 py-2 border border-l-0 border-gray-300 bg-white text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 focus:border-0">
+                          <input type="text" wire:model="display_date" disabled
+                                 class="relative inline-flex items-center text-center px-2 py-2 border border-l-0 border-gray-300 bg-white text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 focus:border-0">
                           <button type="button" wire:click="changeDate('next')"
                                   class="-ml-px relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-900 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
                             <span class="sr-only">Next</span>
                               <!-- Heroicon name: solid/chevron-right -->
-                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                 fill="currentColor"
                                  aria-hidden="true">
                               <path fill-rule="evenodd"
                                     d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
@@ -60,23 +63,23 @@
         var chartBar;
         var config;
         var data;
-        makeChart('parse','{{$label_plucked}}','{{collect($data)->pluck('net_sale')}}','{{collect($data)->pluck('net_cos')}}','{{collect($data)->pluck('gross_profit')}}');
+        makeChart();
         chartBar = new Chart(
             document.getElementById('chartBar'),
             config
         );
-        function makeChart(q,l,s,c,g) {
-            var labels = l;
+
+        function makeChart() {
+            var labels = '{{$label_plucked}}';
+            var net_sale = '{{collect($data)->pluck('net_sale')}}';
+            var cos = '{{collect($data)->pluck('net_cos')}}';
+            var gross_profit = '{{collect($data)->pluck('gross_profit')}}';
 
             labels = JSON.parse(labels.replace(/&quot;/g, '"'));
-            var net_sale = s;
-            var cos = c;
-            var gross_profit = g;
-            if (q=='parse'){
-                net_sale = JSON.parse(net_sale.replace(/&quot;/g, '"'));
-                cos = JSON.parse(cos.replace(/&quot;/g, '"'));
-                gross_profit = JSON.parse(gross_profit.replace(/&quot;/g, '"'));
-            }
+            net_sale = JSON.parse(net_sale.replace(/&quot;/g, '"'));
+            cos = JSON.parse(cos.replace(/&quot;/g, '"'));
+            gross_profit = JSON.parse(gross_profit.replace(/&quot;/g, '"'));
+
             var data = {
                 labels: labels,
                 datasets: [
@@ -128,11 +131,16 @@
             };
         }
 
-        Livewire.on('updateData', function (l,s,c,g) {
-            // chartBar.destroy();
-            console.log(l,s,c,g)
-            makeChart('not_parse',l,s,c,g);
+        // Livewire.on('updateData', function (l,s,c,g) {
+        //     // chartBar.destroy();
+        //     console.log(l,s,c,g)
+        //     makeChart('not_parse',l,s,c,g);
+        //     chartBar.update();
+        // });
+        window.addEventListener('updateData', function () {
+            makeChart();
+            chartBar.clear();
             chartBar.update();
-        });
+        })
     </script>
 </div>

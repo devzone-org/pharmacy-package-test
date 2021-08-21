@@ -11,6 +11,7 @@ use Devzone\Pharmacy\Http\Livewire\Dashboard\ExpiredProducts;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\MonthwiseSalesSummary;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\TopSellingProductsProfitwise;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\TopSellingProducts;
+use Devzone\Pharmacy\Http\Livewire\Dashboard\TopSuppliersPayable;
 use Devzone\Pharmacy\Http\Livewire\MasterData\Category;
 use Devzone\Pharmacy\Http\Livewire\MasterData\Manufacture;
 use Devzone\Pharmacy\Http\Livewire\MasterData\Medicine;
@@ -146,8 +147,9 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('dashboard.top-selling-products',TopSellingProducts::class);
         Livewire::component('dashboard.expired-products',ExpiredProducts::class);
         Livewire::component('dashboard.monthwise-sales-summary',MonthwiseSalesSummary::class);
- 
-     Livewire::component('purchase.stock-adjustment', StockAdjustment::class);
+        Livewire::component('dashboard.top-supplier-payables',TopSuppliersPayable::class);
+
+        Livewire::component('purchase.stock-adjustment', StockAdjustment::class);
         Livewire::component('purchase.stock-adjustment-listing', StockAdjustmentListing::class);
     }
 

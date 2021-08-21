@@ -7,7 +7,7 @@
     <div class="max-w-full mx-auto py-6 sm:px-6 lg:px-8">
 
 {{--        @livewire('dashboard.date')--}}
-        <div class="grid grid-cols-6 gap-6">
+        <div class="grid grid-cols-6 gap-2">
             <div class="col-span-6">
                 @livewire('dashboard.monthwise-sales-summary')
             </div>
@@ -28,12 +28,19 @@
             <div class="col-span-3">
                 @livewire('dashboard.top-selling-products',['report_type' => 'profit'])
             </div>
+            <div class="col-span-6">
+                @livewire('dashboard.expired-products')
+            </div>
+            <div class="col-span-6">
+                @livewire('dashboard.top-supplier-payables')
+            </div>
         </div>
 
 
 
 
-    @livewire('dashboard.expired-products')
+
+
 
 
 
