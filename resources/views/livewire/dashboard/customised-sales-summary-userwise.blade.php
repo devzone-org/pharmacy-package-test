@@ -67,13 +67,22 @@
         var results = "{{ $result }}";
         results = JSON.parse(results.replace(/&quot;/g, '"'));
 
+
+
         var options = {
             series: results,
             chart: {
                 height: 350,
                 type: 'line',
+                dropShadow: {
+                    enabled: true,
+                    color: '#000',
+                    top: 18,
+                    left: 7,
+                    blur: 10,
+                    opacity: 0.2
+                },
 
-                stacked: true,
                 toolbar: {
                     show: true
                 },
@@ -84,22 +93,22 @@
 
             dataLabels: {
                 enabled: true,
-
-
-                formatter: function (val, opts) {
-                    return  (new Intl.NumberFormat().format(val))
-                },
-
+                        formatter: function (val, opts) {
+                            return  (new Intl.NumberFormat().format(val))
+                        },
             },
             stroke: {
                 curve: 'smooth'
             },
+            title: {
 
+
+            },
             grid: {
                 borderColor: '#e7e7e7',
                 row: {
                     colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-
+                    opacity: 0.5
                 },
             },
             markers: {
@@ -109,44 +118,35 @@
                 categories: labels,
 
             },
-
-            legend: {
-                position: 'top',
-                horizontalAlign: 'left',
-                floating: true,
-                offsetY: 0,
-                offsetX: 60
-            },
             yaxis: {
-                yaxis: {
-                    title: {
-                        text: 'Temperature'
-                    },
-                    min: 5000,
-                    max: 150000
-                },
-                labels: {
-                    formatter: function (value) {
-                        return "PKR " +(new Intl.NumberFormat().format(value))
 
-                    }
-                },
+        labels: {
+                            formatter: function (value) {
+                                return "PKR " +(new Intl.NumberFormat().format(value))
+
+                            }
+                        },
+
             },
+
         };
 
         var chart = new ApexCharts(document.querySelector("#chartBarUserwise"), options);
         chart.render();
+
+
+
         window.addEventListener('userwise-sale', event => {
             var labels = event.detail.label;
             labels = JSON.parse(labels.replace(/&quot;/g, '"'));
 
             var results = event.detail.result;
             results = JSON.parse(results.replace(/&quot;/g, '"'));
-console.log(results)
+
             chart.updateOptions({
                 series: results,
                 xaxis: {
-                    type: 'category',
+
                     categories: labels,
                 }
             })

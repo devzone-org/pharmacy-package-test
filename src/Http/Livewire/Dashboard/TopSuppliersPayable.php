@@ -11,6 +11,8 @@ use Livewire\Component;
 class TopSuppliersPayable extends Component
 {
     public $data=[];
+    public $slabel;
+    public $result;
     public function render()
     {
         $this->search();
@@ -25,8 +27,13 @@ class TopSuppliersPayable extends Component
                 DB::raw('sum(l.credit-l.debit) as total'),
             )
             ->orderBy('total','DESC')
-            ->limit(5)
-            ->get()->toArray();
+            ->limit(8)
+            ->get();
+
+        $this->slabel = $this->data->pluck('supplier')->toJson();
+        $this->result = $this->data->pluck('total')->toJson();
+
+
     }
 
 }

@@ -17,10 +17,12 @@
             </div>
             <div class="col-span-3">
                 @livewire('dashboard.customised-sales-summary-userwise')
-{{--                @livewire('dashboard.customised-sales-returns')--}}
             </div>
-            <div class="col-span-6">
+            <div class="col-span-3">
                 @livewire('dashboard.customised-sales-summary-doctorwise')
+            </div>
+            <div class="col-span-3">
+                @livewire('dashboard.top-supplier-payables')
             </div>
             <div class="col-span-3">
                 @livewire('dashboard.top-selling-products',['report_type' => 'revenue'])
@@ -31,9 +33,7 @@
             <div class="col-span-6">
                 @livewire('dashboard.expired-products')
             </div>
-            <div class="col-span-6">
-                @livewire('dashboard.top-supplier-payables')
-            </div>
+
         </div>
 
 

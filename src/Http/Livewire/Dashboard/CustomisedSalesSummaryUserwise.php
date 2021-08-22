@@ -122,7 +122,6 @@ class CustomisedSalesSummaryUserwise extends Component
 
 
         foreach(collect($this->data)->groupBy('user')->toArray() as $user => $details){
-
             $this->result[] = [
                 'name' => $user,
                 'data' => collect($details)->pluck('net_sale')->toArray()
