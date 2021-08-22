@@ -107,7 +107,7 @@ class MonthwiseSalesSummary extends Component
                 $date=$this->prev_2;
             }
             $this->data[$i] = [
-                'date' => date('M, Y',strtotime($date)),
+                'date' => date('F Y',strtotime($date)),
                 'month' => isset($sale[$i]) ? $sale[$i]['month'] : 0,
                 'no_of_sale' => isset($sale[$i]) ? $sale[$i]['no_of_sale'] : 0,
                 'total_after_refund' => isset($sale[$i]) ? $sale[$i]['total_after_refund'] : 0,
