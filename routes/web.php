@@ -156,5 +156,26 @@ Route::get('report/stock-in-out', function () {
 Route::get('report/inter-transfer-IPD-medicines', function () {
     return view('pharmacy::reports.inter-transfer-IPD-medicines');
 });
+Route::get('report/inventory-ledger', function () {
+    return view('pharmacy::reports.inventory-ledger');
+});
 
 Route::get('print/sale/{id}', [PrintController::class, 'print']);
+Route::get(' ', function (){
+    \Devzone\Pharmacy\Models\InventoryLedger::truncate();
+    $inventory=\Devzone\Pharmacy\Models\ProductInventory::groupBy('product_id')
+        ->select('product_id',\Illuminate\Support\Facades\DB::raw('sum(qty) as qty'))
+        ->get()->toArray();
+    foreach ($inventory as $inv){
+        if ($inv['qty']>0){
+            \Devzone\Pharmacy\Models\InventoryLedger::create([
+                'product_id'=>$inv['product_id'],
+                'description'=>'inventory updated',
+                'increase'=>$inv['qty'],
+                'decrease'=>0,
+                'type'=>'purchase'
+            ]);
+        }
+
+    }
+});

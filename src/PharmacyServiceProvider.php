@@ -47,6 +47,7 @@ use Devzone\Pharmacy\Http\Livewire\Reports\StockInOut;
 use Devzone\Pharmacy\Http\Livewire\Reports\StockNearExpiry;
 use Devzone\Pharmacy\Http\Livewire\Reports\StockRegister;
 use Devzone\Pharmacy\Http\Livewire\Reports\StockReorderLevel;
+use Devzone\Pharmacy\Models\InventoryLedger;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -137,6 +138,7 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('report.stock-near-expiry',StockNearExpiry::class);
         Livewire::component('report.stock-in-out',StockInOut::class);
         Livewire::component('report.inter-transfer-IPD-medicines',InterTransferIPDMedicines::class);
+        Livewire::component('report.inventory-ledger',\Devzone\Pharmacy\Http\Livewire\Reports\InventoryLedger::class);
         Livewire::component('master-data.medicine',Medicine::class);
         Livewire::component('sales.admission-pharmacy',\Devzone\Pharmacy\Http\Livewire\Sales\AdmissionPharmacy::class);
         Livewire::component('dashboard.date',Date::class);

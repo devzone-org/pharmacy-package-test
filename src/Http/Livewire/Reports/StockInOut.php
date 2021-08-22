@@ -87,8 +87,9 @@ class StockInOut extends Component
             $this->report[$key]['sale_return'] = $product_grouped->where('type','sale')->sum('increase');
             $this->report[$key]['purchases'] = $product_grouped->where('type','purchase')->sum('increase')+$product_grouped->where('type','purchase-bonus')->sum('increase');
             $this->report[$key]['purchase_return'] = $product_grouped->where('type','purchase-refund')->sum('decrease');
+            $this->report[$key]['adjustment'] = $product_grouped->where('type','adjustment')->sum('increase')-$product_grouped->where('type','adjustment')->sum('decrease');
             $this->report[$key]['opening_stock'] = $previous->where('product_id',$product->product_id)->sum('increase')-$previous->where('product_id',$product->product_id)->sum('decrease');
-            $closing=($this->report[$key]['opening_stock']-($this->report[$key]['sales']+$this->report[$key]['purchase_return']))+$this->report[$key]['sale_return']+$this->report[$key]['purchases'];
+            $closing=($this->report[$key]['opening_stock']-($this->report[$key]['sales']+$this->report[$key]['purchase_return']))+$this->report[$key]['sale_return']+$this->report[$key]['purchases']+($this->report[$key]['adjustment']);
             $this->report[$key]['closing_stock']=$closing;
         }
 //        $this->report=collect($this->report)->sortByDesc('opening_stock');

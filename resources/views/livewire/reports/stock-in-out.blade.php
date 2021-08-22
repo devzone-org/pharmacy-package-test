@@ -87,7 +87,7 @@
 
                         <div class="bg-white py-6 px-4 sm:p-6 ">
                             <h3 class="text-lg leading-6  text-center font-medium text-gray-900">{{ env('APP_NAME') }}</h3>
-                            <p class="text-md leading-6  text-center  text-gray-900">Stock In and Out Report</p>
+                            <p class="text-md leading-6  text-center  text-gray-900">Stock Movement Report</p>
                         </div>
                         <table class="min-w-full  divide-y divide-gray-200">
                             <thead class="bg-gray-50">
@@ -183,7 +183,7 @@
                                         {{$r['purchase_return']}}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        -
+                                        {{$r['adjustment'] < 0 ? '('.abs($r['adjustment']).')' : abs($r['adjustment']) }}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{$r['closing_stock']}}
