@@ -57,48 +57,99 @@
         </div>
     </div>
 
-    <div class="overflow-hidden">
-        <canvas class="p-10 " id="chartBarUserwise"></canvas>
-    </div>
+
+        <div class="p-10 " id="chartBarUserwise"></div>
+
     <!-- Chart bar -->
     <script>
         var labels = "{{$label_plucked}}";
         labels = JSON.parse(labels.replace(/&quot;/g, '"'));
-        var userWise = "{{ json_encode( $prepare_data)}}";
-        userWise = JSON.parse(userWise.replace(/&quot;/g, '"'));
-        const dataUserwise = {
-            labels: labels,
-            datasets: userWise
-        };
+        var results = "{{ $result }}";
+        results = JSON.parse(results.replace(/&quot;/g, '"'));
 
-        const configUserwise = {
-            type: 'bar',
-            data: dataUserwise,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: {
-                            font: {
-                                size: 16,
-                                weight: 'Bold',
-                            }
-                        }
-                    },
-                    title: {
-                        display: false,
-                        text: 'Bar Chart'
-                    },
 
+
+        var options = {
+            series: results,
+            chart: {
+                height: 350,
+                type: 'line',
+                dropShadow: {
+                    enabled: true,
+                    color: '#000',
+                    top: 18,
+                    left: 7,
+                    blur: 10,
+                    opacity: 0.2
+                },
+
+                toolbar: {
+                    show: true
+                },
+                zoom: {
+                    enabled: false
                 }
             },
+
+            dataLabels: {
+                enabled: true,
+                        formatter: function (val, opts) {
+                            return  (new Intl.NumberFormat().format(val))
+                        },
+            },
+            stroke: {
+                curve: 'smooth'
+            },
+            title: {
+
+
+            },
+            grid: {
+                borderColor: '#e7e7e7',
+                row: {
+                    colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+                    opacity: 0.5
+                },
+            },
+            markers: {
+                size: 1
+            },
+            xaxis: {
+                categories: labels,
+
+            },
+            yaxis: {
+
+        labels: {
+                            formatter: function (value) {
+                                return "PKR " +(new Intl.NumberFormat().format(value))
+
+                            }
+                        },
+
+            },
+
         };
 
+        var chart = new ApexCharts(document.querySelector("#chartBarUserwise"), options);
+        chart.render();
 
-        var chartBarUser = new Chart(
-            document.getElementById('chartBarUserwise'),
-            configUserwise
-        );
+
+
+        window.addEventListener('userwise-sale', event => {
+            var labels = event.detail.label;
+            labels = JSON.parse(labels.replace(/&quot;/g, '"'));
+
+            var results = event.detail.result;
+            results = JSON.parse(results.replace(/&quot;/g, '"'));
+
+            chart.updateOptions({
+                series: results,
+                xaxis: {
+
+                    categories: labels,
+                }
+            })
+        })
     </script>
 </div>

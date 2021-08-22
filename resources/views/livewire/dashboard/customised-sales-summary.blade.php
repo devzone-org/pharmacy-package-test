@@ -56,91 +56,92 @@
             </table>
         </div>
     </div>
-    <div class="overflow-hidden">
-        <canvas class="p-10 " id="chartBar"></canvas>
-    </div>
+
+    <div class="p-10 " id="chart"></div>
+
     <script>
-        var chartBar;
-        var config;
-        var data;
-        makeChart();
-        chartBar = new Chart(
-            document.getElementById('chartBar'),
-            config
-        );
 
-        function makeChart() {
-            var labels = '{{$label_plucked}}';
-            var net_sale = '{{collect($data)->pluck('net_sale')}}';
-            var cos = '{{collect($data)->pluck('net_cos')}}';
-            var gross_profit = '{{collect($data)->pluck('gross_profit')}}';
 
-            labels = JSON.parse(labels.replace(/&quot;/g, '"'));
-            net_sale = JSON.parse(net_sale.replace(/&quot;/g, '"'));
-            cos = JSON.parse(cos.replace(/&quot;/g, '"'));
-            gross_profit = JSON.parse(gross_profit.replace(/&quot;/g, '"'));
+        var labels = "{{$label_plucked}}";
+        labels = JSON.parse(labels.replace(/&quot;/g, '"'));
+        var results = "{{ $result }}";
+        results = JSON.parse(results.replace(/&quot;/g, '"'));
 
-            var data = {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Sale',
-                        data: net_sale,
-                        borderColor: '#5bd6aa',
-                        backgroundColor: '#5bd6aa',
-                    },
-                    {
-                        label: 'COS',
-                        data: cos,
-                        borderColor: '#5dc2df',
-                        backgroundColor: '#5dc2df',
 
-                    },
-                    {
-                        label: 'Gross Profit',
-                        data: gross_profit,
-                        borderColor: '#fcb37b',
-                        backgroundColor: '#fcb37b',
-                    },
-
-                ]
-            };
-
-            config = {
+        var options = {
+            series: results,
+            chart: {
                 type: 'bar',
-                data: data,
+                height: 350,
+                stacked: true,
+                toolbar: {
+                    show: true
+                },
+                zoom: {
+                    enabled: false
+                }
+            },
+            responsive: [{
+                breakpoint: 480,
                 options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                font: {
-                                    size: 16,
-                                    weight: 'Bold',
-                                }
-                            }
-                        },
-                        title: {
-                            display: false,
-                            text: 'Bar Chart'
-                        },
+                    legend: {
+                        position: 'bottom',
+                        offsetX: -10,
+                        offsetY: 0
+                    }
+                }
+            }],
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    borderRadius: 20
+                },
+            },
+            xaxis: {
+                type: 'category',
+                categories: labels,
+            },
+            yaxis: {
+                labels: {
+                    formatter: function (value) {
+                        return "PKR " +(new Intl.NumberFormat().format(value))
 
                     }
                 },
-            };
-        }
+            },
+            legend: {
+                position: 'right',
+                offsetY: 40
+            },
+            fill: {
+                opacity: 1
+            },
+            dataLabels: {
 
-        // Livewire.on('updateData', function (l,s,c,g) {
-        //     // chartBar.destroy();
-        //     console.log(l,s,c,g)
-        //     makeChart('not_parse',l,s,c,g);
-        //     chartBar.update();
-        // });
-        window.addEventListener('updateData', function () {
-            makeChart();
-            chartBar.clear();
-            chartBar.update();
+                formatter: function (val, opts) {
+                    return  (new Intl.NumberFormat().format(val))
+                },
+            }
+        };
+
+        var charts = new ApexCharts(document.querySelector("#chart"), options);
+        charts.render();
+
+        window.addEventListener('sale-summary', event => {
+            var labels = event.detail.label;
+            labels = JSON.parse(labels.replace(/&quot;/g, '"'));
+
+            var results = event.detail.result;
+            results = JSON.parse(results.replace(/&quot;/g, '"'));
+
+            charts.updateOptions({
+                series: results,
+                xaxis: {
+                    type: 'category',
+                    categories: labels,
+                }
+            })
         })
     </script>
+
 </div>

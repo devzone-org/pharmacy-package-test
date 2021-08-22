@@ -38,7 +38,7 @@ trait DashboardDate
                 $this->label[$key]['label']=$dt->format("d M").' - '.$last_date->format("d M");
                 $this->label[$key]['format']=$dt->weekOfYear;
             }
-            $this->display_date=date('d M Y',strtotime($this->from)).'-'.date('d M Y',strtotime($this->pre_to));
+            $this->display_date=date('d M Y',strtotime($this->from)).' - '.date('d M Y',strtotime($this->pre_to));
         }elseif ($this->type=='month'){
             $this->reset('label');
             $this->from=$this->pre_to->copy()->subMonth(5)->firstOfMonth();
@@ -47,14 +47,15 @@ trait DashboardDate
                 $this->label[$key]['label']=$dt->format("M, Y");
                 $this->label[$key]['format']=$dt->month;
             }
-            $this->display_date=date('M, Y',strtotime($this->from)).'-'.date('M, Y',strtotime($this->pre_to));
+            $this->display_date=date('M Y',strtotime($this->from)).' - '.date('M Y',strtotime($this->pre_to));
         }
         $this->to=$this->pre_to->copy()->endOfDay();
         $this->label_plucked=json_encode(collect($this->label)->pluck('label')->toArray());
-//        $this->emit('updateData',$this->label_plucked,collect($this->data)->pluck('net_sale'),collect($this->data)->pluck('net_cos'),collect($this->data)->pluck('gross_profit'));
-        $this->dispatchBrowserEvent('updateData');
+
+
     }
     public function changeType($type){
+        $this->date = date('Y-m-d');
         $this->type=$type;
         $this->prepareDate();
     }

@@ -13,14 +13,13 @@ class CustomisedSalesSummaryUserwise extends Component
     use DashboardDate;
 
     public $data = [];
-    public $prepare_data;
+    public $result = [];
     public $count;
 
     public function mount()
     {
-        $this->type='week';
-//        $this->date=date('Y-m-d');
-        $this->date='2021-08-10';
+        $this->type='date';
+        $this->date=date('Y-m-d');
         $this->prepareDate();
     }
 
@@ -32,6 +31,7 @@ class CustomisedSalesSummaryUserwise extends Component
 
     public function search()
     {
+        $this->reset(['result', 'data']);
         $sale = Sale::from('sales as s')
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
             ->join('users as u', 'u.id', '=', 's.sale_by')
@@ -92,35 +92,45 @@ class CustomisedSalesSummaryUserwise extends Component
             ->toArray();
 
         foreach ($sale as $key => $s) {
-            if ($this->type == 'month') {
-                $first = collect($sale_return)->where('month', $s['month'])->where('sale_by', $s['sale_by'])->first();
+                $first = collect($sale_return)->where($this->type, $s[$this->type])->where('sale_by', $s['sale_by'])->first();
                 $sale[$key]['return_total'] = $first['return_total'];
                 $sale[$key]['return_cos'] = $first['return_cos'];
                 $sale[$key]['net_sale'] = $sale[$key]['total_after_disc'] - $first['return_total'];
-            } elseif ($this->type == 'week') {
-                $first = collect($sale_return)->where('week', $s['week'])->where('sale_by', $s['sale_by'])->first();
-                $sale[$key]['return_total'] = $first['return_total'];
-                $sale[$key]['return_cos'] = $first['return_cos'];
-                $sale[$key]['net_sale'] = $sale[$key]['total_after_disc'] - $first['return_total'];
-            } elseif ($this->type == 'date') {
-                $first = collect($sale_return)->where('date', $s['date'])->where('sale_by', $s['sale_by'])->first();
-                $sale[$key]['return_total'] = $first['return_total'];
-                $sale[$key]['return_cos'] = $first['return_cos'];
-                $sale[$key]['net_sale'] = $sale[$key]['total_after_disc'] - $first['return_total'];
-            }
-        }
-        $this->data = array_values(collect($sale)->groupBy('sale_by')->toArray());
-        $color=['#5bd6aa','#5dc2df','#fcb37b','#d9534f','#047857','#fca5a5'];
-        foreach ($this->data as $key=>$d) {
-            $first = collect($d)->first();
-            $net_sale = collect($d)->pluck('net_sale')->toArray();
-            $this->prepare_data[] = [
-                'label' => $first['user'],
-                'data' => $net_sale,
-                'borderColor' => $color[$key],
-                'backgroundColor' => $color[$key],
-            ];
         }
 
+        $user_name = array_unique(collect($sale)->pluck('user')->toArray());
+
+        foreach ($this->label as $l) {
+            foreach ($user_name as $us){
+                $record = collect($sale)->where('user',$us)->where($this->type, $l['format'])->first();
+                if (empty($record)) {
+                    $this->data[] = [
+                        "{$this->type}" => $l['format'],
+                        "user" => $us,
+                        'net_sale' => 0,
+
+                    ];
+                } else {
+                    $this->data[] = [
+                        "{$this->type}" => $l['format'],
+                        'net_sale' => round($record['net_sale']),
+                        "user" => $us,
+                    ];
+                }
+            }
+        }
+
+
+        foreach(collect($this->data)->groupBy('user')->toArray() as $user => $details){
+            $this->result[] = [
+                'name' => $user,
+                'data' => collect($details)->pluck('net_sale')->toArray()
+            ];
+        }
+//dd($this->result);
+
+        $this->result = json_encode($this->result);
+
+        $this->dispatchBrowserEvent('userwise-sale', ['result' => $this->result, 'label' => $this->label_plucked]);
     }
 }

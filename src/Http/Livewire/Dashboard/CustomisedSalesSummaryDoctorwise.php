@@ -2,23 +2,24 @@
 
 namespace Devzone\Pharmacy\Http\Livewire\Dashboard;
 
-use Carbon\CarbonPeriod;
 use Devzone\Pharmacy\Http\Traits\DashboardDate;
 use Devzone\Pharmacy\Models\Sale\Sale;
-use Devzone\Pharmacy\Models\Sale\SaleRefund;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class CustomisedSalesSummaryDoctorwise extends Component
 {
     use DashboardDate;
-    public $data=[];
+
+    public $data = [];
+    public $result = [];
+    public $dr_label;
+
     public function mount()
     {
-        $this->type='week';
-//        $this->date=date('Y-m-d');
-        $this->date='2021-08-10';
+        $this->type = 'month';
+        $this->date = date('Y-m-d');
+//        $this->date='2021-08-10';
         $this->prepareDate();
     }
 
@@ -30,10 +31,12 @@ class CustomisedSalesSummaryDoctorwise extends Component
 
     public function search()
     {
+
+        $this->reset(['result', 'data']);
         $sale = Sale::from('sales as s')
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
-            ->leftJoin('sale_refunds as sr','sr.sale_detail_id','=','sd.id')
-            ->leftJoin('employees as e','e.id','=','s.referred_by')
+            ->leftJoin('sale_refunds as sr', 'sr.sale_detail_id', '=', 'sd.id')
+            ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
             ->whereBetween('s.sale_at', [$this->from, $this->to])
             ->groupBy('s.referred_by')
             ->select(
@@ -49,28 +52,37 @@ class CustomisedSalesSummaryDoctorwise extends Component
                 DB::raw('sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0)) as total_refund'),
                 DB::raw('sum(sd.total_after_disc) - (sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0))) as total_after_refund'),
                 DB::raw('sum(sd.total_after_disc) - (sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0))) - (sum((sd.qty - coalesce(sr.refund_qty,0)) * sd.supply_price)) as total_profit'),
-                's.referred_by','e.name as doctor',
+                's.referred_by', 'e.name as doctor',
             )
-
-            ->when($this->type == 'month', function ($q) {
-                return $q->groupBy('month')
-                    ->orderBy('month');
-            })
-            ->when($this->type == 'week', function ($q) {
-                return $q->groupBy('week')
-                    ->orderBy('week');
-            })
-            ->when($this->type == 'date', function ($q) {
-                return $q->groupBy('date')
-                    ->orderBy('date');
-            })
-            ->orderBy('total_after_refund','DESC')
+            ->orderBy('total_after_refund', 'DESC')
+            ->limit(5)
             ->get()
             ->toArray();
-        foreach(collect($sale)->groupBy($this->type) as $s){
-            foreach($s->take(5) as $f){
-                $this->data[]=$f;
-            }
+
+
+        $data = [];
+        foreach ($sale as $s) {
+            $data[] = [
+                'doctor' => empty($s['doctor']) ? 'External' : $s['doctor'],
+                'total_after_refund' => round($s['total_after_refund']),
+                'total_profit' => round($s['total_profit']),
+            ];
         }
+
+        $dr_label = array_unique(collect($data)->pluck('doctor')->toArray());
+        $this->dr_label = json_encode($dr_label);
+        $this->result[] = [
+            'name' => 'Sale',
+            'data' => collect($data)->pluck('total_after_refund')->toArray()
+        ];
+
+        $this->result[] = [
+            'name' => 'Gross Profit',
+            'data' => collect($data)->pluck('total_profit')->toArray()
+        ];
+        $this->result = json_encode($this->result);
+
+        $this->dispatchBrowserEvent('doctor-wise-sale', ['result' => $this->result, 'label' => $this->dr_label]);
+
     }
 }
