@@ -19,7 +19,7 @@ class TopSellingProducts extends Component
     public function mount($report_type)
     {
         $this->report_type = $report_type;
-        $this->date = '2021-08-10';
+        $this->date = date('Y-m-d');
         $this->type = 'week';
         $this->pre_to = new Carbon($this->date);
         if ($this->type == 'date') {
@@ -34,6 +34,7 @@ class TopSellingProducts extends Component
 
     public function render()
     {
+
         $this->search();
         return view('pharmacy::livewire.dashboard.top-selling-products-revenuewise');
     }
@@ -57,7 +58,7 @@ class TopSellingProducts extends Component
                     LEFT JOIN sale_refunds AS sr ON sd.id = sr.sale_detail_id
                     JOIN product_inventories AS pv ON pv.id = sd.product_inventory_id
                     LEFT JOIN purchases AS pur ON pur.id = pv.po_id
-                    LEFT JOIN suppliers AS s ON s.id = pur.supplier_id 
+                    LEFT JOIN suppliers AS s ON s.id = pur.supplier_id
                     JOIN products AS p ON p.id = sd.product_id
                     where sd.created_at BETWEEN '" . $this->from . "' AND '" . $this->to . "'
 
@@ -83,7 +84,7 @@ class TopSellingProducts extends Component
                     LEFT JOIN sale_refunds AS sr ON sd.id = sr.sale_detail_id
                     JOIN product_inventories AS pv ON pv.id = sd.product_inventory_id
                     LEFT JOIN purchases AS pur ON pur.id = pv.po_id
-                    LEFT JOIN suppliers AS s ON s.id = pur.supplier_id 
+                    LEFT JOIN suppliers AS s ON s.id = pur.supplier_id
                     JOIN products AS p ON p.id = sd.product_id
                     where sd.created_at BETWEEN '" . $this->from . "' AND '" . $this->to . "'
 
