@@ -118,5 +118,7 @@ class MonthwiseSalesSummary extends Component
                 'closing_balance' => $closing,
             ];
         }
+
+
     }
 }
