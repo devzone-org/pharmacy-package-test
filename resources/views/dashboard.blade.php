@@ -33,6 +33,10 @@
             <div class="col-span-6">
                 @livewire('dashboard.expired-products')
             </div>
+            <div class="col-span-6">
+                @livewire('dashboard.hourly-trends')
+
+            </div>
 
         </div>
 

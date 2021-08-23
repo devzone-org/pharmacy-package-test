@@ -8,6 +8,7 @@ use Devzone\Pharmacy\Http\Livewire\Dashboard\CustomisedSalesSummaryDoctorwise;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\CustomisedSalesSummaryUserwise;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\Date;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\ExpiredProducts;
+use Devzone\Pharmacy\Http\Livewire\Dashboard\HourlyTrends;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\MonthwiseSalesSummary;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\TopSellingProductsProfitwise;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\TopSellingProducts;
@@ -124,7 +125,7 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('sales.history', \Devzone\Pharmacy\Http\Livewire\Sales\History::class);
         Livewire::component('sales.refund', \Devzone\Pharmacy\Http\Livewire\Sales\Refund::class);
         Livewire::component('sales.view', \Devzone\Pharmacy\Http\Livewire\Sales\View::class);
- 
+
         Livewire::component('report.sales-transaction',SaleTransaction::class);
         Livewire::component('report.sales-return-transaction',SaleReturnTransaction::class);
         Livewire::component('report.sale-summary',SaleSummary::class);
@@ -153,6 +154,7 @@ class PharmacyServiceProvider extends ServiceProvider
 
         Livewire::component('purchase.stock-adjustment', StockAdjustment::class);
         Livewire::component('purchase.stock-adjustment-listing', StockAdjustmentListing::class);
+        Livewire::component('dashboard.hourly-trends',HourlyTrends::class);
     }
 
     /**
