@@ -6,6 +6,7 @@ use Devzone\Ams\Models\ChartOfAccount;
 use Devzone\Ams\Models\Ledger;
 use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\Sale\Sale;
+use Devzone\Pharmacy\Models\Sale\SaleRefund;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -54,6 +55,40 @@ class MonthwiseSalesSummary extends Component
             ->orderBy('month', 'DESC')
             ->get()
             ->toArray();
+
+
+        $sale = Sale::from('sales as s')
+            ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
+            ->whereBetween('s.sale_at', [$this->from, $this->to])
+            ->select (
+                DB::raw('MONTH(s.sale_at) as month'),
+                DB::raw('sum(sd.total) as total'),
+                DB::raw('sum(sd.qty*sd.supply_price) as cos'),
+                DB::raw('count(DISTINCT(s.id)) as no_of_sale'),
+                DB::raw('sum(sd.total_after_disc) as total_after_disc'),
+            )
+            ->groupBy('month')
+            ->orderBy('month', 'DESC')
+            ->get()
+            ->toArray();
+
+
+        $sale_return = SaleRefund::from('sale_refunds as sr')
+            ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
+            ->join('sales as s', 's.id', '=', 'sr.sale_id')
+            ->whereBetween('s.sale_at', [$this->from, $this->to])
+            ->select(
+                DB::raw('MONTH(s.sale_at) as month'),
+                DB::raw('sum((sd.total_after_disc/sd.qty)*sr.refund_qty) as return_total'),
+                DB::raw('sum(sd.supply_price*sr.refund_qty) as return_cos')
+            )
+            ->groupBy('month')
+            ->orderBy('month', 'DESC')
+            ->get()
+            ->toArray();
+
+
+
         $purchase = Purchase::from('purchases as pur')
             ->join('purchase_receives as pr', 'pr.purchase_id', '=', 'pur.id')
             ->whereBetween('pr.created_at', [$this->from, $this->to])
@@ -106,14 +141,18 @@ class MonthwiseSalesSummary extends Component
                 $closing = $stock_closing_prev2['stock_closing'];
                 $date=$this->prev_2;
             }
+            $total_sale = isset($sale[$i]) ? $sale[$i]['total_after_disc'] : 0;
+            $total_return =  isset($sale_return[$i]) ? $sale_return[$i]['return_total'] : 0;
+            $sale_cos = isset($sale[$i]) ? $sale[$i]['cos'] : 0;
+            $return_cos = isset($sale_return[$i]) ? $sale_return[$i]['return_cos'] : 0;
             $this->data[$i] = [
                 'date' => date('F Y',strtotime($date)),
                 'month' => isset($sale[$i]) ? $sale[$i]['month'] : 0,
                 'no_of_sale' => isset($sale[$i]) ? $sale[$i]['no_of_sale'] : 0,
-                'total_after_refund' => isset($sale[$i]) ? $sale[$i]['total_after_refund'] : 0,
-                'cos' => isset($sale[$i]) ? $sale[$i]['cos'] : 0,
-                'total_refund' => isset($sale[$i]) ? $sale[$i]['total_refund'] : 0,
-                'total_profit' => isset($sale[$i]) ? $sale[$i]['total_profit'] : 0,
+                'total_after_refund' => $total_sale - $total_return,
+                'cos' => $sale_cos - $return_cos,
+                'total_refund' => $total_return,
+                'total_profit' => ($total_sale - $total_return) - ($sale_cos - $return_cos),
                 'purchase' => isset($purchase[$i]) ? $purchase[$i]['total'] : 0,
                 'closing_balance' => $closing,
             ];
