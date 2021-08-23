@@ -106,7 +106,7 @@ class CustomisedSalesSummary extends Component
             } else {
                 $this->data[] = [
                     "{$this->type}" => $l['format'],
-                    'cos' => round($record['cos']),
+                    'cos' => round($record['net_cos']),
                     'net_sale' => round($record['net_sale']),
                     'gross_profit' => round($record['gross_profit'])
                 ];
