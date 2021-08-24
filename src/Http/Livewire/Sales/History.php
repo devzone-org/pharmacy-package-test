@@ -52,7 +52,6 @@ class History extends Component
             )
             ->groupBy('sd.sale_id')->orderBy('s.id', 'desc')->paginate(50);
 
-
         return view('pharmacy::livewire.sales.history', ['history' => $history]);
     }
 

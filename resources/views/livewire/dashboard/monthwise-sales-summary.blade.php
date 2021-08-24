@@ -29,29 +29,22 @@
                                 class="px-6 py-3   text-center text-sm font-medium text-gray-900 uppercase tracking-wider">
                                 COS
                             </th>
-
-
-
                             <th scope="col"
                                 class="px-6 py-3   text-center text-sm font-medium text-gray-900 uppercase tracking-wider">
                                 Gross Profit
                             </th>
-
                             <th scope="col"
                                 class="px-6 py-3   text-center text-sm font-medium text-gray-900 uppercase tracking-wider">
                                 Margin (%)
                             </th>
-
                             <th scope="col"
                                 class="px-6 py-3   text-center text-sm font-medium text-gray-900 uppercase tracking-wider">
                                 Purchases
                             </th>
-
                             <th scope="col"
                                 class="px-6 py-3   text-center text-sm font-medium text-gray-900 uppercase tracking-wider">
                                 Closing Stock
                             </th>
-
                         </tr>
                         </thead>
                         <tbody class="bg-white divide-y-4 divide-white">

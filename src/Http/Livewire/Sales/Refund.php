@@ -14,6 +14,7 @@ use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Sale\SaleDetail;
 use Devzone\Pharmacy\Models\Sale\SaleIssuance;
 use Devzone\Pharmacy\Models\Sale\SaleRefund;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -299,7 +300,15 @@ class Refund extends Component
 
             DB::beginTransaction();
             $refund = false;
-
+            $sale=Sale::find($this->sale_id);
+            $sale_receipt_no=Voucher::instance()->advances()->get();
+            $newSale = $sale->replicate();
+            $newSale->created_at = Carbon::now();
+            $newSale->sale_at = date('Y-m-d H:i:s');
+            $newSale->sale_by=Auth::user()->id;
+            $newSale->refunded_id=$sale->id;
+            $newSale->receipt_no=$sale_receipt_no;
+            $newSale->save();
             foreach ($this->refunds as $r) {
                 if (isset($r['restrict'])) {
                     continue;
@@ -330,7 +339,8 @@ class Refund extends Component
                                 'sale_detail_id' => $l->id,
                                 'product_id' => $r['product_id']
                             ], [
-                                'refund_qty' => $dec + $l->refund_qty
+                                'refund_qty' => $dec + $l->refund_qty,
+                                'refunded_id'=>$newSale->id
                             ]);
 
                             ProductInventory::find($r['product_inventory_id'])->increment('qty', $dec);
@@ -399,7 +409,7 @@ class Refund extends Component
                             $discount = round(($s['disc'] / 100) * $total, 2);
                             $after_total = $total - $discount;
                             SaleDetail::create([
-                                'sale_id' => $this->sale_id,
+                                'sale_id' => $newSale->id,
                                 'product_id' => $s['product_id'],
                                 'product_inventory_id' => $i->id,
                                 'qty' => $dec,
