@@ -25,7 +25,7 @@ class History extends Component
     }
     public function render()
     {
-        $history = Sale::from("sales as s")->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
+        $history = Sale::from("sales as s")
             ->join('users as u', 'u.id', '=', 's.sale_by')
             ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
             ->leftJoin('patients as p', 'p.id', '=', 's.patient_id')
@@ -42,15 +42,15 @@ class History extends Component
             })
             ->select(
                 's.id',
-                DB::raw('SUM(sd.total) as sub_total'),
-                DB::raw('SUM(sd.total_after_disc) as gross_total'),
+                's.sub_total',
+                's.gross_total',
+                's.refunded_id',
                 'u.name as sale_by',
                 's.sale_at',
                 's.is_refund',
                 'p.name as patient_name',
                 'e.name as referred_by'
-            )
-            ->groupBy('sd.sale_id')->orderBy('s.id', 'desc')->paginate(50);
+            )->orderBy('s.id', 'desc')->paginate(50);
 
         return view('pharmacy::livewire.sales.history', ['history' => $history]);
     }

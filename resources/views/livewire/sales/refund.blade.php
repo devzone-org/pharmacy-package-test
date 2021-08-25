@@ -459,14 +459,13 @@
                         Refunded
                     </th>
                     <th scope="col" colspan="2"
-                        class="w-12   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        class="w-12 px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
                         ({{ number_format(collect($refunds)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }})
                     </th>
                 </tr>
                 <tr class="bg-gray-50">
                     <th scope="col" colspan="2"
                         class="w-7 px-2    py-2 text-left text-md font-medium text-gray-500  tracking-wider">
-
                     </th>
                     @php
                         $dif = collect($sales)->sum('total_after_disc') +collect($refunds)->where('restrict',true)->sum('total_after_disc') - collect($refunds)->sum('total_after_disc');

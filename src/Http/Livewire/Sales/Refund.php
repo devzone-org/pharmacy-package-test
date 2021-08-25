@@ -62,8 +62,7 @@ class Refund extends Component
             ->where('s.id', $this->sale_id)
             ->select('sd.*', DB::raw('sum(sd.qty) as qty'), 'pr.name as item', 's.remarks', 's.receive_amount', 's.payable_amount', 's.sub_total', 's.gross_total'
                 , 's.patient_id', 's.referred_by', 's.admission_id', 's.procedure_id', 'e.name as referred_by_name', 'p.mr_no', 'p.name as patient_name',
-                'pro.name as procedure_name'
-            )
+                'pro.name as procedure_name')
             ->groupBy('sd.id')
             ->orderBy('sd.product_id')
             ->get()
@@ -300,14 +299,23 @@ class Refund extends Component
 
             DB::beginTransaction();
             $refund = false;
-            $sale=Sale::find($this->sale_id);
-            $sale_receipt_no=Voucher::instance()->advances()->get();
+            $sale = Sale::find($this->sale_id);
+            $sale_receipt_no = Voucher::instance()->advances()->get();
+            $dif = collect($this->sales)->sum('total_after_disc') + collect($this->refunds)->where('restrict', true)->sum('total_after_disc') - collect($this->refunds)->sum('total_after_disc');
+            $new_sub_total = collect($this->sales)->sum('total');
+            $new_total_after_disc = collect($this->sales)->sum('total_after_disc');
+            $total_refund = collect($this->refunds)->sum('total_after_disc') - collect($this->refunds)->where('restrict', true)->sum('total_after_disc');
             $newSale = $sale->replicate();
             $newSale->created_at = Carbon::now();
             $newSale->sale_at = date('Y-m-d H:i:s');
-            $newSale->sale_by=Auth::user()->id;
-            $newSale->refunded_id=$sale->id;
-            $newSale->receipt_no=$sale_receipt_no;
+            $newSale->sale_by = Auth::user()->id;
+            $newSale->refunded_id = $sale->id;
+            $newSale->sub_total = $new_sub_total;
+            $newSale->gross_total = $new_total_after_disc;
+            $newSale->receive_amount = $new_total_after_disc;
+            $newSale->payable_amount = $total_refund;
+            $newSale->is_refund='f';
+            $newSale->receipt_no = $sale_receipt_no;
             $newSale->save();
             foreach ($this->refunds as $r) {
                 if (isset($r['restrict'])) {
@@ -340,14 +348,14 @@ class Refund extends Component
                                 'product_id' => $r['product_id']
                             ], [
                                 'refund_qty' => $dec + $l->refund_qty,
-                                'refunded_id'=>$newSale->id
+                                'refunded_id' => $newSale->id
                             ]);
 
                             ProductInventory::find($r['product_inventory_id'])->increment('qty', $dec);
                             InventoryLedger::create([
                                 'product_id' => $r['product_id'],
                                 'increase' => $dec,
-                                'type'=>'sale-refund',
+                                'type' => 'sale-refund',
                                 'description' => "Refund on dated " . date('d M, Y') .
                                     " against receipt #" . $this->sale_id
                             ]);
@@ -384,7 +392,7 @@ class Refund extends Component
                                     'product_id' => $product_inv->product_id,
                                     'order_id' => $product_inv->po_id,
                                     'decrease' => $sale_qty,
-                                    'type'=>'sale',
+                                    'type' => 'sale',
                                     'description' => "Sale on dated " . date('d M, Y') .
                                         " against receipt #" . $this->sale_id
                                 ]);
@@ -398,7 +406,7 @@ class Refund extends Component
                                     'product_id' => $product_inv->product_id,
                                     'order_id' => $product_inv->po_id,
                                     'decrease' => $dec,
-                                    'type'=>'sale',
+                                    'type' => 'sale',
                                     'description' => "Sale on dated " . date('d M, Y') .
                                         " against receipt #" . $this->sale_id
                                 ]);

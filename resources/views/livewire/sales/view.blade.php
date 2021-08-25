@@ -149,7 +149,7 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                 @foreach($sales_ref as $key => $s)
-                    <tr class="{{ $s['sale_qty'] < 0 ? 'bg-red-50':'' }}">
+                    <tr class="{{ $s['refunded'] == true ? 'bg-red-50':'' }}">
                         <td class="px-2 py-2 text-center  border-r text-md font-medium text-gray-900">
                             {{ $loop->iteration }}
                         </td>
