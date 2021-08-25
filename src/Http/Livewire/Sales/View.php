@@ -78,7 +78,7 @@ class View extends Component
             }else{
                 $this->refund_with_sale=false;
                 $this->sales = Sale::from('sales as s')
-                    ->join('sale_refunds as sr', 'sr.sale_id', '=', 's.refunded_id')
+                    ->join('sale_refund_details as sr', 'sr.refunded_id', '=', 's.id')
                     ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
                     ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
                     ->leftJoin('patients as pt', 'pt.id', '=', 's.patient_id')
@@ -152,8 +152,18 @@ class View extends Component
 //                        $array['total_after_disc'] = - abs($array['total']);
 //                    }
 //                    $array['disc'] = $s['disc'];
-//
+
 //                    $this->sales_ref[] = $array;
+                    $this->sales[$key]['sale_qty']=$s['refund_qty'];
+                    $this->sales[$key]['retail_price']=$s['retail_price'];
+                    $this->sales[$key]['total'] = round($s['retail_price'] * $s['refund_qty'],2);
+                    if ($s['disc'] > 0) {
+                        $discount = round(($s['disc'] / 100) * abs( $this->sales[$key]['total']), 2);
+                        $this->sales[$key]['total_after_disc'] = (abs( $this->sales[$key]['total']) - $discount);
+                    } else {
+                        $this->sales[$key]['total_after_disc'] = abs( $this->sales[$key]['total']);
+                    }
+                    $this->sales[$key]['disc'] = $s['disc'];
                     $this->sales[$key]['refunded']=true;
                 }
             }

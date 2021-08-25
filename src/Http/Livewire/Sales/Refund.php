@@ -4,6 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
 
+use App\Models\SaleRefundDetail;
 use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount;
@@ -348,6 +349,13 @@ class Refund extends Component
                                 'product_id' => $r['product_id']
                             ], [
                                 'refund_qty' => $dec + $l->refund_qty,
+                                'refunded_id' => $newSale->id
+                            ]);
+                            \Devzone\Pharmacy\Models\Sale\SaleRefundDetail::create([
+                                'sale_id' => $r['sale_id'],
+                                'sale_detail_id' => $l->id,
+                                'product_id' => $r['product_id'],
+                                'refund_qty' => $dec,
                                 'refunded_id' => $newSale->id
                             ]);
 
