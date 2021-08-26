@@ -33,144 +33,99 @@ class View extends Component
     public $admission = false;
     public $admission_details = [];
     public $handed_over;
-    public $sale_only;
+    public $refund_against;
     public $refund_with_sale;
 
 
     public function mount($sale_id, $admission_id = null, $procedure_id = null)
     {
-
         $this->sale_id = $sale_id;
-        if (Sale::where('id',$this->sale_id)->whereNull('refunded_id')->exists()){
-            $this->sale_only=true;
-            $this->sales = Sale::from('sales as s')
-                ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
-                ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
-                ->leftJoin('patients as pt', 'pt.id', '=', 's.patient_id')
-                ->join('products as p', 'p.id', '=', 'sd.product_id')
-                ->join('users as u', 'u.id', '=', 's.sale_by')
-                ->where('s.id', $sale_id)
-                ->select('p.name as item', DB::raw('sum(sd.qty) as sale_qty'), 'sd.retail_price', 'sd.disc',
-                    's.sale_at', 's.remarks', 'pt.name as patient_name', 's.is_refund', 'u.name as sale_by','e.name as referred_by',
-                )
-                ->groupBy('sd.product_id')
-                ->groupBy('sd.retail_price')
-                ->orderBy('sd.product_id')->get()->toArray();
-        }else{
-            $this->sale_only=false;
-            if (SaleDetail::where('sale_id',$this->sale_id)->exists()){
-                $this->refund_with_sale=true;
-                $this->sales = Sale::from('sales as s')
-                    ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
-                     ->leftJoin('sale_refunds as sr', 'sr.sale_detail_id', '=', 'sd.id')
-                    ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
-                    ->leftJoin('patients as pt', 'pt.id', '=', 's.patient_id')
-                    ->join('products as p', 'p.id', '=', 'sd.product_id')
-                    ->join('users as u', 'u.id', '=', 's.sale_by')
-                    ->where('s.id', $sale_id)
-                    ->select('p.name as item', DB::raw('sum(sd.qty) as sale_qty'), 'sd.retail_price', 'sd.disc',
-                        's.sale_at', 's.remarks', 'pt.name as patient_name', 's.is_refund', 'u.name as sale_by','e.name as referred_by',
-                        DB::raw('sum(sr.refund_qty) as refund_qty')
-                    )
-                    ->groupBy('sd.product_id')
-                    ->groupBy('sd.retail_price')
-                    ->orderBy('sd.product_id')->get()->toArray();
-            }else{
-                $this->refund_with_sale=false;
-                $this->sales = Sale::from('sales as s')
-                    ->join('sale_refund_details as sr', 'sr.refunded_id', '=', 's.id')
-                    ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
-                    ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
-                    ->leftJoin('patients as pt', 'pt.id', '=', 's.patient_id')
-                    ->join('products as p', 'p.id', '=', 'sd.product_id')
-                    ->join('users as u', 'u.id', '=', 's.sale_by')
-                    ->where('s.id', $sale_id)
-                    ->select('p.name as item', DB::raw('sum(sd.qty) as sale_qty'), 'sd.retail_price', 'sd.disc',
-                        's.sale_at', 's.remarks', 'pt.name as patient_name', 's.is_refund', 'u.name as sale_by','e.name as referred_by',
-                        DB::raw('sum(sr.refund_qty) as refund_qty')
-                    )
-                    ->groupBy('sd.product_id')
-                    ->groupBy('sd.retail_price')
-                    ->orderBy('sd.product_id')->get()->toArray();
-            }
-        }
+//        if (SaleDetail::where('sale_id', $this->sale_id)->exists()) {
+//            $this->refund_with_sale = true;
+//        } else {
+//            $this->refund_with_sale = false;
+//        }
+        $new_sale_in_refund = Sale::from('sales as s')
+            ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
+            ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
+            ->leftJoin('patients as pt', 'pt.id', '=', 's.patient_id')
+            ->join('products as p', 'p.id', '=', 'sd.product_id')
+            ->join('users as u', 'u.id', '=', 's.sale_by')
+            ->where('s.id', $sale_id)
+            ->select('p.name as item', DB::raw('sum(sd.qty) as sale_qty'), 'sd.retail_price', 'sd.disc',
+                's.sale_at', 's.remarks', 'pt.name as patient_name', 's.is_refund', 'u.name as sale_by', 'e.name as referred_by',
+                's.refunded_id'
+            )
+            ->groupBy('sd.product_id')
+            ->groupBy('sd.retail_price')
+            ->orderBy('sd.product_id')->get()->toArray();
 
-
-//        $this->sales = Sale::from('sales as s')
-//            ->when(isset($this->refund_with_sale),function ($q){
-//                if ($this->refund_with_sale==true){
-//                    return $q->join('sale_details as sd', 'sd.sale_id', '=', 's.id');
-//                }else{
-//                    return $q->join('sale_details as sd', 'sd.sale_id', '=', 's.refunded_id');
-//                }
-//            })
-//            ->when($this->sale_only==false,function ($q){
-//                return $q->join('sale_refunds as sr', 'sr.sale_detail_id', '=', 'sd.id');
-//            })
-//
-//            ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
-//            ->leftJoin('patients as pt', 'pt.id', '=', 's.patient_id')
-//            ->join('products as p', 'p.id', '=', 'sd.product_id')
-//            ->join('users as u', 'u.id', '=', 's.sale_by')
-//            ->where('s.id', $sale_id)
-//            ->select('p.name as item', DB::raw('sum(sd.qty) as sale_qty'), 'sd.retail_price', 'sd.disc',
-//                's.sale_at', 's.remarks', 'pt.name as patient_name', 's.is_refund', 'u.name as sale_by','e.name as referred_by',
-//                DB::raw('sum(sr.refund_qty) as refund_qty')
-//            )
-//            ->groupBy('sd.product_id')
-//            ->groupBy('sd.retail_price')
-//            ->orderBy('sd.product_id')->get()->toArray();
+        $refund_only = Sale::from('sales as s')
+            ->join('sale_refund_details as sr', 'sr.refunded_id', '=', 's.id')
+            ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
+            ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
+            ->leftJoin('patients as pt', 'pt.id', '=', 's.patient_id')
+            ->join('products as p', 'p.id', '=', 'sd.product_id')
+            ->join('users as u', 'u.id', '=', 's.sale_by')
+            ->where('sr.refunded_id', $sale_id)
+            ->select('p.name as item', DB::raw('sum(sd.qty) as sale_qty'), 'sd.retail_price', 'sd.disc','s.refunded_id',
+                's.sale_at', 's.remarks', 'pt.name as patient_name', 's.is_refund', 'u.name as sale_by', 'e.name as referred_by',
+                DB::raw('sum(sr.refund_qty) as refund_qty'))
+            ->groupBy('sd.product_id')
+            ->groupBy('sd.retail_price')
+            ->orderBy('sd.product_id')
+            ->get()->toArray();
+        $this->sales = array_merge($new_sale_in_refund, $refund_only);
 
         foreach ($this->sales as $key => $s) {
-            $array = [];
             if ($key == 0) {
                 $this->referred_by_name = $s['referred_by'];
                 $this->sale_at = date('d M, Y h:i A', strtotime($s['sale_at']));
                 $this->sale_by = $s['sale_by'];
                 $this->patient_name = $s['patient_name'];
                 $this->remarks = $s['remarks'];
+                $this->refund_against=$s['refunded_id'];
             }
-
             $this->sales[$key]['total'] = $s['sale_qty'] * $s['retail_price'];
             $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'];
             if ($s['disc'] > 0) {
                 $discount = round(($s['disc'] / 100) * $this->sales[$key]['total'], 2);
                 $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'] - $discount;
             }
-            $this->sales[$key]['refunded']=false;
+            $this->sales[$key]['refunded'] = false;
 
-            if ($this->sale_only==false){
+            if (isset($s['refund_qty'])) {
                 if ($s['refund_qty'] > 0) {
-//                    $array['item'] = 'Refunded - ' . $s['item'];
-//                    $array['sale_qty'] = -$s['refund_qty'];
-//                    $array['retail_price'] = -$s['retail_price'];
-//                    $array['total'] = - round($s['retail_price'] * $s['refund_qty'],2);
-//                    if ($s['disc'] > 0) {
-//                        $discount = round(($s['disc'] / 100) * abs($array['total']), 2);
-//                        $array['total_after_disc'] = - (abs($array['total']) - $discount);
-//                    } else {
-//                        $array['total_after_disc'] = - abs($array['total']);
-//                    }
-//                    $array['disc'] = $s['disc'];
-
-//                    $this->sales_ref[] = $array;
-                    $this->sales[$key]['sale_qty']=$s['refund_qty'];
-                    $this->sales[$key]['retail_price']=$s['retail_price'];
-                    $this->sales[$key]['total'] = round($s['retail_price'] * $s['refund_qty'],2);
+//                    if ($this->refund_with_sale == true) {
+                    $this->sales[$key]['item'] = 'Returned - ' . $s['item'];
+                    $this->sales[$key]['sale_qty'] = -$s['refund_qty'];
+                    $this->sales[$key]['retail_price'] = -$s['retail_price'];
+                    $this->sales[$key]['total'] = -round($s['retail_price'] * $s['refund_qty'], 2);
                     if ($s['disc'] > 0) {
-                        $discount = round(($s['disc'] / 100) * abs( $this->sales[$key]['total']), 2);
-                        $this->sales[$key]['total_after_disc'] = (abs( $this->sales[$key]['total']) - $discount);
+                        $discount = round(($s['disc'] / 100) * abs($this->sales[$key]['total']), 2);
+                        $this->sales[$key]['total_after_disc'] = -(abs($this->sales[$key]['total']) - $discount);
                     } else {
-                        $this->sales[$key]['total_after_disc'] = abs( $this->sales[$key]['total']);
+                        $this->sales[$key]['total_after_disc'] = -abs($this->sales[$key]['total']);
                     }
                     $this->sales[$key]['disc'] = $s['disc'];
-                    $this->sales[$key]['refunded']=true;
+
+//                    }
+                    $this->sales[$key]['refunded'] = true;
+                } else {
+                    $this->sales[$key]['sale_qty'] = $s['refund_qty'];
+                    $this->sales[$key]['retail_price'] = $s['retail_price'];
+                    $this->sales[$key]['total'] = round($s['retail_price'] * $s['refund_qty'], 2);
+                    if ($s['disc'] > 0) {
+                        $discount = round(($s['disc'] / 100) * abs($this->sales[$key]['total']), 2);
+                        $this->sales[$key]['total_after_disc'] = (abs($this->sales[$key]['total']) - $discount);
+                    } else {
+                        $this->sales[$key]['total_after_disc'] = abs($this->sales[$key]['total']);
+                    }
+                    $this->sales[$key]['disc'] = $s['disc'];
                 }
             }
             $this->sales_ref[] = $this->sales[$key];
-
         }
-
         if (!empty($admission_id) && !empty($procedure_id)) {
 
             $this->admission_details = \App\Models\Hospital\Admission::from('admissions as a')

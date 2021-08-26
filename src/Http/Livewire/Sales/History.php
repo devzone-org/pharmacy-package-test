@@ -48,6 +48,8 @@ class History extends Component
                 'u.name as sale_by',
                 's.sale_at',
                 's.is_refund',
+                's.receive_amount',
+                's.payable_amount',
                 'p.name as patient_name',
                 'e.name as referred_by'
             )->orderBy('s.id', 'desc')->paginate(50);

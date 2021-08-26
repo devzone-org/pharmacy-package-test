@@ -10,6 +10,13 @@
                         Inter Transfer IPD
                     @endif
                     Receipt #{{ $sale_id }}
+                    @if(!empty($refund_against))
+                        <span class="text-base text-indigo-500">
+                                <a target="_blank" href="{{ url('pharmacy/sales/view/') }}/{{$refund_against}}">
+                                    Refunded Against  Receipt # {{$refund_against}}
+                                </a>
+                        </span>
+                    @endif
                 </h2>
 
             </div>
@@ -292,9 +299,9 @@
                 <div>
                     <p class="p-2">Handed over to
 
-                    @foreach($handed_over as $ho)
+                        @foreach($handed_over as $ho)
                             {{ $ho['handed_over_to'] }}
-                        @if(!$loop->last) ,
+                            @if(!$loop->last) ,
                             @endif
                         @endforeach
 
@@ -303,7 +310,6 @@
             @endif
 
         </div>
-
 
 
     </main>
