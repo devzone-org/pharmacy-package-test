@@ -306,6 +306,24 @@ class Refund extends Component
             $new_sub_total = collect($this->sales)->sum('total');
             $new_total_after_disc = collect($this->sales)->sum('total_after_disc');
             $total_refund = collect($this->refunds)->sum('total_after_disc') - collect($this->refunds)->where('restrict', true)->sum('total_after_disc');
+            if($dif>0){
+                if ($this->received==''){
+                    throw new \Exception('Please Enter Received Amount');
+                }
+                if ($this->received<$dif){
+                    throw new \Exception('Received Amount is Not Valid');
+                }
+                $change_due=$this->received !='' ? $this->received-$dif : 0;
+            }else{
+                if ($this->received==''){
+                    throw new \Exception('Please Enter Paid Amount');
+                }
+                if ($this->received!=abs($dif)){
+                    throw new \Exception('Paid Amount is Not Valid');
+                }
+                $change_due=0;
+            }
+//            dd($dif,$new_sub_total,$new_total_after_disc,$total_refund,$this->received,$change_due);
             $newSale = $sale->replicate();
             $newSale->created_at = Carbon::now();
             $newSale->sale_at = date('Y-m-d H:i:s');
@@ -313,8 +331,8 @@ class Refund extends Component
             $newSale->refunded_id = $sale->id;
             $newSale->sub_total = $new_sub_total;
             $newSale->gross_total = $new_total_after_disc;
-            $newSale->receive_amount = $new_total_after_disc;
-            $newSale->payable_amount = $total_refund;
+            $newSale->receive_amount = $this->received;
+            $newSale->payable_amount = $change_due;
             $newSale->is_refund='f';
             $newSale->receipt_no = $sale_receipt_no;
             $newSale->save();

@@ -76,7 +76,7 @@ class PrintController extends Controller
             $sales[$key]['refunded'] = false;
 //            $sales_ref[] = $sales[$key];
             if (isset($s['refund_qty'])) {
-                if ($s['refund_qty'] > 0) {2
+                if ($s['refund_qty'] > 0) {
 //                    if ($refund_with_sale == true) {
                         $sales[$key]['item'] = 'Returned - ' . $s['item'];
                         $sales[$key]['sale_qty'] = -$s['refund_qty'];

@@ -10,13 +10,6 @@
                         Inter Transfer IPD
                     @endif
                     Receipt #{{ $sale_id }}
-                    @if(!empty($refund_against))
-                        <span class="text-base text-indigo-500">
-                                <a target="_blank" href="{{ url('pharmacy/sales/view/') }}/{{$refund_against}}">
-                                    Refunded Against  Receipt # {{$refund_against}}
-                                </a>
-                        </span>
-                    @endif
                 </h2>
 
             </div>
@@ -151,7 +144,6 @@
                         class="w-32 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
                         Gross Total
                     </th>
-
                 </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -213,35 +205,41 @@
 
                         </th>
                     @endif
-
                     <th scope="col"
                         class="w-7 px-2   border-r py-2 text-center text-md font-medium text-gray-500  tracking-wider">
                         {{ number_format(collect($sales_ref)->sum('total_after_disc'),2) }}
-
                     </th>
                 </tr>
-
                 <tr>
                     <th class="p-2">&nbsp;</th>
                 </tr>
                 <tr class="bg-gray-50">
-                    <th rowspan="{{ $admission==true? '4' : '4' }}" colspan="{{ $admission==true? '2' : '3' }}"
+                    <th rowspan="{{ $admission==true? '7' : '7' }}" colspan="{{ $admission==true? '2' : '3' }}"
                         class="  border-r   bg-white text-md font-medium text-gray-500  tracking-wider">
+                        @if(!empty($refund_against))
+                            <span class="text-base text-indigo-500">
+                                <a target="_blank" href="{{ url('pharmacy/sales/view/') }}/{{$refund_against}}">
+                                    Refunded Against  Receipt # {{$refund_against}}
+                                </a>
+                            </span>
+                        @else
+                            &nbsp;
+                        @endif
 
-                        <textarea name="" cols="30" rows="5" id="remarks" wire:model.defer="remarks"
-                                  class="p-0 focus:ring-0 block w-full border-0 text-md resize-none h-40  "></textarea>
+{{--                        <textarea name="" cols="30" rows="5" id="remarks" wire:model.defer="remarks"--}}
+{{--                                  class="p-0 focus:ring-0 block w-full border-0 text-md resize-none h-40  "></textarea>--}}
 
                     </th>
                     <th scope="col" colspan="{{ $admission==true? '3' : '4' }}"
                         class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
-                        Sub Total
+                        Sale
                     </th>
                     <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
                         class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
                         {{ number_format(collect($sales_ref)->where('sale_qty','>','0')->sum('total'),2) }}
                     </th>
                 </tr>
-                @if($admission==false)
+                @if($admission==false )
                     <tr>
                         <th scope="col" colspan="4"
                             class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
@@ -256,22 +254,51 @@
                 <tr class="bg-gray-50">
                     <th scope="col" colspan="{{ $admission==true? '3' : '4' }}"
                         class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
-                        Gross Total
+                        Net Sale
                     </th>
                     <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
                         class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
                         {{ number_format(collect($sales_ref)->where('sale_qty','>','0')->sum('total_after_disc'),2) }}
                     </th>
                 </tr>
-
                 <tr>
                     <th scope="col" colspan="{{ $admission==true? '3' : '4' }}"
                         class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
-                        Refunded
+                        Returned
                     </th>
                     <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
                         class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        {{ number_format(abs(collect($sales_ref)->where('sale_qty','<','0')->sum('total_after_disc')),2) }}
+                        ({{ number_format(abs(collect($sales_ref)->where('sale_qty','<','0')->sum('total_after_disc')),2) }})
+                    </th>
+                </tr>
+                <tr class="bg-gray-50">
+                    <th scope="col" colspan="{{ $admission==true? '3' : '4' }}"
+                        class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
+                        Net Total
+                    </th>
+                    <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
+                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        {{ number_format(abs(collect($sales_ref)->sum('total_after_disc')),2) }}
+                    </th>
+                </tr>
+                <tr>
+                    <th scope="col" colspan="{{ $admission==true? '3' : '4' }}"
+                        class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
+                        Cash Received
+                    </th>
+                    <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
+                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        {{ number_format(collect($sales_ref)->first()['receive_amount'],2) }}
+                    </th>
+                </tr>
+                <tr class="bg-gray-50">
+                    <th scope="col" colspan="{{ $admission==true? '3' : '4' }}"
+                        class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
+                        Change Returned
+                    </th>
+                    <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
+                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        {{ number_format(collect($sales_ref)->first()['payable_amount'],2) }}
                     </th>
                 </tr>
 
@@ -284,11 +311,11 @@
                     @endif
                     <th scope="col" colspan="{{ $admission==true? '3' : '4' }}"
                         class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
-                        Net Total
+                        &nbsp;
                     </th>
                     <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
                         class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        {{ number_format(abs(collect($sales_ref)->sum('total_after_disc')),2) }}
+                        &nbsp;
                     </th>
                 </tr>
 

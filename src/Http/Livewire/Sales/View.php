@@ -54,7 +54,7 @@ class View extends Component
             ->where('s.id', $sale_id)
             ->select('p.name as item', DB::raw('sum(sd.qty) as sale_qty'), 'sd.retail_price', 'sd.disc',
                 's.sale_at', 's.remarks', 'pt.name as patient_name', 's.is_refund', 'u.name as sale_by', 'e.name as referred_by',
-                's.refunded_id'
+                's.refunded_id','s.receive_amount','s.payable_amount'
             )
             ->groupBy('sd.product_id')
             ->groupBy('sd.retail_price')
@@ -70,7 +70,7 @@ class View extends Component
             ->where('sr.refunded_id', $sale_id)
             ->select('p.name as item', DB::raw('sum(sd.qty) as sale_qty'), 'sd.retail_price', 'sd.disc','s.refunded_id',
                 's.sale_at', 's.remarks', 'pt.name as patient_name', 's.is_refund', 'u.name as sale_by', 'e.name as referred_by',
-                DB::raw('sum(sr.refund_qty) as refund_qty'))
+                DB::raw('sum(sr.refund_qty) as refund_qty'),'s.receive_amount','s.payable_amount')
             ->groupBy('sd.product_id')
             ->groupBy('sd.retail_price')
             ->orderBy('sd.product_id')
@@ -134,17 +134,13 @@ class View extends Component
                 ->where('a.id', $admission_id)
                 ->select('p.mr_no', 'p.name', 'a.admission_no', 'e.name as doctor')->first()
                 ->toArray();
-
             $procedure_name = \App\Models\Hospital\Procedure::where('id', $procedure_id)->first('name');
             $sale_handed_over = SaleIssuance::where('sale_id', $this->sale_id)->get();
             $this->handed_over = $sale_handed_over->toArray();
             $this->admission_details['procedure_name'] = $procedure_name->name;
             $this->admission = true;
         }
-
     }
-
-
     public function render()
     {
         return view('pharmacy::livewire.sales.view');
