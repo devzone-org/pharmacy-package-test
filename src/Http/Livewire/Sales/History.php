@@ -50,6 +50,7 @@ class History extends Component
                 's.is_refund',
                 's.receive_amount',
                 's.payable_amount',
+                's.refunded_id',
                 'p.name as patient_name',
                 'e.name as referred_by'
             )->orderBy('s.id', 'desc')->paginate(50);

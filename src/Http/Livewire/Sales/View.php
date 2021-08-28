@@ -125,7 +125,9 @@ class View extends Component
                 }
             }
             $this->sales_ref[] = $this->sales[$key];
+
         }
+//        dd($this->sales_ref);
         if (!empty($admission_id) && !empty($procedure_id)) {
 
             $this->admission_details = \App\Models\Hospital\Admission::from('admissions as a')

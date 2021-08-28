@@ -85,21 +85,32 @@
                                     Department
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
-                                    Sales after discount (PKR)
+                                    Sales (PKR)
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Discount (PKR)
                                 </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
+                                    Sales Return (PKR)
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
+                                    Net Sales (PKR)<br>
+                                    (A)
+                                </th>
+
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    COS (PKR)
+                                    COS (PKR)<br>
+                                    (B)
                                 </th>
 
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Gross Profit (PKR)
+                                    <br>(A-B)
                                 </th>
 
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Gross Margin (%)
+                                    Gross Margin (%)<br>
+                                    (A-B)/A
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     # of Sales
@@ -120,19 +131,25 @@
                                             {{!empty($r['department_name'])  ? $r['department_name'] : '-'}}
                                         </td>
                                         <td class="px-3 py-3  text-center text-sm text-gray-500">
-                                            {{$r['total_after_disc']}}
+                                            {{$r['total']}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                             ({{number_format($r['total']-$r['total_after_disc'],2)}})
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            {{number_format($r['total_refund'],2)}}
+                                        </td>
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            {{number_format($r['total_after_refund'],2)}}
+                                        </td>
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['cos'],2)}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{number_format($r['total_after_disc']-$r['cos'],2)}}
+                                            {{number_format($r['total_after_refund']-$r['cos'],2)}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{number_format((($r['total_after_disc']-$r['cos'])/$r['total_after_disc'])*100,2)}}
+                                            {{number_format((($r['total_after_refund']-$r['cos'])/$r['total_after_refund'])*100,2)}} %
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{$r['no_of_sale']}}
@@ -150,22 +167,28 @@
 
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_after_disc'),2)}}
+                                        {{number_format(collect($report)->sum('total'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                        ({{number_format(collect($report)->sum('total')-collect($report)->sum('total_after_disc'),2)}})
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                        {{number_format(collect($report)->sum('total_refund'),2)}}
+                                    </th>
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                        {{number_format(collect($report)->sum('total_after_refund'),2)}}
+                                    </th>
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         {{number_format(collect($report)->sum('cos'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('cos'),2)}}
+                                        {{number_format(collect($report)->sum('total_after_refund')-collect($report)->sum('cos'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         @php
-                                            $gross_margin=((collect($report)->sum('total_after_disc')-collect($report)->sum('cos'))/collect($report)->sum('total_after_disc'))*100;
+                                            $gross_margin=((collect($report)->sum('total_after_refund')-collect($report)->sum('cos'))/collect($report)->sum('total_after_refund'))*100;
                                         @endphp
-                                        {{number_format($gross_margin,2)}}
+                                        {{number_format($gross_margin,2)}} %
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         {{number_format(collect($report)->sum('no_of_sale'))}}

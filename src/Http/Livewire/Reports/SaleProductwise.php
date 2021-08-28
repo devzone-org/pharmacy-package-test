@@ -7,6 +7,7 @@ use App\Models\Hospital\Department;
 use App\Models\Hospital\Employees\Employee;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Sale\Sale;
+use Devzone\Pharmacy\Models\Sale\SaleDetail;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -36,6 +37,7 @@ class SaleProductwise extends Component
     {
         $this->report = Sale::from('sales as s')
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
+            ->leftJoin('sale_refunds as sr', 'sr.sale_detail_id', '=', 'sd.id')
             ->join('products as p','p.id','=','sd.product_id')
             ->when(!empty($this->to), function ($q) {
                 return $q->whereDate('s.sale_at', '<=', $this->to);
@@ -48,9 +50,20 @@ class SaleProductwise extends Component
             })
             ->select(
                 'p.name as product_name',
-                DB::raw('sum(sd.qty) as qty'),
-                DB::raw('sum(sd.qty*sd.supply_price) as cos'),
+//                DB::raw('sum(sd.qty) as qty'),
+//                DB::raw('sum(sd.qty*sd.supply_price) as cos'),
+//                DB::raw('sum(sd.total_after_disc) as total_after_disc'),
+
+                DB::raw('sum(sd.total) as total'),
                 DB::raw('sum(sd.total_after_disc) as total_after_disc'),
+                DB::raw('sum(sr.refund_qty) as refund_qty'),
+                DB::raw('sum(sd.qty) as qty'),
+                DB::raw('sum(sd.qty) - sum(coalesce(sr.refund_qty,0)) as total_sale_qty'),
+                DB::raw('sum((sd.qty - coalesce(sr.refund_qty,0)) * sd.supply_price) as cos'),
+                DB::raw('sum(sd.total_after_disc) / sum(sd.qty) as unit'),
+                DB::raw('sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0)) as total_refund'),
+                DB::raw('sum(sd.total_after_disc) - (sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0))) as total_after_refund'),
+                DB::raw('sum(sd.total_after_disc) - (sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0))) - (sum((sd.qty - coalesce(sr.refund_qty,0)) * sd.supply_price)) as total_profit'),
             )
             ->groupBy('sd.product_id')
             ->orderBy('qty','DESC')

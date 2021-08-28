@@ -173,14 +173,13 @@
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         {{number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos'),2)}}
                                     </th>
-
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         @php
                                             $grand_total_after_disc= collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return');
                                              $grand_total_after_disc=empty($grand_total_after_disc) ? 1: $grand_total_after_disc;
                                             $gross_margin=((collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos'))/$grand_total_after_disc)*100;
                                         @endphp
-                                        {{number_format($gross_margin,2)}}
+                                        {{number_format($gross_margin,2)}}%
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         {{number_format(collect($report)->sum('no_of_sale'))}}
