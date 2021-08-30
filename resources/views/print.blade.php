@@ -116,6 +116,8 @@
                         .text("{{ $print['gross_total'] }}")
                         .text("{{ $print['refund'] }}")
                         .text("{{ $print['net_total'] }}")
+                        .text("{{ $print['receive_amount'] }}")
+                        .text("{{ $print['change_returned'] }}")
                         .feed(2)
                         .text("{{ $print['developer'] }}")
                         .text("{{ $print['developer_phone'] }}")

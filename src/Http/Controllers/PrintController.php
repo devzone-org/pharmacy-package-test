@@ -13,26 +13,26 @@ class PrintController extends Controller
 {
     public function print(Request $request, $id)
     {
-        if (SaleDetail::where('sale_id', $id)->exists()) {
-            $refund_with_sale = true;
-        } else {
-            $refund_with_sale = false;
-        }
-        $sales = Sale::from('sales as s')
-            ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
-            ->leftJoin('sale_refunds as sr', 'sr.sale_detail_id', '=', 'sd.id')
-            ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
-            ->leftJoin('patients as pt', 'pt.id', '=', 's.patient_id')
-            ->join('products as p', 'p.id', '=', 'sd.product_id')
-            ->join('users as u', 'u.id', '=', 's.sale_by')
-            ->where('s.id', $id)
-            ->select('p.name as item', DB::raw('sum(sd.qty) as sale_qty'), 'sd.retail_price', 'sd.disc'
-                , 's.sale_at', 's.remarks', 'pt.name as patient_name', 's.is_refund', 'u.name as sale_by',
-                DB::raw('sum(sr.refund_qty) as refund_qty'), 'e.name as referred_by',
-                'pt.name as patient_name', 'pt.mr_no', 'pt.father_husband_name', 'pt.gender', 'pt.phone'
-            )
-            ->groupBy('sd.product_id')
-            ->orderBy('sd.product_id')->get()->toArray();
+//        if (SaleDetail::where('sale_id', $id)->exists()) {
+//            $refund_with_sale = true;
+//        } else {
+//            $refund_with_sale = false;
+//        }
+//        $sales = Sale::from('sales as s')
+//            ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
+//            ->leftJoin('sale_refunds as sr', 'sr.sale_detail_id', '=', 'sd.id')
+//            ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
+//            ->leftJoin('patients as pt', 'pt.id', '=', 's.patient_id')
+//            ->join('products as p', 'p.id', '=', 'sd.product_id')
+//            ->join('users as u', 'u.id', '=', 's.sale_by')
+//            ->where('s.id', $id)
+//            ->select('p.name as item', DB::raw('sum(sd.qty) as sale_qty'), 'sd.retail_price', 'sd.disc'
+//                , 's.sale_at', 's.remarks', 'pt.name as patient_name', 's.is_refund', 'u.name as sale_by',
+//                DB::raw('sum(sr.refund_qty) as refund_qty'), 'e.name as referred_by',
+//                'pt.name as patient_name', 'pt.mr_no', 'pt.father_husband_name', 'pt.gender', 'pt.phone'
+//            )
+//            ->groupBy('sd.product_id')
+//            ->orderBy('sd.product_id')->get()->toArray();
         $new_sale_in_refund = Sale::from('sales as s')
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
             ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
@@ -40,9 +40,9 @@ class PrintController extends Controller
             ->join('products as p', 'p.id', '=', 'sd.product_id')
             ->join('users as u', 'u.id', '=', 's.sale_by')
             ->where('s.id', $id)
-            ->select('p.name as item', DB::raw('sum(sd.qty) as sale_qty'), 'sd.retail_price', 'sd.disc',
+            ->select('p.name as item',DB::raw('sum(sd.qty) as sale_qty'),'sd.retail_price', 'sd.disc',
                 's.sale_at', 's.remarks', 'pt.name as patient_name', 's.is_refund', 'u.name as sale_by', 'e.name as referred_by',
-                'pt.name as patient_name', 'pt.mr_no', 'pt.father_husband_name', 'pt.gender', 'pt.phone'
+                'pt.name as patient_name', 'pt.mr_no', 'pt.father_husband_name', 'pt.gender', 'pt.phone','s.receive_amount','s.payable_amount'
             )
             ->groupBy('sd.product_id')
 //            ->groupBy('sd.retail_price')
@@ -57,7 +57,7 @@ class PrintController extends Controller
             ->where('sr.refunded_id', $id)
             ->select('p.name as item', DB::raw('sum(sd.qty) as sale_qty'), 'sd.retail_price', 'sd.disc',
                 's.sale_at', 's.remarks', 'pt.name as patient_name', 's.is_refund', 'u.name as sale_by', 'e.name as referred_by',
-                DB::raw('sum(sr.refund_qty) as refund_qty'), 'pt.name as patient_name', 'pt.mr_no', 'pt.father_husband_name', 'pt.gender', 'pt.phone'
+                DB::raw('sum(sr.refund_qty) as refund_qty'), 'pt.name as patient_name', 'pt.mr_no', 'pt.father_husband_name', 'pt.gender', 'pt.phone','s.receive_amount','s.payable_amount'
             )
             ->groupBy('sd.product_id')
 //            ->groupBy('sd.retail_price')
@@ -155,17 +155,29 @@ class PrintController extends Controller
 
         $collect = collect($sales_ref);
         $print['inner'] = $inner;
-        $print['footer'] = str_pad("total Qty", 20, " ", STR_PAD_LEFT) . str_pad($collect->sum('sale_qty'), 5, " ", STR_PAD_LEFT) . str_pad("", 20, " ", STR_PAD_LEFT);
-        $print['sub_total'] = str_pad("Sub Total", 33, " ", STR_PAD_LEFT) .
+        $print['footer'] = str_pad("total Qty", 20, " ", STR_PAD_LEFT) . str_pad($collect->where('sale_qty','>','0')->sum('sale_qty'), 5, " ", STR_PAD_LEFT) . str_pad("", 20, " ", STR_PAD_LEFT);
+        $print['sub_total'] = str_pad("Sale", 33, " ", STR_PAD_LEFT) .
             str_pad(number_format($collect->where('sale_qty', '>', 0)->sum('total'), 2), 15, " ", STR_PAD_LEFT);
         $print['discount'] = str_pad("Discount (PKR)", 33, " ", STR_PAD_LEFT) .
             str_pad(number_format($collect->where('sale_qty', '>', 0)->sum('total') - $collect->where('sale_qty', '>', 0)->sum('total_after_disc'), 2), 15, " ", STR_PAD_LEFT);
-        $print['gross_total'] = str_pad("Gross Total", 33, " ", STR_PAD_LEFT) .
+        $print['gross_total'] = str_pad("Net Sale", 33, " ", STR_PAD_LEFT) .
             str_pad(number_format($collect->where('sale_qty', '>', 0)->sum('total_after_disc'), 2), 15, " ", STR_PAD_LEFT);
-        $print['refund'] = str_pad("Refunded", 33, " ", STR_PAD_LEFT) .
-            str_pad(number_format($collect->where('sale_qty', '<', 0)->sum('total_after_disc'), 2), 15, " ", STR_PAD_LEFT);
+        $add_bracket=abs(number_format($collect->where('sale_qty', '<', 0)->sum('total_after_disc'),2));
+        $add_bracket='('.$add_bracket.')';
+        $print['refund'] = str_pad("Returned", 33, " ", STR_PAD_LEFT) .
+            str_pad($add_bracket, 15, " ", STR_PAD_LEFT);
         $print['net_total'] = str_pad("Net Total", 33, " ", STR_PAD_LEFT) .
             str_pad(number_format($collect->where('sale_qty', '>', 0)->sum('total_after_disc') + $collect->where('sale_qty', '<', 0)->sum('total_after_disc'), 2), 15, " ", STR_PAD_LEFT);
+
+        if(abs($collect->where('sale_qty','<','0')->sum('total_after_disc')) > $collect->where('sale_qty','>','0')->sum('total_after_disc')){
+            $label='Paid';
+        }else{
+            $label='Received';
+        }
+        $print['receive_amount'] = str_pad($label, 33, " ", STR_PAD_LEFT) .
+            str_pad($sale['receive_amount'], 15, " ", STR_PAD_LEFT);
+        $print['change_returned'] = str_pad("Change Returned", 33, " ", STR_PAD_LEFT) .
+            str_pad($sale['payable_amount'], 15, " ", STR_PAD_LEFT);
         return view('pharmacy::print', compact('sales_ref', 'sale', 'id', 'print'));
     }
 }
