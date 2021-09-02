@@ -414,7 +414,7 @@
                     </th>
                 </tr>
                 <tr class="bg-gray-50">
-                    <th rowspan="@if(empty($admission_id) && empty($procedure_id)) 4 @else 3 @endif" colspan="2"
+                    <th rowspan="@if(empty($admission_id) && empty($procedure_id)) 6 @else 3 @endif" colspan="2"
                         class="  border-r   bg-white text-md font-medium text-gray-500  tracking-wider">
 
                     </th>
@@ -459,18 +459,56 @@
                         Refunded
                     </th>
                     <th scope="col" colspan="2"
-                        class="w-12   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        ({{ number_format(collect($refunds)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }})
+                        class="w-12 px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        ({{ number_format(collect($refunds)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }}
+                        )
+                    </th>
+                </tr>
+                @php
+                    $dif = collect($sales)->sum('total_after_disc') +collect($refunds)->where('restrict',true)->sum('total_after_disc') - collect($refunds)->sum('total_after_disc');
+                @endphp
+                <tr class="bg-gray-50">
+                    <th scope="col" colspan="3"
+                        class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
+                        @if($dif>0)
+                            Receivable
+                        @else
+                            Payable
+                        @endif
+                    </th>
+                    <th scope="col" colspan="2"
+                        class="w-12 px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        @if($dif>0)
+                            {{ number_format($dif,2) }}
+                        @else
+                            ({{ number_format(abs($dif),2) }})
+                        @endif
+                    </th>
+                </tr>
+                <tr>
+                    <th scope="col" colspan="3"
+                        class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
+                        Amount
+                        @if($dif>0)
+                            Received
+                        @else
+                            Paid
+                        @endif
+
+                    </th>
+                    <th scope="col" colspan="2"
+                        class="w-12 px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        <input type="number" wire:model.debounce.300ms="received" onclick="this.select();" id="received"
+                               wire:keydown.enter="saleComplete"
+                               class="p-0 focus:ring-0 block w-full  text-md border-0 font-medium text-gray-500 text-center "
+                               autocomplete="off">
                     </th>
                 </tr>
                 <tr class="bg-gray-50">
                     <th scope="col" colspan="2"
                         class="w-7 px-2    py-2 text-left text-md font-medium text-gray-500  tracking-wider">
-
                     </th>
-                    @php
-                        $dif = collect($sales)->sum('total_after_disc') +collect($refunds)->where('restrict',true)->sum('total_after_disc') - collect($refunds)->sum('total_after_disc');
-                    @endphp
+
                     @if(!empty($admission_id) && !empty($procedure_id))
 
                         <td scope="col" colspan="@if($type=='issue') 4 @else 5 @endif"
@@ -488,20 +526,15 @@
                         </td>
                     @else
                         <th scope="col" colspan="3"
-                            class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
-                            @if($dif>0)
-                                Receivable
-                            @else
-                                Payable
-                            @endif
+                            class="w-7 px-2 border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
+                            Change Due
                         </th>
                         <th scope="col" colspan="2"
-                            class="w-10 cursor-pointer px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-
+                            class="w-10 cursor-pointer px-0 py-0 border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
                             @if($dif>0)
-                                {{ number_format($dif,2) }}
+                                {{$received!='' ? $received-$dif : 0}}
                             @else
-                                ({{ number_format(abs($dif),2) }})
+                                0
                             @endif
                         </th>
                     @endif
@@ -528,8 +561,8 @@
     });
     Livewire.on('printInvoice', (saleId, admissionId, procedureId) => {
         window.open('{{ url('pharmacy/print/sale')}}' + '/' + saleId, 'receipt-print', 'height=150,width=400');
-        if (admissionId !=null && procedureId!=null) {
-            window.location = '{{url('pharmacy/sales/refund')}}' + '/' + saleId + '?type=issue&admission_id=' + admissionId + '&procedure_id='+procedureId;
+        if (admissionId != null && procedureId != null) {
+            window.location = '{{url('pharmacy/sales/refund')}}' + '/' + saleId + '?type=issue&admission_id=' + admissionId + '&procedure_id=' + procedureId;
         }
     });
 

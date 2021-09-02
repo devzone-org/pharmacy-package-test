@@ -40,7 +40,6 @@ class CustomisedSalesSummaryDoctorwise extends Component
 
     public function search()
     {
-
         $this->reset(['result', 'data']);
         $sale = Sale::from('sales as s')
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')

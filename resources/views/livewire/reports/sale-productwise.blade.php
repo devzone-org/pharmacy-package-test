@@ -71,27 +71,47 @@
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Qty Sold
+                                    <br>(a)
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
-                                    Sales after discount (PKR)
+                                    Qty Returned<br>(b)
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
+                                    Net Qty <br>(a-b)
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
+                                    Sale (PKR)
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
+                                    Discount (PKR)
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
+                                    Sale Return (PKR)
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
+                                    Net Sale (PKR)<br>
+                                    (A)
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    COS (PKR)
+                                    COS (PKR)<br>
+                                    (B)
                                 </th>
 
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Gross Profit (PKR)
+                                    Gross Profit (PKR)<br>
+                                    (A-B)
                                 </th>
 
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Gross Margin (%)
+                                    Gross Margin (%) <br>
+                                    (A-B)/A
                                 </th>
                             </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                             @if(!empty($report))
                                 @foreach($report as $r)
-                                    <tr>
+                                    <tr class="@if($r['total_sale_qty']==0) bg-red-50 @endif">
                                         <td class="px-3 py-3   text-sm font-medium text-gray-500">
                                             {{ $loop->iteration  }}
                                         </td>
@@ -99,22 +119,37 @@
                                             {{$r['product_name']}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{$r['qty']}}
+                                            {{number_format($r['qty'])}}
+                                        </td>
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                           {{number_format($r['refund_qty'])}}
+                                        </td>
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                           {{number_format($r['total_sale_qty'])}}
                                         </td>
                                         <td class="px-3 py-3  text-center text-sm text-gray-500">
-                                            {{$r['total_after_disc']}}
+                                            {{number_format($r['total'],2)}}
+                                        </td>
+                                        <td class="px-3 py-3  text-center text-sm text-gray-500">
+                                            {{number_format($r['total']-$r['total_after_disc'],2)}}
+                                        </td>
+                                        <td class="px-3 py-3  text-center text-sm text-gray-500">
+                                            {{number_format($r['total_refund'],2)}}
+                                        </td>
+                                        <td class="px-3 py-3  text-center text-sm text-gray-500">
+                                            {{number_format($r['total_after_refund'],2)}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['cos'],2)}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{number_format($r['total_after_disc']-$r['cos'],2)}}
+                                            {{number_format($r['total_after_refund']-$r['cos'],2)}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                             @php
-                                                $total_after_dis=$r['total_after_disc']== 0 ? 1 : $r['total_after_disc'];
+                                                $total_after_dis=$r['total_after_refund']== 0 ? 1 : $r['total_after_refund'];
                                             @endphp
-                                            {{number_format((($r['total_after_disc']-$r['cos'])/$total_after_dis)*100,2)}} %
+                                            {{number_format((($r['total_after_refund']-$r['cos'])/$total_after_dis)*100,2)}} %
                                         </td>
                                     </tr>
                                 @endforeach
@@ -129,19 +164,34 @@
                                         {{number_format(collect($report)->sum('qty'))}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_after_disc'),2)}}
+                                        {{number_format(collect($report)->sum('refund_qty'))}}
+                                    </th>
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                        {{number_format(collect($report)->sum('total_sale_qty'))}}
+                                    </th>
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                        {{number_format(collect($report)->sum('total'),2)}}
+                                    </th>
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                        {{number_format(collect($report)->sum('total')-collect($report)->sum('total_after_disc'),2)}}
+                                    </th>
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                        {{number_format(collect($report)->sum('total_refund'),2)}}
+                                    </th>
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                        {{number_format(collect($report)->sum('total_after_refund'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         {{number_format(collect($report)->sum('cos'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('cos'),2)}}
+                                        {{number_format(collect($report)->sum('total_after_refund')-collect($report)->sum('cos'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         @php
-                                            $gross_margin=((collect($report)->sum('total_after_disc')-collect($report)->sum('cos'))/collect($report)->sum('total_after_disc'))*100;
+                                            $gross_margin=((collect($report)->sum('total_after_refund')-collect($report)->sum('cos'))/collect($report)->sum('total_after_refund'))*100;
                                         @endphp
-                                        {{number_format($gross_margin,2)}}
+                                        {{number_format($gross_margin,2)}} %
                                     </th>
                                 </tr>
                             </tbody>

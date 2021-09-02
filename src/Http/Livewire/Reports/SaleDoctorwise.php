@@ -37,6 +37,7 @@ class SaleDoctorwise extends Component
     {
         $this->report = Sale::from('sales as s')
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
+            ->leftJoin('sale_refunds as sr', 'sr.sale_detail_id', '=', 'sd.id')
             ->leftJoin('employees as e','e.id','=','s.referred_by')
             ->leftJoin('departments as d','d.id','=','e.department_id')
             ->when(!empty($this->to), function ($q) {
@@ -56,9 +57,16 @@ class SaleDoctorwise extends Component
                 'e.name as doctor_name',
                 'd.name as department_name',
                 DB::raw('sum(sd.total) as total'),
-                DB::raw('sum(sd.qty*sd.supply_price) as cos'),
                 DB::raw('count(DISTINCT(s.id)) as no_of_sale'),
                 DB::raw('sum(sd.total_after_disc) as total_after_disc'),
+                DB::raw('sum(sr.refund_qty) as refund_qty'),
+                DB::raw('sum(sd.qty) as total_sale_qty'),
+                DB::raw('sum((sd.qty - coalesce(sr.refund_qty,0)) * sd.supply_price) as cos'),
+                DB::raw('sum(sd.total_after_disc) / sum(sd.qty) as unit'),
+                DB::raw('sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0)) as total_refund'),
+                DB::raw('sum(sd.total_after_disc) - (sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0))) as total_after_refund'),
+                DB::raw('sum(sd.total_after_disc) - (sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0))) - (sum((sd.qty - coalesce(sr.refund_qty,0)) * sd.supply_price)) as total_profit'),
+                's.referred_by', 'e.name as doctor',
             )
             ->groupBy('s.referred_by')
             ->get()
