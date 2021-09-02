@@ -84,7 +84,7 @@ class StockInOut extends Component
             $this->report[$key]['rack'] = $product->rack;
             $this->report[$key]['type'] = $product->product_type;
             $this->report[$key]['sales'] = $product_grouped->where('type','sale')->sum('decrease');
-            $this->report[$key]['sale_return'] = $product_grouped->where('type','sale')->sum('increase');
+            $this->report[$key]['sale_return'] = $product_grouped->where('type','sale-refund')->sum('increase');
             $this->report[$key]['purchases'] = $product_grouped->where('type','purchase')->sum('increase')+$product_grouped->where('type','purchase-bonus')->sum('increase');
             $this->report[$key]['purchase_return'] = $product_grouped->where('type','purchase-refund')->sum('decrease');
             $this->report[$key]['adjustment'] = $product_grouped->where('type','adjustment')->sum('increase')-$product_grouped->where('type','adjustment')->sum('decrease');

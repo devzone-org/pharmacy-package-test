@@ -132,7 +132,7 @@
                                         {{ $h['refund_qty'] }}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        PKR {{ number_format($h['return_total'],2) }}
+                                        PKR {{ number_format($h['return_value'],2) }}
                                     </td>
                                 </tr>
                             @endforeach
@@ -146,7 +146,7 @@
                                 </th>
 
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    PKR {{ number_format(collect($report)->sum('return_total'),2) }}
+                                    PKR {{ number_format(collect($report)->sum('return_value'),2) }}
 
                                 </th>
 

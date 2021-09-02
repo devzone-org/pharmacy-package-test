@@ -56,12 +56,12 @@ class SaleReturnTransaction extends Component
             })
             ->select('s.sale_at', 'sd.sale_id', 'sr.id', 'pr.name as product_name',
                 'sr.updated_at as return_date',
+                DB::raw('sum((sd.total_after_disc/sd.qty)*sr.refund_qty) as return_value'),
                 DB::raw("(SELECT SUM(sale_details.total_after_disc) FROM sale_details
                                 WHERE sale_details.sale_id = sr.sale_id) as total"),
                 DB::raw('sum(sd.total_after_disc) as return_total'), 'sr.refund_qty',
                 'p.name as patient_name')
             ->groupBy('sr.sale_detail_id')->get()->toArray();
-
     }
 
     public function resetSearch()

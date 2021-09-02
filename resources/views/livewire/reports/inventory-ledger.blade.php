@@ -89,12 +89,16 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                             @if(!empty($report))
                                 <tr class="bg-gray-50">
-                                    <th scope="col" colspan="5" class="px-3 py-3 text-right text-sm font-medium text-gray-900">
+                                    <th scope="col" colspan="5"
+                                        class="px-3 py-3 text-right text-sm font-medium text-gray-900">
                                         Opening Inventory
                                     </th>
-                                    <th scope="col"  class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                         {{!empty($opening_inv) ? $opening_inv->closing_inventory : 0}}
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                        {{$opening_inv}}
                                     </th>
+                                    @php
+                                        $closing = $opening_inv;
+                                    @endphp
                                 </tr>
                                 @foreach($report as $r)
                                     <tr>
@@ -114,7 +118,14 @@
                                             {{$r['increase']}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{$r['increase']-$r['decrease']}}
+                                            @php
+                                                if($r['increase']>0){
+                                                    $closing = $closing+$r['increase'];
+                                                }else{
+                                                    $closing = $closing-$r['decrease'];
+                                                }
+                                            @endphp
+                                            {{$closing}}
                                         </td>
                                     </tr>
                                 @endforeach
@@ -125,10 +136,10 @@
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         @php
-                                            $opening=!empty($opening_inv) ? $opening_inv->closing_inventory : 0;
-                                            $closing=collect($report)->sum('increase')-collect($report)->sum('descrese');
+                                            $opening= $opening_inv;
+                                            $closing_total =collect($report)->sum('increase')-collect($report)->sum('descrese');
                                         @endphp
-                                        {{$closing+$opening}}
+                                        {{$opening-$closing_total}}
                                     </th>
                                 </tr>
                             </tbody>

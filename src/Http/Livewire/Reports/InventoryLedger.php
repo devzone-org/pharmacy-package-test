@@ -48,11 +48,12 @@ class InventoryLedger extends Component
                 })
                 ->select('p.name as item', 'p.type as product_type','il.*')
                 ->get()->toArray();
-            $this->opening_inv= \Devzone\Pharmacy\Models\InventoryLedger::whereDate('created_at','<',$this->from)
+            $open_details = \Devzone\Pharmacy\Models\InventoryLedger::whereDate('created_at','<',$this->from)
                 ->where('product_id',$this->product_id)
                 ->groupBy('product_id')
-                ->select('product_id',DB::raw('sum(increase-decrease) as closing_inventory'))
+                ->select('product_id',DB::raw('sum(increase) as increase'),DB::raw('sum(decrease) as decrease'))
                 ->first();
+            $this->opening_inv = $open_details['increase']-$open_details['decrease'];
         }
 
     }
