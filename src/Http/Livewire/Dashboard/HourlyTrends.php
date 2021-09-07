@@ -83,7 +83,7 @@ class HourlyTrends extends Component
             ->select(
                 DB::raw('hour(s.sale_at) as hour'),
                 DB::raw('sum(s.gross_total) as gross_total'),
-                DB::raw('count(DISTINCT(s.id)) as no_of_sale'),
+                DB::raw('count((s.id)) as no_of_sale'),
             )
             ->groupBy('hour')
             ->get()
