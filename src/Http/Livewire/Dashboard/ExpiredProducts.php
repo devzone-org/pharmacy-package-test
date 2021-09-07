@@ -11,7 +11,7 @@ class ExpiredProducts extends Component
     public $date;
     public function mount()
     {
-        $this->date = '2021-08-10';
+        $this->date = date('Y-m-d',strtotime('-3 months'));
     }
 
     public function render()

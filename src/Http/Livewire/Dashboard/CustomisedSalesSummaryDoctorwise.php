@@ -103,20 +103,20 @@ class CustomisedSalesSummaryDoctorwise extends Component
         if ($this->type=='date'){
             $this->reset('label');
             $this->from=$this->pre_to->copy();
-
+            $this->to=$this->pre_to->copy();
             $this->display_date=date('d M Y',strtotime($this->pre_to));
         }elseif ($this->type=='week'){
             $this->reset('label');
             $this->from=$this->pre_to->copy()->startOfWeek();
-
+            $this->to=$this->pre_to->copy()->endOfWeek();
             $this->display_date=date('d M Y',strtotime($this->from)).' - '.date('d M Y',strtotime($this->pre_to));
         }elseif ($this->type=='month'){
             $this->reset('label');
             $this->from=$this->pre_to->copy()->firstOfMonth();
-
+            $this->to=$this->pre_to->copy()->endofMonth();
             $this->display_date=date('M Y',strtotime($this->from));
         }
-        $this->to=$this->pre_to->copy()->endOfDay();
+
         $this->label_plucked=json_encode(collect($this->label)->pluck('label')->toArray());
 
 
