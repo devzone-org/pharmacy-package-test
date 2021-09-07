@@ -40,7 +40,7 @@ class HourlyTrends extends Component
         if ($this->type == 'date') {
             $this->reset('label');
             $this->from = $this->pre_to->copy();
-            $this->to = $this->pre_to->copy();
+            $this->to = $this->pre_to->copy()->endOfDay();
             $this->display_date = date('d M Y', strtotime($this->pre_to));
         } elseif ($this->type == 'week') {
             $this->reset('label');
