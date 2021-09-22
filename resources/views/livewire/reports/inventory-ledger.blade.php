@@ -137,9 +137,8 @@
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         @php
                                             $opening= $opening_inv;
-                                            $closing_total =collect($report)->sum('increase')-collect($report)->sum('descrese');
                                         @endphp
-                                        {{$opening-$closing_total}}
+                                        {{abs($closing)}}
                                     </th>
                                 </tr>
                             </tbody>

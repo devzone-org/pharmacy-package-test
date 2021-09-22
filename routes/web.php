@@ -162,21 +162,21 @@ Route::get('report/inventory-ledger', function () {
 });
 
 Route::get('print/sale/{id}', [PrintController::class, 'print']);
-//Route::get(' ', function (){
-//    \Devzone\Pharmacy\Models\InventoryLedger::truncate();
-//    $inventory=\Devzone\Pharmacy\Models\ProductInventory::groupBy('product_id')
-//        ->select('product_id',\Illuminate\Support\Facades\DB::raw('sum(qty) as qty'))
-//        ->get()->toArray();
-//    foreach ($inventory as $inv){
-//        if ($inv['qty']>0){
-//            \Devzone\Pharmacy\Models\InventoryLedger::create([
-//                'product_id'=>$inv['product_id'],
-//                'description'=>'inventory updated',
-//                'increase'=>$inv['qty'],
-//                'decrease'=>0,
-//                'type'=>'purchase'
-//            ]);
-//        }
-//
-//    }
-//});
+Route::get('inventory', function (){
+    \Devzone\Pharmacy\Models\InventoryLedger::truncate();
+    $inventory=\Devzone\Pharmacy\Models\ProductInventory::groupBy('product_id')
+        ->select('product_id',\Illuminate\Support\Facades\DB::raw('sum(qty) as qty'))
+        ->get()->toArray();
+    foreach ($inventory as $inv){
+        if ($inv['qty']>0){
+            \Devzone\Pharmacy\Models\InventoryLedger::create([
+                'product_id'=>$inv['product_id'],
+                'description'=>'inventory updated',
+                'increase'=>$inv['qty'],
+                'decrease'=>0,
+                'type'=>'purchase'
+            ]);
+        }
+
+    }
+});
