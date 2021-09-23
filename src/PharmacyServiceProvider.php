@@ -14,6 +14,9 @@ use Devzone\Pharmacy\Http\Livewire\Dashboard\TopSellingProductsProfitwise;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\TopSellingProducts;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\TopSuppliersPayable;
 use Devzone\Pharmacy\Http\Livewire\MasterData\Category;
+use Devzone\Pharmacy\Http\Livewire\MasterData\CustomerAdd;
+use Devzone\Pharmacy\Http\Livewire\MasterData\CustomerEdit;
+use Devzone\Pharmacy\Http\Livewire\MasterData\CustomerList;
 use Devzone\Pharmacy\Http\Livewire\MasterData\Manufacture;
 use Devzone\Pharmacy\Http\Livewire\MasterData\Medicine;
 use Devzone\Pharmacy\Http\Livewire\MasterData\ProductsAdd;
@@ -103,6 +106,9 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('master-data.supplier-edit', SupplierEdit::class);
         Livewire::component('master-data.supplier-list', SupplierList::class);
 
+        Livewire::component('master-data.customer-add', CustomerAdd::class);
+        Livewire::component('master-data.customer-edit', CustomerEdit::class);
+        Livewire::component('master-data.customer-list', CustomerList::class);
 
         Livewire::component('purchases.purchase-list', PurchaseList::class);
         Livewire::component('purchases.purchase-add', PurchaseAdd::class);

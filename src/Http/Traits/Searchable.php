@@ -37,7 +37,8 @@ trait Searchable
         'patient' => ['mr_no', 'name', 'phone'],
         'referred_by' => ['name'],
         'item' => ['item', 'qty', 'retail_price', 'rack', 'tier', 'packing'],
-        'adjustment_items' => ['item', 'qty', 'expiry']
+        'adjustment_items' => ['item', 'qty', 'expiry'],
+        'customer'=>['name','company','phone']
     ];
 
 

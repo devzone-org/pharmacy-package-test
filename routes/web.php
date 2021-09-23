@@ -40,6 +40,16 @@ Route::get('master-data/suppliers/edit/{id}', function ($id) {
     return view('pharmacy::master_data.supplier-edit', compact('id'));
 });
 
+Route::get('master-data/customers/add', function () {
+    return view('pharmacy::master_data.customer-add');
+});
+Route::get('master-data/customers/edit/{id}', function ($id) {
+    return view('pharmacy::master_data.customer-edit',compact('id'));
+});
+Route::get('master-data/customers', function () {
+    return view('pharmacy::master_data.customers-list');
+});
+
 Route::get('purchases', function () {
     return view('pharmacy::purchases.purchase-list');
 });
