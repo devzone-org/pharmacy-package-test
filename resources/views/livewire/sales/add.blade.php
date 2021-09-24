@@ -1,9 +1,6 @@
-<div class="max-w-3xl mx-auto mt-5   lg:max-w-7xl   lg:grid lg:grid-cols-12 lg:gap-4">
-
+<div class="max-w-7xl mx-auto mt-5 lg:max-w-7xl lg:grid lg:grid-cols-12 lg:gap-4">
     <main class="col-span-12 ">
-
-
-        <div class="lg:flex  lg:justify-between  ">
+        <div class="lg:flex  lg:justify-between">
             <div class="flex-1 min-w-0">
                 <h2 class="text-2xl mb-3 font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
                     @if(empty($admission_id) && empty($procedure_id))
@@ -12,11 +9,17 @@
                         Inter Transfer IPD Medicine
                     @endif
                 </h2>
-
             </div>
             <div class="mt-5 flex lg:mt-0 lg:ml-4 ">
+                <span class="">
+                      <button type="button"
+                              wire:click="searchCustomer"
+                              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Add Customer (F10)
+                      </button>
+                    </span>
                 @if(empty($admission_id) && empty($procedure_id))
-                    <span class="">
+                    <span class="ml-3">
                       <button type="button"
                               wire:click="searchReferredBy"
                               class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -111,7 +114,15 @@
                 </div>
             </div>
         @else
-            <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-4   shadow rounded-md p-3">
+            <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-5 shadow rounded-md p-3">
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Customer
+                    </dt>
+                    <dd class="mt-1 text-xl font-medium text-gray-900">
+                        {{ $customer_name_credit ?? '-' }}
+                    </dd>
+                </div>
                 <div class="">
                     <dt class="text-sm font-medium text-gray-500">
                         Referred By
@@ -410,16 +421,22 @@
                 @if($admission==false)
                     <tr>
                         <th scope="col" colspan="4"
-                            class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
-                            Received Amount (F4)
+                            class="w-7 px-2   border-r py-2 @if($credit==true) bg-red-50 @endif text-xl font-medium text-gray-500  tracking-wider">
+                            <input id="credit" wire:model="credit" type="checkbox"
+                                   class="focus:ring-red-500 h-4 w-4 text-red-600 border-red-300 rounded">
+                            <label for="credit" class="text-red-500">Credit</label>
+                            <div class="ml-3 float-right">
+                                <span class=""> Received Amount (F4)</span>
+                            </div>
                         </th>
                         <th scope="col" colspan="2"
-                            class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
+                            class="w-10   px-2 py-2 @if($credit==true) bg-red-50 @endif  border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
                             <input type="number" wire:model.debounce.300ms="received" onClick="this.select();"
-                                   id="received"
+                                   id="received" @if($credit==true) disabled @endif
                                    wire:keydown.enter="saleComplete"
-                                   class="p-0 focus:ring-0 block w-full  text-xl border-0 font-medium text-gray-500 text-center "
+                                   class="p-0 focus:ring-0 block w-full @if($credit==true) bg-red-50 @endif  text-xl border-0 font-medium text-gray-500 text-center "
                                    autocomplete="off">
+
                         </th>
                     </tr>
                     <tr class="bg-gray-50">
@@ -463,6 +480,241 @@
 
 
     </main>
+    <div x-data="{ open: @entangle('add_modal') }" x-cloak x-show="open"
+         class="fixed z-50 inset-0 overflow-y-auto">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="open" x-description="Background overlay, show/hide based on modal state."
+                 x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <!-- This element is to trick the browser into centering the modal contents. -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true"></span>
+            <div x-show="open" x-description="Modal panel, show/hide based on modal state."
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="inline-block align-bottom bg-white rounded-lg  text-left
+                    overflow-hidden shadow-xl transform transition-all
+                    sm:my-8 sm:align-middle sm:max-w-xl sm:w-full  "
+                 role="dialog" aria-modal="true" aria-labelledby="modal-headline">
+
+                <div class=" p-4">
+
+                    <div class="mb-5">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Add Patient</h3>
+                    </div>
+                    @if ($errors->any())
+                        <div class="rounded-md bg-red-50 p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <!-- Heroicon name: x-circle -->
+                                    <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg"
+                                         viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd"
+                                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                              clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-red-800">
+                                        @php
+                                            $count = count($errors->all());
+                                        @endphp
+                                        There {{ $count > 1 ? "were {$count} errors": "was {$count} error" }}
+                                        with
+                                        your submission
+                                    </h3>
+                                    <div class="mt-2 text-sm text-red-700">
+                                        <ul class="list-disc pl-5 space-y-1">
+
+                                            @foreach ($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                    @if(!empty($success))
+                        <div class="rounded-md bg-green-50 p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <!-- Heroicon name: check-circle -->
+                                    <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg"
+                                         viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd"
+                                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                              clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-green-800">
+                                        {{ $success }}
+                                    </p>
+                                </div>
+                                <div class="ml-auto pl-3">
+                                    <div class="-mx-1.5 -my-1.5">
+                                        <button type="button" wire:click="$set('success', '')"
+                                                class="inline-flex bg-green-50 rounded-md p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-green-50 focus:ring-green-600">
+                                            <span class="sr-only">Dismiss</span>
+                                            <!-- Heroicon name: x -->
+                                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg"
+                                                 viewBox="0 0 20 20"
+                                                 fill="currentColor" aria-hidden="true">
+                                                <path fill-rule="evenodd"
+                                                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                      clip-rule="evenodd"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                    <div class="grid grid-cols-6 gap-6 @if(!empty($success)|| ($errors->any())) mt-2 @endif">
+                        <div class="col-span-6 sm:col-span-6">
+                            <label class="block text-sm font-medium text-gray-700">MR #</label>
+                            <input wire:model="patient_mr" type="text" autocomplete="off" readonly
+                                   class="mt-1 block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <label class="block text-sm font-medium text-gray-700">Patient Name<span
+                                        class="text-red-500">*</span></label>
+                            <input wire:model="add_patient_name" type="text" autocomplete="off"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <label class="block text-sm font-medium text-gray-700">Father/Husband Name<span
+                                        class="text-red-500">*</span></label>
+                            <input wire:model="father_husband_name" type="text" autocomplete="off"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+
+                        <div class="col-span-6 sm:col-span-3">
+                            <label class="block text-sm font-medium text-gray-700">Contact #
+                                @if($has_contact)<span
+                                        class="text-red-500">*</span>@endif
+                                @if($has_contact)
+                                    <p wire:click="hasContact"
+                                       class="float-right cursor-pointer text-sm text-red-500">
+                                        Do not Have Phone?
+                                    </p>
+                                @else
+                                    <p wire:click="hasContact"
+                                       class="float-right cursor-pointer text-sm text-indigo-500">
+                                        Have Phone?
+                                    </p>
+                                @endif
+                                {{--                                @if(!$add_more_contact)--}}
+                                {{--                                    <p class="float-right text-indigo-500 cursor-pointer" wire:click="addMoreContact">+--}}
+                                {{--                                        Add More</p>--}}
+                                {{--                                @else--}}
+                                {{--                                    <p class="float-right text-indigo-500 cursor-pointer"--}}
+                                {{--                                       wire:click="removeMoreContact">- Remove More</p>--}}
+                                {{--                                @endif--}}
+                            </label>
+                            <div class="mt-1 relative rounded-md shadow-sm">
+                                <input wire:model="patient_contact" type="text" autocomplete="off"
+                                       class="focus:ring-indigo-500 focus:border-indigo-500 block w-full  pr-12 sm:text-sm border-gray-300 rounded-md">
+                                <div class="absolute inset-y-0 right-0 flex items-center">
+                                    <label class="sr-only">Contact</label>
+                                    <select wire:model="patient_contact_whatsApp"
+                                            class="focus:ring-indigo-500 focus:border-indigo-500 h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-500 sm:text-sm rounded-md">
+                                        <option value="t">WhatsApp</option>
+                                        <option value="f">None</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        {{--                        @if($add_more_contact)--}}
+                        <div class="col-span-6 sm:col-span-3">
+                            <label class="block text-sm font-medium text-gray-700">Contact# 2</label>
+                            <input wire:model="patient_contact_2" type="text" autocomplete="off"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <label class="block text-sm font-medium text-gray-700">Landline#</label>
+                            <input wire:model="patient_contact_3" type="text" autocomplete="off"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+                        {{--                        @endif--}}
+                        <div class="col-span-6 sm:col-span-3">
+                            <label class="block text-sm font-medium text-gray-700">Gender<span
+                                        class="text-red-500">*</span></label>
+                            <select wire:model="patient_gender"
+                                    class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value=""></option>
+                                <option value="m">Male</option>
+                                <option value="f">Female</option>
+                                <option value="o">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <label class="block text-sm font-medium text-gray-700">Age (Years)</label>
+                            <input wire:model.debounce.1000ms="patient_age" type="number" autocomplete="off"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <label class="block text-sm font-medium text-gray-700">Date of birth</label>
+                            <input wire:model.lazy="patient_dob" type="date" autocomplete="off"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <label class="block text-sm font-medium text-gray-700">Doctor</label>
+                            <select wire:model="patient_doctor"
+                                    class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value=""></option>
+                                @foreach($doctors as $doctor)
+                                    <option value="{{$doctor['id']}}">{{$doctor['name']}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <label class="block text-sm font-medium text-gray-700">Registration Date</label>
+                            <input wire:model="patient_registration_date" type="date" autocomplete="off"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <label class="block text-sm font-medium text-gray-700">City</label>
+                            <input wire:model="patient_city" type="text" autocomplete="off"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+                        <div class="col-span-6 sm:col-span-3">
+                            <label class="block text-sm font-medium text-gray-700">Referred By</label>
+                            <input wire:model="patient_referred_by" type="text" autocomplete="off"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+                        <div class="col-span-6 sm:col-span-6">
+                            <label class="block text-sm font-medium text-gray-700">Address</label>
+                            <textarea wire:model="patient_address" name="about" rows="3"
+                                      class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"></textarea>
+                        </div>
+                    </div>
+                    <div class="py-3  text-right ">
+                        <button type="button"
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm"
+                                @click="open = false">
+                            Close
+                        </button>
+                        <button type="button" wire:click="addPatient"
+                                class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
+                            Add
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     {{--    <div x-data="{ open: @entangle('choose_till') }" x-cloak x-show="open"--}}
     {{--         class="fixed z-40 inset-0 overflow-y-auto">--}}
@@ -528,8 +780,8 @@
     });
     Livewire.on('printInvoice', (saleId, admissionId, procedureId) => {
         window.open('{{ url('pharmacy/print/sale')}}' + '/' + saleId, 'receipt-print', 'height=150,width=400');
-        if (admissionId !=null && procedureId!=null) {
-            window.location = '{{url('pharmacy/sales/view')}}' + '/' + saleId + '?admission_id=' + admissionId + '&procedure_id='+procedureId;
+        if (admissionId != null && procedureId != null) {
+            window.location = '{{url('pharmacy/sales/view')}}' + '/' + saleId + '?admission_id=' + admissionId + '&procedure_id=' + procedureId;
         }
     });
 
@@ -570,7 +822,11 @@
             input.focus();
             input.select();
         }
-
+        if (event.keyCode == 121) {
+            event.preventDefault();
+            event.stopPropagation();
+            window.livewire.emit('searchCustomer');
+        }
         if (event.keyCode == 122) {
             event.preventDefault();
             event.stopPropagation();
@@ -581,5 +837,6 @@
             event.stopPropagation();
             window.livewire.emit('searchPatient');
         }
+
     });
 </script>

@@ -14,6 +14,9 @@ use Devzone\Pharmacy\Http\Livewire\Dashboard\TopSellingProductsProfitwise;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\TopSellingProducts;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\TopSuppliersPayable;
 use Devzone\Pharmacy\Http\Livewire\MasterData\Category;
+use Devzone\Pharmacy\Http\Livewire\MasterData\CustomerAdd;
+use Devzone\Pharmacy\Http\Livewire\MasterData\CustomerEdit;
+use Devzone\Pharmacy\Http\Livewire\MasterData\CustomerList;
 use Devzone\Pharmacy\Http\Livewire\MasterData\Manufacture;
 use Devzone\Pharmacy\Http\Livewire\MasterData\Medicine;
 use Devzone\Pharmacy\Http\Livewire\MasterData\ProductsAdd;
@@ -23,6 +26,7 @@ use Devzone\Pharmacy\Http\Livewire\MasterData\Racks;
 use Devzone\Pharmacy\Http\Livewire\MasterData\SupplierAdd;
 use Devzone\Pharmacy\Http\Livewire\MasterData\SupplierEdit;
 use Devzone\Pharmacy\Http\Livewire\MasterData\SupplierList;
+use Devzone\Pharmacy\Http\Livewire\MasterData\UserCreditLimits;
 use Devzone\Pharmacy\Http\Livewire\Payments\Supplier\Add;
 use Devzone\Pharmacy\Http\Livewire\Payments\Supplier\Edit;
 use Devzone\Pharmacy\Http\Livewire\Payments\Supplier\PaymentList;
@@ -103,6 +107,13 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('master-data.supplier-edit', SupplierEdit::class);
         Livewire::component('master-data.supplier-list', SupplierList::class);
 
+        Livewire::component('master-data.customer-add', CustomerAdd::class);
+        Livewire::component('master-data.customer-edit', CustomerEdit::class);
+        Livewire::component('master-data.customer-list', CustomerList::class);
+
+        Livewire::component('master-data.user-credit-limits', UserCreditLimits::class);
+        Livewire::component('payments.customer.payment-list', \Devzone\Pharmacy\Http\Livewire\Payments\Customer\PaymentList::class);
+        Livewire::component('payments.customer.add', \Devzone\Pharmacy\Http\Livewire\Payments\Customer\Add::class);
 
         Livewire::component('purchases.purchase-list', PurchaseList::class);
         Livewire::component('purchases.purchase-add', PurchaseAdd::class);

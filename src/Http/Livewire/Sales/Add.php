@@ -6,17 +6,23 @@ namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
 use App\Models\Hospital\Admission;
 use App\Models\Hospital\AdmissionJobDetail;
+use App\Models\Hospital\Employees\Employee;
 use App\Models\Hospital\Hospital;
+use App\Models\Hospital\Patient;
 use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount;
+use Devzone\Ams\Models\Ledger;
 use Devzone\Pharmacy\Http\Traits\Searchable;
+use Devzone\Pharmacy\Models\Customer;
 use Devzone\Pharmacy\Models\InventoryLedger;
 use Devzone\Pharmacy\Models\ProductInventory;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Sale\SaleDetail;
 use Devzone\Pharmacy\Models\Sale\SaleIssuance;
 use Devzone\Pharmacy\Models\Sale\UserTill;
+use Devzone\Pharmacy\Models\UserLimit;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -48,8 +54,36 @@ class Add extends Component
     public $admission_details = [];
     public $hospital_info = [];
     public $handed_over;
+    public $credit;
 
-    protected $listeners = ['openSearch', 'searchReferredBy', 'searchPatient', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
+    public $customer_name_credit;
+    public $customer_id_credit;
+
+    public $doctors = [];
+    public $add_modal = false;
+    public $patient_mr;
+    public $add_patient_name;
+    public $father_husband_name;
+    public $patient_gender;
+    public $patient_contact;
+    public $patient_contact_whatsApp;
+    public $patient_relation;
+    public $patient_contact_2;
+    public $patient_contact_3;
+    public $patient_dob;
+    public $patient_doctor;
+    public $patient_registration_date;
+    public $patient_city;
+    public $patient_address;
+    public $patient_referred_by;
+    public $patient_age;
+    public $has_contact = true;
+
+    protected $listeners = ['openSearch', 'searchReferredBy', 'searchPatient', 'searchCustomer', 'emitCustomerIdCredit', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
+
+    protected $validationAttributes = [
+        'add_patient_name' => 'patient name'
+    ];
 
     public function mount($admission_id = null, $procedure_id = null, $doctor_id = null)
     {
@@ -80,12 +114,11 @@ class Add extends Component
                     })
                     ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
                     ->where('pm.procedure_id', $this->procedure_id)
-                    ->where('pi.qty','>',0)
+                    ->where('pi.qty', '>', 0)
                     ->select('p.name as item', 'p.retail_price as product_price', 'pm.qty as required_qty',
                         'pi.qty as available_qty', 'pi.retail_price', 'pro.name as procedure_name',
                         'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'r.name as rack', 'r.tier')
                     ->groupBy('p.id')
-
                     ->orderBy('pi.qty', 'desc')->get()->toArray();
 
                 $this->admission_details['procedure_name'] = collect($medicines)->first()['procedure_name'];
@@ -149,6 +182,14 @@ class Add extends Component
 
     }
 
+    public function emitCustomerIdCredit()
+    {
+        $data = $this->searchable_data[$this->highlight_index];
+        $this->customer_id_credit = $data['id'];
+        $this->customer_name_credit = $data['name'];
+        $this->searchableReset();
+    }
+
     public function emitPatientId()
     {
         if (empty($this->admission_id) && empty($this->procedure_id)) {
@@ -201,6 +242,11 @@ class Add extends Component
         $this->searchableOpenModal('referred_by_id', 'referred_by_name', 'referred_by');
     }
 
+    public function searchCustomer()
+    {
+        $this->searchableOpenModal('customer_id_credit', 'customer_name_credit', 'customer');
+    }
+
     public function searchPatient()
     {
         $this->searchableOpenModal('patient_id', 'patient_name', 'patient');
@@ -210,7 +256,6 @@ class Add extends Component
     {
         return view('pharmacy::livewire.sales.add');
     }
-
 
     public function updated($name, $value)
     {
@@ -235,7 +280,6 @@ class Add extends Component
         }
 
     }
-
 
     public function updatedDiscount($value)
     {
@@ -269,6 +313,8 @@ class Add extends Component
 
     public function saleComplete()
     {
+        $this->resetErrorBag();
+        $this->reset('success');
         try {
             DB::beginTransaction();
             if (empty($this->sales)) {
@@ -277,18 +323,57 @@ class Add extends Component
             if (empty(Auth::user()->account_id)) {
                 throw new \Exception('Cash in Hand - ' . Auth::user()->name . ' not found.');
             }
-            if (empty($this->received) && $this->admission == false) {
-                throw new \Exception('Please enter received amount.');
+            if (empty($this->credit)) {
+                if (empty($this->received) && $this->admission == false) {
+                    throw new \Exception('Please enter received amount.');
+                }
+                if ((collect($this->sales)->sum('total_after_disc') > $this->received) && $this->admission == false) {
+                    throw new \Exception('Received amount should be greater than PKR ' . collect($this->sales)->sum('total_after_disc') . "/-");
+                }
+            } else {
+                if (empty($this->customer_id_credit)) {
+                    throw new \Exception('Please select customer to credit amount.');
+                }
+
+                $customer_account = Customer::join('chart_of_accounts as coa', 'coa.id', '=', 'customers.account_id')
+                    ->where('customers.id', $this->customer_id_credit)
+                    ->select('coa.name', 'customers.*')
+                    ->first();
+                $previous_credit = Ledger::where('account_id', $customer_account->account_id)
+                    ->groupBy('account_id')
+                    ->select(DB::raw('sum(debit-credit) as balance'))
+                    ->first();
+                $previous_balance=!empty($previous_credit) ? $previous_credit->balance : 0;
+                if (collect($this->sales)->sum('total_after_disc') + $previous_balance > $customer_account->credit_limit) {
+                    throw new \Exception('Amount exceeding customer credit limit (PKR ' . number_format($customer_account->credit_limit) . ')');
+                }
+                $user_limit = UserLimit::where('user_id', Auth::id())
+                    ->where('date', date('Y-m-d'))
+                    ->first();
+                $balance = !empty($user_limit) ? $user_limit->balance : 0;
+
+                if (collect($this->sales)->sum('total_after_disc') + $balance > Auth::user()->credit_limit) {
+                    throw new \Exception('Amount exceeding User credit limit (PKR ' . number_format(Auth::user()->credit_limit) . ')');
+                }
+                if (!empty($user_limit)) {
+                    UserLimit::where('id', $user_limit->id)->update([
+                        'balance' => DB::raw('balance +'.collect($this->sales)->sum('total_after_disc'))
+                    ]);
+                } else {
+                    UserLimit::create([
+                        'user_id'=>Auth::id(),
+                        'date'=>date('Y-m-d'),
+                        'balance'=>collect($this->sales)->sum('total_after_disc')
+                    ]);
+                }
             }
-            if ((collect($this->sales)->sum('total_after_disc') > $this->received) && $this->admission == false) {
-                throw new \Exception('Received amount should be greater than PKR ' . collect($this->sales)->sum('total_after_disc') . "/-");
-            }
+
             if ($this->admission == true) {
                 if (empty($this->handed_over)) {
                     throw new \Exception('Handed over field is required.');
                 }
             }
-            $sale_receipt_no=Voucher::instance()->advances()->get();
+            $sale_receipt_no = Voucher::instance()->advances()->get();
             $sale_id = Sale::create([
                 'patient_id' => $this->patient_id,
                 'referred_by' => $this->referred_by_id,
@@ -301,8 +386,11 @@ class Add extends Component
                 'gross_total' => collect($this->sales)->sum('total_after_disc'),
                 'admission_id' => $this->admission_id ?? null,
                 'procedure_id' => $this->procedure_id ?? null,
-                'receipt_no'=>$sale_receipt_no,
+                'receipt_no' => $sale_receipt_no,
+                'customer_id' => $this->customer_id_credit ?? null,
+                'is_credit' => empty($this->credit) ? 'f' : 't'
             ])->id;
+
 
             foreach ($this->sales as $s) {
                 $inv = ProductInventory::where('product_id', $s['product_id'])
@@ -366,7 +454,8 @@ class Add extends Component
             $amounts = SaleDetail::where('sale_id', $sale_id)->select(DB::raw('SUM(total_after_disc) as sale'), DB::raw('SUM(qty * supply_price) as cost'))->first();
             $customer_name = $this->patient_name ?? 'walking customer';
             $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} sold to Patient {$customer_name}. Cash received PKR " .
-                number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name." at ".date('h:i A');
+                number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name . " at " . date('h:i A');
+
             $vno = Voucher::instance()->voucher()->get();
 
             if ($this->admission) {
@@ -402,8 +491,17 @@ class Add extends Component
             }
 
             if ($this->admission == false) {
-                GeneralJournal::instance()->account(Auth::user()->account_id)->debit($amounts['sale'])->voucherNo($vno)
-                    ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                if (empty($this->credit)) {
+                    GeneralJournal::instance()->account(Auth::user()->account_id)->debit($amounts['sale'])->voucherNo($vno)
+                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                } else {
+
+                    $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} sold to Patient {$customer_name}. {$customer_account->name} Account debited with PKR " .
+                        number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name . " at " . date('h:i A');
+                    GeneralJournal::instance()->account($customer_account->account_id)->debit($amounts['sale'])->voucherNo($vno)
+                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                }
+
             }
 
             foreach ($accounts as $a) {
@@ -440,7 +538,7 @@ class Add extends Component
     public function resetAll()
     {
         $this->reset(['sales', 'referred_by_id', 'referred_by_name', 'success', 'patient_id', 'patient_name',
-            'payable', 'received', 'remarks', 'discount', 'error']);
+            'payable', 'received', 'remarks', 'discount', 'error', 'customer_id_credit', 'customer_name_credit', 'credit']);
     }
 
     public function updatedTillId($value)
@@ -459,5 +557,82 @@ class Add extends Component
             'account_id' => $this->till_id
         ]);
         $this->choose_till = false;
+    }
+
+    public function openAddModel()
+    {
+        $this->resetErrorBag();
+        $this->reset('success');
+        $this->patient_contact_whatsApp = 't';
+        $this->searchable_modal = false;
+        $this->patient_registration_date = date('Y-m-d');
+        $last_patient = Patient::orderBy('id', 'DESC')->first();
+        $this->patient_mr = 'MR' . str_pad($last_patient->id + 1, 6, '0', STR_PAD_LEFT);
+        $this->doctors = Employee::where('is_doctor', 't')->where('status', 't')->get()->toArray();
+        $this->add_modal = true;
+    }
+
+    public function hasContact()
+    {
+        if ($this->has_contact) {
+            $this->has_contact = false;
+        } else {
+            $this->has_contact = true;
+        }
+    }
+
+    public function updatedPatientDob($val)
+    {
+        $this->patient_age = Carbon::parse($val)->diff(\Carbon\Carbon::now())->format('%y');
+    }
+
+    public function updatedPatientAge($val)
+    {
+
+        if (!empty($val)) {
+            $age = '-' . $val . ' year';
+            $this->patient_dob = date('Y-m-d', strtotime($age));
+        }
+    }
+
+    public function addPatient()
+    {
+        $validation = [
+            'add_patient_name' => 'required',
+            'father_husband_name' => 'required',
+            'patient_gender' => 'required',
+        ];
+        if ($this->has_contact) {
+            $validation['patient_contact'] = 'required';
+        }
+        $this->validate($validation);
+        $last_patient = Patient::orderBy('id', 'DESC')->first();
+        $this->patient_mr = 'MR' . str_pad($last_patient->id + 1, 6, '0', STR_PAD_LEFT);
+        $created_patient = Patient::create([
+            'mr_no' => $this->patient_mr ?? null,
+            'name' => $this->add_patient_name,
+            'father_husband_name' => $this->father_husband_name ?? null,
+            'gender' => $this->patient_gender ?? null,
+            'phone' => $this->patient_contact ?? null,
+            'contact_relation' => $this->patient_relation ?? null,
+            'has_whatsApp' => $this->patient_contact_whatsApp ?? 'f',
+            'phone_2' => $this->patient_contact_2 ?? null,
+            'phone_3' => $this->patient_contact_3 ?? null,
+            'dob' => $this->patient_dob ?? null,
+            'age' => $this->patient_age ?? null,
+            'doctor_id' => $this->patient_doctor ?? null,
+            'registration_date' => $this->patient_registration_date ?? date('Y-m-d'),
+            'address' => $this->patient_address ?? null,
+            'referred_by' => $this->patient_referred_by ?? null,
+            'created_by' => auth()->user()->id,
+            'city' => $this->patient_city ?? null,
+        ]);
+        $this->patient_id = $created_patient->id;
+        $this->patient_name = $created_patient->mr_no . ' - ' . $created_patient->name;
+        $this->referred_by_id = $created_patient->doctor_id;
+        $this->referred_by_name = collect($this->doctors)->where('id', $this->referred_by_id)->first()['name'];
+        $this->add_modal = false;
+        $this->patient_contact_whatsApp = 't';
+        $this->reset('add_patient_name', 'father_husband_name', 'patient_gender', 'patient_contact', 'patient_contact_2', 'patient_contact_3', 'patient_relation', 'patient_dob', 'patient_age', 'patient_doctor', 'patient_registration_date', 'patient_address', 'patient_city', 'patient_referred_by');
     }
 }

@@ -8,6 +8,7 @@ use App\Models\Hospital\Employees\Employee;
 use App\Models\Hospital\Patient;
 use Devzone\Ams\Models\ChartOfAccount;
 use Devzone\Pharmacy\Models\Category;
+use Devzone\Pharmacy\Models\Customer;
 use Devzone\Pharmacy\Models\Manufacture;
 use Devzone\Pharmacy\Models\Product;
 use Devzone\Pharmacy\Models\Rack;
@@ -37,7 +38,8 @@ trait Searchable
         'patient' => ['mr_no', 'name', 'phone'],
         'referred_by' => ['name'],
         'item' => ['item', 'qty', 'retail_price', 'rack', 'tier', 'packing'],
-        'adjustment_items' => ['item', 'qty', 'expiry']
+        'adjustment_items' => ['item', 'qty', 'expiry'],
+        'customer'=>['name','phone','company','credit_limit']
     ];
 
 
@@ -90,6 +92,7 @@ trait Searchable
         if ($this->searchable_emit_only) {
             $this->emitSelf(Str::camel('emit_' . $this->searchable_id));
         } else {
+
             $data = $this->searchable_data[$this->highlight_index] ?? null;
             $this->{$this->searchable_id} = $data['id'];
             $this->{$this->searchable_name} = $data['name'];
@@ -254,6 +257,19 @@ trait Searchable
                         ->orWhere('tier', 'LIKE', '%' . $value . '%');
                 })
                 ->get();
+            if ($search->isNotEmpty()) {
+                $this->searchable_data = $search->toArray();
+            } else {
+                $this->searchable_data = [];
+            }
+        }
+        if ($this->searchable_type == 'customer') {
+            $search=Customer::where('status','t')
+                ->where(function ($q) use ($value){
+                        return $q->orWhere('name','LIKE','%'.$value.'%')
+                            ->orWhere('phone','LIKE','%'.$value.'%')
+                            ->orWhere('company','LIKE','%'.$value.'%');
+                })->get();
             if ($search->isNotEmpty()) {
                 $this->searchable_data = $search->toArray();
             } else {
