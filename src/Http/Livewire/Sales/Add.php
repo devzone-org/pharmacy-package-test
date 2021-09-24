@@ -12,13 +12,16 @@ use App\Models\Hospital\Patient;
 use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount;
+use Devzone\Ams\Models\Ledger;
 use Devzone\Pharmacy\Http\Traits\Searchable;
+use Devzone\Pharmacy\Models\Customer;
 use Devzone\Pharmacy\Models\InventoryLedger;
 use Devzone\Pharmacy\Models\ProductInventory;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Sale\SaleDetail;
 use Devzone\Pharmacy\Models\Sale\SaleIssuance;
 use Devzone\Pharmacy\Models\Sale\UserTill;
+use Devzone\Pharmacy\Models\UserLimit;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -76,7 +79,7 @@ class Add extends Component
     public $patient_age;
     public $has_contact = true;
 
-    protected $listeners = ['openSearch', 'searchReferredBy', 'searchPatient', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
+    protected $listeners = ['openSearch', 'searchReferredBy', 'searchPatient', 'searchCustomer', 'emitCustomerIdCredit', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
 
     protected $validationAttributes = [
         'add_patient_name' => 'patient name'
@@ -179,6 +182,14 @@ class Add extends Component
 
     }
 
+    public function emitCustomerIdCredit()
+    {
+        $data = $this->searchable_data[$this->highlight_index];
+        $this->customer_id_credit = $data['id'];
+        $this->customer_name_credit = $data['name'];
+        $this->searchableReset();
+    }
+
     public function emitPatientId()
     {
         if (empty($this->admission_id) && empty($this->procedure_id)) {
@@ -230,9 +241,12 @@ class Add extends Component
     {
         $this->searchableOpenModal('referred_by_id', 'referred_by_name', 'referred_by');
     }
-    public function searchCustomer(){
+
+    public function searchCustomer()
+    {
         $this->searchableOpenModal('customer_id_credit', 'customer_name_credit', 'customer');
     }
+
     public function searchPatient()
     {
         $this->searchableOpenModal('patient_id', 'patient_name', 'patient');
@@ -242,7 +256,6 @@ class Add extends Component
     {
         return view('pharmacy::livewire.sales.add');
     }
-
 
     public function updated($name, $value)
     {
@@ -267,7 +280,6 @@ class Add extends Component
         }
 
     }
-
 
     public function updatedDiscount($value)
     {
@@ -301,6 +313,8 @@ class Add extends Component
 
     public function saleComplete()
     {
+        $this->resetErrorBag();
+        $this->reset('success');
         try {
             DB::beginTransaction();
             if (empty($this->sales)) {
@@ -319,6 +333,38 @@ class Add extends Component
             } else {
                 if (empty($this->customer_id_credit)) {
                     throw new \Exception('Please select customer to credit amount.');
+                }
+
+                $customer_account = Customer::join('chart_of_accounts as coa', 'coa.id', '=', 'customers.account_id')
+                    ->where('customers.id', $this->customer_id_credit)
+                    ->select('coa.name', 'customers.*')
+                    ->first();
+                $previous_credit = Ledger::where('account_id', $customer_account->account_id)
+                    ->groupBy('account_id')
+                    ->select(DB::raw('sum(debit-credit) as balance'))
+                    ->first();
+                $previous_balance=!empty($previous_credit) ? $previous_credit->balance : 0;
+                if (collect($this->sales)->sum('total_after_disc') + $previous_balance > $customer_account->credit_limit) {
+                    throw new \Exception('Amount exceeding customer credit limit (PKR ' . number_format($customer_account->credit_limit) . ')');
+                }
+                $user_limit = UserLimit::where('user_id', Auth::id())
+                    ->where('date', date('Y-m-d'))
+                    ->first();
+                $balance = !empty($user_limit) ? $user_limit->balance : 0;
+
+                if (collect($this->sales)->sum('total_after_disc') + $balance > Auth::user()->credit_limit) {
+                    throw new \Exception('Amount exceeding User credit limit (PKR ' . number_format(Auth::user()->credit_limit) . ')');
+                }
+                if (!empty($user_limit)) {
+                    UserLimit::where('id', $user_limit->id)->update([
+                        'balance' => DB::raw('balance +'.collect($this->sales)->sum('total_after_disc'))
+                    ]);
+                } else {
+                    UserLimit::create([
+                        'user_id'=>Auth::id(),
+                        'date'=>date('Y-m-d'),
+                        'balance'=>collect($this->sales)->sum('total_after_disc')
+                    ]);
                 }
             }
 
@@ -344,6 +390,7 @@ class Add extends Component
                 'customer_id' => $this->customer_id_credit ?? null,
                 'is_credit' => empty($this->credit) ? 'f' : 't'
             ])->id;
+
 
             foreach ($this->sales as $s) {
                 $inv = ProductInventory::where('product_id', $s['product_id'])
@@ -448,13 +495,10 @@ class Add extends Component
                     GeneralJournal::instance()->account(Auth::user()->account_id)->debit($amounts['sale'])->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                 } else {
-                   $employee_account = Employee::join('chart_of_accounts as coa', 'coa.id', '=', 'employees.account_id')
-                        ->where('employees.account_id', $this->customer_id_credit)
-                        ->select('coa.name','employees.account_id')
-                        ->first();
-                    $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} sold to Patient {$customer_name}. {$employee_account->name} Account debited with PKR " .
+
+                    $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} sold to Patient {$customer_name}. {$customer_account->name} Account debited with PKR " .
                         number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name . " at " . date('h:i A');
-                    GeneralJournal::instance()->account($employee_account->account_id)->debit($amounts['sale'])->voucherNo($vno)
+                    GeneralJournal::instance()->account($customer_account->account_id)->debit($amounts['sale'])->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                 }
 
@@ -494,7 +538,7 @@ class Add extends Component
     public function resetAll()
     {
         $this->reset(['sales', 'referred_by_id', 'referred_by_name', 'success', 'patient_id', 'patient_name',
-            'payable', 'received', 'remarks', 'discount', 'error']);
+            'payable', 'received', 'remarks', 'discount', 'error', 'customer_id_credit', 'customer_name_credit', 'credit']);
     }
 
     public function updatedTillId($value)

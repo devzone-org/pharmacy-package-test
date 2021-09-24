@@ -26,6 +26,7 @@ use Devzone\Pharmacy\Http\Livewire\MasterData\Racks;
 use Devzone\Pharmacy\Http\Livewire\MasterData\SupplierAdd;
 use Devzone\Pharmacy\Http\Livewire\MasterData\SupplierEdit;
 use Devzone\Pharmacy\Http\Livewire\MasterData\SupplierList;
+use Devzone\Pharmacy\Http\Livewire\MasterData\UserCreditLimits;
 use Devzone\Pharmacy\Http\Livewire\Payments\Supplier\Add;
 use Devzone\Pharmacy\Http\Livewire\Payments\Supplier\Edit;
 use Devzone\Pharmacy\Http\Livewire\Payments\Supplier\PaymentList;
@@ -109,6 +110,10 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('master-data.customer-add', CustomerAdd::class);
         Livewire::component('master-data.customer-edit', CustomerEdit::class);
         Livewire::component('master-data.customer-list', CustomerList::class);
+
+        Livewire::component('master-data.user-credit-limits', UserCreditLimits::class);
+        Livewire::component('payments.customer.payment-list', \Devzone\Pharmacy\Http\Livewire\Payments\Customer\PaymentList::class);
+        Livewire::component('payments.customer.add', \Devzone\Pharmacy\Http\Livewire\Payments\Customer\Add::class);
 
         Livewire::component('purchases.purchase-list', PurchaseList::class);
         Livewire::component('purchases.purchase-add', PurchaseAdd::class);

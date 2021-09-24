@@ -19,7 +19,7 @@
                       </button>
                     </span>
                 @if(empty($admission_id) && empty($procedure_id))
-                    <span class="">
+                    <span class="ml-3">
                       <button type="button"
                               wire:click="searchReferredBy"
                               class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -120,7 +120,7 @@
                         Customer
                     </dt>
                     <dd class="mt-1 text-xl font-medium text-gray-900">
-                        {{ $customer_name ?? '-' }}
+                        {{ $customer_name_credit ?? '-' }}
                     </dd>
                 </div>
                 <div class="">
@@ -421,20 +421,20 @@
                 @if($admission==false)
                     <tr>
                         <th scope="col" colspan="4"
-                            class="w-7 px-2   border-r py-2  text-xl font-medium text-gray-500  tracking-wider">
-                            <input id="credit" wire:model.defer="credit" type="checkbox"
-                                   class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
-                            <label for="comments" class="">Credit</label>
+                            class="w-7 px-2   border-r py-2 @if($credit==true) bg-red-50 @endif text-xl font-medium text-gray-500  tracking-wider">
+                            <input id="credit" wire:model="credit" type="checkbox"
+                                   class="focus:ring-red-500 h-4 w-4 text-red-600 border-red-300 rounded">
+                            <label for="credit" class="text-red-500">Credit</label>
                             <div class="ml-3 float-right">
                                 <span class=""> Received Amount (F4)</span>
                             </div>
                         </th>
                         <th scope="col" colspan="2"
-                            class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
+                            class="w-10   px-2 py-2 @if($credit==true) bg-red-50 @endif  border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
                             <input type="number" wire:model.debounce.300ms="received" onClick="this.select();"
-                                   id="received"
+                                   id="received" @if($credit==true) disabled @endif
                                    wire:keydown.enter="saleComplete"
-                                   class="p-0 focus:ring-0 block w-full  text-xl border-0 font-medium text-gray-500 text-center "
+                                   class="p-0 focus:ring-0 block w-full @if($credit==true) bg-red-50 @endif  text-xl border-0 font-medium text-gray-500 text-center "
                                    autocomplete="off">
 
                         </th>
@@ -822,7 +822,11 @@
             input.focus();
             input.select();
         }
-
+        if (event.keyCode == 121) {
+            event.preventDefault();
+            event.stopPropagation();
+            window.livewire.emit('searchCustomer');
+        }
         if (event.keyCode == 122) {
             event.preventDefault();
             event.stopPropagation();
@@ -833,5 +837,6 @@
             event.stopPropagation();
             window.livewire.emit('searchPatient');
         }
+
     });
 </script>

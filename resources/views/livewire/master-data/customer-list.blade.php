@@ -121,7 +121,7 @@
                                         {{$c->name}}
                                     </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{$c->credit_limit}}
+                                        {{number_format($c->credit_limit)}}
                                     </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         {{$c->phone}}

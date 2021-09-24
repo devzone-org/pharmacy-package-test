@@ -21,6 +21,7 @@ class CreateCustomersTable extends Migration
             $table->string('address')->nullable();
             $table->string('company')->nullable();
             $table->decimal('credit_limit');
+            $table->decimal('remaining_limit');
             $table->enum('status',['t','f'])->default('t');
             $table->integer('account_id');
             $table->timestamps();
