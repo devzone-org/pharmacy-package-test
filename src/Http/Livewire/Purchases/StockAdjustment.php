@@ -107,14 +107,7 @@ class StockAdjustment extends Component
                     'added_by' => Auth::id(),
                     'voucher_no' => $vno
                 ]);
-                InventoryLedger::create([
-                    'product_id' => $find['product_id'],
-                    'order_id' => $find['po_id'],
-                    'increase' => $a['indicator'] == 'i' ? $a['a_qty'] : 0,
-                    'decrease' => $a['indicator'] == 'd' ? $a['a_qty'] : 0,
-                    'type' => 'adjustment',
-                    'description' => "adjustment"
-                ]);
+
                 if ($a['indicator'] == 'i') {
                     $increase = $increase + ($a['a_qty'] * $find['supply_price']);
                     $description .= " [Increase - " . $a['item'] . " {$find['supply_price']} X {$a['a_qty']} = PKR" . ($a['a_qty'] * $find['supply_price']) . "/- ]";
@@ -124,6 +117,15 @@ class StockAdjustment extends Component
                     $description .= " [Decrease - " . $a['item'] . " {$find['supply_price']} X {$a['a_qty']} = PKR" . ($a['a_qty'] * $find['supply_price']) . "/- ]";
                     $find->decrement('qty', $a['a_qty']);
                 }
+
+                InventoryLedger::create([
+                    'product_id' => $find['product_id'],
+                    'order_id' => $find['po_id'],
+                    'increase' => $a['indicator'] == 'i' ? $a['a_qty'] : 0,
+                    'decrease' => $a['indicator'] == 'd' ? $a['a_qty'] : 0,
+                    'type' => 'adjustment',
+                    'description' => $description
+                ]);
             }
 
 
