@@ -349,7 +349,7 @@ class PurchaseReceive extends Component
                         'order_id' => $this->purchase_id,
                         'increase' => $r->qty,
                         'type' => 'purchase',
-                        'description' => 'Inventory increase'
+                        'description' => $description
                     ]);
                     if ($r->bonus > 0) {
                         ProductInventory::create([
@@ -367,7 +367,7 @@ class PurchaseReceive extends Component
                             'order_id' => $this->purchase_id,
                             'increase' => $r->bonus,
                             'type' => 'purchase-bonus',
-                            'description' => 'Inventory increase by bonus'
+                            'description' => '[BONUS] '.$description
                         ]);
                     }
                 }

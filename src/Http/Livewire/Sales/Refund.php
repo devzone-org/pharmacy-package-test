@@ -306,22 +306,23 @@ class Refund extends Component
             $new_sub_total = collect($this->sales)->sum('total');
             $new_total_after_disc = collect($this->sales)->sum('total_after_disc');
             $total_refund = collect($this->refunds)->sum('total_after_disc') - collect($this->refunds)->where('restrict', true)->sum('total_after_disc');
-            if($dif>0){
-                if ($this->received==''){
+            if ($dif > 0) {
+                if ($this->received == '') {
                     throw new \Exception('Please Enter Received Amount');
                 }
-                if ($this->received<$dif){
+                if ($this->received < $dif) {
                     throw new \Exception('Received Amount is Not Valid');
                 }
-                $change_due=$this->received !='' ? $this->received-$dif : 0;
-            }else{
-                if ($this->received==''){
+                $change_due = $this->received != '' ? $this->received - $dif : 0;
+            } else {
+                if ($this->received == '') {
                     throw new \Exception('Please Enter Paid Amount');
                 }
-                if ($this->received!=abs($dif)){
+
+                if ($this->received < abs($dif)) {
                     throw new \Exception('Paid Amount is Not Valid');
                 }
-                $change_due=0;
+                $change_due = abs($dif) - $this->received;
             }
 //            dd($dif,$new_sub_total,$new_total_after_disc,$total_refund,$this->received,$change_due);
             $newSale = $sale->replicate();
@@ -333,7 +334,7 @@ class Refund extends Component
             $newSale->gross_total = $new_total_after_disc;
             $newSale->receive_amount = $this->received;
             $newSale->payable_amount = $change_due;
-            $newSale->is_refund='f';
+            $newSale->is_refund = 'f';
             $newSale->receipt_no = $sale_receipt_no;
             $newSale->save();
             foreach ($this->refunds as $r) {
@@ -382,7 +383,7 @@ class Refund extends Component
                                 'product_id' => $r['product_id'],
                                 'increase' => $dec,
                                 'type' => 'sale-refund',
-                                'description' => "Refund on dated " . date('d M, Y') .
+                                'description' => "Refund on dated " . date('d M, Y H:i:s') .
                                     " against receipt #" . $this->sale_id
                             ]);
                         }
@@ -419,7 +420,7 @@ class Refund extends Component
                                     'order_id' => $product_inv->po_id,
                                     'decrease' => $sale_qty,
                                     'type' => 'sale',
-                                    'description' => "Sale on dated " . date('d M, Y') .
+                                    'description' => "Sale on dated " . date('d M, Y H:i:s') .
                                         " against receipt #" . $this->sale_id
                                 ]);
                                 $sale_qty = 0;
@@ -433,7 +434,7 @@ class Refund extends Component
                                     'order_id' => $product_inv->po_id,
                                     'decrease' => $dec,
                                     'type' => 'sale',
-                                    'description' => "Sale on dated " . date('d M, Y') .
+                                    'description' => "Sale on dated " . date('d M, Y H:i:s') .
                                         " against receipt #" . $this->sale_id
                                 ]);
                                 $sale_qty = $sale_qty - $dec;

@@ -325,7 +325,7 @@ class Add extends Component
                                 'order_id' => $product_inv->po_id,
                                 'decrease' => $sale_qty,
                                 'type' => 'sale',
-                                'description' => "Sale on dated " . date('d M, Y') .
+                                'description' => "Sale on dated " . date('d M, Y H:i:s') .
                                     " against receipt #" . $sale_id
                             ]);
                             $sale_qty = 0;
@@ -338,7 +338,7 @@ class Add extends Component
                                 'order_id' => $product_inv->po_id,
                                 'decrease' => $product_inv->qty,
                                 'type' => 'sale',
-                                'description' => "Sale on dated " . date('d M, Y') .
+                                'description' => "Sale on dated " . date('d M, Y H:i:s') .
                                     " against receipt #" . $sale_id
                             ]);
                             $sale_qty = $sale_qty - $dec;

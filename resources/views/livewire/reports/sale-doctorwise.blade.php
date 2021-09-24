@@ -66,7 +66,8 @@
 
                         <div class="bg-white py-6 px-4 sm:p-6 ">
                             <h3 class="text-lg leading-6  text-center font-medium text-gray-900">{{ env('APP_NAME') }}</h3>
-                            <p class="text-md leading-6  text-center  text-gray-900">Pharmacy Sale Doctor wise Report</p>
+                            <p class="text-md leading-6  text-center  text-gray-900">Pharmacy Sale Doctor wise
+                                Report</p>
                             <p class="text-md leading-6  text-center  text-gray-900">Statement period
                                 from {{ date('d M, Y',strtotime($from)) }} to {{ date('d M, Y',strtotime($to)) }}</p>
                         </div>
@@ -131,7 +132,7 @@
                                             {{!empty($r['department_name'])  ? $r['department_name'] : '-'}}
                                         </td>
                                         <td class="px-3 py-3  text-center text-sm text-gray-500">
-                                            {{$r['total']}}
+                                            {{number_format($r['total'],2)}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                             ({{number_format($r['total']-$r['total_after_disc'],2)}})
@@ -149,7 +150,8 @@
                                             {{number_format($r['total_after_refund']-$r['cos'],2)}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{number_format((($r['total_after_refund']-$r['cos'])/$r['total_after_refund'])*100,2)}} %
+                                            {{number_format((($r['total_after_refund']-$r['cos'])/$r['total_after_refund'])*100,2)}}
+                                            %
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{$r['no_of_sale']}}
@@ -170,7 +172,8 @@
                                         {{number_format(collect($report)->sum('total'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                       ({{number_format(collect($report)->sum('total')-collect($report)->sum('total_after_disc'),2)}})
+                                        ({{number_format(collect($report)->sum('total')-collect($report)->sum('total_after_disc'),2)}}
+                                        )
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         {{number_format(collect($report)->sum('total_refund'),2)}}
