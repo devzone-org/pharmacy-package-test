@@ -1,16 +1,15 @@
-<div class="max-w-7xl mx-auto mt-5 lg:max-w-7xl lg:grid lg:grid-cols-12 lg:gap-4">
-    <main class="col-span-12 ">
-        <div class="lg:flex  lg:justify-between">
-            <div class="flex-1 min-w-0">
-                <h2 class="text-2xl mb-3 font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                    @if(empty($admission_id) && empty($procedure_id))
-                        Sale Invoice
-                    @else
-                        Inter Transfer IPD Medicine
-                    @endif
-                </h2>
-            </div>
-            <div class="mt-5 flex lg:mt-0 lg:ml-4 ">
+<div class="max-w-full px-5 mx-auto mt-5 lg:grid lg:grid-cols-12 lg:gap-3">
+    <div class="lg:flex col-span-12  lg:justify-between">
+        <div class="flex-1 min-w-0">
+            <h2 class="text-2xl mb-3 font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                @if(empty($admission_id) && empty($procedure_id))
+                    Sale Invoice
+                @else
+                    Inter Transfer IPD Medicine
+                @endif
+            </h2>
+        </div>
+        <div class="mt-5 flex lg:mt-0 lg:ml-4 ">
                 <span class="">
                       <button type="button"
                               wire:click="searchCustomer"
@@ -18,8 +17,8 @@
                         Add Customer (F10)
                       </button>
                     </span>
-                @if(empty($admission_id) && empty($procedure_id))
-                    <span class="ml-3">
+            @if(empty($admission_id) && empty($procedure_id))
+                <span class="ml-3">
                       <button type="button"
                               wire:click="searchReferredBy"
                               class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -27,7 +26,7 @@
                       </button>
                     </span>
 
-                    <span class="ml-3">
+                <span class="ml-3">
                       <button type="button" wire:click="searchPatient"
                               class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
 
@@ -36,21 +35,18 @@
                       </button>
                     </span>
 
-                @endif
-                <span class="ml-3">
+            @endif
+            <span class="ml-3">
                   <button type="button" wire:click="searchableOpenModal('product_id', 'product_name', 'item')"
                           class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                          xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round"
                                                                   stroke-width="2"
                                                                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-
                     Search Item (F1)
                   </button>
                 </span>
-
-
-                <span class="ml-3">
+            <span class="ml-3">
                   <button type="button" wire:click="saleComplete"
                           class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
 
@@ -67,97 +63,147 @@
                   </button>
                 </span>
 
-            </div>
-
         </div>
-        @if($admission)
-            <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-5   shadow rounded-md p-3">
-                <div class="">
-                    <dt class="text-sm font-medium text-gray-500">
-                        Referred By
-                    </dt>
-                    <dd class="mt-1 text-lg font-medium text-gray-900">
-                        {{ $admission_details['doctor'] ?? '-' }}
-                    </dd>
-                </div>
-                <div class="">
-                    <dt class="text-sm font-medium text-gray-500">
-                        Patient Name
-                    </dt>
-                    <dd class="mt-1 text-lg font-medium text-gray-900">
-                        {{  $admission_details['mr_no'].' - '.$admission_details['name'] ?? 'Walk-in' }}
-                    </dd>
-                </div>
-                <div class="">
-                    <dt class="text-sm font-medium text-gray-500">
-                        Admission # - Procedure
-                    </dt>
-                    <dd class="mt-1 text-lg font-medium text-gray-900">
-                        {{  $admission_details['admission_no'] ?? '' }} - {{$admission_details['procedure_name']}}
-                    </dd>
-                </div>
-                <div class="">
-                    <dt class="text-sm font-medium text-gray-500">
-                        Date
-                    </dt>
-                    <dd class="mt-1 text-lg font-medium text-gray-900">
-                        {{ date('d M, Y') }}
-                    </dd>
-                </div>
-                <div class="">
-                    <dt class="text-sm font-medium text-gray-500">
-                        Issued By
-                    </dt>
-                    <dd class="mt-1 text-lg font-medium text-gray-900">
-                        {{ Auth::user()->name }}
-                    </dd>
-                </div>
-            </div>
-        @else
-            <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-5 shadow rounded-md p-3">
-                <div class="">
-                    <dt class="text-sm font-medium text-gray-500">
-                        Customer
-                    </dt>
-                    <dd class="mt-1 text-xl font-medium text-gray-900">
-                        {{ $customer_name_credit ?? '-' }}
-                    </dd>
-                </div>
-                <div class="">
-                    <dt class="text-sm font-medium text-gray-500">
-                        Referred By
-                    </dt>
-                    <dd class="mt-1 text-xl font-medium text-gray-900">
-                        {{ $referred_by_name ?? '-' }}
-                    </dd>
-                </div>
-                <div class="">
-                    <dt class="text-sm font-medium text-gray-500">
-                        Patient Name
-                    </dt>
-                    <dd class="mt-1 text-xl font-medium text-gray-900">
-                        {{ $patient_name ?? 'Walk-in' }}
-                    </dd>
-                </div>
-                <div class="">
-                    <dt class="text-sm font-medium text-gray-500">
-                        Date
-                    </dt>
-                    <dd class="mt-1 text-xl font-medium text-gray-900">
-                        {{ date('d M, Y') }}
-                    </dd>
-                </div>
-                <div class="">
-                    <dt class="text-sm font-medium text-gray-500">
-                        Sale By
-                    </dt>
-                    <dd class="mt-1 text-xl font-medium text-gray-900">
-                        {{ Auth::user()->name }}
-                    </dd>
-                </div>
-            </div>
-        @endif
 
+    </div>
+{{--    <div class="col-span-12">--}}
+{{--        @if($admission)--}}
+{{--            <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-5   shadow rounded-md p-3">--}}
+{{--                <div class="">--}}
+{{--                    <dt class="text-sm font-medium text-gray-500">--}}
+{{--                        Referred By--}}
+{{--                    </dt>--}}
+{{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
+{{--                        {{ $admission_details['doctor'] ?? '-' }}--}}
+{{--                    </dd>--}}
+{{--                </div>--}}
+{{--                <div class="">--}}
+{{--                    <dt class="text-sm font-medium text-gray-500">--}}
+{{--                        Patient Name--}}
+{{--                    </dt>--}}
+{{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
+{{--                        {{  $admission_details['mr_no'].' - '.$admission_details['name'] ?? 'Walk-in' }}--}}
+{{--                    </dd>--}}
+{{--                </div>--}}
+{{--                <div class="">--}}
+{{--                    <dt class="text-sm font-medium text-gray-500">--}}
+{{--                        Admission # - Procedure--}}
+{{--                    </dt>--}}
+{{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
+{{--                        {{  $admission_details['admission_no'] ?? '' }} - {{$admission_details['procedure_name']}}--}}
+{{--                    </dd>--}}
+{{--                </div>--}}
+{{--                <div class="">--}}
+{{--                    <dt class="text-sm font-medium text-gray-500">--}}
+{{--                        Date--}}
+{{--                    </dt>--}}
+{{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
+{{--                        {{ date('d M, Y') }}--}}
+{{--                    </dd>--}}
+{{--                </div>--}}
+{{--                <div class="">--}}
+{{--                    <dt class="text-sm font-medium text-gray-500">--}}
+{{--                        Issued By--}}
+{{--                    </dt>--}}
+{{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
+{{--                        {{ Auth::user()->name }}--}}
+{{--                    </dd>--}}
+{{--                </div>--}}
+{{--            </div>--}}
+{{--        @else--}}
+{{--            <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-5 shadow rounded-md p-3">--}}
+{{--                <div class="">--}}
+{{--                    <dt class="text-sm font-medium text-gray-500">--}}
+{{--                        Customer--}}
+{{--                    </dt>--}}
+{{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
+{{--                        {{ $customer_name_credit ?? '-' }}--}}
+{{--                    </dd>--}}
+{{--                </div>--}}
+{{--                <div class="">--}}
+{{--                    <dt class="text-sm font-medium text-gray-500">--}}
+{{--                        Referred By--}}
+{{--                    </dt>--}}
+{{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
+{{--                        {{ $referred_by_name ?? '-' }}--}}
+{{--                    </dd>--}}
+{{--                </div>--}}
+{{--                <div class="">--}}
+{{--                    <dt class="text-sm font-medium text-gray-500">--}}
+{{--                        Patient Name--}}
+{{--                    </dt>--}}
+{{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
+{{--                        {{ $patient_name ?? 'Walk-in' }}--}}
+{{--                    </dd>--}}
+{{--                </div>--}}
+{{--                <div class="">--}}
+{{--                    <dt class="text-sm font-medium text-gray-500">--}}
+{{--                        Date--}}
+{{--                    </dt>--}}
+{{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
+{{--                        {{ date('d M, Y') }}--}}
+{{--                    </dd>--}}
+{{--                </div>--}}
+{{--                <div class="">--}}
+{{--                    <dt class="text-sm font-medium text-gray-500">--}}
+{{--                        Sale By--}}
+{{--                    </dt>--}}
+{{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
+{{--                        {{ Auth::user()->name }}--}}
+{{--                    </dd>--}}
+{{--                </div>--}}
+{{--            </div>--}}
+{{--        @endif--}}
+{{--    </div>--}}
+
+    <main class="col-span-2">
+
+        <div class="mb-3 p-2 bg-white shadow rounded-lg overflow-hidden">
+            <dt class="text-sm font-medium text-gray-500 truncate">
+                Customer
+            </dt>
+            <dd class="mt-1 text-xl font-medium text-gray-900">
+               <span class="text-xs font-base text-gray-500">Name: </span>  {{ $customer_name_credit ?? 'Nill' }}<br>
+                <span class="text-xs font-base text-gray-500">Credit Limit :</span> PKR {{number_format($customer_credit_limit) ?? '-'}}<br>
+                <span class="text-xs font-base text-gray-500">Closing Balance :</span> PKR {{number_format($customer_previous_credit) ?? '-'}}
+
+            </dd>
+        </div>
+        <div class="mb-3 p-2 bg-white shadow rounded-lg overflow-hidden">
+            <dt class="text-sm font-medium text-gray-500 truncate">
+                Patient Name
+            </dt>
+            <dd class="mt-1 text-xl font-medium text-gray-900">
+                {{ $patient_name ?? 'Walk-in' }}
+            </dd>
+        </div>
+        <div class="mb-3 p-2 bg-white shadow rounded-lg overflow-hidden">
+            <dt class="text-sm font-medium text-gray-500 truncate">
+                Referred by
+            </dt>
+            <dd class="mt-1 text-xl font-medium text-gray-900">
+                {{ $referred_by_name ?? '-' }}
+            </dd>
+        </div>
+        <div class="mb-3 p-2 bg-white shadow rounded-lg overflow-hidden">
+            <dt class="text-sm font-medium text-gray-500 truncate">
+                Date
+            </dt>
+            <dd class="mt-1 text-xl font-medium text-gray-900">
+                {{ date('d M, Y') }}
+            </dd>
+        </div>
+        <div class="mb-3 p-2 bg-white shadow rounded-lg overflow-hidden">
+            <dt class="text-sm font-medium text-gray-500 truncate">
+                Sale By
+            </dt>
+            <dd class="mt-1 text-xl font-medium text-gray-900">
+                {{ Auth::user()->name }}
+            </dd>
+        </div>
+    </main>
+
+    <main class="col-span-10">
         @if(!empty($success))
             <div class="rounded-md mb-5 bg-green-50 p-4">
                 <div class="flex">
@@ -421,10 +467,10 @@
                 @if($admission==false)
                     <tr>
                         <th scope="col" colspan="4"
-                            class="w-7 px-2   border-r py-2 @if($credit==true) bg-red-50 @endif text-xl font-medium text-gray-500  tracking-wider">
+                            class="w-7 px-2 text-left border-r py-2 @if($credit==true) bg-red-50 @endif text-xl font-medium text-gray-500  tracking-wider">
                             <input id="credit" wire:model="credit" type="checkbox"
                                    class="focus:ring-red-500 h-4 w-4 text-red-600 border-red-300 rounded">
-                            <label for="credit" class="text-red-500">Credit</label>
+                            <label for="credit" class="text-red-500 text-sm">On Credit</label>
                             <div class="ml-3 float-right">
                                 <span class=""> Received Amount (F4)</span>
                             </div>
@@ -432,7 +478,7 @@
                         <th scope="col" colspan="2"
                             class="w-10   px-2 py-2 @if($credit==true) bg-red-50 @endif  border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
                             <input type="number" wire:model.debounce.300ms="received" onClick="this.select();"
-                                   id="received" @if($credit==true) disabled @endif
+                                   id="received"
                                    wire:keydown.enter="saleComplete"
                                    class="p-0 focus:ring-0 block w-full @if($credit==true) bg-red-50 @endif  text-xl border-0 font-medium text-gray-500 text-center "
                                    autocomplete="off">
@@ -447,7 +493,12 @@
 
                         <th scope="col" colspan="{{ $admission==true? '2' : '5' }}"
                             class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
-                            Change
+                            @if($credit==true && $received < collect($this->sales)->sum('total_after_disc'))
+                                On Account
+                            @else
+                                Change
+                            @endif
+
                         </th>
                         <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
                             class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">

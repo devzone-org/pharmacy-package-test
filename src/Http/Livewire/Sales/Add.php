@@ -58,6 +58,8 @@ class Add extends Component
 
     public $customer_name_credit;
     public $customer_id_credit;
+    public $customer_credit_limit;
+    public $customer_previous_credit;
 
     public $doctors = [];
     public $add_modal = false;
@@ -78,6 +80,7 @@ class Add extends Component
     public $patient_referred_by;
     public $patient_age;
     public $has_contact = true;
+
 
     protected $listeners = ['openSearch', 'searchReferredBy', 'searchPatient', 'searchCustomer', 'emitCustomerIdCredit', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
 
@@ -188,6 +191,14 @@ class Add extends Component
         $this->customer_id_credit = $data['id'];
         $this->customer_name_credit = $data['name'];
         $this->searchableReset();
+        $customer_account = Customer::find($this->customer_id_credit);
+        $this->customer_credit_limit=$customer_account->credit_limit;
+        $previous_credit = Ledger::where('account_id', $customer_account->account_id)
+            ->groupBy('account_id')
+            ->select(DB::raw('sum(debit-credit) as balance'))
+            ->first();
+        $this->customer_previous_credit=!empty($previous_credit) ? $previous_credit->balance : 0;
+
     }
 
     public function emitPatientId()
@@ -300,6 +311,9 @@ class Add extends Component
 
     public function updatedReceived($value)
     {
+        if ($value < 0) {
+            $this->received = 0;
+        }
         if (empty($value) || !is_numeric($value)) {
             $value = 0;
         }
@@ -311,18 +325,20 @@ class Add extends Component
         unset($this->sales[$key]);
     }
 
+    public function updatedCredit($val)
+    {
+        if ($val == true) {
+            if (empty($this->customer_id_credit)) {
+                $this->searchableOpenModal('customer_id_credit', 'customer_name_credit', 'customer');
+            }
+        }
+    }
+
     public function saleComplete()
     {
-        $this->resetErrorBag();
-        $this->reset('success');
         try {
             DB::beginTransaction();
-            if (empty($this->sales)) {
-                throw new \Exception('Invoice is empty.');
-            }
-            if (empty(Auth::user()->account_id)) {
-                throw new \Exception('Cash in Hand - ' . Auth::user()->name . ' not found.');
-            }
+
             if (empty($this->credit)) {
                 if (empty($this->received) && $this->admission == false) {
                     throw new \Exception('Please enter received amount.');
@@ -331,40 +347,44 @@ class Add extends Component
                     throw new \Exception('Received amount should be greater than PKR ' . collect($this->sales)->sum('total_after_disc') . "/-");
                 }
             } else {
-                if (empty($this->customer_id_credit)) {
-                    throw new \Exception('Please select customer to credit amount.');
-                }
+                if ($this->received < collect($this->sales)->sum('total_after_disc')) {
+                    if (empty($this->customer_id_credit)) {
+                        throw new \Exception('Please select customer to credit amount.');
+                    }
+                    $customer_account = Customer::join('chart_of_accounts as coa', 'coa.id', '=', 'customers.account_id')
+                        ->where('customers.id', $this->customer_id_credit)
+                        ->select('coa.name', 'customers.*')
+                        ->first();
+                    $previous_credit = Ledger::where('account_id', $customer_account->account_id)
+                        ->groupBy('account_id')
+                        ->select(DB::raw('sum(debit-credit) as balance'))
+                        ->first();
+                    $previous_balance = !empty($previous_credit) ? $previous_credit->balance : 0;
+                    if ($this->received < collect($this->sales)->sum('total_after_disc')) {
+                        if ((collect($this->sales)->sum('total_after_disc') - $this->received) + $previous_balance > $customer_account->credit_limit) {
+                            throw new \Exception('Amount exceeding customer credit limit (PKR ' . number_format($customer_account->credit_limit) . ')');
+                        }
+                        $user_limit = UserLimit::where('user_id', Auth::id())
+                            ->where('date', date('Y-m-d'))
+                            ->first();
+                        $balance = !empty($user_limit) ? $user_limit->balance : 0;
 
-                $customer_account = Customer::join('chart_of_accounts as coa', 'coa.id', '=', 'customers.account_id')
-                    ->where('customers.id', $this->customer_id_credit)
-                    ->select('coa.name', 'customers.*')
-                    ->first();
-                $previous_credit = Ledger::where('account_id', $customer_account->account_id)
-                    ->groupBy('account_id')
-                    ->select(DB::raw('sum(debit-credit) as balance'))
-                    ->first();
-                $previous_balance=!empty($previous_credit) ? $previous_credit->balance : 0;
-                if (collect($this->sales)->sum('total_after_disc') + $previous_balance > $customer_account->credit_limit) {
-                    throw new \Exception('Amount exceeding customer credit limit (PKR ' . number_format($customer_account->credit_limit) . ')');
-                }
-                $user_limit = UserLimit::where('user_id', Auth::id())
-                    ->where('date', date('Y-m-d'))
-                    ->first();
-                $balance = !empty($user_limit) ? $user_limit->balance : 0;
-
-                if (collect($this->sales)->sum('total_after_disc') + $balance > Auth::user()->credit_limit) {
-                    throw new \Exception('Amount exceeding User credit limit (PKR ' . number_format(Auth::user()->credit_limit) . ')');
-                }
-                if (!empty($user_limit)) {
-                    UserLimit::where('id', $user_limit->id)->update([
-                        'balance' => DB::raw('balance +'.collect($this->sales)->sum('total_after_disc'))
-                    ]);
-                } else {
-                    UserLimit::create([
-                        'user_id'=>Auth::id(),
-                        'date'=>date('Y-m-d'),
-                        'balance'=>collect($this->sales)->sum('total_after_disc')
-                    ]);
+                        if (collect($this->sales)->sum('total_after_disc') + $balance > Auth::user()->credit_limit) {
+                            throw new \Exception('Amount exceeding User credit limit (PKR ' . number_format(Auth::user()->credit_limit) . ')');
+                        }
+                        $credit_amount = collect($this->sales)->sum('total_after_disc') - $this->received;
+                        if (!empty($user_limit)) {
+                            UserLimit::where('id', $user_limit->id)->update([
+                                'balance' => DB::raw('balance +' . $credit_amount)
+                            ]);
+                        } else {
+                            UserLimit::create([
+                                'user_id' => Auth::id(),
+                                'date' => date('Y-m-d'),
+                                'balance' => $credit_amount
+                            ]);
+                        }
+                    }
                 }
             }
 
@@ -381,14 +401,15 @@ class Add extends Component
                 'sale_at' => date('Y-m-d H:i:s'),
                 'remarks' => $this->remarks,
                 'receive_amount' => $this->received,
-                'payable_amount' => $this->payable,
+                'payable_amount' => !empty($this->credit) && $this->received < collect($this->sales)->sum('total_after_disc') ? 0 : $this->payable,
                 'sub_total' => collect($this->sales)->sum('total'),
                 'gross_total' => collect($this->sales)->sum('total_after_disc'),
                 'admission_id' => $this->admission_id ?? null,
                 'procedure_id' => $this->procedure_id ?? null,
                 'receipt_no' => $sale_receipt_no,
                 'customer_id' => $this->customer_id_credit ?? null,
-                'is_credit' => empty($this->credit) ? 'f' : 't'
+                'is_credit' => !empty($this->credit) && $this->received < collect($this->sales)->sum('total_after_disc') ? 't' : 'f',
+                'is_paid' => !empty($this->credit) && $this->received < collect($this->sales)->sum('total_after_disc') ? 'f' : 't',
             ])->id;
 
 
@@ -491,14 +512,13 @@ class Add extends Component
             }
 
             if ($this->admission == false) {
-                if (empty($this->credit)) {
-                    GeneralJournal::instance()->account(Auth::user()->account_id)->debit($amounts['sale'])->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
-                } else {
-
+                if (!empty($this->credit) && $this->received < collect($this->sales)->sum('total_after_disc')) {
                     $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} sold to Patient {$customer_name}. {$customer_account->name} Account debited with PKR " .
                         number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name . " at " . date('h:i A');
                     GeneralJournal::instance()->account($customer_account->account_id)->debit($amounts['sale'])->voucherNo($vno)
+                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                } else {
+                    GeneralJournal::instance()->account(Auth::user()->account_id)->debit($amounts['sale'])->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                 }
 
