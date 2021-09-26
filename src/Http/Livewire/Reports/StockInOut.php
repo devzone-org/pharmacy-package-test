@@ -72,6 +72,9 @@ class StockInOut extends Component
             ->get();
         $previous=InventoryLedger::whereDate('created_at','<',$this->from)
             ->groupBy('product_id')
+            ->when(!empty($this->product_id), function ($q) {
+                return $q->where('product_id', $this->product_id);
+            })
             ->select('product_id',DB::raw('sum(decrease) as decrease'),DB::raw('sum(increase) as increase'))
             ->get();
 
@@ -117,7 +120,7 @@ class StockInOut extends Component
         } elseif ($val == 'yesterday') {
             $this->date_range = false;
             $this->from = date('Y-m-d', strtotime('-1 days'));
-            $this->to = date('Y-m-d', strtotime('-1 days'));
+            $this->to = date('Y-m-d');
             $this->search();
         } elseif ($val == 'today') {
             $this->date_range = false;
