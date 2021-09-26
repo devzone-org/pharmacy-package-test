@@ -69,7 +69,7 @@
                                wire:click="searchableOpenModal('customer_id', 'customer_name', 'customer')" readonly
                                type="text" autocomplete="off"
                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                              >
+                        >
                     </div>
 
 
@@ -106,82 +106,64 @@
                 <thead class="bg-white">
                 <tr>
                     <th scope="col" colspan="9" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                        <i>Un Paid Purchase Orders</i>
+                        <i>Un Paid Invoices</i>
                     </th>
                 </tr>
                 <tr class="bg-gray-50">
-
-                    <th scope="col" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-
+                    <th scope="col" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500">
                     </th>
-
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
                         #
                     </th>
-
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                        PO #
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
+                        Receipt #
                     </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                        Supplier Invoice
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
+                        Invoice #
                     </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                        GRN #
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
+                        Patient
                     </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                        Delivery Date
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
+                        Date
                     </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
                         Amount
                     </th>
-
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                        Tax
-                    </th>
-
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                        Gross Amount
-                    </th>
-
                 </tr>
                 </thead>
                 <tbody class="   bg-white ">
-
+                @foreach($payments as $key=>$p)
                     <tr>
                         <td class="px-3 py-3   text-sm font-medium text-gray-500">
-
-                            <input
-                                  wire:model="selected_orders" type="checkbox"
+                            <input wire:model="payments.{{$key}}.selected" type="checkbox"
                                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
                         </td>
-                        <td class="px-3 py-3   text-sm font-medium text-gray-500">
+                        <td class="px-3 py-3 text-sm font-medium text-gray-500">
+                            {{$loop->iteration}}
                         </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
+                        <td class="px-3 py-3 text-sm text-gray-500">
+                            {{$p['id']}}
                         </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
+                        <td class="px-3 py-3 text-sm text-gray-500">
+                            {{$p['receipt_no']}}
                         </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
+                        <td class="px-3 py-3 text-sm text-gray-500">
+                            {{$p['patient']}}
                         </td>
-
-                        <td class="px-3 py-3   text-sm text-gray-500">
+                        <td class="px-3 py-3 text-sm text-gray-500">
+                            {{date('d M Y h:i A',strtotime($p['sale_at']))}}
                         </td>
-
-
-                        <td class="px-3 py-3    text-sm text-gray-500">
+                        <td class="px-3 py-3 text-sm text-gray-500">
+                            {{number_format($p['gross_total'],2)}}
                         </td>
-                        <td class="px-3 py-3    text-sm text-gray-500">
-                        </td>
-                        <td class="px-3 py-3    text-sm text-gray-500">
-                        </td>
-
-
                     </tr>
-
+                @endforeach
                 <tr>
-                    <th colspan="9">&nbsp;</th>
+                    <th colspan="7">&nbsp;</th>
                 </tr>
                 <tr>
-                    <th scope="col" colspan="8" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
                         Selected Orders
                     </th>
                     <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
@@ -189,7 +171,7 @@
                     </th>
                 </tr>
                 <tr>
-                    <th scope="col" colspan="8" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
                         (Payable Amount)
                     </th>
                     <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
@@ -198,7 +180,7 @@
                     </th>
                 </tr>
                 <tr>
-                    <th scope="col" colspan="8" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
                         Selected Returns
                     </th>
                     <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
@@ -206,17 +188,15 @@
                     </th>
                 </tr>
                 <tr>
-                    <th scope="col" colspan="8" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
                         Receivable Amount
                     </th>
                     <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
 
                     </th>
                 </tr>
-
-
                 <tr>
-                    <th scope="col" colspan="8" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
                         (Net Payable) / Receivable
                     </th>
                     <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
@@ -224,7 +204,7 @@
                     </th>
                 </tr>
                 <tr>
-                    <th colspan="9">&nbsp;</th>
+                    <th colspan="7">&nbsp;</th>
                 </tr>
                 </tbody>
             </table>
