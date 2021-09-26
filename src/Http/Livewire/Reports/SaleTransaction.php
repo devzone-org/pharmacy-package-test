@@ -75,6 +75,7 @@ class SaleTransaction extends Component
                 DB::raw('sum(sd.supply_price*sr.refund_qty) as return_cos')
             )
             ->groupBy('sr.sale_detail_id')->get();
+
         foreach ($this->report as $key => $rep) {
             if ($sale_return->isNotEmpty()) {
                 $this->report[$key]['sale_return'] = $sale_return->where('sale_id', $rep['id'])->sum('return_total');
