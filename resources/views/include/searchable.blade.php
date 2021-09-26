@@ -91,6 +91,12 @@
                 @else
                     <p class="text-center text-sm text-gray-600 mb-3">Loading...</p>
                 @endif
+                @if(!isset($this->hide_add_patient_searchable))
+                    @if($searchable_type=='patient')
+                        <p class="text-indigo-600 pt-0 p-3 font-bold cursor-pointer inline-block float-right"
+                           wire:click="openAddModel">+ Add New Patient</p>
+                    @endif
+                @endif
             </div>
         </div>
     </div>

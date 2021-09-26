@@ -40,6 +40,27 @@ Route::get('master-data/suppliers/edit/{id}', function ($id) {
     return view('pharmacy::master_data.supplier-edit', compact('id'));
 });
 
+Route::get('master-data/customers/add', function () {
+    return view('pharmacy::master_data.customer-add');
+});
+Route::get('master-data/customers/edit/{id}', function ($id) {
+    return view('pharmacy::master_data.customer-edit',compact('id'));
+});
+Route::get('master-data/customers', function () {
+    return view('pharmacy::master_data.customers-list');
+});
+Route::get('master-data/user-credit-limits', function () {
+    return view('pharmacy::master_data.user-credit-limits');
+});
+
+Route::get('customer/payments', function () {
+    return view('pharmacy::payments.customer.customer-payments');
+});
+Route::get('customer/payments/add', function () {
+    return view('pharmacy::payments.customer.add');
+});
+
+
 Route::get('purchases', function () {
     return view('pharmacy::purchases.purchase-list');
 });
@@ -162,6 +183,7 @@ Route::get('report/inventory-ledger', function () {
 });
 
 Route::get('print/sale/{id}', [PrintController::class, 'print']);
+ 
 
 Route::get('update-retail',function (){
 
@@ -173,6 +195,7 @@ Route::get('update-retail',function (){
     }
 });
 Route::get('opening-stock', function (){
+ 
     \Devzone\Pharmacy\Models\InventoryLedger::truncate();
     $inventory=\Devzone\Pharmacy\Models\ProductInventory::groupBy('product_id')
         ->select('product_id',\Illuminate\Support\Facades\DB::raw('sum(qty) as qty'))
