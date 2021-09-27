@@ -317,7 +317,7 @@
 
 
         <div class="bg-white p-3 border-t rounded-b-md  ">
-
+            {{$payments->links()}}
         </div>
 
     </div>

@@ -59,6 +59,9 @@ Route::get('customer/payments', function () {
 Route::get('customer/payments/add', function () {
     return view('pharmacy::payments.customer.add');
 });
+Route::get('customer/payments/view/{id}', function ($id) {
+    return view('pharmacy::payments.customer.view',compact('id'));
+});
 
 
 Route::get('purchases', function () {

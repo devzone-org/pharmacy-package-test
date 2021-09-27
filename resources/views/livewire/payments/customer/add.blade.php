@@ -21,9 +21,7 @@
             <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
                 <div>
                     <h3 class="text-lg leading-6 font-medium text-gray-900">Add Customer Payment</h3>
-
                 </div>
-
                 @include('pharmacy::include.errors')
                 @if(!empty($success))
                     <div class="rounded-md bg-green-50 p-4">
@@ -68,26 +66,23 @@
                         <input wire:model.defer="customer_name"
                                wire:click="searchableOpenModal('customer_id', 'customer_name', 'customer')" readonly
                                type="text" autocomplete="off"
-                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        >
+                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
 
 
                     <div class="col-span-6 sm:col-span-2">
                         <label for="closing_balance" class="block text-sm font-medium text-gray-700">Closing
                             Balance</label>
-                        <input value="" readonly
+                        <input value="" readonly wire:model="closing_balance"
                                type="text" autocomplete="off"
-                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                               id="closing_balance">
+                               class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
 
 
                     <div class="col-span-6 sm:col-span-2">
-                        <label for="payment_date" class="block text-sm font-medium text-gray-700">Payment Date</label>
-                        <input wire:model.defer="payment_date" type="date" autocomplete="off"
-                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                               id="payment_date">
+                        <label for="payment_date" class="block text-sm font-medium text-gray-700">Receiving Date</label>
+                        <input wire:model.defer="receiving_date" type="date" autocomplete="off"
+                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
 
 
@@ -122,13 +117,19 @@
                         Invoice #
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
-                        Patient
+                        Cash
+                    </th>
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
+                        On Account
+                    </th>
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
+                        Refund
+                    </th>
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
+                        Total Receivable
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
                         Date
-                    </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
-                        Amount
                     </th>
                 </tr>
                 </thead>
@@ -149,62 +150,43 @@
                             {{$p['receipt_no']}}
                         </td>
                         <td class="px-3 py-3 text-sm text-gray-500">
-                            {{$p['patient']}}
+                            {{number_format($p['receive_amount'],2)}}
+                        </td>
+                        <td class="px-3 py-3 text-sm text-gray-500">
+                            {{number_format($p['gross_total']-$p['receive_amount'],2)}}
+                        </td>
+                        <td class="px-3 py-3 text-sm text-gray-500">
+                            -
+                        </td>
+                        <td class="px-3 py-3 text-sm text-gray-500">
+                            {{number_format($p['gross_total']-$p['receive_amount'],2)}}
                         </td>
                         <td class="px-3 py-3 text-sm text-gray-500">
                             {{date('d M Y h:i A',strtotime($p['sale_at']))}}
                         </td>
-                        <td class="px-3 py-3 text-sm text-gray-500">
-                            {{number_format($p['gross_total'],2)}}
-                        </td>
                     </tr>
                 @endforeach
                 <tr>
-                    <th colspan="7">&nbsp;</th>
+                    <th colspan="9">&nbsp;</th>
                 </tr>
                 <tr>
-                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
-                        Selected Orders
+                    <th scope="col" colspan="8" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                        Selected Receipt
                     </th>
                     <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
-
+                        {{collect($this->payments)->where('selected',true)->count()}}
                     </th>
                 </tr>
                 <tr>
-                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
-                        (Payable Amount)
-                    </th>
-                    <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
-
-
-                    </th>
-                </tr>
-                <tr>
-                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
-                        Selected Returns
-                    </th>
-                    <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
-
-                    </th>
-                </tr>
-                <tr>
-                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="8" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
                         Receivable Amount
                     </th>
                     <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
-
+                        {{collect($this->payments)->where('selected',true)->sum('gross_total')-collect($this->payments)->where('selected',true)->sum('receive_amount')}}
                     </th>
                 </tr>
                 <tr>
-                    <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
-                        (Net Payable) / Receivable
-                    </th>
-                    <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
-
-                    </th>
-                </tr>
-                <tr>
-                    <th colspan="7">&nbsp;</th>
+                    <th colspan="9">&nbsp;</th>
                 </tr>
                 </tbody>
             </table>
