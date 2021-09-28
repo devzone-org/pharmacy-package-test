@@ -23,8 +23,10 @@ class View extends Component
             ->select(
                 'c.name as customer_name','coa.name as account_name','us.name as added_by','a.name as approved_by',
                 'cp.id', 'cp.description',  'cp.receiving_date',
-                DB::raw('(s.gross_total - s.receive_amount) as total_receivable'),
+//                DB::raw('(s.gross_total - s.receive_amount) as total_receivable'),
+                's.id as receipt_no','s.gross_total','s.receive_amount','s.sale_at','s.receipt_no as invoice_no',
                 'cp.created_at', 'cp.approved_at', 'cpd.sale_id')
+
             ->get()->toArray();
     }
     public function render(){

@@ -115,6 +115,7 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('payments.customer.payment-list', \Devzone\Pharmacy\Http\Livewire\Payments\Customer\PaymentList::class);
         Livewire::component('payments.customer.add', \Devzone\Pharmacy\Http\Livewire\Payments\Customer\Add::class);
         Livewire::component('payments.customer.view', \Devzone\Pharmacy\Http\Livewire\Payments\Customer\View::class);
+        Livewire::component('payments.customer.edit', \Devzone\Pharmacy\Http\Livewire\Payments\Customer\Edit::class);
 
         Livewire::component('purchases.purchase-list', PurchaseList::class);
         Livewire::component('purchases.purchase-add', PurchaseAdd::class);

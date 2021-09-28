@@ -8,13 +8,16 @@ use App\Models\SaleRefundDetail;
 use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount;
+use Devzone\Ams\Models\Ledger;
 use Devzone\Pharmacy\Http\Traits\Searchable;
+use Devzone\Pharmacy\Models\Customer;
 use Devzone\Pharmacy\Models\InventoryLedger;
 use Devzone\Pharmacy\Models\ProductInventory;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Sale\SaleDetail;
 use Devzone\Pharmacy\Models\Sale\SaleIssuance;
 use Devzone\Pharmacy\Models\Sale\SaleRefund;
+use Devzone\Pharmacy\Models\UserLimit;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -47,6 +50,10 @@ class Refund extends Component
     public $admission_details = [];
     public $hospital_info = [];
     public $handed_over;
+    public $credit;
+    public $is_credited;
+    public $customer_id;
+    public $customer_name;
     protected $listeners = ['openSearch', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
 
     public function mount($primary_id, $type)
@@ -60,21 +67,24 @@ class Refund extends Component
             ->leftJoin('patients as p', 'p.id', '=', 's.patient_id')
             ->join('products as pr', 'pr.id', '=', 'sd.product_id')
             ->leftJoin('procedures as pro', 'pro.id', '=', 's.procedure_id')
+            ->leftJoin('customers as cus', 'cus.id', '=', 's.customer_id')
             ->where('s.id', $this->sale_id)
             ->select('sd.*', DB::raw('sum(sd.qty) as qty'), 'pr.name as item', 's.remarks', 's.receive_amount', 's.payable_amount', 's.sub_total', 's.gross_total'
-                , 's.patient_id', 's.referred_by', 's.admission_id', 's.procedure_id', 'e.name as referred_by_name', 'p.mr_no', 'p.name as patient_name',
-                'pro.name as procedure_name')
+                , 's.patient_id', 's.referred_by', 's.admission_id', 's.procedure_id', 's.customer_id', 's.is_credit', 'e.name as referred_by_name', 'p.mr_no', 'p.name as patient_name',
+                'pro.name as procedure_name', 'cus.name as customer_name')
             ->groupBy('sd.id')
             ->orderBy('sd.product_id')
             ->get()
             ->toArray();
 
         $first = collect($this->old_sales)->first();
+
         $this->admission_id = $first['admission_id'];
         $this->procedure_id = $first['procedure_id'];
+        $this->customer_id = $first['customer_id'];
+        $this->is_credited = $first['is_credit'];
         $this->hospital_info = \App\Models\Hospital\Hospital::first()->toArray();
         if (!empty($this->admission_id) && !empty($this->procedure_id)) {
-
             $this->admission_details = \App\Models\Hospital\Admission::from('admissions as a')
                 ->join('patients as p', 'p.id', '=', 'a.patient_id')
                 ->leftJoin('employees as e', 'e.id', '=', 'a.doctor_id')
@@ -204,7 +214,6 @@ class Refund extends Component
 
             }
         }
-
     }
 
 
@@ -306,24 +315,64 @@ class Refund extends Component
             $new_sub_total = collect($this->sales)->sum('total');
             $new_total_after_disc = collect($this->sales)->sum('total_after_disc');
             $total_refund = collect($this->refunds)->sum('total_after_disc') - collect($this->refunds)->where('restrict', true)->sum('total_after_disc');
-            if($dif>0){
-                if ($this->received==''){
-                    throw new \Exception('Please Enter Received Amount');
+            if ($dif > 0) {
+                if (!empty($this->credit) && $this->received < collect($this->sales)->sum('total_after_disc')){
+                    if (empty($this->customer_id)) {
+                        throw new \Exception('Please select customer to credit amount.');
+                    }
+                    $customer_account = Customer::join('chart_of_accounts as coa', 'coa.id', '=', 'customers.account_id')
+                        ->where('customers.id', $this->customer_id)
+                        ->select('coa.name', 'customers.*')
+                        ->first();
+                    $previous_credit = Ledger::where('account_id', $customer_account->account_id)
+                        ->groupBy('account_id')
+                        ->select(DB::raw('sum(debit-credit) as balance'))
+                        ->first();
+                    $previous_balance = !empty($previous_credit) ? $previous_credit->balance : 0;
+                    if ($this->received < collect($this->sales)->sum('total_after_disc')) {
+                        if ((collect($this->sales)->sum('total_after_disc') - $this->received) + $previous_balance > $customer_account->credit_limit) {
+                            throw new \Exception('Amount exceeding customer credit limit (PKR ' . number_format($customer_account->credit_limit) . ')');
+                        }
+                        $user_limit = UserLimit::where('user_id', Auth::id())
+                            ->where('date', date('Y-m-d'))
+                            ->first();
+                        $balance = !empty($user_limit) ? $user_limit->balance : 0;
+
+                        if (collect($this->sales)->sum('total_after_disc') + $balance > Auth::user()->credit_limit) {
+                            throw new \Exception('Amount exceeding User credit limit (PKR ' . number_format(Auth::user()->credit_limit) . ')');
+                        }
+                        $credit_amount = collect($this->sales)->sum('total_after_disc') - $this->received;
+                        if (!empty($user_limit)) {
+                            UserLimit::where('id', $user_limit->id)->update([
+                                'balance' => DB::raw('balance +' . $credit_amount)
+                            ]);
+                        } else {
+                            UserLimit::create([
+                                'user_id' => Auth::id(),
+                                'date' => date('Y-m-d'),
+                                'balance' => $credit_amount
+                            ]);
+                        }
+                    }
+                }else{
+                    if ($this->received == '') {
+                        throw new \Exception('Please Enter Received Amount');
+                    }
+                    if ($this->received < $dif) {
+                        throw new \Exception('Received Amount is Not Valid');
+                    }
                 }
-                if ($this->received<$dif){
-                    throw new \Exception('Received Amount is Not Valid');
-                }
-                $change_due=$this->received !='' ? $this->received-$dif : 0;
-            }else{
-                if ($this->received==''){
+
+                $change_due = $this->received != '' ? $this->received - $dif : 0;
+            } else {
+                if ($this->received == '' && empty($this->credit)) {
                     throw new \Exception('Please Enter Paid Amount');
                 }
-                if ($this->received!=abs($dif)){
+                if ($this->received != abs($dif) && empty($this->credit)) {
                     throw new \Exception('Paid Amount is Not Valid');
                 }
-                $change_due=0;
+                $change_due = 0;
             }
-//            dd($dif,$new_sub_total,$new_total_after_disc,$total_refund,$this->received,$change_due);
             $newSale = $sale->replicate();
             $newSale->created_at = Carbon::now();
             $newSale->sale_at = date('Y-m-d H:i:s');
@@ -333,7 +382,7 @@ class Refund extends Component
             $newSale->gross_total = $new_total_after_disc;
             $newSale->receive_amount = $this->received;
             $newSale->payable_amount = $change_due;
-            $newSale->is_refund='f';
+            $newSale->is_refund = 'f';
             $newSale->receipt_no = $sale_receipt_no;
             $newSale->save();
             foreach ($this->refunds as $r) {
@@ -393,7 +442,7 @@ class Refund extends Component
             }
             if ($refund) {
                 Sale::find($this->sale_id)->update([
-                    'is_refund' => 't'
+                    'is_refund' => 't',
                 ]);
             }
             if (!empty($this->sales)) {
@@ -494,14 +543,36 @@ class Refund extends Component
             }
             $vno = Voucher::instance()->voucher()->get();
             $accounts = ChartOfAccount::whereIn('reference', ['cost-of-sales-pharmacy-5', 'income-pharmacy-5', 'income-return-pharmacy-5', 'pharmacy-inventory-5'])->get();
-
+            $customer = Customer::find($this->customer_id);
             $dif = $refund_retail - $sales_retail;
             if ($dif > 0) {
-                GeneralJournal::instance()->account($cash_acount)->credit(abs($dif))->voucherNo($vno)
-                    ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                if ($this->is_credited == 't' || !empty($this->credit)) {
+                    GeneralJournal::instance()->account($customer->account_id)->credit(abs($dif))->voucherNo($vno)
+                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                } else {
+                    GeneralJournal::instance()->account($cash_acount)->credit(abs($dif))->voucherNo($vno)
+                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                }
+
             } else {
-                GeneralJournal::instance()->account($cash_acount)->debit(abs($dif))->voucherNo($vno)
-                    ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                if ($this->is_credited == 't' || !empty($this->credit)) {
+//                    $customer_balance = Ledger::from('ledgers as l')
+//                        ->where('l.account_id', '=', $customer->account_id)
+//                        ->where('l.is_approve', 't')
+//                        ->select(DB::raw('sum(l.debit - l.credit) as closing'))->first();
+//                    $closing_balance = !empty($customer_balance) ? $customer_balance->closing : 0;
+//                    if ($closing_balance >= $dif){
+                        GeneralJournal::instance()->account($customer->account_id)->debit(abs($dif))->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+//                    }
+//                    else {
+//                        GeneralJournal::instance()->account($cash_acount)->debit(abs($dif))->voucherNo($vno)
+//                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+//                    }
+                } else {
+                    GeneralJournal::instance()->account($cash_acount)->debit(abs($dif))->voucherNo($vno)
+                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                }
             }
             foreach ($accounts as $a) {
                 if ($sales_retail > 0) {

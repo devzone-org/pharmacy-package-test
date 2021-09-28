@@ -104,166 +104,107 @@
                 </div>
             </dl>
         </div>
-{{--        <table class="min-w-full divide-y divide-gray-200 rounded-md ">--}}
-{{--            <thead  class="bg-white">--}}
-{{--            <tr  >--}}
-{{--                <th scope="col" colspan="6" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">--}}
-{{--                    <i>Receipt</i>--}}
-{{--                </th>--}}
-{{--            </tr>--}}
-{{--            <tr  class="bg-gray-50">--}}
-{{--                --}}
-{{--                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">--}}
-{{--                    #--}}
-{{--                </th>--}}
+        <table class="min-w-full divide-y divide-gray-200 rounded-md ">
+            <thead class="bg-white">
+            <tr>
+                <th scope="col" colspan="8" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <i>Receipts</i>
+                </th>
+            </tr>
+            <tr class="bg-gray-50">
 
-{{--                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">--}}
-{{--                    PO #--}}
-{{--                </th>--}}
-{{--                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">--}}
-{{--                    Supplier Invoice--}}
-{{--                </th>--}}
-{{--                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">--}}
-{{--                    GRN #--}}
-{{--                </th>--}}
-{{--                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">--}}
-{{--                    Delivery Date--}}
-{{--                </th>--}}
-{{--                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">--}}
-{{--                    Amount--}}
-{{--                </th>--}}
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    #
+                </th>
 
-{{--            </tr>--}}
-{{--            </thead>--}}
-{{--            <tbody class="   bg-white ">--}}
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    Receipt #
+                </th>
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    Invoice #
+                </th>
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    Cash
+                </th>
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    on Account
+                </th>
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                    Refund
+                </th>
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                    Total Receivable
+                </th>
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                    Date
+                </th>
 
-{{--            @foreach($purchase_orders as $key => $m)--}}
-{{--                <tr>--}}
+            </tr>
+            </thead>
+            <tbody class="bg-white">
 
-{{--                    <td class="px-3 py-3   text-sm font-medium text-gray-500">--}}
-{{--                        {{ $loop->iteration }}--}}
-{{--                    </td>--}}
-{{--                    <td class="px-3 py-3   text-sm text-gray-500">--}}
-{{--                        {{ $m['id'] }}--}}
-{{--                    </td>--}}
-{{--                    <td class="px-3 py-3   text-sm text-gray-500">--}}
-{{--                        {{ $m['supplier_invoice'] }}--}}
-{{--                    </td>--}}
-{{--                    <td class="px-3 py-3   text-sm text-gray-500">--}}
-{{--                        {{ $m['grn_no'] }}--}}
-{{--                    </td>--}}
+            @foreach($payments as $key => $p)
+                <tr>
 
-{{--                    <td class="px-3 py-3   text-sm text-gray-500">--}}
-{{--                        @if(!empty($m['delivery_date']))--}}
-{{--                            {{ date('d M Y',strtotime($m['delivery_date'])) }}--}}
-{{--                        @endif--}}
-{{--                    </td>--}}
+                    <td class="px-3 py-3   text-sm font-medium text-gray-500">
+                        {{ $loop->iteration }}
+                    </td>
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        {{ $p['receipt_no'] }}
+                    </td>
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        {{ $p['invoice_no'] }}
+                    </td>
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        {{ $p['receive_amount'] }}
+                    </td>
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        {{ $p['gross_total']-$p['receive_amount'] }}
+                    </td>
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        -
+                    </td>
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        {{$p['gross_total']-$p['receive_amount']}}
+                    </td>
 
-
-{{--                    <td class="px-3 py-3    text-sm text-gray-500">--}}
-{{--                        {{ number_format($m['total_cost'],2) }}--}}
-{{--                    </td>--}}
-
-
-{{--                </tr>--}}
-{{--            @endforeach--}}
-
-{{--            <tr   class="bg-white">--}}
-{{--                <th scope="col" colspan="6" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">--}}
-{{--                    &nbsp;--}}
-{{--                </th>--}}
-{{--            </tr>--}}
-
-{{--            <tr  class="bg-white">--}}
-{{--                <th scope="col" colspan="6" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">--}}
-{{--                    <i>Un Adjusted Returns</i>--}}
-{{--                </th>--}}
-{{--            </tr>--}}
-{{--            <tr  class="bg-gray-50">--}}
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        @if(!empty($p['sale_at']))
+                            {{ date('d M Y h:i A',strtotime($p['sale_at'])) }}
+                        @endif
+                    </td>
 
 
-{{--                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">--}}
-{{--                    #--}}
-{{--                </th>--}}
+                </tr>
+            @endforeach
 
-{{--                <th scope="col"  colspan="4" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">--}}
-{{--                    Description--}}
-{{--                </th>--}}
+            <tr class="bg-white">
+                <th scope="col" colspan="8" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    &nbsp;
+                </th>
+            </tr>
+            <tr>
+                <th scope="col" colspan="7" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    Selected Orders
+                </th>
+                <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
+                    {{ collect($payments)->count() }}
+                </th>
+            </tr>
 
-{{--                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">--}}
-{{--                    Amount--}}
-{{--                </th>--}}
-
-{{--            </tr>--}}
-{{--            @foreach($returns as $key => $m)--}}
-{{--                <tr >--}}
-
-{{--                    <td class="px-3 py-3   text-sm font-medium text-gray-500">--}}
-{{--                        {{ $loop->iteration }}--}}
-{{--                    </td>--}}
-{{--                    <td  colspan="4" class="px-3 py-3   text-sm text-gray-500">--}}
-{{--                        {{ $m['description'] }}--}}
-{{--                    </td>--}}
-
-
-
-{{--                    <td class="px-3 py-3   text-sm text-gray-500">--}}
-{{--                        {{ number_format($m['total'],2) }}--}}
-{{--                    </td>--}}
-
-
-{{--                </tr>--}}
-{{--            @endforeach--}}
-{{--            <tr>--}}
-{{--                <th colspan="6">&nbsp;</th>--}}
-{{--            </tr>--}}
-{{--            <tr  >--}}
-{{--                <th scope="col" colspan="5" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">--}}
-{{--                    Selected Orders--}}
-{{--                </th>--}}
-{{--                <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">--}}
-{{--                    {{ count($selected_orders) }}--}}
-{{--                </th>--}}
-{{--            </tr>--}}
-{{--            <tr  >--}}
-{{--                <th scope="col" colspan="5" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">--}}
-{{--                    (Payable Amount)--}}
-{{--                </th>--}}
-{{--                <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">--}}
-{{--                    ({{ number_format(collect($purchase_orders)->whereIn('id',$selected_orders)->sum('total_cost'),2) }})--}}
-{{--                </th>--}}
-{{--            </tr>--}}
-{{--            <tr  >--}}
-{{--                <th scope="col" colspan="5" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">--}}
-{{--                    Selected Returns--}}
-{{--                </th>--}}
-{{--                <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">--}}
-{{--                    {{ count($selected_returns) }}--}}
-{{--                </th>--}}
-{{--            </tr>--}}
-{{--            <tr  >--}}
-{{--                <th scope="col" colspan="5" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">--}}
-{{--                    Receivable Amount--}}
-{{--                </th>--}}
-{{--                <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">--}}
-{{--                    {{ number_format(collect($returns)->whereIn('id',$selected_returns)->sum('total'),2) }}--}}
-{{--                </th>--}}
-{{--            </tr>--}}
-
-
-{{--            <tr  >--}}
-{{--                <th scope="col" colspan="5" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">--}}
-{{--                    (Net Payable) / Receivable--}}
-{{--                </th>--}}
-{{--                <th scope="col"  class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">--}}
-{{--                    {{ \Devzone\Ams\Helper\GeneralJournal::numberFormat(-collect($purchase_orders)->whereIn('id',$selected_orders)->sum('total_cost') + collect($returns)->whereIn('id',$selected_returns)->sum('total'),2) }}--}}
-{{--                </th>--}}
-{{--            </tr>--}}
-{{--            <tr>--}}
-{{--                <th colspan="6">&nbsp;</th>--}}
-{{--            </tr>--}}
-{{--            </tbody>--}}
-{{--        </table>--}}
+            <tr>
+                <th scope="col" colspan="7" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    Receivable Amount
+                </th>
+                <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
+                    {{ number_format(collect($payments)->sum('gross_total')-collect($payments)->sum('receive_amount'),2) }}
+                </th>
+            </tr>
+            <tr>
+                <th colspan="8">&nbsp;</th>
+            </tr>
+            </tbody>
+        </table>
     </div>
 
 

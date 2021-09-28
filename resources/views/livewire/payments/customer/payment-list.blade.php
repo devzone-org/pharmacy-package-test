@@ -236,8 +236,6 @@
                                     </svg>
                                 </button>
                             </div>
-
-
                             <div x-show="open"
                                  class="origin-top-right absolute right-0 mt-2 w-56 z-10 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
                                  role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
@@ -250,7 +248,7 @@
                                                 class="text-gray-700 cursor-pointer block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                                 role="menuitem" tabindex="-1">Mark as Approve
                                         </p>
-                                        <a class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                        <a href="{{ url('pharmacy/customer/payments/edit') }}/{{$p->id}}" class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                                 role="menuitem" tabindex="-1">Edit</a>
                                         <p wire:click="removePayment('{{$p->id}}')" class="text-red-700 cursor-pointer block w-full text-left px-4 py-2 text-sm hover:bg-red-200"
                                                 role="menuitem" tabindex="-1">Remove</p>

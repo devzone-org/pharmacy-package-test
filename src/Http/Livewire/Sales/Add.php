@@ -369,7 +369,7 @@ class Add extends Component
                             ->first();
                         $balance = !empty($user_limit) ? $user_limit->balance : 0;
 
-                        if (collect($this->sales)->sum('total_after_disc') + $balance > Auth::user()->credit_limit) {
+                        if ((collect($this->sales)->sum('total_after_disc') - $this->received) + $balance > Auth::user()->credit_limit) {
                             throw new \Exception('Amount exceeding User credit limit (PKR ' . number_format(Auth::user()->credit_limit) . ')');
                         }
                         $credit_amount = collect($this->sales)->sum('total_after_disc') - $this->received;
@@ -394,6 +394,7 @@ class Add extends Component
                 }
             }
             $sale_receipt_no = Voucher::instance()->advances()->get();
+            $total_after_disc=collect($this->sales)->sum('total_after_disc');
             $sale_id = Sale::create([
                 'patient_id' => $this->patient_id,
                 'referred_by' => $this->referred_by_id,
@@ -401,15 +402,17 @@ class Add extends Component
                 'sale_at' => date('Y-m-d H:i:s'),
                 'remarks' => $this->remarks,
                 'receive_amount' => $this->received,
-                'payable_amount' => !empty($this->credit) && $this->received < collect($this->sales)->sum('total_after_disc') ? 0 : $this->payable,
+                'payable_amount' => !empty($this->credit) && $this->received < $total_after_disc ? 0 : $this->payable,
                 'sub_total' => collect($this->sales)->sum('total'),
                 'gross_total' => collect($this->sales)->sum('total_after_disc'),
                 'admission_id' => $this->admission_id ?? null,
                 'procedure_id' => $this->procedure_id ?? null,
                 'receipt_no' => $sale_receipt_no,
                 'customer_id' => $this->customer_id_credit ?? null,
-                'is_credit' => !empty($this->credit) && $this->received < collect($this->sales)->sum('total_after_disc') ? 't' : 'f',
-                'is_paid' => !empty($this->credit) && $this->received < collect($this->sales)->sum('total_after_disc') ? 'f' : 't',
+                'is_credit' => !empty($this->credit) && $this->received < $total_after_disc ? 't' : 'f',
+                'is_paid' => !empty($this->credit) && $this->received < $total_after_disc ? 'f' : 't',
+                'on_account'=>!empty($this->credit) && $this->received < $total_after_disc ? $total_after_disc - $this->received : 0,
+                'total_receivable'=>!empty($this->credit) && $this->received < $total_after_disc ? $total_after_disc - $this->received : 0,
             ])->id;
 
 
@@ -517,7 +520,8 @@ class Add extends Component
                         number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name . " at " . date('h:i A');
                     GeneralJournal::instance()->account($customer_account->account_id)->debit($amounts['sale'])->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
-                } else {
+                }
+                if($this->received > 0){
                     GeneralJournal::instance()->account(Auth::user()->account_id)->debit($amounts['sale'])->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                 }

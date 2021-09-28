@@ -487,13 +487,21 @@
                 </tr>
                 <tr>
                     <th scope="col" colspan="3"
-                        class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
-                        Amount
-                        @if($dif>0)
-                            Received
-                        @else
-                            Paid
+                        class="w-7 px-2 @if($credit==true) bg-red-50 @endif  border-r py-2 text-left text-md font-medium text-gray-500  tracking-wider">
+                        @if(!empty($customer_id))
+                            <input id="credit" wire:model="credit" type="checkbox"
+                                   class="focus:ring-red-500 h-4 w-4 text-red-600 border-red-300 rounded">
+                            <label for="credit" class="text-red-500 text-sm">On Credit</label>
                         @endif
+                        <div class="ml-3 float-right">
+                            Amount
+                            @if($dif>0)
+                                Received
+                            @else
+                                Paid
+                            @endif
+                        </div>
+
 
                     </th>
                     <th scope="col" colspan="2"
