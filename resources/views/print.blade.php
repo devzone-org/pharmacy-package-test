@@ -85,11 +85,14 @@
                 .then(logo => {
                     var escposCommands = doc
 
+
                         .align(escpos.TextAlignment.Center)
                         .style([escpos.FontStyle.Bold])
-
+                        .size(1,1)
                         .text("{{ $print['app_name'] }}")
                         .feed()
+                        .style([escpos.FontStyle.Normal])
+                        .size(0,0)
 
                         .text("{{ $print['address_1'] }}")
                         .text("{{ $print['address_2'] }}")
