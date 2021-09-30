@@ -88,7 +88,15 @@
                 </div>
             </div>
         @else
-            <div class="grid mb-3 bg-white gap-x-4 gap-y-8 grid-cols-4   shadow rounded-md p-3">
+            <div class="grid mb-3 bg-white gap-x-4 gap-y-8 grid-cols-5 shadow rounded-md p-3">
+                <div class="">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Customer
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {{ $customer_name ?? '-' }}
+                    </dd>
+                </div>
                 <div class="">
                     <dt class="text-sm font-medium text-gray-500">
                         Referred By
@@ -460,12 +468,11 @@
                     </th>
                     <th scope="col" colspan="2"
                         class="w-12 px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        ({{ number_format(collect($refunds)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }}
-                        )
+                        ({{ number_format(collect($refunds)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }})
                     </th>
                 </tr>
                 @php
-                    $dif = collect($sales)->sum('total_after_disc') +collect($refunds)->where('restrict',true)->sum('total_after_disc') - collect($refunds)->sum('total_after_disc');
+                    $dif = collect($sales)->sum('total_after_disc') + collect($refunds)->where('restrict',true)->sum('total_after_disc') - collect($refunds)->sum('total_after_disc');
                 @endphp
                 <tr class="bg-gray-50">
                     <th scope="col" colspan="3"
@@ -505,10 +512,10 @@
 
                     </th>
                     <th scope="col" colspan="2"
-                        class="w-12 px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                        class="w-12 px-2 py-2 @if($credit==true) bg-red-50 @endif  border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
                         <input type="number" wire:model.debounce.300ms="received" onclick="this.select();" id="received"
                                wire:keydown.enter="saleComplete"
-                               class="p-0 focus:ring-0 block w-full  text-md border-0 font-medium text-gray-500 text-center "
+                               class="p-0 focus:ring-0 block w-full @if($credit==true) bg-red-50 @endif  text-md border-0 font-medium text-gray-500 text-center "
                                autocomplete="off">
                     </th>
                 </tr>
