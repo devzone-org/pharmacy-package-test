@@ -412,7 +412,6 @@ class Add extends Component
                 'is_credit' => !empty($this->credit) && $this->received < $total_after_disc ? 't' : 'f',
                 'is_paid' => !empty($this->credit) && $this->received < $total_after_disc ? 'f' : 't',
                 'on_account'=>!empty($this->credit) && $this->received < $total_after_disc ? $total_after_disc - $this->received : 0,
-                'total_receivable'=>!empty($this->credit) && $this->received < $total_after_disc ? $total_after_disc - $this->received : 0,
             ])->id;
 
 

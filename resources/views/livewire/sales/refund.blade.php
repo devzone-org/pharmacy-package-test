@@ -514,9 +514,8 @@
                 </tr>
                 <tr class="bg-gray-50">
                     <th scope="col" colspan="2"
-                        class="w-7 px-2    py-2 text-left text-md font-medium text-gray-500  tracking-wider">
+                        class="w-7 px-2 py-2 text-left text-md font-medium text-gray-500  tracking-wider">
                     </th>
-
                     @if(!empty($admission_id) && !empty($procedure_id))
 
                         <td scope="col" colspan="@if($type=='issue') 4 @else 5 @endif"
