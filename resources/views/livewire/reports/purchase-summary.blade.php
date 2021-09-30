@@ -84,25 +84,33 @@
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Supplier Invoice #
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Supplier Invoice Date
-                                </th>
+
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Invoice Payment Status
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Invoice Payment Date
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Total PO Value
-                                </th>
+
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Total COS
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                    Discount
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                    After Discount
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                   Tax
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                    Grand Total
                                 </th>
                             </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                             @if(!empty($report))
+                                @php
+                                    $total_tax = 0;
+                                @endphp
                                 @foreach($report as $r)
                                     <tr>
                                         <td class="px-3 py-3   text-sm font-medium text-gray-500">
@@ -132,9 +140,7 @@
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{$r['supplier_invoice']}}
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{!empty($r['invoice_date']) ? date('d M Y',strtotime($r['invoice_date'])) : '-'}}
-                                        </td>
+
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                             @if($r['is_paid']=='t')
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
@@ -146,26 +152,58 @@
                                             </span>
                                             @endif
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{!empty($r['payment_date']) ? date('d M Y',strtotime($r['payment_date'])) : '-'}}
-                                        </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{number_format($r['po_value'],2)}}
-                                        </td>
+
+
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['cos'],2)}}
                                         </td>
+
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            {{number_format($r['cos'] - $r['po_value'],2)}}
+                                        </td>
+
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            {{number_format($r['po_value'],2)}}
+                                        </td>
+
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            @php
+                                            $tax = 0;
+                                                if(!empty($r['advance_tax'])){
+                                                    $tax = $r['po_value'] /100 *$r['advance_tax'];
+                                                }
+                                                $total_tax = $total_tax + $tax;
+                                            @endphp
+                                            {{number_format($tax,2)}}
+                                        </td>
+
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            {{number_format($r['po_value'] + $tax,2)}}
+                                        </td>
+
                                     </tr>
                                 @endforeach
                                 <tr class="bg-gray-50">
-                                    <th scope="col" colspan="12" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
+                                    <th scope="col" colspan="10" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
 
                                     </th>
+
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                        {{number_format(collect($report)->sum('cos'),2)}}
+                                    </th>
+
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                        {{number_format(collect($report)->sum('cos') - collect($report)->sum('po_value'),2)}}
+                                    </th>
+
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         {{number_format(collect($report)->sum('po_value'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('cos'),2)}}
+                                        {{number_format($total_tax,2)}}
+                                    </th>
+                                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                        {{number_format($total_tax + collect($report)->sum('po_value'),2)}}
                                     </th>
                                 </tr>
                             </tbody>

@@ -69,7 +69,7 @@
             $first=collect($po)->first();
             $total_discount_value=0;
         @endphp
-        <dl class="grid grid-cols-1  rounded-t-lg bg-white overflow-hidden shadow divide-y divide-gray-200 md:grid-cols-7 md:divide-y-0 md:divide-x">
+        <dl class="grid grid-cols-1  rounded-t-lg bg-white overflow-hidden shadow divide-y divide-gray-200 md:grid-cols-6 md:divide-y-0 md:divide-x">
             <div class="px-4 py-5 sm:p-6">
                 <dt class="text-base font-semibold text-gray-900">
                     Supplier Name
@@ -121,16 +121,7 @@
                     </div>
                 </dd>
             </div>
-            <div class="px-4 py-5 sm:p-6">
-                <dt class="text-base font-semibold text-gray-900">
-                    Supplier Invoice Date
-                </dt>
-                <dd class="mt-1 flex justify-between items-baseline md:block lg:flex">
-                    <div class="flex items-baseline text-2xl font-semibold text-gray-900">
-                        {{!empty($first['invoice_date']) ? date('d M Y',strtotime($first['invoice_date'])) : '-'}}
-                    </div>
-                </dd>
-            </div>
+
             <div class="px-4 py-5 sm:p-6">
                 <dt class="text-base font-semibold text-gray-900">
                     Delivery Date
@@ -156,11 +147,11 @@
                     </th>
                     <th scope="col"
                         class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
-                        Purchase Price
+                        Purchase
                     </th>
                     <th scope="col"
                         class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
-                        Quantity
+                        Qty
                     </th>
                     <th scope="col"
                         class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
@@ -169,20 +160,25 @@
 
                     <th scope="col"
                         class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                        Discount %
+                        Total Value
                     </th>
 
                     <th scope="col"
                         class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                        Discount Value
+                        Disc
+                    </th>
+
+                    <th scope="col"
+                        class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                        After Disc
                     </th>
                     <th scope="col"
                         class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                        Sales Tax Value
+                        Tax
                     </th>
                     <th scope="col"
                         class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                        Total Value
+                        Grand Total
                     </th>
                     <th scope="col"
                         class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
@@ -199,7 +195,9 @@
                 </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-
+                @php
+                    $total_tax = 0;
+                @endphp
                 @foreach($po as $o)
                     <tr>
                         <td class="px-3 py-3   text-sm font-medium text-gray-500">
@@ -218,20 +216,31 @@
                             {{$o['bonus']}}
                         </td>
                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                            {{$o['discount']}}
+                            {{ number_format($o['qty'] * $o['cost_of_price']) }}
                         </td>
                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                             @php
                                 $discount_value=$o['qty']*$o['cost_of_price'] - $o['qty']*$o['after_disc_cost'];
                                 $total_discount_value=$total_discount_value+$discount_value;
                             @endphp
-                            {{number_format($discount_value,2)}}
-                        </td>
-                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                            -
+                            {{number_format($discount_value,2)}} ({{$o['discount']}}%)
                         </td>
                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                             {{$o['total_cost']}}
+                        </td>
+                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                            @php
+                                $tax = 0;
+                                    if(!empty($o['advance_tax'])){
+                                        $tax = $o['total_cost'] /100 *$o['advance_tax'];
+                                    }
+                                    $total_tax = $total_tax + $tax;
+                            @endphp
+                            {{number_format($tax,2)}}
+                        </td>
+
+                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                            {{$o['total_cost']+$tax}}
                         </td>
                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                             {{$o['retail_price']}}
@@ -264,13 +273,18 @@
                         class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                         {{number_format($total_discount_value,2)}}
                     </th>
-                    <th scope="col"
-                        class="px-3 py-3 text-center text-sm font-medium text-gray-900">
 
-                    </th>
                     <th scope="col"
                         class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                         {{number_format(collect($po)->sum('total_cost'),2)}}
+                    </th>
+                    <th scope="col"
+                        class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                    {{ number_format($total_tax,2) }}
+                    </th>
+                    <th scope="col"
+                        class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                        {{number_format($total_tax + collect($po)->sum('total_cost'),2)}}
                     </th>
                     <th scope="col" colspan="3"
                         class="px-3 py-3 text-center text-sm font-medium text-gray-900">

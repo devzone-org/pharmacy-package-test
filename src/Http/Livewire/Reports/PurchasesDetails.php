@@ -36,8 +36,7 @@ class PurchasesDetails extends Component
             ->leftJoin('purchase_receives as pr','pr.purchase_id','=','p.id')
             ->leftJoin('products as pro','pro.id','=','pr.product_id')
             ->leftJoin('suppliers as s','s.id','=','p.supplier_id')
-            ->leftJoin('supplier_payment_details as spd','spd.order_id','=','p.id')
-            ->leftJoin('supplier_payments as sp','sp.id','=','spd.supplier_payment_id')
+
             ->when(!empty($this->to), function ($q) {
                 return $q->whereDate('p.created_at', '<=', $this->to);
             })
@@ -51,7 +50,7 @@ class PurchasesDetails extends Component
             ->select(
                 'p.id as po_no','p.created_at as placement_date','p.delivery_date as receiving_date','p.grn_no','p.supplier_invoice',
                 's.name as supplier_name','pro.name as product_name',
-                'sp.payment_date','sp.created_at as invoice_date',
+                'p.advance_tax',
                 'pr.qty','pr.cost_of_price','pr.retail_price','pr.total_cost','pr.bonus','pr.discount','pr.batch_no','pr.expiry','pr.after_disc_cost'
             )
 
