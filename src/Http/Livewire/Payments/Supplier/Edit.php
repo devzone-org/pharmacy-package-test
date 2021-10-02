@@ -62,8 +62,6 @@ class Edit extends Component
         foreach ($this->selected_orders as $key => $a){
             $this->selected_orders[$key] = (string)$a;
         }
-
-
     }
 
     public function emitSupplierId()

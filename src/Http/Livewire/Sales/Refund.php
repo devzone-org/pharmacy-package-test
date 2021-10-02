@@ -47,6 +47,9 @@ class Refund extends Component
     public $admission_details = [];
     public $hospital_info = [];
     public $handed_over;
+    public $credit=false;
+    public $customer_id;
+    public $customer_name;
     protected $listeners = ['openSearch', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
 
     public function mount($primary_id, $type)
@@ -60,9 +63,10 @@ class Refund extends Component
             ->leftJoin('patients as p', 'p.id', '=', 's.patient_id')
             ->join('products as pr', 'pr.id', '=', 'sd.product_id')
             ->leftJoin('procedures as pro', 'pro.id', '=', 's.procedure_id')
+            ->leftJoin('customers as c','c.id','=','s.customer_id')
             ->where('s.id', $this->sale_id)
             ->select('sd.*', DB::raw('sum(sd.qty) as qty'), 'pr.name as item', 's.remarks', 's.receive_amount', 's.payable_amount', 's.sub_total', 's.gross_total'
-                , 's.patient_id', 's.referred_by', 's.admission_id', 's.procedure_id', 'e.name as referred_by_name', 'p.mr_no', 'p.name as patient_name',
+                , 's.patient_id', 's.referred_by', 's.admission_id', 's.procedure_id','s.customer_id','s.on_account','s.is_credit','s.on_account', 'c.name as customer_name','e.name as referred_by_name', 'p.mr_no', 'p.name as patient_name',
                 'pro.name as procedure_name')
             ->groupBy('sd.id')
             ->orderBy('sd.product_id')
@@ -72,9 +76,11 @@ class Refund extends Component
         $first = collect($this->old_sales)->first();
         $this->admission_id = $first['admission_id'];
         $this->procedure_id = $first['procedure_id'];
+        $this->customer_id=$first['customer_id'];
+        $this->customer_name=$first['customer_name'];
+        $this->credit=$first['is_credit'];
         $this->hospital_info = \App\Models\Hospital\Hospital::first()->toArray();
         if (!empty($this->admission_id) && !empty($this->procedure_id)) {
-
             $this->admission_details = \App\Models\Hospital\Admission::from('admissions as a')
                 ->join('patients as p', 'p.id', '=', 'a.patient_id')
                 ->leftJoin('employees as e', 'e.id', '=', 'a.doctor_id')
@@ -204,9 +210,7 @@ class Refund extends Component
 
             }
         }
-
     }
-
 
     public function updatedDiscount($value)
     {
@@ -305,9 +309,11 @@ class Refund extends Component
             $dif = collect($this->sales)->sum('total_after_disc') + collect($this->refunds)->where('restrict', true)->sum('total_after_disc') - collect($this->refunds)->sum('total_after_disc');
             $new_sub_total = collect($this->sales)->sum('total');
             $new_total_after_disc = collect($this->sales)->sum('total_after_disc');
+ 
             $total_refund = collect($this->refunds)->sum('total_after_disc') - collect($this->refunds)->where('restrict', true)->sum('total_after_disc');
             if ($dif > 0) {
                 if ($this->received == '') {
+ 
                     throw new \Exception('Please Enter Received Amount');
                 }
                 if ($this->received < $dif) {
@@ -324,7 +330,21 @@ class Refund extends Component
                 }
                 $change_due = abs($dif) - $this->received;
             }
-//            dd($dif,$new_sub_total,$new_total_after_disc,$total_refund,$this->received,$change_due);
+
+            if (empty($this->sales)){ //refund only
+                $on_account=$total_refund_this_time;
+            }else{ //sales and refund both
+                if($new_total_after_disc >= $total_refund_this_time){
+                    if (!empty($credit)){
+                        $on_account=$total_refund_this_time-$new_total_after_disc; // to push minus value in on_account=>case=add more on account
+                    }else{
+                        $on_account=0;
+                    }
+                }else{
+                    $on_account=$new_total_after_disc-$total_refund_this_time; // to push positive value in on_account=>case=minus from on account
+                }
+            }
+
             $newSale = $sale->replicate();
             $newSale->created_at = Carbon::now();
             $newSale->sale_at = date('Y-m-d H:i:s');
@@ -336,6 +356,7 @@ class Refund extends Component
             $newSale->payable_amount = $change_due;
             $newSale->is_refund = 'f';
             $newSale->receipt_no = $sale_receipt_no;
+            $newSale->on_account=$on_account;
             $newSale->save();
             foreach ($this->refunds as $r) {
                 if (isset($r['restrict'])) {

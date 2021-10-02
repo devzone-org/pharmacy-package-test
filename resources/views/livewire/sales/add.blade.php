@@ -161,7 +161,7 @@
                       @endif
                   </button>
                 </span>
-
+ 
                         </div>
 
                     </div>
@@ -529,6 +529,7 @@
                         <textarea name="" cols="30" rows="5" id="remarks"
                                   class="p-0 focus:ring-0 block w-full border-0 text-md resize-none h-40  "></textarea>
 
+ 
                                     </th>
                                     <th scope="col" colspan="{{ $admission==true? '3' : '4' }}"
                                         class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
@@ -615,6 +616,7 @@
                                         <td scope="col" colspan="5"
                                             class="w-10 bg-gray-50 border-0 text-center text-sm  text-gray-500  tracking-wider">
                                             <div class="flex -m-1">
+ 
                                 <span class="inline-flex items-center px-3 bg-gray-50 text-gray-500 text-xl font-medium">
                                   Handed over to
                                 </span>
