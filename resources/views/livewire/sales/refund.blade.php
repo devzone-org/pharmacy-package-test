@@ -12,9 +12,10 @@
             </div>
             <div class="mt-5 flex lg:mt-0 lg:ml-4 ">
                 <span class="ml-3">
-                    @if($type=='issue' || empty($admission_id))
-                        <button type="button" wire:click="searchableOpenModal('product_id', 'product_name', 'item')"
-                                class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    @if($credit==false)
+                        @if($type=='issue' || empty($admission_id))
+                            <button type="button" wire:click="searchableOpenModal('product_id', 'product_name', 'item')"
+                                    class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor"
                                  viewBox="0 0 24 24"
                                  xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round"
@@ -22,6 +23,7 @@
                                                                           d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                             Search Item (F1)
                         </button>
+                        @endif
                     @endif
                 </span>
                 <span class="ml-3">
@@ -468,7 +470,8 @@
                     </th>
                     <th scope="col" colspan="2"
                         class="w-12 px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        ({{ number_format(collect($refunds)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }})
+                        ({{ number_format(collect($refunds)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }}
+                        )
                     </th>
                 </tr>
                 @php
@@ -495,8 +498,8 @@
                 <tr>
                     <th scope="col" colspan="3"
                         class="w-7 px-2 @if($credit==true) bg-red-50 @endif  border-r py-2 text-left text-md font-medium text-gray-500  tracking-wider">
-                        @if(!empty($customer_id))
-                            <input id="credit" wire:model="credit" type="checkbox"
+                        @if($credit==true)
+                            <input id="credit" wire:model="credit" type="checkbox" disabled
                                    class="focus:ring-red-500 h-4 w-4 text-red-600 border-red-300 rounded">
                             <label for="credit" class="text-red-500 text-sm">On Credit</label>
                         @endif
@@ -514,7 +517,7 @@
                     <th scope="col" colspan="2"
                         class="w-12 px-2 py-2 @if($credit==true) bg-red-50 @endif  border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
                         <input type="number" wire:model.debounce.300ms="received" onclick="this.select();" id="received"
-                               wire:keydown.enter="saleComplete"
+                               wire:keydown.enter="saleComplete" @if($credit==true) disabled @endif
                                class="p-0 focus:ring-0 block w-full @if($credit==true) bg-red-50 @endif  text-md border-0 font-medium text-gray-500 text-center "
                                autocomplete="off">
                     </th>

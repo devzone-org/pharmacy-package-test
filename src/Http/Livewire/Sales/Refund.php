@@ -9,6 +9,7 @@ use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount;
 use Devzone\Pharmacy\Http\Traits\Searchable;
+use Devzone\Pharmacy\Models\Customer;
 use Devzone\Pharmacy\Models\InventoryLedger;
 use Devzone\Pharmacy\Models\ProductInventory;
 use Devzone\Pharmacy\Models\Sale\Sale;
@@ -78,7 +79,7 @@ class Refund extends Component
         $this->procedure_id = $first['procedure_id'];
         $this->customer_id=$first['customer_id'];
         $this->customer_name=$first['customer_name'];
-        $this->credit=$first['is_credit'];
+        $this->credit=$first['is_credit']=='t' ? true : false;
         $this->hospital_info = \App\Models\Hospital\Hospital::first()->toArray();
         if (!empty($this->admission_id) && !empty($this->procedure_id)) {
             $this->admission_details = \App\Models\Hospital\Admission::from('admissions as a')
@@ -313,7 +314,6 @@ class Refund extends Component
             $total_refund = collect($this->refunds)->sum('total_after_disc') - collect($this->refunds)->where('restrict', true)->sum('total_after_disc');
             if ($dif > 0) {
                 if ($this->received == '') {
- 
                     throw new \Exception('Please Enter Received Amount');
                 }
                 if ($this->received < $dif) {
@@ -321,30 +321,18 @@ class Refund extends Component
                 }
                 $change_due = $this->received != '' ? $this->received - $dif : 0;
             } else {
-                if ($this->received == '') {
-                    throw new \Exception('Please Enter Paid Amount');
-                }
-
-                if ($this->received < abs($dif)) {
-                    throw new \Exception('Paid Amount is Not Valid');
-                }
-                $change_due = abs($dif) - $this->received;
-            }
-
-            if (empty($this->sales)){ //refund only
-                $on_account=$total_refund_this_time;
-            }else{ //sales and refund both
-                if($new_total_after_disc >= $total_refund_this_time){
-                    if (!empty($credit)){
-                        $on_account=$total_refund_this_time-$new_total_after_disc; // to push minus value in on_account=>case=add more on account
-                    }else{
-                        $on_account=0;
+                if ($this->credit==false){
+                    if ($this->received == '') {
+                        throw new \Exception('Please Enter Paid Amount');
                     }
-                }else{
-                    $on_account=$new_total_after_disc-$total_refund_this_time; // to push positive value in on_account=>case=minus from on account
-                }
-            }
 
+                    if ($this->received < abs($dif)) {
+                        throw new \Exception('Paid Amount is Not Valid');
+                    }
+                    $change_due = abs($dif) - $this->received;
+                }
+
+            }
             $newSale = $sale->replicate();
             $newSale->created_at = Carbon::now();
             $newSale->sale_at = date('Y-m-d H:i:s');
@@ -353,10 +341,10 @@ class Refund extends Component
             $newSale->sub_total = $new_sub_total;
             $newSale->gross_total = $new_total_after_disc;
             $newSale->receive_amount = $this->received;
-            $newSale->payable_amount = $change_due;
+            $newSale->payable_amount = $change_due ?? abs($dif);
             $newSale->is_refund = 'f';
             $newSale->receipt_no = $sale_receipt_no;
-            $newSale->on_account=$on_account;
+            $newSale->on_account=abs($dif);
             $newSale->save();
             foreach ($this->refunds as $r) {
                 if (isset($r['restrict'])) {
@@ -518,13 +506,30 @@ class Refund extends Component
             $accounts = ChartOfAccount::whereIn('reference', ['cost-of-sales-pharmacy-5', 'income-pharmacy-5', 'income-return-pharmacy-5', 'pharmacy-inventory-5'])->get();
 
             $dif = $refund_retail - $sales_retail;
-            if ($dif > 0) {
-                GeneralJournal::instance()->account($cash_acount)->credit(abs($dif))->voucherNo($vno)
-                    ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
-            } else {
-                GeneralJournal::instance()->account($cash_acount)->debit(abs($dif))->voucherNo($vno)
+            if ($this->credit==false){
+                if ($dif > 0) {
+                    GeneralJournal::instance()->account($cash_acount)->credit(abs($dif))->voucherNo($vno)
+                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                } else {
+                    GeneralJournal::instance()->account($cash_acount)->debit(abs($dif))->voucherNo($vno)
+                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                }
+            }else{
+                $customer_account=Customer::from('customers as c')
+                    ->join('chart_of_accounts as coa','coa.id','=','c.account_id')
+                    ->where('c.id',$this->customer_id)
+                    ->select('c.id','coa.name as account_name','coa.id as account_id')
+                    ->first();
+                if ($this->old_sales[0]['patient_id'] > 0) {
+                    $patient= 'to patient ' . $this->old_sales[0]['patient_name'] . ' against MR# ' . $this->old_sales[0]['mr_no'] . '. ';
+                } else {
+                    $patient= 'to walking customer. ';
+                }
+                $description='Refunded: PKR ' . number_format($refund_retail, 2) . $patient .' Customer Account:  '.$customer_account->account_name.' : adjusted on ' . date('d M, Y') . ' by ' . Auth::user()->name;
+                GeneralJournal::instance()->account($customer_account->account_id)->credit($refund_retail)->voucherNo($vno)
                     ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
             }
+
             foreach ($accounts as $a) {
                 if ($sales_retail > 0) {
                     if ($a->reference == 'cost-of-sales-pharmacy-5') {

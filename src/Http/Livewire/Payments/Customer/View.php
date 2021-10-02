@@ -12,7 +12,7 @@ class View extends Component
     public $payments=[];
     public function mount($id){
         $this->payment_id=$id;
-        $this->payments = CustomerPayment::from('customer_payments as cp')
+        $payments = CustomerPayment::from('customer_payments as cp')
             ->join('customers as c', 'c.id', 'cp.customer_id')
             ->join('chart_of_accounts as coa', 'coa.id', '=', 'cp.receiving_in')
             ->join('customer_payment_details as cpd', 'cpd.customer_payment_id', '=', 'cp.id')
@@ -23,10 +23,8 @@ class View extends Component
             ->select(
                 'c.name as customer_name','coa.name as account_name','us.name as added_by','a.name as approved_by',
                 'cp.id', 'cp.description',  'cp.receiving_date',
-//                DB::raw('(s.gross_total - s.receive_amount) as total_receivable'),
                 's.id as receipt_no','s.gross_total','s.receive_amount','s.sale_at','s.receipt_no as invoice_no',
                 'cp.created_at', 'cp.approved_at', 'cpd.sale_id')
-
             ->get()->toArray();
     }
     public function render(){

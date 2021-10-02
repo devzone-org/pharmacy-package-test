@@ -579,7 +579,7 @@
                                         <th scope="col" colspan="2"
                                             class="w-10   px-2 py-2 @if($credit==true) bg-red-50 @endif  border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
                                             <input type="number" wire:model.debounce.300ms="received" onClick="this.select();"
-                                                   id="received"
+                                                   id="received" @if($credit==true) disabled @endif
                                                    wire:keydown.enter="saleComplete"
                                                    class="p-0 focus:ring-0 block w-full @if($credit==true) bg-red-50 @endif  text-xl border-0 font-medium text-gray-500 text-center "
                                                    autocomplete="off">

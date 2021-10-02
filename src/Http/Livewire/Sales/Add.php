@@ -328,6 +328,7 @@ class Add extends Component
     public function updatedCredit($val)
     {
         $this->received=0;
+        $this->payable=0;
         if ($val == true) {
             if (empty($this->customer_id_credit)) {
                 $this->searchableOpenModal('customer_id_credit', 'customer_name_credit', 'customer');
@@ -399,16 +400,16 @@ class Add extends Component
                 'sale_at' => date('Y-m-d H:i:s'),
                 'remarks' => $this->remarks,
                 'receive_amount' => $this->received,
-                'payable_amount' => !empty($this->credit) && $this->received < $total_after_disc ? 0 : $this->payable,
+                'payable_amount' => !empty($this->credit) ? 0 : $this->payable,
                 'sub_total' => collect($this->sales)->sum('total'),
                 'gross_total' => collect($this->sales)->sum('total_after_disc'),
                 'admission_id' => $this->admission_id ?? null,
                 'procedure_id' => $this->procedure_id ?? null,
                 'receipt_no' => $sale_receipt_no,
                 'customer_id' => $this->customer_id_credit ?? null,
-                'is_credit' => !empty($this->credit) && $this->received < $total_after_disc ? 't' : 'f',
-                'is_paid' => !empty($this->credit) && $this->received < $total_after_disc ? 'f' : 't',
-                'on_account' => !empty($this->credit) && $this->received < $total_after_disc ? $total_after_disc - $this->received : 0,
+                'is_credit' => !empty($this->credit)  ? 't' : 'f',
+                'is_paid' => !empty($this->credit)  ? 'f' : 't',
+                'on_account' => !empty($this->credit)  ? $total_after_disc  : 0,
             ])->id;
 
 
@@ -512,7 +513,7 @@ class Add extends Component
 
             if ($this->admission == false) {
                 if (!empty($this->credit)) {
-                    $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} sold to Patient {$customer_name}. {$customer_account->name} Account debited with PKR " .
+                    $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} sold to Patient {$customer_name}.  on Account {$customer_account->name} : PKR " .
                         number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name . " at " . date('h:i A');
                     GeneralJournal::instance()->account($customer_account->account_id)->debit($amounts['sale'])->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
