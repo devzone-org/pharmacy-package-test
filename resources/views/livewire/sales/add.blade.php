@@ -3,10 +3,9 @@
     <div class="h-screen flex  border-t bg-gray-100">
 
 
-
         <!-- Static sidebar for desktop -->
         <div class="  md:flex md:flex-shrink-0">
-            <div class="flex flex-col w-72">
+            <div class="flex flex-col w-64">
                 <!-- Sidebar component, swap this element with another sidebar if you like -->
                 <div class="flex flex-col flex-grow border-r border-gray-200   overflow-y-auto">
                     <div class="h-full   bg-white p-2 overflow-y-auto">
@@ -14,12 +13,12 @@
 
                             <div>
 
-                                <dl class="space-y-8    sm:space-y-6">
-                                    <div   wire:click="searchCustomer" class="cursor-pointer">
+                                <dl class="space-y-4 ">
+                                    <div wire:click="searchCustomer" class="cursor-pointer ">
                                         <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
                                             Customer Name (F10)
                                         </dt>
-                                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">
+                                        <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
                                             <p>
                                                 {{ $customer_name_credit }}
                                             </p>
@@ -30,9 +29,9 @@
                                         <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
                                             Customer Credit Limit
                                         </dt>
-                                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">
+                                        <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
                                             <p>
-                                             PKR   {{ number_format($customer_credit_limit) }}
+                                                PKR {{ number_format($customer_credit_limit) }}
                                             </p>
                                         </dd>
                                     </div>
@@ -41,39 +40,40 @@
                                         <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
                                             Customer Closing Balance
                                         </dt>
-                                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">
+                                        <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
                                             <p>
-                                                PKR   {{ number_format($customer_previous_credit) }}
+                                                PKR {{ number_format($customer_previous_credit) }}
                                             </p>
                                         </dd>
                                     </div>
+                                    @if(empty($admission_id) && empty($procedure_id))
+                                        <div wire:click="searchReferredBy" class="cursor-pointer border-t pt-2">
+                                            <dt class="text-sm font-medium  text-gray-500   sm:flex-shrink-0">
+                                                Referred By (F11)
+                                            </dt>
+                                            <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
+                                                <p>
+                                                    {{ $referred_by_name }}
+                                                </p>
+                                            </dd>
+                                        </div>
 
-                                    <div>
-                                        <dt class="text-sm font-medium text-gray-500 sm:w-40 sm:flex-shrink-0">
-                                            Patient Name
-                                        </dt>
-                                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">
-                                            <p>
-                                                {{ $patient_name ?? 'Walk-in' }}
-                                            </p>
-                                        </dd>
-                                    </div>
-                                    <div>
-                                        <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
-                                            Referred By
-                                        </dt>
-                                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">
-                                            <p>
-                                                {{ $referred_by_name }}
-                                            </p>
-                                        </dd>
-                                    </div>
-
-                                    <div>
+                                        <div wire:click="searchPatient" class="cursor-pointer">
+                                            <dt class="text-sm font-medium text-gray-500 sm:w-40 sm:flex-shrink-0">
+                                                Patient Name (F12)
+                                            </dt>
+                                            <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
+                                                <p>
+                                                    {{ $patient_name ?? 'Walk-in' }}
+                                                </p>
+                                            </dd>
+                                        </div>
+                                    @endif
+                                    <div class=" border-t pt-2">
                                         <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
                                             Date
                                         </dt>
-                                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">
+                                        <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
                                             <p>
                                                 {{ date('d M, Y') }}
                                             </p>
@@ -84,7 +84,7 @@
                                         <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
                                             Sale By
                                         </dt>
-                                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">
+                                        <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
                                             <p>
                                                 {{ Auth::user()->name }}
                                             </p>
@@ -107,40 +107,16 @@
                     <div class="lg:flex col-span-12  lg:justify-between">
                         <div class="flex-1 min-w-0">
                             <h2 class="text-2xl mb-3 font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                                 @if(empty($admission_id) && empty($procedure_id))
-                                        Sale Invoice
-                                    @else
-                                        Inter Transfer IPD Medicine
-                                    @endif
+                                @if(empty($admission_id) && empty($procedure_id))
+                                    Sale Invoice
+                                @else
+                                    Inter Transfer IPD Medicine
+                                @endif
                             </h2>
                         </div>
                         <div class="mt-5 flex lg:mt-0 lg:ml-4 ">
-                <span class="">
-                      <button type="button"
-                              wire:click="searchCustomer"
-                              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Add Customer (F10)
-                      </button>
-                    </span>
-                            @if(empty($admission_id) && empty($procedure_id))
-                                <span class="ml-3">
-                      <button type="button"
-                              wire:click="searchReferredBy"
-                              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Add Referred By (F11)
-                      </button>
-                    </span>
-
-                                <span class="ml-3">
-                      <button type="button" wire:click="searchPatient"
-                              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
 
 
-                        Add Patient (F12)
-                      </button>
-                    </span>
-
-                            @endif
                             <span class="ml-3">
                   <button type="button" wire:click="searchableOpenModal('product_id', 'product_name', 'item')"
                           class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -167,7 +143,7 @@
                       @endif
                   </button>
                 </span>
- 
+
                         </div>
 
                     </div>
@@ -178,7 +154,8 @@
                                 <div class="flex">
                                     <div class="flex-shrink-0">
                                         <!-- Heroicon name: solid/check-circle -->
-                                        <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                        <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg"
+                                             viewBox="0 0 20 20"
                                              fill="currentColor" aria-hidden="true">
                                             <path fill-rule="evenodd"
                                                   d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -196,7 +173,8 @@
                                                     class="inline-flex bg-green-50 rounded-md p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-green-50 focus:ring-green-600">
                                                 <span class="sr-only">Dismiss</span>
                                                 <!-- Heroicon name: solid/x -->
-                                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg"
+                                                     viewBox="0 0 20 20"
                                                      fill="currentColor" aria-hidden="true">
                                                     <path fill-rule="evenodd"
                                                           d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -214,7 +192,8 @@
                                 <div class="flex">
                                     <div class="flex-shrink-0">
 
-                                        <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                        <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor"
+                                             viewBox="0 0 24 24"
                                              xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                   d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -231,7 +210,8 @@
                                                     class="inline-flex bg-red-50 rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-red-50 focus:ring-red-600">
                                                 <span class="sr-only">Dismiss</span>
                                                 <!-- Heroicon name: solid/x -->
-                                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg"
+                                                     viewBox="0 0 20 20"
                                                      fill="currentColor" aria-hidden="true">
                                                     <path fill-rule="evenodd"
                                                           d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -305,7 +285,8 @@
                                             @endif
                                         </td>
                                         <td class="px-2   text-left   border-r  text-md text-gray-500">
-                                            <input type="number" wire:model.lazy="sales.{{ $key }}.s_qty" onClick="this.select();"
+                                            <input type="number" wire:model.lazy="sales.{{ $key }}.s_qty"
+                                                   onClick="this.select();"
                                                    class="p-0 focus:ring-0 block w-full  text-md border-0 text-center "
                                                    autocomplete="off">
                                         </td>
@@ -334,7 +315,8 @@
                                             {{ number_format($s['total_after_disc'],2) }}
                                         </td>
                                         <td class="  w-10 cursor-pointer px-2 py-3   border-r text-center text-md font-medium text-red-700  tracking-wider  ">
-                                            <svg wire:click="removeEntry('{{ $key }}')" class="w-5 h-5 " fill="currentColor"
+                                            <svg wire:click="removeEntry('{{ $key }}')" class="w-5 h-5 "
+                                                 fill="currentColor"
                                                  viewBox="0 0 20 20"
                                                  xmlns="http://www.w3.org/2000/svg">
                                                 <path fill-rule="evenodd"
@@ -392,13 +374,14 @@
                                     </th>
                                 </tr>
                                 <tr class="bg-gray-50">
-                                    <th rowspan="{{ $admission==true? '2' : '4' }}" colspan="{{ $admission==true? '2' : '3' }}"
+                                    <th rowspan="{{ $admission==true? '2' : '4' }}"
+                                        colspan="{{ $admission==true? '2' : '3' }}"
                                         class="  border-r   bg-white text-md font-medium text-gray-500  tracking-wider">
 
                         <textarea name="" cols="30" rows="5" id="remarks"
                                   class="p-0 focus:ring-0 block w-full border-0 text-md resize-none h-40  "></textarea>
 
- 
+
                                     </th>
                                     <th scope="col" colspan="{{ $admission==true? '3' : '4' }}"
                                         class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
@@ -417,7 +400,8 @@
                                         </th>
                                         <th scope="col" colspan="2"
                                             class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
-                                            <input type="number" wire:model.lazy="discount" min="0" max="100" onClick="this.select();"
+                                            <input type="number" wire:model.lazy="discount" min="0" max="100"
+                                                   onClick="this.select();"
                                                    id="discount"
                                                    class="p-0 focus:ring-0 block w-full  text-xl border-0 font-medium text-gray-500 text-center "
                                                    autocomplete="off">
@@ -447,7 +431,8 @@
                                         </th>
                                         <th scope="col" colspan="2"
                                             class="w-10   px-2 py-2 @if($credit==true) bg-red-50 @endif  border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
-                                            <input type="number" wire:model.debounce.300ms="received" onClick="this.select();"
+                                            <input type="number" wire:model.debounce.300ms="received" @if($credit==true) disabled @endif
+                                                   onClick="this.select();"
                                                    id="received"
                                                    wire:keydown.enter="saleComplete"
                                                    class="p-0 focus:ring-0 block w-full @if($credit==true) bg-red-50 @endif  text-xl border-0 font-medium text-gray-500 text-center "
@@ -489,7 +474,8 @@
                                 <span class="inline-flex items-center px-3 bg-gray-50 text-gray-500 text-xl font-medium">
                                   Handed over to
                                 </span>
-                                                <input type="text" wire:model.defer="handed_over" onClick="this.select();"
+                                                <input type="text" wire:model.defer="handed_over"
+                                                       onClick="this.select();"
                                                        class="flex-1 border-0 min-w-0 block w-full px-3 py-2 rounded-none focus:ring-0 text-xl placeholder-gray-500 placeholder-opacity-50"
                                                        placeholder="Enter here">
                                             </div>
@@ -506,7 +492,6 @@
             </main>
         </div>
     </div>
-
 
 
     <div x-data="{ open: @entangle('add_modal') }" x-cloak x-show="open"
