@@ -1,15 +1,114 @@
-<div class="max-w-full px-5 mx-auto mt-5 lg:grid lg:grid-cols-12 lg:gap-3">
-    <div class="lg:flex col-span-12  lg:justify-between">
-        <div class="flex-1 min-w-0">
-            <h2 class="text-2xl mb-3 font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                @if(empty($admission_id) && empty($procedure_id))
-                    Sale Invoice
-                @else
-                    Inter Transfer IPD Medicine
-                @endif
-            </h2>
+<div class="max-w-full  ">
+
+    <div class="h-screen flex  border-t bg-gray-100">
+
+
+
+        <!-- Static sidebar for desktop -->
+        <div class="  md:flex md:flex-shrink-0">
+            <div class="flex flex-col w-72">
+                <!-- Sidebar component, swap this element with another sidebar if you like -->
+                <div class="flex flex-col flex-grow border-r border-gray-200   bg-white overflow-y-auto">
+                    <div class="h-full bg-white p-2 overflow-y-auto">
+                        <div class=" ">
+
+                            <div>
+                                <h3 class="font-medium text-gray-900">Information</h3>
+                                <dl class="mt-2 border-t border-b border-gray-200 divide-y divide-gray-200">
+                                    <div class="py-3 flex justify-between text-sm font-medium">
+                                        <dt class="text-gray-500">Uploaded by</dt>
+                                        <dd class="text-gray-900">Marie Culver</dd>
+                                    </div>
+                                    <div class="py-3 flex justify-between text-sm font-medium">
+                                        <dt class="text-gray-500">Created</dt>
+                                        <dd class="text-gray-900">June 8, 2020</dd>
+                                    </div>
+                                    <div class="py-3 flex justify-between text-sm font-medium">
+                                        <dt class="text-gray-500">Last modified</dt>
+                                        <dd class="text-gray-900">June 8, 2020</dd>
+                                    </div>
+                                    <div class="py-3 flex justify-between text-sm font-medium">
+                                        <dt class="text-gray-500">Dimensions</dt>
+                                        <dd class="text-gray-900">4032 x 3024</dd>
+                                    </div>
+                                    <div class="py-3 flex justify-between text-sm font-medium">
+                                        <dt class="text-gray-500">Resolution</dt>
+                                        <dd class="text-gray-900">72 x 72</dd>
+                                    </div>
+                                </dl>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-900">Description</h3>
+                                <div class="mt-2 flex items-center justify-between">
+                                    <p class="text-sm text-gray-500 italic">Add a description to this image.</p>
+                                    <button type="button" class="-mr-2 h-8 w-8 bg-white rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        <!-- Heroicon name: solid/pencil -->
+                                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                        </svg>
+                                        <span class="sr-only">Add description</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-900">Shared with</h3>
+                                <ul role="list" class="mt-2 border-t border-b border-gray-200 divide-y divide-gray-200">
+                                    <li class="py-3 flex justify-between items-center">
+                                        <div class="flex items-center">
+                                            <img src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=1024&h=1024&q=80" alt="" class="w-8 h-8 rounded-full">
+                                            <p class="ml-4 text-sm font-medium text-gray-900">Aimee Douglas</p>
+                                        </div>
+                                        <button type="button" class="ml-6 bg-white rounded-md text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Remove<span class="sr-only"> Aimee Douglas</span></button>
+                                    </li>
+                                    <li class="py-3 flex justify-between items-center">
+                                        <div class="flex items-center">
+                                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixqx=oilqXxSqey&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" class="w-8 h-8 rounded-full">
+                                            <p class="ml-4 text-sm font-medium text-gray-900">Andrea McMillan</p>
+                                        </div>
+                                        <button type="button" class="ml-6 bg-white rounded-md text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Remove<span class="sr-only"> Andrea McMillan</span></button>
+                                    </li>
+                                    <li class="py-2 flex justify-between items-center">
+                                        <button type="button" class="group -ml-1 bg-white p-1 rounded-md flex items-center focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <span class="w-8 h-8 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400">
+                      <!-- Heroicon name: solid/plus-sm -->
+                      <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                      </svg>
+                    </span>
+                                            <span class="ml-4 text-sm font-medium text-indigo-600 group-hover:text-indigo-500">Share</span>
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="flex">
+                                <button type="button" class="flex-1 bg-indigo-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Download
+                                </button>
+                                <button type="button" class="flex-1 ml-3 bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="mt-5 flex lg:mt-0 lg:ml-4 ">
+        <div class="flex flex-col w-0 flex-1 overflow-hidden">
+
+
+            <main class="flex-1 relative overflow-y-auto focus:outline-none">
+                <div class="py-6 px-4">
+                    <div class="lg:flex col-span-12  lg:justify-between">
+                        <div class="flex-1 min-w-0">
+                            <h2 class="text-2xl mb-3 font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                                @if(empty($admission_id) && empty($procedure_id))
+                                    Sale Invoice
+                                @else
+                                    Inter Transfer IPD Medicine
+                                @endif
+                            </h2>
+                        </div>
+                        <div class="mt-5 flex lg:mt-0 lg:ml-4 ">
                 <span class="">
                       <button type="button"
                               wire:click="searchCustomer"
@@ -17,8 +116,8 @@
                         Add Customer (F10)
                       </button>
                     </span>
-            @if(empty($admission_id) && empty($procedure_id))
-                <span class="ml-3">
+                            @if(empty($admission_id) && empty($procedure_id))
+                                <span class="ml-3">
                       <button type="button"
                               wire:click="searchReferredBy"
                               class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -26,7 +125,7 @@
                       </button>
                     </span>
 
-                <span class="ml-3">
+                                <span class="ml-3">
                       <button type="button" wire:click="searchPatient"
                               class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
 
@@ -35,8 +134,8 @@
                       </button>
                     </span>
 
-            @endif
-            <span class="ml-3">
+                            @endif
+                            <span class="ml-3">
                   <button type="button" wire:click="searchableOpenModal('product_id', 'product_name', 'item')"
                           class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -46,7 +145,7 @@
                     Search Item (F1)
                   </button>
                 </span>
-            <span class="ml-3">
+                            <span class="ml-3">
                   <button type="button" wire:click="saleComplete"
                           class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
 
@@ -62,522 +161,485 @@
                       @endif
                   </button>
                 </span>
-
-        </div>
-
-    </div>
-    {{--    <div class="col-span-12">--}}
-    {{--        @if($admission)--}}
-    {{--            <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-5   shadow rounded-md p-3">--}}
-    {{--                <div class="">--}}
-    {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-    {{--                        Referred By--}}
-    {{--                    </dt>--}}
-    {{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
-    {{--                        {{ $admission_details['doctor'] ?? '-' }}--}}
-    {{--                    </dd>--}}
-    {{--                </div>--}}
-    {{--                <div class="">--}}
-    {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-    {{--                        Patient Name--}}
-    {{--                    </dt>--}}
-    {{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
-    {{--                        {{  $admission_details['mr_no'].' - '.$admission_details['name'] ?? 'Walk-in' }}--}}
-    {{--                    </dd>--}}
-    {{--                </div>--}}
-    {{--                <div class="">--}}
-    {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-    {{--                        Admission # - Procedure--}}
-    {{--                    </dt>--}}
-    {{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
-    {{--                        {{  $admission_details['admission_no'] ?? '' }} - {{$admission_details['procedure_name']}}--}}
-    {{--                    </dd>--}}
-    {{--                </div>--}}
-    {{--                <div class="">--}}
-    {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-    {{--                        Date--}}
-    {{--                    </dt>--}}
-    {{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
-    {{--                        {{ date('d M, Y') }}--}}
-    {{--                    </dd>--}}
-    {{--                </div>--}}
-    {{--                <div class="">--}}
-    {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-    {{--                        Issued By--}}
-    {{--                    </dt>--}}
-    {{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
-    {{--                        {{ Auth::user()->name }}--}}
-    {{--                    </dd>--}}
-    {{--                </div>--}}
-    {{--            </div>--}}
-    {{--        @else--}}
-    {{--            <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-5 shadow rounded-md p-3">--}}
-    {{--                <div class="">--}}
-    {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-    {{--                        Customer--}}
-    {{--                    </dt>--}}
-    {{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
-    {{--                        {{ $customer_name_credit ?? '-' }}--}}
-    {{--                    </dd>--}}
-    {{--                </div>--}}
-    {{--                <div class="">--}}
-    {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-    {{--                        Referred By--}}
-    {{--                    </dt>--}}
-    {{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
-    {{--                        {{ $referred_by_name ?? '-' }}--}}
-    {{--                    </dd>--}}
-    {{--                </div>--}}
-    {{--                <div class="">--}}
-    {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-    {{--                        Patient Name--}}
-    {{--                    </dt>--}}
-    {{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
-    {{--                        {{ $patient_name ?? 'Walk-in' }}--}}
-    {{--                    </dd>--}}
-    {{--                </div>--}}
-    {{--                <div class="">--}}
-    {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-    {{--                        Date--}}
-    {{--                    </dt>--}}
-    {{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
-    {{--                        {{ date('d M, Y') }}--}}
-    {{--                    </dd>--}}
-    {{--                </div>--}}
-    {{--                <div class="">--}}
-    {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-    {{--                        Sale By--}}
-    {{--                    </dt>--}}
-    {{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
-    {{--                        {{ Auth::user()->name }}--}}
-    {{--                    </dd>--}}
-    {{--                </div>--}}
-    {{--            </div>--}}
-    {{--        @endif--}}
-    {{--    </div>--}}
-
-    <main class="col-span-2">
-
-        <div class="mb-3 bg-white shadow rounded-lg overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                <tr>
-                    <th scope="col" colspan="2"
-                        class="px-6 py-2 text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        Customer
-                    </th>
-                </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                <tr>
-                    <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                        Name
-                    </td>
-                    <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {{ $customer_name_credit ?? 'Nill' }}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                        Credit Limit
-                    </td>
-                    <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                        PKR {{number_format($customer_credit_limit) ?? '-'}}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                        Closing Balance
-                    </td>
-                    <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                        PKR {{number_format($customer_previous_credit) ?? '-'}}
-                    </td>
-                </tr>
-                </tbody>
-                <thead class="bg-gray-50">
-                <tr>
-                    <th scope="col" colspan="2"
-                        class="px-6 py-2 text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        Patient Name
-                    </th>
-                </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                <tr>
-                    <td colspan="2" class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {{ $patient_name ?? 'Walk-in' }}
-                    </td>
-                </tr>
-                </tbody>
-                <thead class="bg-gray-50">
-                <tr>
-                    <th scope="col" colspan="2"
-                        class="px-6 py-2 text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        Referred by
-                    </th>
-                </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                <tr>
-                    <td colspan="2" class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {{ $referred_by_name ?? '-' }}
-                    </td>
-                </tr>
-                </tbody>
-{{--                <thead class="bg-gray-50">--}}
-{{--                <tr>--}}
-{{--                    <th scope="col"--}}
-{{--                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">--}}
-{{--                        Sale By--}}
-{{--                    </th>--}}
-{{--                    <th scope="col"--}}
-{{--                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">--}}
-{{--                        Date--}}
-{{--                    </th>--}}
-{{--                </tr>--}}
-{{--                </thead>--}}
-{{--                <tbody class="bg-white divide-y divide-gray-200">--}}
-{{--                <tr>--}}
-{{--                    <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">--}}
-{{--                        {{ Auth::user()->name }}--}}
-{{--                    </td>--}}
-{{--                    <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">--}}
-{{--                        {{ date('d M, Y') }}--}}
-{{--                    </td>--}}
-{{--                </tr>--}}
-{{--                </tbody>--}}
-            </table>
-        </div>
-    </main>
-
-    <main class="col-span-10">
-        @if(!empty($success))
-            <div class="rounded-md mb-5 bg-green-50 p-4">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <!-- Heroicon name: solid/check-circle -->
-                        <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                             fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd"
-                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                  clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-medium text-green-800">
-                            {{ $success }}
-                        </p>
-                    </div>
-                    <div class="ml-auto pl-3">
-                        <div class="-mx-1.5 -my-1.5">
-                            <button type="button" wire:click="$set('success','')"
-                                    class="inline-flex bg-green-50 rounded-md p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-green-50 focus:ring-green-600">
-                                <span class="sr-only">Dismiss</span>
-                                <!-- Heroicon name: solid/x -->
-                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                     fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd"
-                                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                          clip-rule="evenodd"/>
-                                </svg>
-                            </button>
+ 
                         </div>
+
                     </div>
-                </div>
-            </div>
-        @endif
+                {{--    <div class="col-span-12">--}}
+                {{--        @if($admission)--}}
+                {{--            <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-5   shadow rounded-md p-3">--}}
+                {{--                <div class="">--}}
+                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
+                {{--                        Referred By--}}
+                {{--                    </dt>--}}
+                {{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
+                {{--                        {{ $admission_details['doctor'] ?? '-' }}--}}
+                {{--                    </dd>--}}
+                {{--                </div>--}}
+                {{--                <div class="">--}}
+                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
+                {{--                        Patient Name--}}
+                {{--                    </dt>--}}
+                {{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
+                {{--                        {{  $admission_details['mr_no'].' - '.$admission_details['name'] ?? 'Walk-in' }}--}}
+                {{--                    </dd>--}}
+                {{--                </div>--}}
+                {{--                <div class="">--}}
+                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
+                {{--                        Admission # - Procedure--}}
+                {{--                    </dt>--}}
+                {{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
+                {{--                        {{  $admission_details['admission_no'] ?? '' }} - {{$admission_details['procedure_name']}}--}}
+                {{--                    </dd>--}}
+                {{--                </div>--}}
+                {{--                <div class="">--}}
+                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
+                {{--                        Date--}}
+                {{--                    </dt>--}}
+                {{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
+                {{--                        {{ date('d M, Y') }}--}}
+                {{--                    </dd>--}}
+                {{--                </div>--}}
+                {{--                <div class="">--}}
+                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
+                {{--                        Issued By--}}
+                {{--                    </dt>--}}
+                {{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
+                {{--                        {{ Auth::user()->name }}--}}
+                {{--                    </dd>--}}
+                {{--                </div>--}}
+                {{--            </div>--}}
+                {{--        @else--}}
+                {{--            <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-5 shadow rounded-md p-3">--}}
+                {{--                <div class="">--}}
+                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
+                {{--                        Customer--}}
+                {{--                    </dt>--}}
+                {{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
+                {{--                        {{ $customer_name_credit ?? '-' }}--}}
+                {{--                    </dd>--}}
+                {{--                </div>--}}
+                {{--                <div class="">--}}
+                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
+                {{--                        Referred By--}}
+                {{--                    </dt>--}}
+                {{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
+                {{--                        {{ $referred_by_name ?? '-' }}--}}
+                {{--                    </dd>--}}
+                {{--                </div>--}}
+                {{--                <div class="">--}}
+                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
+                {{--                        Patient Name--}}
+                {{--                    </dt>--}}
+                {{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
+                {{--                        {{ $patient_name ?? 'Walk-in' }}--}}
+                {{--                    </dd>--}}
+                {{--                </div>--}}
+                {{--                <div class="">--}}
+                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
+                {{--                        Date--}}
+                {{--                    </dt>--}}
+                {{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
+                {{--                        {{ date('d M, Y') }}--}}
+                {{--                    </dd>--}}
+                {{--                </div>--}}
+                {{--                <div class="">--}}
+                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
+                {{--                        Sale By--}}
+                {{--                    </dt>--}}
+                {{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
+                {{--                        {{ Auth::user()->name }}--}}
+                {{--                    </dd>--}}
+                {{--                </div>--}}
+                {{--            </div>--}}
+                {{--        @endif--}}
+                {{--    </div>--}}
 
-        @if(!empty($error))
-            <div class="rounded-md mb-5 bg-red-50 p-4">
-                <div class="flex">
-                    <div class="flex-shrink-0">
+                {{--    <main class="col-span-2">--}}
 
-                        <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                             xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-medium text-red-800">
-                            {{ $error }}
-                        </p>
-                    </div>
-                    <div class="ml-auto pl-3">
-                        <div class="-mx-1.5 -my-1.5">
-                            <button type="button" wire:click="$set('error','')"
-                                    class="inline-flex bg-red-50 rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-red-50 focus:ring-red-600">
-                                <span class="sr-only">Dismiss</span>
-                                <!-- Heroicon name: solid/x -->
-                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                     fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd"
-                                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                          clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endif
+                {{--        <div class="mb-3 p-2 bg-white shadow rounded-lg overflow-hidden">--}}
+                {{--            <dt class="text-sm font-medium text-gray-500 truncate">--}}
+                {{--                Customer--}}
+                {{--            </dt>--}}
+                {{--            <dd class="mt-1 text-xl font-medium text-gray-900">--}}
+                {{--               <span class="text-xs font-base text-gray-500">Name: </span>  {{ $customer_name_credit ?? 'Nill' }}<br>--}}
+                {{--                <span class="text-xs font-base text-gray-500">Credit Limit :</span> PKR {{number_format($customer_credit_limit) ?? '-'}}<br>--}}
+                {{--                <span class="text-xs font-base text-gray-500">Closing Balance :</span> PKR {{number_format($customer_previous_credit) ?? '-'}}--}}
 
+                {{--            </dd>--}}
+                {{--        </div>--}}
+                {{--        <div class="mb-3 p-2 bg-white shadow rounded-lg overflow-hidden">--}}
+                {{--            <dt class="text-sm font-medium text-gray-500 truncate">--}}
+                {{--                Patient Name--}}
+                {{--            </dt>--}}
+                {{--            <dd class="mt-1 text-xl font-medium text-gray-900">--}}
+                {{--                {{ $patient_name ?? 'Walk-in' }}--}}
+                {{--            </dd>--}}
+                {{--        </div>--}}
+                {{--        <div class="mb-3 p-2 bg-white shadow rounded-lg overflow-hidden">--}}
+                {{--            <dt class="text-sm font-medium text-gray-500 truncate">--}}
+                {{--                Referred by--}}
+                {{--            </dt>--}}
+                {{--            <dd class="mt-1 text-xl font-medium text-gray-900">--}}
+                {{--                {{ $referred_by_name ?? '-' }}--}}
+                {{--            </dd>--}}
+                {{--        </div>--}}
+                {{--        <div class="mb-3 p-2 bg-white shadow rounded-lg overflow-hidden">--}}
+                {{--            <dt class="text-sm font-medium text-gray-500 truncate">--}}
+                {{--                Date--}}
+                {{--            </dt>--}}
+                {{--            <dd class="mt-1 text-xl font-medium text-gray-900">--}}
+                {{--                {{ date('d M, Y') }}--}}
+                {{--            </dd>--}}
+                {{--        </div>--}}
+                {{--        <div class="mb-3 p-2 bg-white shadow rounded-lg overflow-hidden">--}}
+                {{--            <dt class="text-sm font-medium text-gray-500 truncate">--}}
+                {{--                Sale By--}}
+                {{--            </dt>--}}
+                {{--            <dd class="mt-1 text-xl font-medium text-gray-900">--}}
+                {{--                {{ Auth::user()->name }}--}}
+                {{--            </dd>--}}
+                {{--        </div>--}}
+                {{--    </main>--}}
+                <!-- This example requires Tailwind CSS v2.0+ -->
 
-        <div class="bg-white  overflow-hidden  shadow rounded-lg">
-            <table class="min-w-full table-fixed divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                <tr>
-                    <th scope="col"
-                        class="w-7 px-2   border-r py-2 text-center text-md font-medium text-gray-500  tracking-wider">
-                        #
-                    </th>
-                    <th scope="col"
-                        class="  px-2   border-r py-2 text-left text-md font-medium text-gray-500  tracking-wider">
-                        Item
-                    </th>
-                    <th scope="col"
-                        class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
-                        Qty
-                    </th>
-                    <th scope="col"
-                        class="w-28 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
-                        Unit Price
-                    </th>
-                    <th scope="col"
-                        class="w-32 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
-                        Total
-                    </th>
-                    @if($admission==false)
-                        <th scope="col"
-                            class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
-                            Disc %
-                        </th>
-                        <th scope="col" title="Total After Disc"
-                            class="w-32 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
-                            Disc PKR
-                        </th>
-                    @endif
-                    <th scope="col" title="Total After Disc"
-                        class="w-32 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
-                        Gross Total
-                    </th>
-                    <th scope="col"
-                        class="w-10 cursor-pointer px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-
-                    </th>
-                </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                @foreach($sales as $key => $s)
-                    <tr class="{{ !empty($s['type']) ? 'bg-red-50' : '' }}">
-                        <td class="px-2  text-center  border-r text-md font-medium text-gray-900">
-                            {{ $loop->iteration }}
-                        </td>
-                        <td class="px-2 text-left border-r text-md text-gray-500">
-                            {{ $s['item'] }}
-                            @if(isset($s['required_qty']))
-                                @if(!empty($s['required_qty']))
-                                    <span
-                                            class="text-red-500 text-sm">(Required Quantity is {{$s['required_qty']}})</span>
-                                @endif
-                            @endif
-                        </td>
-                        <td class="px-2   text-left   border-r  text-md text-gray-500">
-                            <input type="number" wire:model.lazy="sales.{{ $key }}.s_qty" onClick="this.select();"
-                                   class="p-0 focus:ring-0 block w-full  text-md border-0 text-center "
-                                   autocomplete="off">
-                        </td>
-                        <td class="px-2  text-center  border-r text-md text-gray-500">
-                            <input type="number" wire:model.lazy="sales.{{ $key }}.retail_price"
-                                   onClick="this.select();"
-                                   class="p-0 focus:ring-0 block w-full  text-md border-0 text-center "
-                                   autocomplete="off">
-
-                        </td>
-                        <td class="px-2 bg-gray-50  text-center border-r text-md text-gray-500">
-                            {{ number_format($s['total'],2) }}
-                        </td>
-                        @if($admission==false)
-                            <td class="px-2  text-center border-r text-md text-gray-500">
-                                <input type="number" step="0.01" wire:model.lazy="sales.{{ $key }}.disc"
-                                       onClick="this.select();"
-                                       class="text-center p-0 focus:ring-0 block w-full   text-md border-0  "
-                                       autocomplete="off">
-                            </td>
-                            <td class="px-2 bg-gray-50  text-center border-r text-md text-gray-500">
-                                {{ number_format($s['total'] - $s['total_after_disc'],2) }}
-                            </td>
+                    <main class="col-span-12">
+                        @if(!empty($success))
+                            <div class="rounded-md mb-5 bg-green-50 p-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <!-- Heroicon name: solid/check-circle -->
+                                        <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                             fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd"
+                                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                  clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-green-800">
+                                            {{ $success }}
+                                        </p>
+                                    </div>
+                                    <div class="ml-auto pl-3">
+                                        <div class="-mx-1.5 -my-1.5">
+                                            <button type="button" wire:click="$set('success','')"
+                                                    class="inline-flex bg-green-50 rounded-md p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-green-50 focus:ring-green-600">
+                                                <span class="sr-only">Dismiss</span>
+                                                <!-- Heroicon name: solid/x -->
+                                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                     fill="currentColor" aria-hidden="true">
+                                                    <path fill-rule="evenodd"
+                                                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                          clip-rule="evenodd"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         @endif
-                        <td class="px-2 bg-gray-50  text-center border-r text-md text-gray-500">
-                            {{ number_format($s['total_after_disc'],2) }}
-                        </td>
-                        <td class="  w-10 cursor-pointer px-2 py-3   border-r text-center text-md font-medium text-red-700  tracking-wider  ">
-                            <svg wire:click="removeEntry('{{ $key }}')" class="w-5 h-5 " fill="currentColor"
-                                 viewBox="0 0 20 20"
-                                 xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd"
-                                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                      clip-rule="evenodd"></path>
-                            </svg>
-                        </td>
-                    </tr>
-                @endforeach
-                <tr>
-                    <th scope="col" colspan="2"
-                        class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
-                        Total
-                    </th>
-                    <th scope="col"
-                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        {{ collect($sales)->sum('s_qty') }}
-                    </th>
-                    <th scope="col"
-                        class="w-7 px-2   border-r py-2 text-right text-xs font-medium text-gray-500  tracking-wider">
-                    </th>
-                    <th scope="col"
-                        class="w-7 px-2   border-r py-2 text-center text-md font-medium text-gray-500  tracking-wider">
-                        {{ number_format(collect($sales)->sum('total'),2) }}
-                    </th>
-                    @if($admission==false)
-                        <th scope="col"
-                            class="w-7 px-2  border-r py-2 text-right text-xs font-medium text-gray-500  tracking-wider">
-                        </th>
 
-                        <th scope="col"
-                            class="w-7 px-2   border-r py-2 text-center text-md font-medium text-gray-500  tracking-wider">
-                            {{ number_format(collect($sales)->sum('total') - collect($sales)->sum('total_after_disc'),2) }}
-                        </th>
-                    @endif
+                        @if(!empty($error))
+                            <div class="rounded-md mb-5 bg-red-50 p-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
 
-                    <th scope="col"
-                        class="w-7 px-2   border-r py-2 text-center text-md font-medium text-gray-500  tracking-wider">
-                        {{ number_format(collect($sales)->sum('total_after_disc'),2) }}
-
-                    </th>
-                </tr>
-
-                <tr>
-                    <th colspan="5" class="text-left p-2 text-sm text-red-600">
-                        @if($admission)
-                            @if($hospital_info['transfer_medicine']=='cost_of_price')
-                                Note: Medicines will be issued on Supply Price.
-                            @else
-                                Note: Medicines will be issued on Retail Price.
-                            @endif
-                        @else
-                            &nbsp;
+                                        <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-red-800">
+                                            {{ $error }}
+                                        </p>
+                                    </div>
+                                    <div class="ml-auto pl-3">
+                                        <div class="-mx-1.5 -my-1.5">
+                                            <button type="button" wire:click="$set('error','')"
+                                                    class="inline-flex bg-red-50 rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-red-50 focus:ring-red-600">
+                                                <span class="sr-only">Dismiss</span>
+                                                <!-- Heroicon name: solid/x -->
+                                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                     fill="currentColor" aria-hidden="true">
+                                                    <path fill-rule="evenodd"
+                                                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                          clip-rule="evenodd"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         @endif
-                    </th>
-                </tr>
-                <tr class="bg-gray-50">
-                    <th rowspan="{{ $admission==true? '2' : '4' }}" colspan="{{ $admission==true? '2' : '3' }}"
-                        class="  border-r   bg-white text-md font-medium text-gray-500  tracking-wider">
+
+
+                        <div class="bg-white  overflow-hidden  shadow rounded-lg">
+                            <table class="min-w-full table-fixed divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col"
+                                        class="w-7 px-2   border-r py-2 text-center text-md font-medium text-gray-500  tracking-wider">
+                                        #
+                                    </th>
+                                    <th scope="col"
+                                        class="  px-2   border-r py-2 text-left text-md font-medium text-gray-500  tracking-wider">
+                                        Item
+                                    </th>
+                                    <th scope="col"
+                                        class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
+                                        Qty
+                                    </th>
+                                    <th scope="col"
+                                        class="w-28 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
+                                        Unit Price
+                                    </th>
+                                    <th scope="col"
+                                        class="w-32 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
+                                        Total
+                                    </th>
+                                    @if($admission==false)
+                                        <th scope="col"
+                                            class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
+                                            Disc %
+                                        </th>
+                                        <th scope="col" title="Total After Disc"
+                                            class="w-32 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
+                                            Disc PKR
+                                        </th>
+                                    @endif
+                                    <th scope="col" title="Total After Disc"
+                                        class="w-32 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
+                                        Gross Total
+                                    </th>
+                                    <th scope="col"
+                                        class="w-10 cursor-pointer px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($sales as $key => $s)
+                                    <tr class="{{ !empty($s['type']) ? 'bg-red-50' : '' }}">
+                                        <td class="px-2  text-center  border-r text-md font-medium text-gray-900">
+                                            {{ $loop->iteration }}
+                                        </td>
+                                        <td class="px-2 text-left border-r text-md text-gray-500">
+                                            {{ $s['item'] }}
+                                            @if(isset($s['required_qty']))
+                                                @if(!empty($s['required_qty']))
+                                                    <span
+                                                            class="text-red-500 text-sm">(Required Quantity is {{$s['required_qty']}})</span>
+                                                @endif
+                                            @endif
+                                        </td>
+                                        <td class="px-2   text-left   border-r  text-md text-gray-500">
+                                            <input type="number" wire:model.lazy="sales.{{ $key }}.s_qty" onClick="this.select();"
+                                                   class="p-0 focus:ring-0 block w-full  text-md border-0 text-center "
+                                                   autocomplete="off">
+                                        </td>
+                                        <td class="px-2  text-center  border-r text-md text-gray-500">
+                                            <input type="number" wire:model.lazy="sales.{{ $key }}.retail_price"
+                                                   onClick="this.select();"
+                                                   class="p-0 focus:ring-0 block w-full  text-md border-0 text-center "
+                                                   autocomplete="off">
+
+                                        </td>
+                                        <td class="px-2 bg-gray-50  text-center border-r text-md text-gray-500">
+                                            {{ number_format($s['total'],2) }}
+                                        </td>
+                                        @if($admission==false)
+                                            <td class="px-2  text-center border-r text-md text-gray-500">
+                                                <input type="number" step="0.01" wire:model.lazy="sales.{{ $key }}.disc"
+                                                       onClick="this.select();"
+                                                       class="text-center p-0 focus:ring-0 block w-full   text-md border-0  "
+                                                       autocomplete="off">
+                                            </td>
+                                            <td class="px-2 bg-gray-50  text-center border-r text-md text-gray-500">
+                                                {{ number_format($s['total'] - $s['total_after_disc'],2) }}
+                                            </td>
+                                        @endif
+                                        <td class="px-2 bg-gray-50  text-center border-r text-md text-gray-500">
+                                            {{ number_format($s['total_after_disc'],2) }}
+                                        </td>
+                                        <td class="  w-10 cursor-pointer px-2 py-3   border-r text-center text-md font-medium text-red-700  tracking-wider  ">
+                                            <svg wire:click="removeEntry('{{ $key }}')" class="w-5 h-5 " fill="currentColor"
+                                                 viewBox="0 0 20 20"
+                                                 xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd"
+                                                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                                      clip-rule="evenodd"></path>
+                                            </svg>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                <tr>
+                                    <th scope="col" colspan="2"
+                                        class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
+                                        Total
+                                    </th>
+                                    <th scope="col"
+                                        class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+                                        {{ collect($sales)->sum('s_qty') }}
+                                    </th>
+                                    <th scope="col"
+                                        class="w-7 px-2   border-r py-2 text-right text-xs font-medium text-gray-500  tracking-wider">
+                                    </th>
+                                    <th scope="col"
+                                        class="w-7 px-2   border-r py-2 text-center text-md font-medium text-gray-500  tracking-wider">
+                                        {{ number_format(collect($sales)->sum('total'),2) }}
+                                    </th>
+                                    @if($admission==false)
+                                        <th scope="col"
+                                            class="w-7 px-2  border-r py-2 text-right text-xs font-medium text-gray-500  tracking-wider">
+                                        </th>
+
+                                        <th scope="col"
+                                            class="w-7 px-2   border-r py-2 text-center text-md font-medium text-gray-500  tracking-wider">
+                                            {{ number_format(collect($sales)->sum('total') - collect($sales)->sum('total_after_disc'),2) }}
+                                        </th>
+                                    @endif
+
+                                    <th scope="col"
+                                        class="w-7 px-2   border-r py-2 text-center text-md font-medium text-gray-500  tracking-wider">
+                                        {{ number_format(collect($sales)->sum('total_after_disc'),2) }}
+
+                                    </th>
+                                </tr>
+
+                                <tr>
+                                    <th colspan="5" class="text-left p-2 text-sm text-red-600">
+                                        @if($admission)
+                                            @if($hospital_info['transfer_medicine']=='cost_of_price')
+                                                Note: Medicines will be issued on Supply Price.
+                                            @else
+                                                Note: Medicines will be issued on Retail Price.
+                                            @endif
+                                        @else
+                                            &nbsp;
+                                        @endif
+                                    </th>
+                                </tr>
+                                <tr class="bg-gray-50">
+                                    <th rowspan="{{ $admission==true? '2' : '4' }}" colspan="{{ $admission==true? '2' : '3' }}"
+                                        class="  border-r   bg-white text-md font-medium text-gray-500  tracking-wider">
 
                         <textarea name="" cols="30" rows="5" id="remarks"
                                   class="p-0 focus:ring-0 block w-full border-0 text-md resize-none h-40  "></textarea>
 
-                    </th>
-                    <th scope="col" colspan="{{ $admission==true? '3' : '4' }}"
-                        class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
-                        Sub Total
-                    </th>
-                    <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
-                        class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
-                        {{ number_format(collect($sales)->sum('total'),2) }}
-                    </th>
-                </tr>
-                @if($admission==false)
-                    <tr>
-                        <th scope="col" colspan="4"
-                            class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
-                            Discount (F3) (%)
-                        </th>
-                        <th scope="col" colspan="2"
-                            class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
-                            <input type="number" wire:model.lazy="discount" min="0" max="100" onClick="this.select();"
-                                   id="discount"
-                                   class="p-0 focus:ring-0 block w-full  text-xl border-0 font-medium text-gray-500 text-center "
-                                   autocomplete="off">
-                        </th>
-                    </tr>
-                @endif
-                <tr class="bg-gray-50">
-                    <th scope="col" colspan="{{ $admission==true? '3' : '4' }}"
-                        class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
-                        Gross Total
-                    </th>
-                    <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
-                        class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
-                        {{ number_format(collect($sales)->sum('total_after_disc'),2) }}
-                    </th>
-                </tr>
-                @if($admission==false)
-                    <tr>
-                        <th scope="col" colspan="4"
-                            class="w-7 px-2 text-left border-r py-2 @if($credit==true) bg-red-50 @endif text-xl font-medium text-gray-500  tracking-wider">
-                            <input id="credit" wire:model="credit" type="checkbox"
-                                   class="focus:ring-red-500 h-4 w-4 text-red-600 border-red-300 rounded">
-                            <label for="credit" class="text-red-500 text-sm">On Credit</label>
-                            <div class="ml-3 float-right">
-                                <span class=""> Received Amount (F4)</span>
-                            </div>
-                        </th>
-                        <th scope="col" colspan="2"
-                            class="w-10   px-2 py-2 @if($credit==true) bg-red-50 @endif  border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
-                            <input type="number" wire:model.debounce.300ms="received" onClick="this.select();" @if($credit==true) disabled @endif
-                                   id="received"
-                                   wire:keydown.enter="saleComplete"
-                                   class="p-0 focus:ring-0 block w-full @if($credit==true) bg-red-50 @endif  text-xl border-0 font-medium text-gray-500 text-center "
-                                   autocomplete="off">
+ 
+                                    </th>
+                                    <th scope="col" colspan="{{ $admission==true? '3' : '4' }}"
+                                        class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
+                                        Sub Total
+                                    </th>
+                                    <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
+                                        class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
+                                        {{ number_format(collect($sales)->sum('total'),2) }}
+                                    </th>
+                                </tr>
+                                @if($admission==false)
+                                    <tr>
+                                        <th scope="col" colspan="4"
+                                            class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
+                                            Discount (F3) (%)
+                                        </th>
+                                        <th scope="col" colspan="2"
+                                            class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
+                                            <input type="number" wire:model.lazy="discount" min="0" max="100" onClick="this.select();"
+                                                   id="discount"
+                                                   class="p-0 focus:ring-0 block w-full  text-xl border-0 font-medium text-gray-500 text-center "
+                                                   autocomplete="off">
+                                        </th>
+                                    </tr>
+                                @endif
+                                <tr class="bg-gray-50">
+                                    <th scope="col" colspan="{{ $admission==true? '3' : '4' }}"
+                                        class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
+                                        Gross Total
+                                    </th>
+                                    <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
+                                        class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
+                                        {{ number_format(collect($sales)->sum('total_after_disc'),2) }}
+                                    </th>
+                                </tr>
+                                @if($admission==false)
+                                    <tr>
+                                        <th scope="col" colspan="4"
+                                            class="w-7 px-2 text-left border-r py-2 @if($credit==true) bg-red-50 @endif text-xl font-medium text-gray-500  tracking-wider">
+                                            <input id="credit" wire:model="credit" type="checkbox"
+                                                   class="focus:ring-red-500 h-4 w-4 text-red-600 border-red-300 rounded">
+                                            <label for="credit" class="text-red-500 text-sm">On Credit</label>
+                                            <div class="ml-3 float-right">
+                                                <span class=""> Received Amount (F4)</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" colspan="2"
+                                            class="w-10   px-2 py-2 @if($credit==true) bg-red-50 @endif  border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
+                                            <input type="number" wire:model.debounce.300ms="received" onClick="this.select();"
+                                                   id="received"
+                                                   wire:keydown.enter="saleComplete"
+                                                   class="p-0 focus:ring-0 block w-full @if($credit==true) bg-red-50 @endif  text-xl border-0 font-medium text-gray-500 text-center "
+                                                   autocomplete="off">
 
-                        </th>
-                    </tr>
-                    <tr class="bg-gray-50">
-                        <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
-                            class="w-7 px-2    py-2 text-left text-md font-medium text-gray-500  tracking-wider">
-                            Remarks (F5)
-                        </th>
+                                        </th>
+                                    </tr>
+                                    <tr class="bg-gray-50">
+                                        <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
+                                            class="w-7 px-2    py-2 text-left text-md font-medium text-gray-500  tracking-wider">
+                                            Remarks (F5)
+                                        </th>
 
-                        <th scope="col" colspan="{{ $admission==true? '2' : '5' }}"
-                            class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
-                            @if($credit==true && $received < collect($this->sales)->sum('total_after_disc'))
-                                On Account
-                            @else
-                                Change
-                            @endif
+                                        <th scope="col" colspan="{{ $admission==true? '2' : '5' }}"
+                                            class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
+                                            @if($credit==true && $received < collect($this->sales)->sum('total_after_disc'))
+                                                On Account
+                                            @else
+                                                Change
+                                            @endif
 
-                        </th>
-                        <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
-                            class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
-                            {{ number_format($payable,2) }}
-                        </th>
-                    </tr>
-                @endif
-                @if($admission)
-                    <tr class="bg-gray-50">
-                        <th scope="col" colspan="2"
-                            class="w-7 px-2    py-2 text-left text-md font-medium text-gray-500  tracking-wider">
-                            Remarks (F5)
-                        </th>
-                        <td scope="col" colspan="5"
-                            class="w-10 bg-gray-50 border-0 text-center text-sm  text-gray-500  tracking-wider">
-                            <div class="flex -m-1">
+                                        </th>
+                                        <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
+                                            class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
+                                            {{ number_format($payable,2) }}
+                                        </th>
+                                    </tr>
+                                @endif
+                                @if($admission)
+                                    <tr class="bg-gray-50">
+                                        <th scope="col" colspan="2"
+                                            class="w-7 px-2    py-2 text-left text-md font-medium text-gray-500  tracking-wider">
+                                            Remarks (F5)
+                                        </th>
+                                        <td scope="col" colspan="5"
+                                            class="w-10 bg-gray-50 border-0 text-center text-sm  text-gray-500  tracking-wider">
+                                            <div class="flex -m-1">
+ 
                                 <span class="inline-flex items-center px-3 bg-gray-50 text-gray-500 text-xl font-medium">
                                   Handed over to
                                 </span>
-                                <input type="text" wire:model.defer="handed_over" onClick="this.select();"
-                                       class="flex-1 border-0 min-w-0 block w-full px-3 py-2 rounded-none focus:ring-0 text-xl placeholder-gray-500 placeholder-opacity-50"
-                                       placeholder="Enter here">
-                            </div>
-                        </td>
-                    </tr>
-                @endif
-                </tbody>
-            </table>
+                                                <input type="text" wire:model.defer="handed_over" onClick="this.select();"
+                                                       class="flex-1 border-0 min-w-0 block w-full px-3 py-2 rounded-none focus:ring-0 text-xl placeholder-gray-500 placeholder-opacity-50"
+                                                       placeholder="Enter here">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endif
+                                </tbody>
+                            </table>
+                        </div>
+
+
+                    </main>
+                </div>
+            </main>
         </div>
+    </div>
 
 
-    </main>
+
     <div x-data="{ open: @entangle('add_modal') }" x-cloak x-show="open"
          class="fixed z-50 inset-0 overflow-y-auto">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -814,57 +876,6 @@
         </div>
     </div>
 
-    {{--    <div x-data="{ open: @entangle('choose_till') }" x-cloak x-show="open"--}}
-    {{--         class="fixed z-40 inset-0 overflow-y-auto">--}}
-    {{--        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">--}}
-    {{--            <div x-show="open" x-description="Background overlay, show/hide based on modal state."--}}
-    {{--                 x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"--}}
-    {{--                 x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"--}}
-    {{--                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"--}}
-    {{--                 class="fixed inset-0 transition-opacity" aria-hidden="true">--}}
-    {{--                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>--}}
-    {{--            </div>--}}
-
-    {{--            <!-- This element is to trick the browser into centering the modal contents. -->--}}
-    {{--            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true"></span>--}}
-    {{--            <div @click.away="open = false;" x-show="open" x-description="Modal panel, show/hide based on modal state."--}}
-    {{--                 x-transition:enter="ease-out duration-300"--}}
-    {{--                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"--}}
-    {{--                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"--}}
-    {{--                 x-transition:leave="ease-in duration-200"--}}
-    {{--                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"--}}
-    {{--                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"--}}
-    {{--                 class="h-1/3 inline-block align-bottom bg-white rounded-lg  text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full  "--}}
-    {{--                 role="dialog" aria-modal="true" aria-labelledby="modal-headline">--}}
-    {{--                <div class="p-3">--}}
-    {{--                    <fieldset>--}}
-    {{--                        <h3 class="mb-3 text-md font-medium text-gray-500">List of All Tills</h3>--}}
-    {{--                        <div class="bg-white rounded-md -space-y-px">--}}
-    {{--                            @foreach($tills as $key => $t)--}}
-    {{--                                <label--}}
-    {{--                                    class="border-gray-200 rounded-tl-md rounded-tr-md relative border p-4 flex cursor-pointer">--}}
-    {{--                                    <input type="radio" wire:model="till_id" name="till_id" value="{{ $t['id'] }}"--}}
-    {{--                                           class="h-4 w-4 mt-0.5 cursor-pointer text-indigo-600 border-gray-300 focus:ring-indigo-500"--}}
-    {{--                                           aria-labelledby="privacy-setting-0-label"--}}
-    {{--                                           aria-describedby="privacy-setting-0-description">--}}
-    {{--                                    <div class="ml-3 flex flex-col">--}}
-    {{--                                        <span id="till-{{ $key }}-label"--}}
-    {{--                                              class="text-gray-900 block text-sm font-medium">--}}
-    {{--                                          {{ $t['name'] }}--}}
-    {{--                                        </span>--}}
-    {{--                                    </div>--}}
-    {{--                                </label>--}}
-    {{--                            @endforeach--}}
-    {{--                        </div>--}}
-    {{--                    </fieldset>--}}
-    {{--                    <button type="button" wire:click="updateTill"--}}
-    {{--                            class="mt-3 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">--}}
-    {{--                        Update Till--}}
-    {{--                    </button>--}}
-    {{--                </div>--}}
-    {{--            </div>--}}
-    {{--        </div>--}}
-    {{--    </div>--}}
     @include('pharmacy::include.searchable')
 </div>
 
