@@ -150,10 +150,10 @@
                             {{number_format($p['on_account'],2)}}
                         </td>
                         <td class="px-3 py-3 text-sm text-gray-500">
-                            {{number_format($p['refunded'],2)}}
+                            {{number_format(abs($p['refunded']),2)}}
                         </td>
                         <td class="px-3 py-3 text-sm text-gray-500">
-                            {{number_format($p['on_account']-$p['refunded'],2)}}
+                            {{number_format($p['on_account']-(abs($p['refunded'])),2)}}
                         </td>
                         <td class="px-3 py-3 text-sm text-gray-500">
                             {{date('d M Y h:i A',strtotime($p['sale_at']))}}
@@ -184,7 +184,7 @@
                         Refunded
                     </th>
                     <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
-                        {{collect($this->payments)->where('selected',true)->sum('refunded')}}
+                        {{abs(collect($this->payments)->where('selected',true)->sum('refunded'))}}
                     </th>
                 </tr>
                 <tr>
@@ -192,7 +192,7 @@
                         Total Receivable
                     </th>
                     <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
-                        {{collect($this->payments)->where('selected',true)->sum('on_account') - collect($this->payments)->where('selected',true)->sum('refunded')}}
+                        {{collect($this->payments)->where('selected',true)->sum('on_account') - abs(collect($this->payments)->where('selected',true)->sum('refunded'))}}
                     </th>
                 </tr>
                 <tr>

@@ -12,18 +12,16 @@
             </div>
             <div class="mt-5 flex lg:mt-0 lg:ml-4 ">
                 <span class="ml-3">
-                    @if($credit==false)
-                        @if($type=='issue' || empty($admission_id))
-                            <button type="button" wire:click="searchableOpenModal('product_id', 'product_name', 'item')"
-                                    class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor"
-                                 viewBox="0 0 24 24"
-                                 xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round"
-                                                                          stroke-width="2"
-                                                                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                            Search Item (F1)
-                        </button>
-                        @endif
+                    @if($type=='issue' || empty($admission_id))
+                    <button type="button" wire:click="searchableOpenModal('product_id', 'product_name', 'item')"
+                            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor"
+                             viewBox="0 0 24 24"
+                             xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round"
+                                                                      stroke-width="2"
+                                                                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        Search Item (F1)
+                    </button>
                     @endif
                 </span>
                 <span class="ml-3">
