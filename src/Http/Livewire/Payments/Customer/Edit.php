@@ -2,35 +2,49 @@
 
 namespace Devzone\Pharmacy\Http\Livewire\Payments\Customer;
 
-use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Customer;
-use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Payments\CustomerPayment;
 use Devzone\Pharmacy\Models\Payments\CustomerPaymentDetail;
-use Illuminate\Support\Facades\Auth;
+use Devzone\Pharmacy\Models\Payments\SupplierPayment;
+use Devzone\Pharmacy\Models\Payments\SupplierPaymentDetail;
+use Devzone\Pharmacy\Models\Payments\SupplierPaymentRefundDetail;
+use Devzone\Pharmacy\Models\Sale\Sale;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
-class Add extends Component
+class Edit extends Component
 {
-    use Searchable;
-
+    public $payment_id;
     public $customer_id;
     public $customer_name;
     public $payments = [];
     public $description;
     public $receiving_date;
     public $closing_balance;
-
-    protected $listeners = ['emitCustomerId'];
+    public $selected_payment = [];
 
     protected $validationAttributes = [
         'customer_id' => 'Customer'
     ];
 
+    public function mount($id)
+    {
+        $this->payment_id = $id;
+        $payment = CustomerPayment::find($this->payment_id);
+        $payment_details = CustomerPaymentDetail::where('customer_payment_id', $this->payment_id)->get();
+        $customer = Customer::find($payment->customer_id);
+
+        $this->customer_id = $customer->id;
+        $this->customer_name = $customer->name;
+        $this->selected_payment = $payment_details->pluck('sale_id')->toArray();
+        $this->description = $payment->description;
+        $this->receiving_date = $payment->receiving_date;
+        $this->emitCustomerId();
+    }
+
     public function render()
     {
-        return view('pharmacy::livewire.payments.customer.add');
+        return view('pharmacy::livewire.payments.customer.edit');
     }
 
     public function emitCustomerId()
@@ -48,7 +62,12 @@ class Add extends Component
         if ($payments->isNotEmpty()) {
             $payments = $payments->toArray();
             foreach ($payments as $key => $p) {
-                $payments[$key]['selected'] = false;
+                if (in_array($payments[$key]['id'], $this->selected_payment)) {
+                    $payments[$key]['selected'] = true;
+                } else {
+                    $payments[$key]['selected'] = false;
+                }
+
             }
             $this->payments = $payments;
         } else {
@@ -77,28 +96,25 @@ class Add extends Component
         }
         try {
             DB::beginTransaction();
-            if (empty(Auth::user()->account_id)) {
-                throw new \Exception('Cash in Hand - ' . Auth::user()->name . ' account not found.');
+            if (CustomerPayment::whereNotNull('approved_by')->where('id', $this->payment_id)->exists()) {
+                throw new \Exception('This payment is already approved so unable to edit.');
             }
-            $id=CustomerPayment::create([
-                'customer_id' => $this->customer_id,
-                'description'=>$this->description,
-                'receiving_in'=>Auth::user()->account_id,
-                'receiving_date'=>$this->receiving_date,
-                'added_by'=>Auth::id(),
-            ])->id;
+            CustomerPayment::find($this->payment_id)->update([
+                'description' => $this->description,
+                'receiving_date' => $this->receiving_date,
+            ]);
+            CustomerPaymentDetail::where('customer_payment_id', $this->payment_id)->delete();
             foreach (collect($this->payments)->where('selected',true) as $p){
                 CustomerPaymentDetail::create([
-                    'customer_payment_id'=>$id,
+                    'customer_payment_id'=>$this->payment_id,
                     'sale_id'=>$p['id']
                 ]);
             }
             DB::commit();
-            $this->success = 'Record has been added and waiting for approval.';
-            $this->reset(['customer_id', 'customer_name', 'payments', 'receiving_date','description','closing_balance']);
+            $this->success = 'Record has been updated.';
 
         } catch (\Exception $e) {
-            $this->addError('Exception', $e->getMessage());
+            $this->addError('purchase_orders', $e->getMessage());
             DB::rollBack();
         }
     }

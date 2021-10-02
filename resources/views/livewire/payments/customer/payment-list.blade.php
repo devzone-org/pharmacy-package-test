@@ -8,21 +8,21 @@
                         <div class="bg-white py-6 px-4 space-y-6 sm:p-6 ">
                             <div class="grid grid-cols-8 gap-6">
                                 <div class="col-span-8 sm:col-span-2">
-                                    <label for="name" class="block text-sm font-medium text-gray-700">Supplier
+                                    <label for="name" class="block text-sm font-medium text-gray-700">Customer
                                         Name</label>
-                                    <input type="text" wire:model.defer="supplier_name" readonly
-                                           wire:click="searchableOpenModal('supplier_id','supplier_name','supplier')"
+                                    <input type="text" wire:model.defer="customer_name" readonly
+                                           wire:click="searchableOpenModal('customer_id','customer_name','customer')"
                                            name="name" id="name" autocomplete="off"
                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 </div>
 
-                                <div class="col-span-8 sm:col-span-2">
-                                    <label for="salt" class="block text-sm font-medium text-gray-700">Pay From</label>
-                                    <input type="text" wire:model.defer="pay_from_name"
-                                           wire:click="searchableOpenModal('pay_from','pay_from_name','pay_from')"
-                                           id="salt" autocomplete="off"
-                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                </div>
+{{--                                <div class="col-span-8 sm:col-span-2">--}}
+{{--                                    <label for="salt" class="block text-sm font-medium text-gray-700">Pay From</label>--}}
+{{--                                    <input type="text" wire:model.defer="pay_from_name"--}}
+{{--                                           wire:click="searchableOpenModal('pay_from','pay_from_name','pay_from')"--}}
+{{--                                           id="salt" autocomplete="off"--}}
+{{--                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">--}}
+{{--                                </div>--}}
 
                                 <div class="col-span-8 sm:col-span-2">
                                     <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
@@ -31,9 +31,7 @@
                                             id="status">
                                         <option value=""></option>
                                         <option value="app">Approved</option>
-
                                         <option value="not-app">Not Approved</option>
-
                                     </select>
                                 </div>
 
@@ -151,17 +149,16 @@
                 </th>
 
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Supplier Name
+                    Customer Name
                 </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                     Description
                 </th>
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Pay From
+                    Receiving in
                 </th>
-
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    (Payable) / Receivable
+                    Receivable
                 </th>
 
                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
@@ -183,44 +180,46 @@
             </tr>
             </thead>
             <tbody class="   bg-white divide-y divide-gray-200 ">
-
+            @foreach($payments as $p)
                 <tr class="">
                     <td class="px-3 py-3   text-sm font-medium text-gray-500">
-
+                        {{$loop->iteration}}
                     </td>
-
-                    <td class="px-3 py-3   text-sm text-gray-500">
-
-                    </td>
-                    <td class="px-3 py-3   text-sm text-gray-500">
-
-                    </td>
-
-                    <td class="px-3 py-3   text-sm text-gray-500">
-
+                    <td class="px-3 py-3   text-sm font-medium text-gray-500">
+                        {{$p->customer_name}}
                     </td>
                     <td class="px-3 py-3   text-sm text-gray-500">
-
-
-
-
+                        {{$p->description}}
                     </td>
-
                     <td class="px-3 py-3   text-sm text-gray-500">
-
-
+                        {{$p->account_name}}
                     </td>
-
-
                     <td class="px-3 py-3   text-sm text-gray-500">
-
+                        {{number_format($p->total_receivable,2)}}
                     </td>
-
-
                     <td class="px-3 py-3   text-sm text-gray-500">
-
+                        @if(empty($p->approved_by))
+                            <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+                              In process
+                            </span>
+                        @else
+                            <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                Received
+                            </span>
+                        @endif
                     </td>
-
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        {{$p->added_by}}<br>
+                        {{ date('d M Y h:i A',strtotime($p->created_at)) }}
+                    </td>
+                    <td class="px-3 py-3   text-sm text-gray-500">
+                        @if(!empty($p->approved_by))
+                            {{ $p->approved_by }} <br>
+                            {{ date('d M Y h:i A',strtotime($p->approved_at)) }}
+                        @endif
+                    </td>
 
                     <td class="px-3 py-3   text-sm text-gray-500">
                         <div class="relative inline-block text-left" x-data="{open:false}">
@@ -237,44 +236,34 @@
                                     </svg>
                                 </button>
                             </div>
-
-
                             <div x-show="open"
                                  class="origin-top-right absolute right-0 mt-2 w-56 z-10 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
                                  role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                                 <div class="py-1" role="none">
-                                    <a href=""
+                                    <a href="{{ url('pharmacy/customer/payments/view') }}/{{$p->id}}"
                                        class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                        role="menuitem" tabindex="-1">View</a>
-
-
-                                        <p
-                                           class="text-gray-700 cursor-pointer block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                           role="menuitem" tabindex="-1">Mark as Approve
+                                    @if(empty($p->approved_by))
+                                        <p wire:click="markAsApproved('{{ $p->id }}','{{ $p->receiving_date }}','{{$p->customer_name}}','{{$p->total_receivable}}','{{$p->account_name}}')"
+                                                class="text-gray-700 cursor-pointer block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                                role="menuitem" tabindex="-1">Mark as Approve
                                         </p>
-                                        <a
-                                           class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                           role="menuitem" tabindex="-1">Edit</a>
-
-                                        <p
-                                           class="text-red-700 cursor-pointer block w-full text-left px-4 py-2 text-sm hover:bg-red-200"
-                                           role="menuitem" tabindex="-1">Remove</p>
-
-
-
+                                        <a href="{{ url('pharmacy/customer/payments/edit') }}/{{$p->id}}" class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                                role="menuitem" tabindex="-1">Edit</a>
+                                        <p wire:click="removePayment('{{$p->id}}')" class="text-red-700 cursor-pointer block w-full text-left px-4 py-2 text-sm hover:bg-red-200"
+                                                role="menuitem" tabindex="-1">Remove</p>
+                                    @endif
                                 </div>
                             </div>
                         </div>
                     </td>
 
                 </tr>
-
+            @endforeach
             </tbody>
         </table>
-
-
         <div class="bg-white p-3 border-t rounded-b-md  ">
-
+            {{$payments->links()}}
         </div>
 
     </div>
@@ -307,7 +296,7 @@
 
                 <div class="p-4">
                     <div class="text-justify">
-                        A payment of Amount <strong> PKR  </strong> will be deducted from <strong></strong> against supplier <strong> </strong> on dated <strong></strong>.
+                        An Amount <strong> PKR {{number_format($amt,2)}} </strong> will be Received in <strong>{{$receiving_in}}</strong> against customer <strong> {{$approval_customer_name}} </strong> on dated <strong>{{date('d M,Y',strtotime($receiving_date))}}</strong>.
                         Are you sure you want to proceed?
                     </div>
 

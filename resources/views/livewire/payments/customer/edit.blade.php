@@ -20,7 +20,7 @@
         <div class="shadow sm:rounded-md sm:overflow-hidden">
             <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
                 <div>
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">Add Customer Payment</h3>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Customer Payment</h3>
                 </div>
                 @include('pharmacy::include.errors')
                 @if(!empty($success))
@@ -63,13 +63,9 @@
                 <div class="grid grid-cols-6 gap-6">
                     <div class="col-span-6 sm:col-span-2">
                         <label for="supplier_name" class="block text-sm font-medium text-gray-700">Customer Name</label>
-                        <input wire:model.defer="customer_name"
-                               wire:click="searchableOpenModal('customer_id', 'customer_name', 'customer')" readonly
-                               type="text" autocomplete="off"
-                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <input wire:model.defer="customer_name" readonly type="text" autocomplete="off"
+                               class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
-
-
                     <div class="col-span-6 sm:col-span-2">
                         <label for="closing_balance" class="block text-sm font-medium text-gray-700">Closing
                             Balance</label>
@@ -77,22 +73,17 @@
                                type="text" autocomplete="off"
                                class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
-
-
                     <div class="col-span-6 sm:col-span-2">
                         <label for="payment_date" class="block text-sm font-medium text-gray-700">Receiving Date</label>
                         <input wire:model.defer="receiving_date" type="date" autocomplete="off"
                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
-
-
                     <div class="col-span-6 ">
                         <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
                         <textarea
                                 class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                 id="description" cols="30" wire:model.defer="description" rows="4"></textarea>
                     </div>
-
                 </div>
             </div>
 
@@ -190,19 +181,14 @@
                 </tr>
                 </tbody>
             </table>
-
-
             <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
                 <button type="submit"
                         class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
-                    Add
+                    Update
                 </button>
             </div>
         </div>
     </form>
-
-
-    @include('pharmacy::include.searchable')
 </div>
 
 <script>
