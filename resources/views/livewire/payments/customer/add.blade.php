@@ -100,7 +100,7 @@
             <table class="min-w-full divide-y divide-gray-200 rounded-md ">
                 <thead class="bg-white">
                 <tr>
-                    <th scope="col" colspan="9" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="8" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         <i>Un Paid Invoices</i>
                     </th>
                 </tr>
@@ -112,9 +112,6 @@
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
                         Receipt #
-                    </th>
-                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
-                        Invoice #
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
                         Cash
@@ -147,19 +144,16 @@
                             {{$p['id']}}
                         </td>
                         <td class="px-3 py-3 text-sm text-gray-500">
-                            {{$p['receipt_no']}}
-                        </td>
-                        <td class="px-3 py-3 text-sm text-gray-500">
                             {{number_format($p['receive_amount'],2)}}
                         </td>
                         <td class="px-3 py-3 text-sm text-gray-500">
-                            {{number_format($p['gross_total']-$p['receive_amount'],2)}}
+                            {{number_format($p['on_account'],2)}}
                         </td>
                         <td class="px-3 py-3 text-sm text-gray-500">
-                            -
+                            {{number_format($p['refunded'],2)}}
                         </td>
                         <td class="px-3 py-3 text-sm text-gray-500">
-                            {{number_format($p['gross_total']-$p['receive_amount'],2)}}
+                            {{number_format($p['on_account']-$p['refunded'],2)}}
                         </td>
                         <td class="px-3 py-3 text-sm text-gray-500">
                             {{date('d M Y h:i A',strtotime($p['sale_at']))}}
@@ -167,10 +161,10 @@
                     </tr>
                 @endforeach
                 <tr>
-                    <th colspan="9">&nbsp;</th>
+                    <th colspan="8">&nbsp;</th>
                 </tr>
                 <tr>
-                    <th scope="col" colspan="8" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    <th scope="col" colspan="7" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
                         Selected Receipt
                     </th>
                     <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
@@ -178,15 +172,31 @@
                     </th>
                 </tr>
                 <tr>
-                    <th scope="col" colspan="8" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
-                        Receivable Amount
+                    <th scope="col" colspan="7" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                        Sub Total
                     </th>
                     <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
-                        {{collect($this->payments)->where('selected',true)->sum('gross_total')-collect($this->payments)->where('selected',true)->sum('receive_amount')}}
+                        {{collect($this->payments)->where('selected',true)->sum('on_account')}}
                     </th>
                 </tr>
                 <tr>
-                    <th colspan="9">&nbsp;</th>
+                    <th scope="col" colspan="7" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                        Refunded
+                    </th>
+                    <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
+                        {{collect($this->payments)->where('selected',true)->sum('refunded')}}
+                    </th>
+                </tr>
+                <tr>
+                    <th scope="col" colspan="7" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                        Total Receivable
+                    </th>
+                    <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
+                        {{collect($this->payments)->where('selected',true)->sum('on_account') - collect($this->payments)->where('selected',true)->sum('refunded')}}
+                    </th>
+                </tr>
+                <tr>
+                    <th colspan="8">&nbsp;</th>
                 </tr>
                 </tbody>
             </table>

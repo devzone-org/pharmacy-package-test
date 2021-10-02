@@ -42,13 +42,21 @@ class Add extends Component
                     ->where('e.is_doctor', 't');
             })
             ->where('s.customer_id', $this->customer_id)
+            ->whereNull('s.refunded_id')
             ->whereIn('s.is_paid', ['f', 'p'])
             ->select('s.*', 'p.name as patient', 'e.name as referred')
+            ->get();
+        $sale_ids=$payments->where('is_refund','t')->pluck('id')->toArray();
+        $refund_entries=Sale::whereIn('refunded_id',$sale_ids)
+            ->groupBy('refunded_id')
+            ->select('id','refunded_id',DB::raw('sum(on_account) as total_refunded'))
             ->get();
         if ($payments->isNotEmpty()) {
             $payments = $payments->toArray();
             foreach ($payments as $key => $p) {
                 $payments[$key]['selected'] = false;
+                $refunded=$refund_entries->where('refunded_id',$p['id'])->first();
+                $payments[$key]['refunded'] =!empty($refunded) ? $refunded->total_refunded : 0;
             }
             $this->payments = $payments;
         } else {
