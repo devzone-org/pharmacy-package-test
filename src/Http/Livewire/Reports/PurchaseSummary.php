@@ -29,12 +29,11 @@ class PurchaseSummary extends Component
     public function search()
     {
         $this->report =Purchase::from('purchases as p')
-            ->leftJoin('purchase_orders as po','po.purchase_id','=','p.id')
+            ->leftJoin('purchase_receives as po','po.purchase_id','=','p.id')
             ->leftJoin('suppliers as s','s.id','=','p.supplier_id')
             ->leftJoin('users as u','u.id','=','p.created_by')
             ->leftJoin('users as us','us.id','=','p.approved_by')
-            ->leftJoin('supplier_payment_details as spd','spd.order_id','=','p.id')
-            ->leftJoin('supplier_payments as sp','sp.id','=','spd.supplier_payment_id')
+
             ->when(!empty($this->to), function ($q) {
                 return $q->whereDate('p.created_at', '<=', $this->to);
             })
@@ -49,7 +48,7 @@ class PurchaseSummary extends Component
                 'u.name as created_by',
                 'us.name as approved_by',
                 'p.id as po_no','p.delivery_date as receiving_date','p.grn_no','p.supplier_invoice','p.is_paid',
-                'sp.payment_date','sp.created_at as invoice_date',
+                'p.advance_tax',
                 DB::raw('sum(po.total_cost) as po_value'),
                 DB::raw('sum(po.qty*po.cost_of_price) as cos'),
             )

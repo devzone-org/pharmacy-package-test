@@ -110,6 +110,7 @@ class PrintController extends Controller
         $sale = collect($sales_ref)->first();
         $print = [];
         $print['feed'] = "               ";
+        $print['app_name'] = env('APP_NAME');
         $print['address_1'] = env('RECEIPT_PRINTER_ADDRESS_1');
         $print['address_2'] = env('RECEIPT_PRINTER_ADDRESS_2');
         $print['developer'] = env('RECEIPT_PRINTER_DEVELOPER');

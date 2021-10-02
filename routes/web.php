@@ -189,7 +189,19 @@ Route::get('report/inventory-ledger', function () {
 });
 
 Route::get('print/sale/{id}', [PrintController::class, 'print']);
-Route::get('inventory', function (){
+ 
+
+Route::get('update-retail',function (){
+
+    $sales = \Devzone\Pharmacy\Models\Sale\SaleDetail::get();
+    foreach ($sales as $s){
+        \Devzone\Pharmacy\Models\Sale\SaleDetail::where('id',$s->id)->update([
+            'retail_price_after_disc' => $s->total_after_disc / $s->qty
+        ]);
+    }
+});
+Route::get('opening-stock', function (){
+ 
     \Devzone\Pharmacy\Models\InventoryLedger::truncate();
     $inventory=\Devzone\Pharmacy\Models\ProductInventory::groupBy('product_id')
         ->select('product_id',\Illuminate\Support\Facades\DB::raw('sum(qty) as qty'))
