@@ -3,91 +3,97 @@
     <div class="h-screen flex  border-t bg-gray-100">
 
 
-
         <!-- Static sidebar for desktop -->
         <div class="  md:flex md:flex-shrink-0">
-            <div class="flex flex-col w-72">
+            <div class="flex flex-col w-64">
                 <!-- Sidebar component, swap this element with another sidebar if you like -->
-                <div class="flex flex-col flex-grow border-r border-gray-200   bg-white overflow-y-auto">
-                    <div class="h-full bg-white p-2 overflow-y-auto">
-                        <div class=" ">
+                <div class="flex flex-col flex-grow border-r border-gray-200   overflow-y-auto">
+                    <div class="h-full   bg-white p-2 overflow-y-auto">
+                        <div class=" mt-6">
 
                             <div>
-                                <h3 class="font-medium text-gray-900">Information</h3>
-                                <dl class="mt-2 border-t border-b border-gray-200 divide-y divide-gray-200">
-                                    <div class="py-3 flex justify-between text-sm font-medium">
-                                        <dt class="text-gray-500">Uploaded by</dt>
-                                        <dd class="text-gray-900">Marie Culver</dd>
+
+                                <dl class="space-y-4 ">
+                                    <div wire:click="searchCustomer" class="cursor-pointer ">
+                                        <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
+                                            Customer Name (F10)
+                                        </dt>
+                                        <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
+                                            <p>
+                                                {{ $customer_name_credit }}
+                                            </p>
+                                        </dd>
                                     </div>
-                                    <div class="py-3 flex justify-between text-sm font-medium">
-                                        <dt class="text-gray-500">Created</dt>
-                                        <dd class="text-gray-900">June 8, 2020</dd>
+
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
+                                            Customer Credit Limit
+                                        </dt>
+                                        <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
+                                            <p>
+                                                PKR {{ number_format($customer_credit_limit) }}
+                                            </p>
+                                        </dd>
                                     </div>
-                                    <div class="py-3 flex justify-between text-sm font-medium">
-                                        <dt class="text-gray-500">Last modified</dt>
-                                        <dd class="text-gray-900">June 8, 2020</dd>
+
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
+                                            Customer Closing Balance
+                                        </dt>
+                                        <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
+                                            <p>
+                                                PKR {{ number_format($customer_previous_credit) }}
+                                            </p>
+                                        </dd>
                                     </div>
-                                    <div class="py-3 flex justify-between text-sm font-medium">
-                                        <dt class="text-gray-500">Dimensions</dt>
-                                        <dd class="text-gray-900">4032 x 3024</dd>
+                                    @if(empty($admission_id) && empty($procedure_id))
+                                        <div wire:click="searchReferredBy" class="cursor-pointer border-t pt-2">
+                                            <dt class="text-sm font-medium  text-gray-500   sm:flex-shrink-0">
+                                                Referred By (F11)
+                                            </dt>
+                                            <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
+                                                <p>
+                                                    {{ $referred_by_name }}
+                                                </p>
+                                            </dd>
+                                        </div>
+
+                                        <div wire:click="searchPatient" class="cursor-pointer">
+                                            <dt class="text-sm font-medium text-gray-500 sm:w-40 sm:flex-shrink-0">
+                                                Patient Name (F12)
+                                            </dt>
+                                            <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
+                                                <p>
+                                                    {{ $patient_name ?? 'Walk-in' }}
+                                                </p>
+                                            </dd>
+                                        </div>
+                                    @endif
+                                    <div class=" border-t pt-2">
+                                        <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
+                                            Date
+                                        </dt>
+                                        <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
+                                            <p>
+                                                {{ date('d M, Y') }}
+                                            </p>
+                                        </dd>
                                     </div>
-                                    <div class="py-3 flex justify-between text-sm font-medium">
-                                        <dt class="text-gray-500">Resolution</dt>
-                                        <dd class="text-gray-900">72 x 72</dd>
+
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
+                                            Sale By
+                                        </dt>
+                                        <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
+                                            <p>
+                                                {{ Auth::user()->name }}
+                                            </p>
+                                        </dd>
                                     </div>
                                 </dl>
+
                             </div>
-                            <div>
-                                <h3 class="font-medium text-gray-900">Description</h3>
-                                <div class="mt-2 flex items-center justify-between">
-                                    <p class="text-sm text-gray-500 italic">Add a description to this image.</p>
-                                    <button type="button" class="-mr-2 h-8 w-8 bg-white rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                        <!-- Heroicon name: solid/pencil -->
-                                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                        </svg>
-                                        <span class="sr-only">Add description</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <div>
-                                <h3 class="font-medium text-gray-900">Shared with</h3>
-                                <ul role="list" class="mt-2 border-t border-b border-gray-200 divide-y divide-gray-200">
-                                    <li class="py-3 flex justify-between items-center">
-                                        <div class="flex items-center">
-                                            <img src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=1024&h=1024&q=80" alt="" class="w-8 h-8 rounded-full">
-                                            <p class="ml-4 text-sm font-medium text-gray-900">Aimee Douglas</p>
-                                        </div>
-                                        <button type="button" class="ml-6 bg-white rounded-md text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Remove<span class="sr-only"> Aimee Douglas</span></button>
-                                    </li>
-                                    <li class="py-3 flex justify-between items-center">
-                                        <div class="flex items-center">
-                                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixqx=oilqXxSqey&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" class="w-8 h-8 rounded-full">
-                                            <p class="ml-4 text-sm font-medium text-gray-900">Andrea McMillan</p>
-                                        </div>
-                                        <button type="button" class="ml-6 bg-white rounded-md text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Remove<span class="sr-only"> Andrea McMillan</span></button>
-                                    </li>
-                                    <li class="py-2 flex justify-between items-center">
-                                        <button type="button" class="group -ml-1 bg-white p-1 rounded-md flex items-center focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <span class="w-8 h-8 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400">
-                      <!-- Heroicon name: solid/plus-sm -->
-                      <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-                      </svg>
-                    </span>
-                                            <span class="ml-4 text-sm font-medium text-indigo-600 group-hover:text-indigo-500">Share</span>
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="flex">
-                                <button type="button" class="flex-1 bg-indigo-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    Download
-                                </button>
-                                <button type="button" class="flex-1 ml-3 bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    Delete
-                                </button>
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -109,32 +115,8 @@
                             </h2>
                         </div>
                         <div class="mt-5 flex lg:mt-0 lg:ml-4 ">
-                <span class="">
-                      <button type="button"
-                              wire:click="searchCustomer"
-                              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Add Customer (F10)
-                      </button>
-                    </span>
-                            @if(empty($admission_id) && empty($procedure_id))
-                                <span class="ml-3">
-                      <button type="button"
-                              wire:click="searchReferredBy"
-                              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Add Referred By (F11)
-                      </button>
-                    </span>
-
-                                <span class="ml-3">
-                      <button type="button" wire:click="searchPatient"
-                              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
 
 
-                        Add Patient (F12)
-                      </button>
-                    </span>
-
-                            @endif
                             <span class="ml-3">
                   <button type="button" wire:click="searchableOpenModal('product_id', 'product_name', 'item')"
                           class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -161,147 +143,10 @@
                       @endif
                   </button>
                 </span>
- 
+
                         </div>
 
                     </div>
-                {{--    <div class="col-span-12">--}}
-                {{--        @if($admission)--}}
-                {{--            <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-5   shadow rounded-md p-3">--}}
-                {{--                <div class="">--}}
-                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-                {{--                        Referred By--}}
-                {{--                    </dt>--}}
-                {{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
-                {{--                        {{ $admission_details['doctor'] ?? '-' }}--}}
-                {{--                    </dd>--}}
-                {{--                </div>--}}
-                {{--                <div class="">--}}
-                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-                {{--                        Patient Name--}}
-                {{--                    </dt>--}}
-                {{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
-                {{--                        {{  $admission_details['mr_no'].' - '.$admission_details['name'] ?? 'Walk-in' }}--}}
-                {{--                    </dd>--}}
-                {{--                </div>--}}
-                {{--                <div class="">--}}
-                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-                {{--                        Admission # - Procedure--}}
-                {{--                    </dt>--}}
-                {{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
-                {{--                        {{  $admission_details['admission_no'] ?? '' }} - {{$admission_details['procedure_name']}}--}}
-                {{--                    </dd>--}}
-                {{--                </div>--}}
-                {{--                <div class="">--}}
-                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-                {{--                        Date--}}
-                {{--                    </dt>--}}
-                {{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
-                {{--                        {{ date('d M, Y') }}--}}
-                {{--                    </dd>--}}
-                {{--                </div>--}}
-                {{--                <div class="">--}}
-                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-                {{--                        Issued By--}}
-                {{--                    </dt>--}}
-                {{--                    <dd class="mt-1 text-lg font-medium text-gray-900">--}}
-                {{--                        {{ Auth::user()->name }}--}}
-                {{--                    </dd>--}}
-                {{--                </div>--}}
-                {{--            </div>--}}
-                {{--        @else--}}
-                {{--            <div class="grid mb-3  bg-white gap-x-4 gap-y-8 grid-cols-5 shadow rounded-md p-3">--}}
-                {{--                <div class="">--}}
-                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-                {{--                        Customer--}}
-                {{--                    </dt>--}}
-                {{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
-                {{--                        {{ $customer_name_credit ?? '-' }}--}}
-                {{--                    </dd>--}}
-                {{--                </div>--}}
-                {{--                <div class="">--}}
-                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-                {{--                        Referred By--}}
-                {{--                    </dt>--}}
-                {{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
-                {{--                        {{ $referred_by_name ?? '-' }}--}}
-                {{--                    </dd>--}}
-                {{--                </div>--}}
-                {{--                <div class="">--}}
-                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-                {{--                        Patient Name--}}
-                {{--                    </dt>--}}
-                {{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
-                {{--                        {{ $patient_name ?? 'Walk-in' }}--}}
-                {{--                    </dd>--}}
-                {{--                </div>--}}
-                {{--                <div class="">--}}
-                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-                {{--                        Date--}}
-                {{--                    </dt>--}}
-                {{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
-                {{--                        {{ date('d M, Y') }}--}}
-                {{--                    </dd>--}}
-                {{--                </div>--}}
-                {{--                <div class="">--}}
-                {{--                    <dt class="text-sm font-medium text-gray-500">--}}
-                {{--                        Sale By--}}
-                {{--                    </dt>--}}
-                {{--                    <dd class="mt-1 text-xl font-medium text-gray-900">--}}
-                {{--                        {{ Auth::user()->name }}--}}
-                {{--                    </dd>--}}
-                {{--                </div>--}}
-                {{--            </div>--}}
-                {{--        @endif--}}
-                {{--    </div>--}}
-
-                {{--    <main class="col-span-2">--}}
-
-                {{--        <div class="mb-3 p-2 bg-white shadow rounded-lg overflow-hidden">--}}
-                {{--            <dt class="text-sm font-medium text-gray-500 truncate">--}}
-                {{--                Customer--}}
-                {{--            </dt>--}}
-                {{--            <dd class="mt-1 text-xl font-medium text-gray-900">--}}
-                {{--               <span class="text-xs font-base text-gray-500">Name: </span>  {{ $customer_name_credit ?? 'Nill' }}<br>--}}
-                {{--                <span class="text-xs font-base text-gray-500">Credit Limit :</span> PKR {{number_format($customer_credit_limit) ?? '-'}}<br>--}}
-                {{--                <span class="text-xs font-base text-gray-500">Closing Balance :</span> PKR {{number_format($customer_previous_credit) ?? '-'}}--}}
-
-                {{--            </dd>--}}
-                {{--        </div>--}}
-                {{--        <div class="mb-3 p-2 bg-white shadow rounded-lg overflow-hidden">--}}
-                {{--            <dt class="text-sm font-medium text-gray-500 truncate">--}}
-                {{--                Patient Name--}}
-                {{--            </dt>--}}
-                {{--            <dd class="mt-1 text-xl font-medium text-gray-900">--}}
-                {{--                {{ $patient_name ?? 'Walk-in' }}--}}
-                {{--            </dd>--}}
-                {{--        </div>--}}
-                {{--        <div class="mb-3 p-2 bg-white shadow rounded-lg overflow-hidden">--}}
-                {{--            <dt class="text-sm font-medium text-gray-500 truncate">--}}
-                {{--                Referred by--}}
-                {{--            </dt>--}}
-                {{--            <dd class="mt-1 text-xl font-medium text-gray-900">--}}
-                {{--                {{ $referred_by_name ?? '-' }}--}}
-                {{--            </dd>--}}
-                {{--        </div>--}}
-                {{--        <div class="mb-3 p-2 bg-white shadow rounded-lg overflow-hidden">--}}
-                {{--            <dt class="text-sm font-medium text-gray-500 truncate">--}}
-                {{--                Date--}}
-                {{--            </dt>--}}
-                {{--            <dd class="mt-1 text-xl font-medium text-gray-900">--}}
-                {{--                {{ date('d M, Y') }}--}}
-                {{--            </dd>--}}
-                {{--        </div>--}}
-                {{--        <div class="mb-3 p-2 bg-white shadow rounded-lg overflow-hidden">--}}
-                {{--            <dt class="text-sm font-medium text-gray-500 truncate">--}}
-                {{--                Sale By--}}
-                {{--            </dt>--}}
-                {{--            <dd class="mt-1 text-xl font-medium text-gray-900">--}}
-                {{--                {{ Auth::user()->name }}--}}
-                {{--            </dd>--}}
-                {{--        </div>--}}
-                {{--    </main>--}}
-                <!-- This example requires Tailwind CSS v2.0+ -->
 
                     <main class="col-span-12">
                         @if(!empty($success))
@@ -309,7 +154,8 @@
                                 <div class="flex">
                                     <div class="flex-shrink-0">
                                         <!-- Heroicon name: solid/check-circle -->
-                                        <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                        <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg"
+                                             viewBox="0 0 20 20"
                                              fill="currentColor" aria-hidden="true">
                                             <path fill-rule="evenodd"
                                                   d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -327,7 +173,8 @@
                                                     class="inline-flex bg-green-50 rounded-md p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-green-50 focus:ring-green-600">
                                                 <span class="sr-only">Dismiss</span>
                                                 <!-- Heroicon name: solid/x -->
-                                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg"
+                                                     viewBox="0 0 20 20"
                                                      fill="currentColor" aria-hidden="true">
                                                     <path fill-rule="evenodd"
                                                           d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -345,7 +192,8 @@
                                 <div class="flex">
                                     <div class="flex-shrink-0">
 
-                                        <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                        <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor"
+                                             viewBox="0 0 24 24"
                                              xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                   d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -362,7 +210,8 @@
                                                     class="inline-flex bg-red-50 rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-red-50 focus:ring-red-600">
                                                 <span class="sr-only">Dismiss</span>
                                                 <!-- Heroicon name: solid/x -->
-                                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg"
+                                                     viewBox="0 0 20 20"
                                                      fill="currentColor" aria-hidden="true">
                                                     <path fill-rule="evenodd"
                                                           d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -436,7 +285,8 @@
                                             @endif
                                         </td>
                                         <td class="px-2   text-left   border-r  text-md text-gray-500">
-                                            <input type="number" wire:model.lazy="sales.{{ $key }}.s_qty" onClick="this.select();"
+                                            <input type="number" wire:model.lazy="sales.{{ $key }}.s_qty"
+                                                   onClick="this.select();"
                                                    class="p-0 focus:ring-0 block w-full  text-md border-0 text-center "
                                                    autocomplete="off">
                                         </td>
@@ -465,7 +315,8 @@
                                             {{ number_format($s['total_after_disc'],2) }}
                                         </td>
                                         <td class="  w-10 cursor-pointer px-2 py-3   border-r text-center text-md font-medium text-red-700  tracking-wider  ">
-                                            <svg wire:click="removeEntry('{{ $key }}')" class="w-5 h-5 " fill="currentColor"
+                                            <svg wire:click="removeEntry('{{ $key }}')" class="w-5 h-5 "
+                                                 fill="currentColor"
                                                  viewBox="0 0 20 20"
                                                  xmlns="http://www.w3.org/2000/svg">
                                                 <path fill-rule="evenodd"
@@ -523,13 +374,14 @@
                                     </th>
                                 </tr>
                                 <tr class="bg-gray-50">
-                                    <th rowspan="{{ $admission==true? '2' : '4' }}" colspan="{{ $admission==true? '2' : '3' }}"
+                                    <th rowspan="{{ $admission==true? '2' : '4' }}"
+                                        colspan="{{ $admission==true? '2' : '3' }}"
                                         class="  border-r   bg-white text-md font-medium text-gray-500  tracking-wider">
 
                         <textarea name="" cols="30" rows="5" id="remarks"
                                   class="p-0 focus:ring-0 block w-full border-0 text-md resize-none h-40  "></textarea>
 
- 
+
                                     </th>
                                     <th scope="col" colspan="{{ $admission==true? '3' : '4' }}"
                                         class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
@@ -548,7 +400,8 @@
                                         </th>
                                         <th scope="col" colspan="2"
                                             class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
-                                            <input type="number" wire:model.lazy="discount" min="0" max="100" onClick="this.select();"
+                                            <input type="number" wire:model.lazy="discount" min="0" max="100"
+                                                   onClick="this.select();"
                                                    id="discount"
                                                    class="p-0 focus:ring-0 block w-full  text-xl border-0 font-medium text-gray-500 text-center "
                                                    autocomplete="off">
@@ -578,8 +431,10 @@
                                         </th>
                                         <th scope="col" colspan="2"
                                             class="w-10   px-2 py-2 @if($credit==true) bg-red-50 @endif  border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
+ 
                                             <input type="number" wire:model.debounce.300ms="received" onClick="this.select();"
                                                    id="received" @if($credit==true) disabled @endif
+ 
                                                    wire:keydown.enter="saleComplete"
                                                    class="p-0 focus:ring-0 block w-full @if($credit==true) bg-red-50 @endif  text-xl border-0 font-medium text-gray-500 text-center "
                                                    autocomplete="off">
@@ -620,7 +475,8 @@
                                 <span class="inline-flex items-center px-3 bg-gray-50 text-gray-500 text-xl font-medium">
                                   Handed over to
                                 </span>
-                                                <input type="text" wire:model.defer="handed_over" onClick="this.select();"
+                                                <input type="text" wire:model.defer="handed_over"
+                                                       onClick="this.select();"
                                                        class="flex-1 border-0 min-w-0 block w-full px-3 py-2 rounded-none focus:ring-0 text-xl placeholder-gray-500 placeholder-opacity-50"
                                                        placeholder="Enter here">
                                             </div>
@@ -637,7 +493,6 @@
             </main>
         </div>
     </div>
-
 
 
     <div x-data="{ open: @entangle('add_modal') }" x-cloak x-show="open"
@@ -866,7 +721,7 @@
                             Close
                         </button>
                         <button type="button" wire:click="addPatient"
-                                class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
+                                class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-gray-900 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
                             Add
                         </button>
                     </div>
