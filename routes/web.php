@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('pharmacy::dashboard');
-
 });
 Route::get('master-data', function () {
     return view('pharmacy::master_data.home');

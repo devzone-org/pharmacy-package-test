@@ -9,6 +9,7 @@ use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\InventoryLedger;
+use Devzone\Pharmacy\Models\Product;
 use Devzone\Pharmacy\Models\ProductInventory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -94,7 +95,17 @@ class StockAdjustment extends Component
                     })->first();
 
                 if (empty($inventory)) {
-                    throw new \Exception($a['item'] . ' not found.');
+                    $product = Product::find($a['id']);
+                    if(empty($product)){
+                        throw new \Exception($a['item'] . ' not found.');
+                    }
+                    $inventory = ProductInventory::create([
+                        'product_id' => $a['id'],
+                        'qty' => 0 ,
+                        'retail_price' => $product['cost_of_price'],
+                        'supply_price' => $product['retail_price'],
+                    ]);
+
                 }
 
                 $find = ProductInventory::find($inventory['id']);
@@ -102,7 +113,7 @@ class StockAdjustment extends Component
                     'product_id' => $find['product_id'],
                     'indicator' => $a['indicator'],
                     'qty' => $a['a_qty'],
-                    'current_qty' => $a['qty'],
+                    'current_qty' => $a['qty']?? 0,
                     'remarks' => $this->remarks,
                     'added_by' => Auth::id(),
                     'voucher_no' => $vno

@@ -392,7 +392,5 @@
             </div>
         </div>
     </div>
-    <a href="{{ url('pharmacy/master-data') }}"
-       class="{{ Request::segment(1)=='pharmacy' && Request::segment(2) == 'master-data' ? $a_current : '' }}  rounded-md py-2 px-3 inline-flex items-center text-sm font-medium text-gray-900 hover:bg-gray-50 hover:text-gray-900">
-        Master Data </a>
+
 </nav>
