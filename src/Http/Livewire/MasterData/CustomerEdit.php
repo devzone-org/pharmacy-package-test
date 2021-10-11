@@ -3,6 +3,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\MasterData;
 
 use Devzone\Pharmacy\Models\Customer;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class CustomerEdit extends Component
@@ -17,11 +18,14 @@ class CustomerEdit extends Component
     public $status;
     public $success;
 
+    public $employee_id;
+    public $employees = [];
+
+
     protected $rules = [
         'name' => 'required',
-        'phone' => 'required|regex:/^(\+92)(3)([0-9]{9})$/',
-        'email' => 'nullable|email',
         'credit_limit' => 'required',
+        'employee_id' => 'required',
     ];
 
     public function mount($id)
@@ -29,11 +33,10 @@ class CustomerEdit extends Component
         $this->customer_id = $id;
         $customer = Customer::where('id', $this->customer_id)->first()->toArray();
         $this->name = $customer['name'];
-        $this->phone = $customer['phone'];
-        $this->email = $customer['email'];
-        $this->company = $customer['company'];
+        $this->employee_id = $customer['employee_id'];
         $this->credit_limit = (int)$customer['credit_limit'];
-        $this->address = $customer['address'];
+        $this->employees = DB::table('employees')->get()->toArray();
+        $this->employees = (json_decode(json_encode($this->employees), true));
         $this->status = $customer['status'];
     }
 
@@ -49,13 +52,10 @@ class CustomerEdit extends Component
         $this->validate();
         Customer::where('id', $this->customer_id)->update([
             'name' => ucwords($this->name),
-            'phone' => $this->phone,
-            'email' => $this->email,
-            'address' => $this->address,
-            'company' => $this->company,
+            'employee_id' => $this->employee_id,
             'credit_limit' => $this->credit_limit,
             'status' => $this->status
         ]);
-        $this->success = 'Customer updated successfully';
+        $this->success = 'Record updated successfully';
     }
 }

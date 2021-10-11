@@ -9,6 +9,13 @@
                 </div>
 
                 <div class="col-span-8 sm:col-span-2">
+                    <label for="receipt" class="block text-sm font-medium text-gray-700">Patient</label>
+                    <input type="text" readonly wire:model.defer="patient_name" wire:click="searchPatient"
+                           autocomplete="off"
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+
+                <div class="col-span-8 sm:col-span-2">
                     <label for="from" class="block text-sm font-medium text-gray-700">Sale From</label>
                     <input type="date" wire:model.defer="from" id="from" autocomplete="off"
                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
@@ -19,7 +26,16 @@
                     <input type="date" wire:model.defer="to" id="to" autocomplete="off"
                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 </div>
-
+                <div class="col-span-8 sm:col-span-2">
+                    <label for="type" class="block text-sm font-medium text-gray-700">Type</label>
+                    <select type="text" wire:model.defer="type"
+                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value=""></option>
+                        <option value="sale">Normal Sale</option>
+                        <option value="credit">Credit Sale</option>
+                        <option value="refund">Refunded</option>
+                    </select>
+                </div>
                 <div class="col-span-8 sm:col-span-2">
                     <button type="button" wire:click="search"
                             class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -57,8 +73,24 @@
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                                     #
                                 </th>
+
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                    Status
+                                </th>
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                                     Receipt #
+                                </th>
+
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                    Sale at
+                                </th>
+
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                    Patient
+                                </th>
+
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                    Referred by
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                                     Sub Total
@@ -67,30 +99,21 @@
                                     Discount
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Gross Total
+                                    Net Sale
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Cash Received
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Cash Refunded
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Change Returned
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Sale at
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Patient
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Referred by
+                                    Sale Returns
                                 </th>
 
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Status
+                                    Cash / (Refund)
                                 </th>
+
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                    Credit
+                                </th>
+
+
                                 <th scope="col" class="relative px-3 py-3">
                                     <span class="sr-only">Edit</span>
                                 </th>
@@ -103,7 +126,42 @@
                                         {{ $loop->iteration + ( $history->firstItem() - 1)   }}
                                     </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
+                                        @if(empty($h->refunded_id))
+                                            @if(!empty($h->on_account) && $h->on_account > 0)
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                On Credit
+                                            </span>
+                                            @else
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                On Cash
+                                            </span>
+                                            @endif
+
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                                Refund
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td class="px-3 py-3   text-sm text-gray-500">
                                         {{ $h->id }}
+                                    </td>
+                                    <td class="px-3 py-3   text-sm text-gray-500">
+                                        {{ date('d M, y h:i A',strtotime($h->sale_at)) }} <br>
+                                        {{ $h->sale_by }}
+                                    </td>
+                                    <td class="px-3 py-3   text-sm text-gray-500">
+                                        @if(!empty($h->patient_name))
+                                            {{ $h->patient_name }}
+                                            <br>
+                                            {{ $h->mr_no }}
+                                        @else
+                                            Walk in
+                                        @endif
+
+                                    </td>
+                                    <td class="px-3 py-3   text-sm text-gray-500">
+                                        {{ $h->referred_by }}
                                     </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         {{ number_format($h->sub_total,2) }}
@@ -115,45 +173,45 @@
                                         {{ number_format($h->gross_total,2) }}
                                     </td>
                                     <td class="px-3 py-3 text-sm text-gray-500">
-                                        @if($h->gross_total==0)
-                                           0.00
+                                        @php
+                                            $refunded = 0;
+                                        @endphp
+                                        @if(!empty($h->refunded_id))
+                                            @php
+                                                $total_refund = \Devzone\Pharmacy\Models\Sale\SaleRefund::from('sale_refunds as sr')
+                                                         ->join('sale_details as sd','sd.id','=','sr.sale_detail_id')
+                                                         ->where('sr.sale_id',$h->refunded_id)
+                                                         ->where('sr.refunded_id',$h->id)
+                                                         ->select(\Illuminate\Support\Facades\DB::raw('sum(sr.refund_qty * sd.retail_price_after_disc) as refund'))
+                                             ->first();
+
+                                             $refunded = $total_refund['refund'];
+                                            @endphp
+                                            {{ number_format($refunded,2) }}
                                         @else
-                                            {{ number_format($h->receive_amount,2) }}
+                                            -
+                                        @endif
+                                    </td>
+
+                                    <td class="px-3 py-3 text-sm text-gray-500">
+                                        @if($refunded - $h->gross_total > 0)
+                                            ({{ number_format(abs($refunded - $h->gross_total),2) }})
+                                        @else
+                                            @if($h->is_credit == 'f')
+                                                {{ number_format(abs($refunded - $h->gross_total),2) }}
+                                            @else
+                                                -
+                                            @endif
                                         @endif
                                     </td>
                                     <td class="px-3 py-3 text-sm text-gray-500">
-                                        @if($h->gross_total==0)
-                                            {{ number_format($h->receive_amount,2) }}
+                                        @if($h->is_credit == 't')
+                                            {{ number_format(abs($refunded - $h->gross_total),2) }}
                                         @else
-                                            0.00
+                                            -
                                         @endif
                                     </td>
-                                    <td class="px-3 py-3 text-sm text-gray-500">
-                                        {{ number_format($h->payable_amount,2) }}
-                                    </td>
-                                    <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{ date('d M, y h:i A',strtotime($h->sale_at)) }} <br>
-                                        {{ $h->sale_by }}
-                                    </td>
-                                    <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{ !empty($h->patient_name) ? $h->patient_name : 'Walk in' }}
-                                    </td>
-                                    <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{ $h->referred_by }}
-                                    </td>
-                                    <td class="px-3 py-3   text-sm text-gray-500">
-                                        @if(empty($h->refunded_id))
-                                            <span
-                                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                          Sale
-                                        </span>
-                                        @else
-                                            <span
-                                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                                          Refund
-                                        </span>
-                                        @endif
-                                    </td>
+
                                     <td class="px-3 py-3   text-right text-sm font-medium">
                                         <div class="flex flex-row-reverse">
                                             <a class="text-red-600 cursor-pointer  " target="_blank"
@@ -204,4 +262,5 @@
 
 
     </div>
+    @include('pharmacy::include.searchable')
 </div>

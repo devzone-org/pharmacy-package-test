@@ -120,7 +120,7 @@
                 <a href="{{ url('pharmacy/master-data/customers') }}" class="focus:outline-none">
                     <!-- Extend touch target to entire panel -->
                     <span class="absolute inset-0" aria-hidden="true"></span>
-                    Customers
+                    Creditors
                 </a>
             </h3>
             <p class="mt-2 text-sm text-gray-500">

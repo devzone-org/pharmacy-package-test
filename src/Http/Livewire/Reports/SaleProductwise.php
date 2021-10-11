@@ -50,10 +50,6 @@ class SaleProductwise extends Component
             })
             ->select(
                 'p.name as product_name',
-//                DB::raw('sum(sd.qty) as qty'),
-//                DB::raw('sum(sd.qty*sd.supply_price) as cos'),
-//                DB::raw('sum(sd.total_after_disc) as total_after_disc'),
-
                 DB::raw('sum(sd.total) as total'),
                 DB::raw('sum(sd.total_after_disc) as total_after_disc'),
                 DB::raw('sum(sr.refund_qty) as refund_qty'),

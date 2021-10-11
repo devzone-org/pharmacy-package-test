@@ -10,7 +10,7 @@
                             clip-rule="evenodd"></path>
                 </svg>
             </a>
-            <span class="ml-4">Customers List</span>
+            <span class="ml-4">Creditors List</span>
         </h3>
     </div>
 
@@ -100,21 +100,19 @@
                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
                     <div class="col-span-6 sm:col-span-3">
-                        <label for="phone" class="block text-sm font-medium text-gray-700">Phone <span class="text-gray-400">(+923333333333)</span></label>
-                        <input wire:model.defer="phone" type="text" autocomplete="off"
-                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <label for="employee" class="block text-sm font-medium text-gray-700">Care
+                            Of</label>
+                        <select wire:model.defer="employee_id"
+                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+
+                            <option value=""></option>
+                            @foreach($employees as $e)
+                                <option value="{{ $e['id'] }}">{{ $e['name'] }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
-                    <div class="col-span-6 sm:col-span-3">
-                        <label class="block text-sm font-medium text-gray-700">Email</label>
-                        <input wire:model.defer="email" type="email" autocomplete="off"
-                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    </div>
-                    <div class="col-span-6 sm:col-span-3">
-                        <label class="block text-sm font-medium text-gray-700">Company</label>
-                        <input wire:model.defer="company" type="text" autocomplete="off"
-                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    </div>
+
                     <div class="col-span-6 sm:col-span-3">
                         <label class="block text-sm font-medium text-gray-700">Credit Limit</label>
                         <input wire:model.defer="credit_limit" type="number" step="0.01" autocomplete="off"
@@ -129,12 +127,7 @@
                             <option value="f">Inactive</option>
                         </select>
                     </div>
-                    <div class="col-span-6 ">
-                        <label class="block text-sm font-medium text-gray-700">Address</label>
-                        <textarea
-                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                cols="30" wire:model.defer="address" rows="4"></textarea>
-                    </div>
+
                 </div>
             </div>
             <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
