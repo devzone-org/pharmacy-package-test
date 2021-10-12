@@ -21,6 +21,7 @@ class CreateCustomersTable extends Migration
 
             $table->enum('status',['t','f'])->default('t');
             $table->integer('account_id');
+            $table->integer('employee_id');
             $table->timestamps();
         });
     }

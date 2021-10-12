@@ -105,14 +105,16 @@
                 </div>
             </div>
         </div>
-        <div class="flex flex-col w-0 flex-1 overflow-hidden">
+
+
+        <div class="flex flex-col   flex-1 overflow-hidden">
             <main class="flex-1 relative overflow-y-auto focus:outline-none">
                 <div class="py-6 px-4">
                     <div class="lg:flex col-span-12  lg:justify-between">
                         <div class="flex-1 min-w-0">
                             <h2 class="text-2xl mb-3 font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
                                 @if(empty($admission_id) && empty($procedure_id))
-                                    Sale Invoice
+                                     @if($credit) Credit @endif Sale Invoice
                                 @else
                                     Inter Transfer IPD Medicine
                                 @endif
@@ -422,7 +424,7 @@
                                         {{ number_format(collect($sales)->sum('total_after_disc'),2) }}
                                     </th>
                                 </tr>
-                                @if($admission==false)
+                                @if($admission==false && $credit == false)
                                     <tr>
                                         <th scope="col" colspan="4"
                                             class="w-7 px-2 text-left border-r py-2 @if($credit==true) bg-red-50 @endif text-xl font-medium text-gray-500  tracking-wider">
@@ -497,8 +499,8 @@
     </div>
 
 
-    <div x-data="{ open: @entangle('add_modal') }" x-cloak x-show="open"
-         class="fixed z-50 inset-0 overflow-y-auto">
+    <div id="add_modal"  x-data="{ open: @entangle('add_modal') }" x-cloak x-show="open"
+         class="fixed z-50 inset-0 overflow-y-auto ">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div x-show="open" x-description="Background overlay, show/hide based on modal state."
                  x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"

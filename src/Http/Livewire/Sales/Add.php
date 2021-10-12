@@ -390,7 +390,9 @@ class Add extends Component
     {
         try {
             DB::beginTransaction();
-
+            if (empty($this->sales)) {
+                throw new \Exception('Unable to complete because invoice is empty.');
+            }
             if (empty($this->credit)) {
                 if (empty($this->received) && $this->admission == false) {
                     throw new \Exception('Please enter received amount.');
