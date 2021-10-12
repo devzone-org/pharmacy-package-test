@@ -22,6 +22,7 @@ class Transaction extends Component
 
     public $sales = [];
     public $refunds = [];
+    public $first = [];
 
     public function mount($sale_id)
     {
@@ -53,7 +54,7 @@ class Transaction extends Component
             $this->refunds = $refund->toArray();
         }
 
-
+        $this->first = $sl->toArray();
         $this->sales = $sale->toArray();
         $this->referred_by = $first['referred_by'];
         $this->on_credit = ($first['is_credit'] == 't') ? true : false;
