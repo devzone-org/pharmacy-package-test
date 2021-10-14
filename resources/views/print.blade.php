@@ -85,7 +85,7 @@
                 .then(logo => {
                     var escposCommands = doc
 
-
+                        .font(escpos.FontFamily.B)
                         .align(escpos.TextAlignment.Center)
                         .style([escpos.FontStyle.Bold])
                         .size(1,1)
@@ -98,37 +98,43 @@
                         .text("{{ $print['address_2'] }}")
                         .feed()
 
+                        .style([escpos.FontStyle.Bold])
                         .text("{{ $print['invoice_no']  }}")
+                        .style([escpos.FontStyle.Normal])
+
                         .text("{{ $print['reprint']  }}")
                         .style([escpos.FontStyle.Normal])
                         .feed()
                         .align()
                         .text("{{$print['patient_name'] }}")
-                        .text("{{$print['patient_mr_no'] }}")
                         .text("{{ $print['father_husband_name'] }}")
-                        .text("{{ $print['gender'] }}")
                         .text("{{ $print['sale_by'] }}")
-                        .text("{{ $print['sale_at'] }}")
-                        .feed()
-                        .text("================================================")
+
+
+                        .text("================================================================")
                         .text("{{ $print['heading'] }}")
-                        .text("================================================")
+                        .text("================================================================")
                         .text("{{ $print['inner'] }}")
-                        .text("------------------------------------------------")
-                        .text("{{ $print['footer'] }}")
-                        .text("------------------------------------------------")
+                        .text("----------------------------------------------------------------")
+
                         .text("{{ $print['sub_total'] }}")
                         .text("{{ $print['discount'] }}")
                         .text("{{ $print['gross_total'] }}")
                         .text("{{ $print['refund'] }}")
                         .text("{{ $print['net_total'] }}")
+                        .feed()
                         .text("{{ $print['receive_amount'] }}")
                         .text("{{ $print['change_returned'] }}")
+                        .text("-----------------------")
+                        .text("{{ $print['note'] }}")
+                        .text("{{ $print['note1'] }}")
+                        .text("{{ $print['note2'] }}")
                         .feed(2)
-                        .text("{{ $print['developer'] }}")
-                        .text("{{ $print['developer_phone'] }}")
 
-                        .feed(5)
+                        .text("{{ $print['developer']." ".$print['developer_phone'] }}")
+
+                        .feed(2)
+
                         .cut()
                         .generateUInt8Array();
 

@@ -333,7 +333,7 @@
 
                                 <tr>
                                     <th colspan="5" class="px-2 py-2 text-right border-r text-md text-gray-900">
-                                        Sub Total
+                                        Sale Sub Total
                                     </th>
                                     <th colspan="3" class="px-2 py-2 text-center border-r text-md text-gray-900">
                                         {{ number_format($first['sub_total'],2) }}
@@ -351,7 +351,7 @@
 
                                 <tr>
                                     <th colspan="5" class="px-2 py-2 text-right border-r text-md text-gray-900">
-                                        Net Sale
+                                        Sale after Discount
                                     </th>
                                     <th colspan="3" class="px-2 py-2 text-center border-r text-md text-gray-900">
                                         {{ number_format(  $first['gross_total'],2) }}
@@ -379,13 +379,36 @@
                                         Sale Returns
                                     </th>
                                     <th colspan="3" class="px-2 py-2 text-center border-r text-md text-gray-900">
-                                        {{ number_format($refunded,2) }}
+                                        ({{ number_format($refunded,2) }})
                                     </th>
                                 </tr>
 
                                 <tr>
                                     <th colspan="5" class="px-2 py-2 text-right border-r text-md text-gray-900">
-                                        Cash / (Refund)
+                                        Net Sales
+                                    </th>
+                                    <th colspan="3" class="px-2 py-2 text-center border-r text-md text-gray-900">
+                                        @if($first['gross_total']- $refunded>0)
+                                            {{ number_format(abs($first['gross_total']- $refunded),2) }}
+                                        @else
+
+                                    ({{ number_format(abs($first['gross_total']- $refunded),2) }})
+                                        @endif
+                                    </th>
+                                </tr>
+
+
+                                <tr>
+                                    <th colspan="5" class="px-2 py-2 text-right border-r text-md text-gray-900">
+
+                                        @if($refunded - $first['gross_total'] > 0)
+                                            (Refund)
+                                        @else
+                                            @if($first['is_credit'] == 'f')
+                                                Cash
+
+                                            @endif
+                                        @endif
                                     </th>
                                     <th colspan="3" class="px-2 py-2 text-center border-r text-md text-gray-900">
                                         @if($refunded - $first['gross_total'] > 0)
@@ -393,8 +416,7 @@
                                         @else
                                             @if($first['is_credit'] == 'f')
                                                 {{ number_format(abs($refunded -  $first['gross_total']),2) }}
-                                            @else
-                                                -
+
                                             @endif
                                         @endif
                                     </th>

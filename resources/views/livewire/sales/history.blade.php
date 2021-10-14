@@ -142,6 +142,18 @@
                                                 Refund
                                             </span>
                                         @endif
+                                        <br>
+                                        @if($h->is_paid=='t')
+                                            <span class="inline-flex mt-1 items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                Paid
+                                            </span>
+                                        @else
+                                            @if(empty($h->refunded_id))
+                                                <span class="inline-flex mt-1 items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                                Not Paid
+                                            </span>
+                                            @endif
+                                        @endif
                                     </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         {{ $h->id }}

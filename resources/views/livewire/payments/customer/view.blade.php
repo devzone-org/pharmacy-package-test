@@ -11,7 +11,7 @@
                             clip-rule="evenodd"></path>
                 </svg>
             </a>
-            <span class="ml-4">Customer Payments</span>
+            <span class="ml-4">Customer Payment Details</span>
         </h3>
     </div>
 
@@ -22,34 +22,30 @@
                 <h3 class="text-lg leading-6 font-medium text-gray-900">View Customer Payment</h3>
             </div>
 
-            @php
-                $first=collect($payments)->first();
-            @endphp
             <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
                 <div class="sm:col-span-1">
                     <dt class="text-sm font-medium text-gray-500">
-                        Customer Name
+                        Customer
                     </dt>
                     <dd class="mt-1 text-sm text-gray-900">
-                        {{ $first['customer_name'] }}
+                        {{ $customer_payment['customer'] }}
                     </dd>
                 </div>
                 <div class="sm:col-span-1">
                     <dt class="text-sm font-medium text-gray-500">
-                        Receiving In
+                        Receive In
                     </dt>
                     <dd class="mt-1 text-sm text-gray-900">
-                        {{ $first['account_name'] }}
+
+                        {{ $customer_payment['account_name'] }}
                     </dd>
                 </div>
                 <div class="sm:col-span-1">
                     <dt class="text-sm font-medium text-gray-500">
-                        Receiving Date
+                        Payment Date
                     </dt>
                     <dd class="mt-1 text-sm text-gray-900">
-                        @if(!empty($first['receiving_date']))
-                            {{ date('d M, Y',strtotime($first['receiving_date'])) }}
-                        @endif
+                        {{ date('d M, Y',strtotime($customer_payment['receiving_date'])) }}
                     </dd>
                 </div>
                 <div class="sm:col-span-1">
@@ -57,26 +53,31 @@
                         Status
                     </dt>
                     <dd class="mt-1 text-sm text-gray-900">
-
-                        @if(!empty($first['approved_at']))
-                            <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-green-100 text-green-800">
-                                  Approved
+                        @if(empty($customer_payment['approved_at']))
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-red-100 text-red-800">
+                                 Not Approved
                                 </span>
                         @else
-                            <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-red-100 text-red-800">
-                              Not Approved
-                            </span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-green-100 text-green-800">
+                                  Approved
+                                </span>
                         @endif
                     </dd>
                 </div>
-                <div class="sm:col-span-2">
+                <div class="sm:col-span-1">
                     <dt class="text-sm font-medium text-gray-500">
                         Description
                     </dt>
                     <dd class="mt-1 text-sm text-gray-900">
-                        {{ $first['description'] ?? '-' }}
+                        {{ $customer_payment['description'] }}
+                    </dd>
+                </div>
+                <div class="sm:col-span-1">
+                    <dt class="text-sm font-medium text-gray-500">
+                        Amount
+                    </dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {{ number_format($customer_payment['total_receive'],2) }}
                     </dd>
                 </div>
                 <div class="sm:col-span-1">
@@ -84,10 +85,8 @@
                         Created By
                     </dt>
                     <dd class="mt-1 text-sm text-gray-900">
-                        {{ $first['added_by'] }} <br>
-                        @if(!empty($first['receiving_date']))
-                            {{ date('d M, Y',strtotime($first['receiving_date'])) }}
-                        @endif
+                        {{ $customer_payment['added_by_name'] }} <br>
+                        {{ date('d M, Y',strtotime($customer_payment['created_at'])) }}
                     </dd>
                 </div>
 
@@ -96,10 +95,8 @@
                         Approved By
                     </dt>
                     <dd class="mt-1 text-sm text-gray-900">
-                        @if(!empty($first['approved_at']))
-                            {{ $first['approved_by'] }} <br>
-                            {{ date('d M, Y H:i A',strtotime($first['approved_at'])) }}
-                        @endif
+                        {{ $customer_payment['approved_by_name'] }} <br>
+                        {{ date('d M, Y',strtotime($customer_payment['approved_at'])) }}
                     </dd>
                 </div>
             </dl>
@@ -107,101 +104,99 @@
         <table class="min-w-full divide-y divide-gray-200 rounded-md ">
             <thead class="bg-white">
             <tr>
-                <th scope="col" colspan="8" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    <i>Receipts</i>
+                <th scope="col" colspan="7" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <i>Un Paid Invoices</i>
                 </th>
             </tr>
             <tr class="bg-gray-50">
 
-                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
                     #
                 </th>
-
-                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
                     Receipt #
                 </th>
-                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    Invoice #
-                </th>
-                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
                     Cash
                 </th>
-                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    on Account
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
+                    On Account
                 </th>
-                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
                     Refund
                 </th>
-                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
                     Total Receivable
                 </th>
-                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
                     Date
                 </th>
-
             </tr>
             </thead>
-            <tbody class="bg-white">
-
-            @foreach($payments as $key => $p)
+            <tbody class="   bg-white ">
+            @foreach($payments as $key=>$p)
                 <tr>
 
-                    <td class="px-3 py-3   text-sm font-medium text-gray-500">
-                        {{ $loop->iteration }}
+                    <td class="px-3 py-3 text-sm font-medium text-gray-500">
+                        {{$loop->iteration}}
                     </td>
-                    <td class="px-3 py-3   text-sm text-gray-500">
-                        {{ $p['receipt_no'] }}
+                    <td class="px-3 py-3 text-sm text-gray-500">
+                        {{$p['id']}}
                     </td>
-                    <td class="px-3 py-3   text-sm text-gray-500">
-                        {{ $p['invoice_no'] }}
+                    <td class="px-3 py-3 text-sm text-gray-500">
+                        {{number_format($p['receive_amount'],2)}}
                     </td>
-                    <td class="px-3 py-3   text-sm text-gray-500">
-                        {{ $p['receive_amount'] }}
+                    <td class="px-3 py-3 text-sm text-gray-500">
+                        {{number_format($p['on_account'],2)}}
                     </td>
-                    <td class="px-3 py-3   text-sm text-gray-500">
-                        {{ $p['gross_total']-$p['receive_amount'] }}
+                    <td class="px-3 py-3 text-sm text-gray-500">
+                        {{number_format($p['refunded'],2)}}
                     </td>
-                    <td class="px-3 py-3   text-sm text-gray-500">
-                        -
+                    <td class="px-3 py-3 text-sm text-gray-500">
+                        {{number_format($p['on_account']-$p['refunded'],2)}}
                     </td>
-                    <td class="px-3 py-3   text-sm text-gray-500">
-                        {{$p['gross_total']-$p['receive_amount']}}
+                    <td class="px-3 py-3 text-sm text-gray-500">
+                        {{date('d M Y h:i A',strtotime($p['sale_at']))}}
                     </td>
-
-                    <td class="px-3 py-3   text-sm text-gray-500">
-                        @if(!empty($p['sale_at']))
-                            {{ date('d M Y h:i A',strtotime($p['sale_at'])) }}
-                        @endif
-                    </td>
-
-
                 </tr>
             @endforeach
-
-            <tr class="bg-white">
-                <th scope="col" colspan="8" class="w-10 px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                    &nbsp;
-                </th>
+            <tr>
+                <th colspan="7">&nbsp;</th>
             </tr>
             <tr>
-                <th scope="col" colspan="7" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
-                    Selected Orders
+                <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    Selected Receipt
                 </th>
                 <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
-                    {{ collect($payments)->count() }}
+                    {{collect($this->payments)->where('selected',true)->count()}}
                 </th>
             </tr>
-
             <tr>
-                <th scope="col" colspan="7" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
-                    Receivable Amount
+                <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    Sub Total
                 </th>
                 <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
-                    {{ number_format(collect($payments)->sum('gross_total')-collect($payments)->sum('receive_amount'),2) }}
+                    {{collect($this->payments)->where('selected',true)->sum('on_account')}}
                 </th>
             </tr>
             <tr>
-                <th colspan="8">&nbsp;</th>
+                <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    Refunded
+                </th>
+                <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
+                    {{collect($this->payments)->where('selected',true)->sum('refunded')}}
+                </th>
+            </tr>
+            <tr>
+                <th scope="col" colspan="6" class="px-3 py-3 text-right text-sm font-medium text-gray-500   ">
+                    Total Receivable
+                </th>
+                <th scope="col" class=" px-3 py-3 border text-left text-sm font-medium text-gray-500   ">
+                    {{collect($this->payments)->where('selected',true)->sum('on_account') - collect($this->payments)->where('selected',true)->sum('refunded')}}
+                </th>
+            </tr>
+            <tr>
+                <th colspan="7">&nbsp;</th>
             </tr>
             </tbody>
         </table>
