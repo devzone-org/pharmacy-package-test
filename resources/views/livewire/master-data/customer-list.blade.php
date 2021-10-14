@@ -27,18 +27,23 @@
                                 </div>
 
                                 <div class="col-span-8 sm:col-span-2">
-                                    <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
-                                    <input type="text" wire:model.defer="phone" autocomplete="off"
-                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <label for="employee" class="block text-sm font-medium text-gray-700">Care
+                                        Of</label>
+                                    <select wire:model.defer="employee_id"
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+
+                                        <option value=""></option>
+                                        @foreach($employees as $e)
+                                            <option value="{{ $e['id'] }}">{{ $e['name'] }}</option>
+                                        @endforeach
+                                    </select>
+
                                 </div>
-                                <div class="col-span-8 sm:col-span-2">
-                                    <label for="phone" class="block text-sm font-medium text-gray-700">Company</label>
-                                    <input type="text" wire:model.defer="company" autocomplete="off"
-                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                </div>
+
                                 <div class="col-span-8 sm:col-span-2">
                                     <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                                    <select wire:model.defer="status" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <select wire:model.defer="status"
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                         <option value="">All</option>
                                         <option value="t">Active</option>
                                         <option value="f">Inactive</option>
@@ -71,11 +76,11 @@
 
                         <div class="bg-white py-6 px-4 space-y-6 sm:p-6 ">
                             <div class="flex justify-between items-center">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900">Customers List</h3>
-                                <a href="{{url('pharmacy/master-data/customers/add')}}"
-                                   class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    Add new Customer
-                                </a>
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">Creditors List</h3>
+                                {{--                                <a href="{{url('pharmacy/master-data/customers/add')}}"--}}
+                                {{--                                   class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">--}}
+                                {{--                                    Add new Customer--}}
+                                {{--                                </a>--}}
                             </div>
                         </div>
                         <table class="min-w-full divide-y divide-gray-200">
@@ -90,18 +95,10 @@
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                                     Credit Limit
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                                    Phone
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                                    Email
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                                    Address
-                                </th>
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Company
+                                    Care Of
                                 </th>
+
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                                     Status
                                 </th>
@@ -124,17 +121,9 @@
                                         {{number_format($c->credit_limit)}}
                                     </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{$c->phone}}
+                                        {{$c->care_of}}
                                     </td>
-                                    <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{$c->email}}
-                                    </td>
-                                    <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{$c->address}}
-                                    </td>
-                                    <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{$c->company}}
-                                    </td>
+
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         @if($c->status=='t')
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
@@ -154,6 +143,10 @@
                             @endforeach
                             </tbody>
                         </table>
+
+                        <div class="bg-white p-2">
+                            {{ $customers->links() }}
+                        </div>
                     </div>
                 </div>
             </div>

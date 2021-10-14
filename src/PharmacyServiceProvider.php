@@ -52,6 +52,7 @@ use Devzone\Pharmacy\Http\Livewire\Reports\StockInOut;
 use Devzone\Pharmacy\Http\Livewire\Reports\StockNearExpiry;
 use Devzone\Pharmacy\Http\Livewire\Reports\StockRegister;
 use Devzone\Pharmacy\Http\Livewire\Reports\StockReorderLevel;
+use Devzone\Pharmacy\Http\Livewire\Sales\Transaction;
 use Devzone\Pharmacy\Models\InventoryLedger;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -138,7 +139,7 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('sales.history', \Devzone\Pharmacy\Http\Livewire\Sales\History::class);
         Livewire::component('sales.refund', \Devzone\Pharmacy\Http\Livewire\Sales\Refund::class);
         Livewire::component('sales.view', \Devzone\Pharmacy\Http\Livewire\Sales\View::class);
-
+        Livewire::component('sales.transaction',Transaction::class);
         Livewire::component('report.sales-transaction',SaleTransaction::class);
         Livewire::component('report.sales-return-transaction',SaleReturnTransaction::class);
         Livewire::component('report.sale-summary',SaleSummary::class);

@@ -195,7 +195,7 @@
                         {{$p->account_name}}
                     </td>
                     <td class="px-3 py-3   text-sm text-gray-500">
-                        {{number_format($p->total_receivable,2)}}
+                        {{number_format($p->amount,2)}}
                     </td>
                     <td class="px-3 py-3   text-sm text-gray-500">
                         @if(empty($p->approved_by))
@@ -244,12 +244,12 @@
                                        class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                        role="menuitem" tabindex="-1">View</a>
                                     @if(empty($p->approved_by))
-                                        <p wire:click="markAsApproved('{{ $p->id }}','{{ $p->receiving_date }}','{{$p->customer_name}}','{{$p->total_receivable}}','{{$p->account_name}}')"
+                                        <p wire:click="markAsApproved('{{ $p->id }}','{{ $p->receiving_date }}','{{$p->customer_name}}','{{$p->amount}}','{{$p->account_name}}')"
                                                 class="text-gray-700 cursor-pointer block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                                 role="menuitem" tabindex="-1">Mark as Approve
                                         </p>
-                                        <a href="{{ url('pharmacy/customer/payments/edit') }}/{{$p->id}}" class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                                role="menuitem" tabindex="-1">Edit</a>
+{{--                                        <a href="{{ url('pharmacy/customer/payments/edit') }}/{{$p->id}}" class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"--}}
+{{--                                                role="menuitem" tabindex="-1">Edit</a>--}}
                                         <p wire:click="removePayment('{{$p->id}}')" class="text-red-700 cursor-pointer block w-full text-left px-4 py-2 text-sm hover:bg-red-200"
                                                 role="menuitem" tabindex="-1">Remove</p>
                                     @endif

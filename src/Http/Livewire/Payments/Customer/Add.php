@@ -37,20 +37,24 @@ class Add extends Component
     {
         $payments = Sale::from('sales as s')
             ->leftJoin('patients as p', 'p.id', '=', 's.patient_id')
-            ->leftJoin('employees as e', function ($q) {
-                return $q->on('e.id', '=', 's.referred_by')
-                    ->where('e.is_doctor', 't');
-            })
+
             ->where('s.customer_id', $this->customer_id)
             ->whereNull('s.refunded_id')
-            ->whereIn('s.is_paid', ['f', 'p'])
-            ->select('s.*', 'p.name as patient', 'e.name as referred')
+            ->whereIn('s.is_paid', ['f'])
+            ->select('s.*', 'p.name as patient')
             ->get();
+
         $sale_ids=$payments->where('is_refund','t')->pluck('id')->toArray();
-        $refund_entries=Sale::whereIn('refunded_id',$sale_ids)
-            ->groupBy('refunded_id')
-            ->select('id','refunded_id',DB::raw('sum(on_account) as total_refunded'))
+//
+        $refund_entries = \Devzone\Pharmacy\Models\Sale\SaleRefund::from('sale_refunds as sr')
+            ->join('sale_details as sd','sd.id','=','sr.sale_detail_id')
+            ->whereIn('sr.sale_id',$sale_ids)
+            ->groupBy('sr.sale_id')
+            ->select(\Illuminate\Support\Facades\DB::raw('sum(sr.refund_qty * sd.retail_price_after_disc) as total_refunded'),
+                'sr.sale_id as refunded_id','sr.refunded_id as id')
             ->get();
+
+
         if ($payments->isNotEmpty()) {
             $payments = $payments->toArray();
             foreach ($payments as $key => $p) {
@@ -94,6 +98,7 @@ class Add extends Component
                 'receiving_in'=>Auth::user()->account_id,
                 'receiving_date'=>$this->receiving_date,
                 'added_by'=>Auth::id(),
+                'amount'=> collect($this->payments)->where('selected',true)->sum('on_account') - collect($this->payments)->where('selected',true)->sum('refunded'),
             ])->id;
             foreach (collect($this->payments)->where('selected',true) as $p){
                 CustomerPaymentDetail::create([

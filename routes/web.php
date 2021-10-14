@@ -61,9 +61,9 @@ Route::get('customer/payments/add', function () {
 Route::get('customer/payments/view/{id}', function ($id) {
     return view('pharmacy::payments.customer.view',compact('id'));
 });
-Route::get('customer/payments/edit/{id}', function ($id) {
-    return view('pharmacy::payments.customer.edit',compact('id'));
-});
+//Route::get('customer/payments/edit/{id}', function ($id) {
+//    return view('pharmacy::payments.customer.edit',compact('id'));
+//});
 
 
 Route::get('purchases', function () {
@@ -137,6 +137,9 @@ Route::get('sales/refund/{id}', function ($id) {
 });
 Route::get('sales/view/{id}', function ($id) {
     return view('pharmacy::sales.view', compact('id'));
+});
+Route::get('sales/transaction/view/{id}', function ($id) {
+    return view('pharmacy::sales.transaction', compact('id'));
 });
 Route::get('sales/admissions', function () {
     return view('pharmacy::sales.admission-pharmacy');

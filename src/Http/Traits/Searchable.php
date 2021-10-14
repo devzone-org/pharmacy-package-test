@@ -39,7 +39,7 @@ trait Searchable
         'referred_by' => ['name'],
         'item' => ['item', 'qty', 'retail_price', 'rack', 'tier', 'packing'],
         'adjustment_items' => ['item', 'qty', 'expiry'],
-        'customer'=>['name','phone','company','credit_limit']
+        'customer'=>['name','care_of', 'credit_limit']
     ];
 
 
@@ -242,7 +242,7 @@ trait Searchable
                 return $q->orWhere('name', 'LIKE', '%' . $value . '%')
                     ->orWhere('mr_no', 'LIKE', '%' . $value . '%')
                     ->orWhere('phone', 'LIKE', '%' . $value . '%');
-            })->select('mr_no', 'name', 'phone', 'id')->get();
+            })->select('mr_no', 'name', 'phone', 'id','customer_id','account_id')->get();
             if ($search->isNotEmpty()) {
                 $this->searchable_data = $search->toArray();
             } else {
@@ -264,12 +264,11 @@ trait Searchable
             }
         }
         if ($this->searchable_type == 'customer') {
-            $search=Customer::where('status','t')
+            $search=Customer::from('customers as c')
+                ->join('employees as e','e.id','=','c.employee_id')
                 ->where(function ($q) use ($value){
-                        return $q->orWhere('name','LIKE','%'.$value.'%')
-                            ->orWhere('phone','LIKE','%'.$value.'%')
-                            ->orWhere('company','LIKE','%'.$value.'%');
-                })->get();
+                        return $q->orWhere('c.name','LIKE','%'.$value.'%');
+                })->select('c.name','c.credit_limit','e.name as care_of','c.id')->get();
             if ($search->isNotEmpty()) {
                 $this->searchable_data = $search->toArray();
             } else {

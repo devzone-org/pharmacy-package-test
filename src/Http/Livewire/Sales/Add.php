@@ -11,8 +11,9 @@ use App\Models\Hospital\Hospital;
 use App\Models\Hospital\Patient;
 use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
-use Devzone\Ams\Models\ChartOfAccount;
+use Devzone\Ams\Helper\ChartOfAccount;
 use Devzone\Ams\Models\Ledger;
+use Devzone\Ams\Models\ChartOfAccount as COA;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Customer;
 use Devzone\Pharmacy\Models\InventoryLedger;
@@ -60,6 +61,11 @@ class Add extends Component
     public $customer_id_credit;
     public $customer_credit_limit;
     public $customer_previous_credit;
+    public $customer_id;
+    public $account_id;
+    public $customer_modal = false;
+    public $customers = [];
+    public $employees = [];
 
     public $doctors = [];
     public $add_modal = false;
@@ -161,17 +167,12 @@ class Add extends Component
             }
 
         }
-//        $this->tills = ChartOfAccount::from('chart_of_accounts as p')
-//            ->join('chart_of_accounts as c', 'p.id', '=', 'c.sub_account')
-//            ->where('p.reference', 'cash-at-pharmacy-tills-4')->get()->toArray();
-//        $till = UserTill::where('user_id', Auth::id())->first();
-//        if (!empty($till)) {
-//            $this->till_id = $till['account_id'];
-//            $till_name = collect($this->tills)->firstWhere('id', $till['account_id']);
-//            $this->till_name = $till_name['name'];
-//        }
+
 
         $this->searchable_emit_only = true;
+
+        $this->employees = DB::table('employees')->get()->toArray();
+        $this->employees = (json_decode(json_encode($this->employees), true));
     }
 
     public function emitReferredById()
@@ -185,13 +186,10 @@ class Add extends Component
 
     }
 
-    public function emitCustomerIdCredit()
+    public function checkCustomerBalances()
     {
-        $data = $this->searchable_data[$this->highlight_index];
-        $this->customer_id_credit = $data['id'];
-        $this->customer_name_credit = $data['name'];
-        $this->searchableReset();
-        $customer_account = Customer::find($this->customer_id_credit);
+
+        $customer_account = Customer::find($this->customer_id);
         $this->customer_credit_limit = $customer_account->credit_limit;
         $previous_credit = Ledger::where('account_id', $customer_account->account_id)
             ->groupBy('account_id')
@@ -207,8 +205,14 @@ class Add extends Component
             $data = $this->searchable_data[$this->highlight_index];
             $this->patient_id = $data['id'];
             $this->patient_name = $data['mr_no'] . ' - ' . $data['name'];
+            $this->customer_id = $data['customer_id'];
+            $this->account_id = $data['account_id'];
             $this->searchableReset();
         }
+        $this->credit = false;
+        $this->error = '';
+
+        $this->reset('customer_previous_credit', 'customer_credit_limit');
 
     }
 
@@ -327,12 +331,58 @@ class Add extends Component
 
     public function updatedCredit($val)
     {
-        $this->received=0;
-        $this->payable=0;
+        $this->received = 0;
+        $this->payable = 0;
         if ($val == true) {
-            if (empty($this->customer_id_credit)) {
-                $this->searchableOpenModal('customer_id_credit', 'customer_name_credit', 'customer');
+            if (empty($this->patient_id)) {
+                $this->error = 'Please select patient first to proceed credit sale.';
+                $this->credit = false;
+            } else {
+                $this->error = '';
+                $this->resetErrorBag();
+                if (empty($this->customer_id)) {
+                    $this->customer_modal = true;
+                } else {
+                    $this->checkCustomerBalances();
+                }
             }
+        }
+    }
+
+    public function addCreditor()
+    {
+        $validatedData = $this->validate([
+            'patient_id' => 'required|integer',
+            'customers.care_of' => 'required',
+            'customers.credit_limit' => 'required|numeric',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $account_id = ChartOfAccount::instance()->createCustomerAccount('Receivable ' . ucwords($this->patient_name));
+            $customer = Customer::create([
+                'name' => ucwords($this->patient_name),
+                'employee_id' => $this->customers['care_of'],
+                'credit_limit' => $this->customers['credit_limit'],
+                'account_id' => $account_id
+            ]);
+
+            Patient::find($this->patient_id)->update([
+                'customer_id' => $customer->id,
+                'account_id' => $account_id
+            ]);
+
+            $this->customer_id = $customer->id;
+            $this->account_id = $account_id;
+
+            DB::commit();
+            $this->checkCustomerBalances();
+            $this->customer_modal = false;
+
+            $this->reset('customers');
+        } catch (\Exception $e) {
+            $this->addError('customers.care_of', $e->getMessage());
+            DB::rollBack();
         }
     }
 
@@ -340,7 +390,9 @@ class Add extends Component
     {
         try {
             DB::beginTransaction();
-
+            if (empty($this->sales)) {
+                throw new \Exception('Unable to complete because invoice is empty.');
+            }
             if (empty($this->credit)) {
                 if (empty($this->received) && $this->admission == false) {
                     throw new \Exception('Please enter received amount.');
@@ -349,11 +401,11 @@ class Add extends Component
                     throw new \Exception('Received amount should be greater than PKR ' . collect($this->sales)->sum('total_after_disc') . "/-");
                 }
             } else {
-                if (empty($this->customer_id_credit)) {
-                    throw new \Exception('Please select customer to credit amount.');
+                if (empty($this->customer_id)) {
+                    throw new \Exception('Please select patient to credit sale.');
                 }
                 $customer_account = Customer::join('chart_of_accounts as coa', 'coa.id', '=', 'customers.account_id')
-                    ->where('customers.id', $this->customer_id_credit)
+                    ->where('customers.id', $this->customer_id)
                     ->select('coa.name', 'customers.*')
                     ->first();
                 $previous_credit = Ledger::where('account_id', $customer_account->account_id)
@@ -362,7 +414,7 @@ class Add extends Component
                     ->first();
                 $previous_balance = !empty($previous_credit) ? $previous_credit->balance : 0;
                 if (collect($this->sales)->sum('total_after_disc') + $previous_balance > $customer_account->credit_limit) {
-                    throw new \Exception('Amount exceeding customer credit limit (PKR ' . number_format($customer_account->credit_limit) . ')');
+                    throw new \Exception('Credit limit exceeding: Available balance is PKR ' . number_format($this->customer_previous_credit));
                 }
                 $user_limit = UserLimit::where('user_id', Auth::id())
                     ->where('date', date('Y-m-d'))
@@ -406,10 +458,10 @@ class Add extends Component
                 'admission_id' => $this->admission_id ?? null,
                 'procedure_id' => $this->procedure_id ?? null,
                 'receipt_no' => $sale_receipt_no,
-                'customer_id' => $this->customer_id_credit ?? null,
-                'is_credit' => !empty($this->credit)  ? 't' : 'f',
-                'is_paid' => !empty($this->credit)  ? 'f' : 't',
-                'on_account' => !empty($this->credit)  ? $total_after_disc  : 0,
+                'customer_id' => $this->customer_id ?? null,
+                'is_credit' => !empty($this->credit) ? 't' : 'f',
+                'is_paid' => !empty($this->credit) ? 'f' : 't',
+                'on_account' => !empty($this->credit) ? $total_after_disc : 0,
             ])->id;
 
 
@@ -466,11 +518,12 @@ class Add extends Component
                             'total' => $total,
                             'disc' => $s['disc'],
                             'total_after_disc' => $after_total,
+                            'retail_price_after_disc' => $after_total / $dec
                         ]);
                     }
                 }
             }
-            $accounts = ChartOfAccount::whereIn('reference', ['pharmacy-inventory-5', 'income-pharmacy-5', 'cost-of-sales-pharmacy-5'])->get();
+            $accounts = COA::whereIn('reference', ['pharmacy-inventory-5', 'income-pharmacy-5', 'cost-of-sales-pharmacy-5'])->get();
 
             $amounts = SaleDetail::where('sale_id', $sale_id)->select(DB::raw('SUM(total_after_disc) as sale'), DB::raw('SUM(qty * supply_price) as cost'))->first();
             $customer_name = $this->patient_name ?? 'walking customer';
@@ -557,8 +610,8 @@ class Add extends Component
 
     public function resetAll()
     {
-        $this->reset(['sales', 'referred_by_id', 'referred_by_name', 'success', 'patient_id', 'patient_name',
-            'payable', 'received', 'remarks', 'discount', 'error', 'customer_id_credit', 'customer_name_credit', 'credit']);
+        $this->reset(['sales', 'referred_by_id', 'referred_by_name', 'success', 'patient_id', 'patient_name', 'customer_credit_limit',
+            'payable', 'received', 'remarks', 'discount', 'error', 'customer_id_credit', 'customer_id', 'account_id', 'customer_previous_credit', 'customer_name_credit', 'credit']);
     }
 
     public function updatedTillId($value)
@@ -626,6 +679,7 @@ class Add extends Component
             $validation['patient_contact'] = 'required';
         }
         $this->validate($validation);
+
         $last_patient = Patient::orderBy('id', 'DESC')->first();
         $this->patient_mr = 'MR' . str_pad($last_patient->id + 1, 6, '0', STR_PAD_LEFT);
         $created_patient = Patient::create([
@@ -653,6 +707,7 @@ class Add extends Component
         $this->referred_by_name = collect($this->doctors)->where('id', $this->referred_by_id)->first()['name'];
         $this->add_modal = false;
         $this->patient_contact_whatsApp = 't';
-        $this->reset('add_patient_name', 'father_husband_name', 'patient_gender', 'patient_contact', 'patient_contact_2', 'patient_contact_3', 'patient_relation', 'patient_dob', 'patient_age', 'patient_doctor', 'patient_registration_date', 'patient_address', 'patient_city', 'patient_referred_by');
+
+        $this->reset('add_patient_name', 'credit', 'customer_id', 'account_id', 'customer_previous_credit', 'customer_credit_limit', 'father_husband_name', 'patient_gender', 'patient_contact', 'patient_contact_2', 'patient_contact_3', 'patient_relation', 'patient_dob', 'patient_age', 'patient_doctor', 'patient_registration_date', 'patient_address', 'patient_city', 'patient_referred_by');
     }
 }

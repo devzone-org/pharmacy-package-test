@@ -24,6 +24,7 @@ class CustomerAdd extends Component
         'credit_limit'=>'required',
     ];
     public function render(){
+        die;
         return view('pharmacy::livewire.master-data.customer-add');
     }
     public function create(){
