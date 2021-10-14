@@ -105,7 +105,7 @@ class ProductsEdit extends Component
     {
         if ($this->retail_price != $this->retail_price_old) {
             $this->retail_price_notification = true;
-            $this->force_update = false;
+            $this->force_update = true;
         } else {
             $this->force_update = false;
             $this->create();
