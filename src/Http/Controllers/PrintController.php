@@ -66,6 +66,7 @@ class PrintController extends Controller
         if (!empty($first['patient_id'])) {
             $patient = Patient::from('patients as p')
                 ->leftJoin('customers as c', 'c.id', '=', 'p.customer_id')
+                ->where('p.id',$first['patient_id'])
                 ->select('p.name', 'p.mr_no', 'p.gender', 'p.father_husband_name', 'p.account_id', 'c.credit_limit')->first();
 
 
