@@ -86,6 +86,9 @@ trait Searchable
 
     public function searchableSelection($key = null)
     {
+        if(empty($this->searchable_data)){
+            return ;
+        }
         if (!empty($key)) {
             $this->highlight_index = $key;
         }

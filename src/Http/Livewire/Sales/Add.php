@@ -554,7 +554,7 @@ class Add extends Component
                             'amount' => $amounts->sale,
                         ]);
 
-                    $ipd_medicine_account = ChartOfAccount::where('reference', 'payable-medicine-5')->first();
+                    $ipd_medicine_account = COA::where('reference', 'payable-medicine-5')->first();
 
                     $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) .
                         " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} issued against admission # " . $admission_details->admission_no . " and procedure " . $admission_details->procedure_name . ". Account " . $ipd_medicine_account->name . " debited with PKR " .
