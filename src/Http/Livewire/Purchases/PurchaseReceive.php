@@ -4,6 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Purchases;
 
 
+use Carbon\Carbon;
 use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount;
@@ -85,7 +86,9 @@ class PurchaseReceive extends Component
         $this->supplier_invoice = $purchase->supplier_invoice;
         $this->supplier_id = $purchase->supplier_id;
         $this->supplier_name = $purchase->supplier_name;
-        $this->delivery_date = $purchase->delivery_date;
+        if (!empty($purchase->delivery_date)){
+            $this->delivery_date = date('d M Y',strtotime($purchase->delivery_date));
+        }
 
         $details = PurchaseOrder::from('purchase_orders as po')
             ->join('products as p', 'p.id', '=', 'po.product_id')
@@ -240,6 +243,14 @@ class PurchaseReceive extends Component
         }
     }
 
+    private function formatDate($date){
+        if (empty($date)){
+            return null;
+        }
+        return Carbon::createFromFormat('d M Y',$date)
+            ->format('Y-m-d');
+    }
+
 
     public function create()
     {
@@ -250,7 +261,7 @@ class PurchaseReceive extends Component
             Purchase::where('id', $this->purchase_id)->update([
                 'supplier_id' => $this->supplier_id,
                 'supplier_invoice' => $this->supplier_invoice,
-                'delivery_date' => $this->delivery_date,
+                'delivery_date' => $this->formatDate($this->delivery_date),
                 'status' => 'receiving',
                 'grn_no' => $this->grn_no,
                 'advance_tax' => $this->advance_tax,

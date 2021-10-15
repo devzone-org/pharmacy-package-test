@@ -39,6 +39,7 @@ use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseReceive;
 use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseView;
 use Devzone\Pharmacy\Http\Livewire\Purchases\StockAdjustment;
 use Devzone\Pharmacy\Http\Livewire\Purchases\StockAdjustmentListing;
+use Devzone\Pharmacy\Http\Livewire\Reports\CustomerReceivables;
 use Devzone\Pharmacy\Http\Livewire\Reports\InterTransferIPDMedicines;
 use Devzone\Pharmacy\Http\Livewire\Reports\PurchasesDetails;
 use Devzone\Pharmacy\Http\Livewire\Reports\PurchaseSummary;
@@ -140,6 +141,8 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('sales.refund', \Devzone\Pharmacy\Http\Livewire\Sales\Refund::class);
         Livewire::component('sales.view', \Devzone\Pharmacy\Http\Livewire\Sales\View::class);
         Livewire::component('sales.transaction',Transaction::class);
+
+        Livewire::component('report.customer-receivables',CustomerReceivables::class);
         Livewire::component('report.sales-transaction',SaleTransaction::class);
         Livewire::component('report.sales-return-transaction',SaleReturnTransaction::class);
         Livewire::component('report.sale-summary',SaleSummary::class);

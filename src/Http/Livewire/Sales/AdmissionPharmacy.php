@@ -5,6 +5,7 @@ namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
 
 use App\Models\Hospital\AdmissionJobDetail;
+use Carbon\Carbon;
 use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount;
@@ -20,6 +21,12 @@ class AdmissionPharmacy extends Component
     public $patient;
     public $from;
     public $to;
+
+    private function formatDate($date){
+        return Carbon::createFromFormat('d M Y',$date)
+            ->format('Y-m-d');
+    }
+
     public function render()
     {
         $admissions = AdmissionJobDetail::from('admission_job_details as ajd')
@@ -43,14 +50,14 @@ class AdmissionPharmacy extends Component
                 return $q->where('p.name', 'like', '%' . $this->patient . '%');
             })
             ->when(!empty($this->from) && !empty($this->to), function ($q) {
-                return $q->where('a.admission_date', '>=', $this->from)
-                    ->where('a.admission_date', '<=', $this->to);
+                return $q->where('a.admission_date', '>=', $this->formatDate($this->from))
+                    ->where('a.admission_date', '<=', $this->formatDate($this->to));
             })
             ->when(!empty($this->from) && empty($this->to), function ($q) {
-                return $q->whereDate('a.admission_date', $this->from);
+                return $q->whereDate('a.admission_date', '>=', $this->formatDate($this->from));
             })
             ->when(!empty($this->to) && empty($this->from), function ($q) {
-                return $q->whereDate('a.admission_date', $this->to);
+                return $q->whereDate('a.admission_date', '<=', $this->formatDate($this->to));
             })
             ->where('ajd.medicines_included', 't')
             ->orderBy('a.id', 'DESC')

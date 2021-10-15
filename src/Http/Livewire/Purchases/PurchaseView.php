@@ -4,6 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Purchases;
 
 
+use Carbon\Carbon;
 use Devzone\Pharmacy\Models\Payments\SupplierPaymentDetail;
 use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\PurchaseOrder;
@@ -26,7 +27,9 @@ class PurchaseView extends Component
         $purchase = Purchase::find($purchase_id);
 
         $this->grn_no = $purchase->grn_no;
-        $this->delivery_date = $purchase->delivery_date;
+        if (!empty($purchase->delivery_date)){
+            $this->delivery_date = date('d M Y',strtotime($purchase->delivery_date));
+        }
         $this->supplier_invoice = $purchase->supplier_invoice;
     }
 
@@ -90,6 +93,14 @@ class PurchaseView extends Component
         return redirect()->to('/pharmacy/purchases');
     }
 
+    private function formatDate($date){
+        if (empty($date)){
+            return null;
+        }
+        return Carbon::createFromFormat('d M Y',$date)
+            ->format('Y-m-d');
+    }
+
     public function openBasicInfo()
     {
         $this->basic_info = true;
@@ -100,7 +111,7 @@ class PurchaseView extends Component
         Purchase::find($this->purchase_id)->update([
             'supplier_invoice' => $this->supplier_invoice,
             'grn_no' => $this->grn_no,
-            'delivery_date' => $this->delivery_date
+            'delivery_date' => $this->formatDate($this->delivery_date)
         ]);
         $this->basic_info = false;
     }

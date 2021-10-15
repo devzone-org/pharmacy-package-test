@@ -70,10 +70,9 @@
 
 
                     <div class="col-span-6 sm:col-span-2">
-                        <label for="date" class="block text-sm font-medium text-gray-700">Delivery Date</label>
-                        <input wire:model.lazy="delivery_date" type="date" autocomplete="off"
-                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                               id="date">
+                        <label for="delivery_date" class="block text-sm font-medium text-gray-700">Delivery Date</label>
+                        <input type="text" readonly wire:model.lazy="delivery_date" id="delivery_date"
+                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
 
 
@@ -480,6 +479,18 @@
     </div>
     @include('pharmacy::include.searchable')
 </div>
+
+@section('script')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+    <script>
+        let from_date = new Pikaday({
+            field: document.getElementById('delivery_date'),
+            format: "DD MMM YYYY"
+        });
+        from_date.setDate(new Date('{{ $delivery_date }}'));
+    </script>
+@endsection
 
 <script>
     document.addEventListener('livewire:load', () => {

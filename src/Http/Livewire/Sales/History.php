@@ -4,6 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
 
+use Carbon\Carbon;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Illuminate\Support\Facades\DB;
@@ -16,28 +17,31 @@ class History extends Component
 
     public $receipt;
     public $from;
+    public $from_vu;
     public $to;
-    public $patient_id;
-    public $patient_name;
-    public $type;
+    public $to_vu;
 
     public function mount()
     {
-        $this->from = date('Y-m-d', strtotime('-1 month'));
-        $this->to = date('Y-m-d');
+        $this->from_vu = date('d M Y', strtotime('-1 month'));
+        $this->to_vu = date('d M Y');
     }
 
-    public function searchPatient()
-    {
-        $this->searchableOpenModal('patient_id', 'patient_name', 'patient');
+    private function formatDate($date){
+        return Carbon::createFromFormat('d M Y',$date)
+            ->format('Y-m-d');
     }
 
     public function render()
     {
+        $this->from = $this->formatDate($this->from_vu);
+        $this->to = $this->formatDate($this->to_vu);
+
         $history = Sale::from("sales as s")
             ->join('users as u', 'u.id', '=', 's.sale_by')
             ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
             ->leftJoin('patients as p', 'p.id', '=', 's.patient_id')
+            ->leftJoin('sale_details as sd', 'sd.sale_id', '=', 's.id')
             ->whereNull('admission_id')
             ->whereNull('procedure_id');
 
@@ -46,20 +50,9 @@ class History extends Component
         } else {
             $history = $history->when(!empty($this->from), function ($q) {
                 return $q->whereDate('s.sale_at', '>=', $this->from);
-            })->when(!empty($this->to), function ($q) {
+            })
+                ->when(!empty($this->to), function ($q) {
                 return $q->whereDate('s.sale_at', '<=', $this->to);
-            })->when(!empty($this->patient_id), function ($q) {
-                return $q->where('s.patient_id', $this->patient_id);
-            })->when(!empty($this->type), function ($q) {
-                if ($this->type == 'sale') {
-                    return $q->whereNull('s.refunded_id')->where('s.is_credit','f');
-                }
-                if($this->type == 'credit'){
-                    return $q->whereNull('s.refunded_id')->where('s.is_credit','t');
-                }
-                if($this->type == 'refund'){
-                    return $q->where('s.refunded_id','>',0);
-                }
             });
         }
 
@@ -74,13 +67,9 @@ class History extends Component
             's.receive_amount',
             's.payable_amount',
             's.refunded_id',
-            's.is_credit',
-            's.is_paid',
-            's.on_account',
             'p.name as patient_name',
-            'p.mr_no',
-            'e.name as referred_by'
-        )->orderBy('s.id', 'desc')->paginate(100);
+            'e.name as referred_by',
+        )->orderBy('s.id', 'desc')->paginate(50);
 
         return view('pharmacy::livewire.sales.history', ['history' => $history]);
     }
@@ -92,7 +81,7 @@ class History extends Component
 
     public function resetSearch()
     {
-        $this->reset(['receipt','type','patient_id','patient_name']);
+        $this->reset('receipt');
         $this->resetPage();
 
     }

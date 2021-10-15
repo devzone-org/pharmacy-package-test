@@ -145,6 +145,10 @@ Route::get('sales/admissions', function () {
     return view('pharmacy::sales.admission-pharmacy');
 });
 
+Route::get('report/customer-receivables', function () {
+    return view('pharmacy::reports.customer-receivables');
+});
+
 Route::get('report/sale-transaction', function () {
     return view('pharmacy::reports.sale-transaction');
 });

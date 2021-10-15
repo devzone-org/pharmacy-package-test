@@ -22,9 +22,11 @@
                 -moz-appearance: textfield;
             }
         </style>
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/pikaday/css/pikaday.css">
         @livewireScripts
         <script src="{{ asset('pharma/js/app.js') }}"></script>
         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
 
 
     </head>
@@ -35,7 +37,7 @@
                 @yield('content')
             </main>
 
-
+            @yield('script')
         </div>
     </body>
 </html>

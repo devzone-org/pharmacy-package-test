@@ -4,6 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Purchases;
 
 
+use Carbon\Carbon;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Product;
 use Devzone\Pharmacy\Models\Purchase;
@@ -124,6 +125,11 @@ class PurchaseAdd extends Component
         }
     }
 
+    private function formatDate($date){
+        return Carbon::createFromFormat('d M Y',$date)
+            ->format('Y-m-d');
+    }
+
     public function create()
     {
         $this->validate();
@@ -133,7 +139,7 @@ class PurchaseAdd extends Component
                 'supplier_id' => $this->supplier_id,
                 'supplier_invoice' => $this->supplier_invoice,
                 'delivery_date' => $this->delivery_date,
-                'expected_date' => $this->expected_date,
+                'expected_date' => $this->formatDate($this->expected_date),
                 'created_by' => Auth::user()->id,
                 'status' => 'approval-awaiting'
             ])->id;
@@ -153,6 +159,7 @@ class PurchaseAdd extends Component
         } catch (\Exception $e) {
             $this->addError('supplier_name', $e->getMessage());
             DB::rollBack();
+
         }
     }
 }

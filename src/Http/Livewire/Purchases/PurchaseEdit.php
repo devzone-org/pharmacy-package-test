@@ -4,6 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Purchases;
 
 
+use Carbon\Carbon;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Product;
 use Devzone\Pharmacy\Models\Purchase;
@@ -67,7 +68,9 @@ class PurchaseEdit extends Component
         $this->supplier_invoice = $purchase->supplier_invoice;
         $this->supplier_id = $purchase->supplier_id;
         $this->supplier_name = $purchase->supplier_name;
-        $this->expected_date = $purchase->expected_date;
+        if (!empty($purchase->expected_date)){
+            $this->expected_date = date('d M Y',strtotime($purchase->expected_date));
+        }
 
         $details = PurchaseOrder::from('purchase_orders as po')
             ->join('products as p', 'p.id', '=', 'po.product_id')
@@ -176,6 +179,14 @@ class PurchaseEdit extends Component
 
     }
 
+    private function formatDate($date){
+        if (empty($date)){
+            return null;
+        }
+        return Carbon::createFromFormat('d M Y',$date)
+            ->format('Y-m-d');
+    }
+
 
     public function create()
     {
@@ -189,7 +200,7 @@ class PurchaseEdit extends Component
             Purchase::where('id', $this->purchase_id)->update([
                 'supplier_id' => $this->supplier_id,
                 'supplier_invoice' => $this->supplier_invoice,
-                'delivery_date' => $this->delivery_date,
+                'expected_date' => $this->formatDate($this->expected_date),
 
             ]);
 
