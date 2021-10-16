@@ -130,10 +130,10 @@ class PaymentList extends Component
                 ". Received '" . $receiving_in['name'] . "' by user " . Auth::user()->name . " on dated " . date('d M, Y h:i A');
 
             GeneralJournal::instance()->account($customer->account_id)->credit($diff)->voucherNo($vno)
-                ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                ->date(date('Y-m-d'))->approve()->reference('customer-payments')->description($description)->execute();
 
             GeneralJournal::instance()->account($customer_payment->receiving_in)->debit($diff)->voucherNo($vno)
-                ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                ->date(date('Y-m-d'))->reference('customer-payments')->approve()->description($description)->execute();
 
             Sale::whereIn('id', $sales)->update([
                 'is_paid' => 't'

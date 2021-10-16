@@ -508,11 +508,11 @@ class Refund extends Component
             $dif = $refund_retail - $sales_retail;
             if ($this->credit==false){
                 if ($dif > 0) {
-                    GeneralJournal::instance()->account($cash_acount)->credit(abs($dif))->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                    GeneralJournal::instance()->account($cash_acount)->reference('customer-refund')->credit(abs($dif))->voucherNo($vno)
+                        ->date(date('Y-m-d'))->approve()->description($description)->execute();
                 } else {
-                    GeneralJournal::instance()->account($cash_acount)->debit(abs($dif))->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                    GeneralJournal::instance()->account($cash_acount)->reference('customer-refund')->debit(abs($dif))->voucherNo($vno)
+                        ->date(date('Y-m-d'))->approve()->description($description)->execute();
                 }
             }else{
                 $customer_account=Customer::from('customers as c')
@@ -526,38 +526,38 @@ class Refund extends Component
                     $patient= 'to walking customer. ';
                 }
                 $description='Refunded: PKR ' . number_format($refund_retail, 2) . $patient .' Customer Account:  '.$customer_account->account_name.' : adjusted on ' . date('d M, Y') . ' by ' . Auth::user()->name;
-                GeneralJournal::instance()->account($customer_account->account_id)->credit($refund_retail)->voucherNo($vno)
-                    ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                GeneralJournal::instance()->account($customer_account->account_id)->reference('customer-refund')->credit($refund_retail)->voucherNo($vno)
+                    ->date(date('Y-m-d'))->approve()->description($description)->execute();
             }
 
             foreach ($accounts as $a) {
                 if ($sales_retail > 0) {
                     if ($a->reference == 'cost-of-sales-pharmacy-5') {
-                        GeneralJournal::instance()->account($a->id)->debit($sales_cost)->voucherNo($vno)
-                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                        GeneralJournal::instance()->account($a->id)->reference('customer-refund')->debit($sales_cost)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
                     }
                     if ($a->reference == 'pharmacy-inventory-5') {
-                        GeneralJournal::instance()->account($a->id)->credit($sales_cost)->voucherNo($vno)
-                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                        GeneralJournal::instance()->account($a->id)->reference('customer-refund')->credit($sales_cost)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
                     }
                     if ($a->reference == 'income-pharmacy-5') {
-                        GeneralJournal::instance()->account($a->id)->credit($sales_retail)->voucherNo($vno)
-                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                        GeneralJournal::instance()->account($a->id)->reference('customer-refund')->credit($sales_retail)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
                     }
                 }
 
                 if ($refund_retail > 0) {
                     if ($a->reference == 'cost-of-sales-pharmacy-5') {
-                        GeneralJournal::instance()->account($a->id)->credit($refund_cost)->voucherNo($vno)
-                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                        GeneralJournal::instance()->account($a->id)->reference('customer-refund')->credit($refund_cost)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
                     }
                     if ($a->reference == 'pharmacy-inventory-5') {
-                        GeneralJournal::instance()->account($a->id)->debit($refund_cost)->voucherNo($vno)
-                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                        GeneralJournal::instance()->account($a->id)->reference('customer-refund')->debit($refund_cost)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
                     }
                     if ($a->reference == 'income-return-pharmacy-5') {
-                        GeneralJournal::instance()->account($a->id)->debit($refund_retail)->voucherNo($vno)
-                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                        GeneralJournal::instance()->account($a->id)->reference('customer-refund')->debit($refund_retail)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
                     }
                 }
             }

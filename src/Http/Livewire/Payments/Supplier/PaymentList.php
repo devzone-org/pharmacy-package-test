@@ -149,7 +149,7 @@ class PaymentList extends Component
             "/- to supplier '".$supplier['name']."' against PO # " . implode(', ', $orders). " & invoice # inv-". $supplier_payment_receipt_no .
                   ". Payment from '".$pay_from['name']."' by user " . Auth::user()->name . " on dated ".date('d M, Y h:i A');
 
-            $bank->voucherNo($vno)->date($this->payment_date)
+            $bank->voucherNo($vno)->date($this->payment_date)->reference('supplier-payment')
                 ->approve()->description($description)->execute();
 
             $sp = GeneralJournal::instance()->account($supplier['account_id']);
@@ -158,7 +158,7 @@ class PaymentList extends Component
             } else {
                 $sp = $sp->credit(abs($diff));
             }
-            $sp->voucherNo($vno)->date($this->payment_date)->approve()
+            $sp->voucherNo($vno)->date($this->payment_date)->approve()->reference('supplier-payment')
                 ->description($description)->execute();
 
             Purchase::whereIn('id', $orders)->update([
