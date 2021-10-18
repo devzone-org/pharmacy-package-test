@@ -63,6 +63,7 @@ class Transaction extends Component
 
         if (!empty($first['patient_id'])) {
             $patient = Patient::from('patients as p')
+                ->where('p.id',$first['patient_id'])
                 ->leftJoin('customers as c', 'c.id', '=', 'p.customer_id')
                 ->select('p.name', 'p.mr_no', 'p.account_id', 'c.credit_limit')->first();
 
