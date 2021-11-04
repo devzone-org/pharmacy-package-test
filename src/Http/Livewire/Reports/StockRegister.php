@@ -5,6 +5,7 @@ namespace Devzone\Pharmacy\Http\Livewire\Reports;
 
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Product;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class StockRegister extends Component
@@ -20,6 +21,7 @@ class StockRegister extends Component
     public $category_id;
     public $category_name;
     public $zero_stock;
+    public $cos_rp;
     public $report = [];
 
     public function mount()
@@ -37,7 +39,7 @@ class StockRegister extends Component
     {
         $this->reset('report');
         $products = Product::from('products as p')
-            ->join('product_inventories as pi', function ($q) {
+            ->leftJoin('product_inventories as pi', function ($q) {
                 return $q->on('pi.product_id', '=', 'p.id');
             })
             ->leftJoin('manufactures as m', 'm.id', '=', 'p.manufacture_id')
@@ -62,61 +64,41 @@ class StockRegister extends Component
                 return $q->where('pi.qty', '>', '0');
             })
             ->groupBy('pi.product_id')
-            ->orderBy('p.id', 'ASC')
+            ->groupBy('pi.supply_price')
+            ->groupBy('pi.retail_price')
+            ->groupBy('pi.batch_no')
+            ->orderBy('p.name', 'ASC')
             ->select(
-                'p.id', 'p.name as item', 'p.type', 'm.name as manufacturer', 'c.name as category', 'pi.barcode', 'r.name as rack',
+                'p.id', 'p.name as item', 'm.name as manufacturer', 'c.name as category', 'r.name as rack',
+                DB::raw('sum(pi.qty) as stock_in_hand'),
+                'pi.supply_price as cos', 'pi.retail_price', 'pi.batch_no'
             )
             ->get();
-        foreach ($products as $key => $product) {
-            $this->report[$key]['id'] = $product->id;
-            $this->report[$key]['item'] = $product->item;
-            $this->report[$key]['type'] = $product->type;
-            $this->report[$key]['manufacturer'] = $product->manufacturer;
-            $this->report[$key]['category'] = $product->category;
-            $this->report[$key]['barcode'] = $product->barcode;
-            $this->report[$key]['rack'] = $product->rack;
-            $this->report[$key]['stock_in_hand'] = $product->inventories->sum('qty');
-            $this->report[$key]['cos'] = $product->inventories->sum('supply_price') / $product->inventories->count();
-            $this->report[$key]['total_retail_value'] = 0;
-            $this->report[$key]['total_stock_value'] = 0;
-            $this->report[$key]['batch_no'] = '';
-            $this->report[$key]['expired_qty'] = 0;
-            foreach ($product->inventories as $inv) {
-                if ($inv->qty > 0) {
-                    $this->report[$key]['total_stock_value'] = $this->report[$key]['total_stock_value'] + ($inv->supply_price * $inv->qty);
-                    $this->report[$key]['total_retail_value'] = $this->report[$key]['total_retail_value'] + ($inv->retail_price * $inv->qty);
-                }
 
-                $this->report[$key]['batch_no'] = !empty($this->report[$key]['batch_no']) ? ' , ' . $inv->batch_no : $inv->batch_no;
-                if ($inv->expiry >= date('Y-m-d')) {
-                    $this->report[$key]['expired_qty'] = $this->report[$key]['expired_qty'] + $inv->qty;
-                }
-            }
-            $this->report[$key]['retail_price'] = $product->inventories->sum('retail_price') / $product->inventories->count();
+        $this->report = [];
 
-            $this->report[$key]['discount'] = 0;
-            foreach ($product->purchases_receive as $receive) {
-                $inventory_qty = $product->inventories->where('po_id', $receive->purchase_id)->first();
-                if (!empty($inventory_qty)) {
-                    $this->report[$key]['discount'] = $this->report[$key]['discount'] + (($receive->cost_of_price * $inventory_qty->qty) - ($receive->after_disc_cost * $inventory_qty->qty));
-                } else {
-                    $this->report[$key]['discount'] = 0;
-                }
-//                 $this->report[$key]['discount'] = $this->report[$key]['discount'] + (($receive->cost_of_price * $receive->qty) - ($receive->after_disc_cost * $receive->qty));
+        foreach ($products->toArray() as $key => $p) {
+            if ($this->cos_rp == 't' && $p['cos'] < $p['retail_price']) {
+                continue;
             }
-            $this->report[$key]['gross_margin'] = 0;
-            $this->report[$key]['gross_margin_percentage'] = 0;
-            if ($this->report[$key]['total_stock_value'] > 0) {
-                $this->report[$key]['gross_margin'] = ($this->report[$key]['total_retail_value'] - $this->report[$key]['total_stock_value']) / $this->report[$key]['total_stock_value'];
-                $this->report[$key]['gross_margin_percentage'] = (($this->report[$key]['total_retail_value'] - $this->report[$key]['total_stock_value']) / $this->report[$key]['total_stock_value']) * 100;
-            }
+            $data = $p;
+            $data['total_stock_value'] = $p['stock_in_hand'] * $p['cos'];
+            $data['total_retail_value'] = $p['stock_in_hand'] * $p['retail_price'];
+            $data['gross_margin_pkr'] = $data['total_retail_value'] - $data['total_stock_value'];
+            if ($data['total_retail_value'] > 0) {
+                $data['gross_margin_per'] = 100 - (($data['total_stock_value'] / $data['total_retail_value']) * 100);
 
+            } else {
+                $data['gross_margin_per'] = 0;
+
+            }
+            $this->report[] = $data;
         }
     }
 
     public function resetSearch()
     {
-        $this->reset('product_id', 'product_name', 'rack_id', 'rack_name', 'category_id', 'category_name', 'manufacture_id', 'manufacture_name');
+        $this->reset('product_id', 'cos_rp', 'product_name', 'rack_id', 'rack_name', 'category_id', 'category_name', 'manufacture_id', 'manufacture_name');
         $this->search();
     }
 }

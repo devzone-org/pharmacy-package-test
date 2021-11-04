@@ -41,6 +41,16 @@
                         <option value="f">Hide</option>
                     </select>
                 </div>
+
+                <div class="col-span-6 sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">Show COS > RP </label>
+                    <select wire:model="cos_rp" class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+
+                        <option value=""></option>
+                        <option value="t">Show</option>
+
+                    </select>
+                </div>
                 <div class="col-span-8 sm:col-span-2">
                     <button type="button" wire:click="search"
                             class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -85,19 +95,13 @@
                                     Category
                                 </th>
 
-                                <th scope="col"
-                                    class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Barcode
-                                </th>
+
 
                                 <th scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Rack
                                 </th>
-                                <th scope="col"
-                                    class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Type
-                                </th>
+
                                 <th scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Stock in Hand
@@ -118,17 +122,14 @@
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Total Retail Value
                                 </th>
-                                <th scope="col"
-                                    class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Discount
-                                </th>
+
                                 <th scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Sales Tax
                                 </th>
                                 <th scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Gross Margin
+                                    Gross Margin (PKR)
                                 </th>
                                 <th scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
@@ -138,15 +139,12 @@
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Batch No
                                 </th>
-                                <th scope="col"
-                                    class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Expired Qty
-                                </th>
+
                             </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($report as $r)
-                                <tr>
+                                <tr class="{{ $r['cos']>= $r['retail_price'] ? 'bg-red-200':'' }} {{  empty($r['retail_price']) ? 'bg-red-200':'' }}">
                                     <td class="px-3 py-3   text-sm font-medium text-gray-500">
                                         {{$loop->iteration}}
                                     </td>
@@ -159,15 +157,11 @@
                                     <td class="px-3 py-3  text-center text-sm text-gray-500">
                                         {{$r['category']}}
                                     </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{$r['barcode']}}
-                                    </td>
+
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{$r['rack']}}
                                     </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        @if($r['type']=='s') Sound alike @elseif($r['type']=='l') Look alike @else - @endif
-                                    </td>
+
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{number_format($r['stock_in_hand'])}}
                                     </td>
@@ -175,36 +169,32 @@
                                         {{number_format($r['cos'],2)}}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{number_format($r['total_stock_value'],2)}}
+                                        {{number_format($r['total_stock_value'] ,2)}}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{--                        {{$r['']}}--}}-
+                                        {{ number_format($r['retail_price'],2) }}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{number_format($r['total_retail_value'],2)}}
                                     </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{number_format($r['discount'],2)}}
-                                    </td>
+
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{--                        {{$r['']}}--}}-
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{number_format($r['gross_margin'],2)}}
+                                        {{number_format($r['gross_margin_pkr'],2)}}
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{number_format($r['gross_margin_percentage'])}}
+                                        {{number_format($r['gross_margin_per'],2)}}%
                                     </td>
                                     <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{$r['batch_no']}}
                                     </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{number_format($r['expired_qty'])}}
-                                    </td>
+
                                 </tr>
                             @endforeach
                             <tr class="bg-gray-50">
-                                <th scope="col" colspan="7"
+                                <th scope="col" colspan="5"
                                     class="px-3 py-3 text-left text-sm font-medium text-gray-900">
                                 </th>
                                 <th scope="col"
@@ -225,12 +215,19 @@
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                     {{number_format(collect($report)->sum('total_retail_value'),2)}}
                                 </th>
-                                <th scope="col" colspan="5"
+                                <th scope="col"
+                                    class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                </th>
+
+                                <th scope="col"
+                                    class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                    {{number_format(collect($report)->sum('gross_margin_pkr'),2)}}
+                                </th>
+                                <th scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                 </th>
                                 <th scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                    {{number_format(collect($report)->sum('expired_qty'),2)}}
                                 </th>
                             </tr>
                             </tbody>

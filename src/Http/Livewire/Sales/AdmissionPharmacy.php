@@ -57,7 +57,7 @@ class AdmissionPharmacy extends Component
             ->select(
                 'ajd.admission_id', 'ajd.procedure_id', 'ajd.schedule_date', 'ajd.schedule_time',
                 'p.name as patient_name','p.mr_no as patient_mr', 'e.name as doctor_name', 'pro.name as procedure_name',
-                'apd.amount', 'apd.medicines', 'apd.sale_id',
+                's.gross_total as amount', 'apd.medicines', 'apd.sale_id',
                 'a.admission_no', 'a.admission_date', 'a.admission_time', 'a.checkout_date', 'a.checkout_time',
                 's.sale_at','u.name as sold_By','ajd.doctor_id'
             )
