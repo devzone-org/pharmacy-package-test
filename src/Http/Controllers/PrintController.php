@@ -130,7 +130,7 @@ class PrintController extends Controller
             $item = str_pad($item, 25, " ");
             $qty = str_pad('-'.$s['refund_qty'], 8, " ", STR_PAD_LEFT);
             $retail = str_pad('-'.$s['retail_price'], 12, " ", STR_PAD_LEFT);
-            $total = str_pad('-'.$s['total'], 16, " ", STR_PAD_LEFT);
+            $total = str_pad('-'.$s['refund_qty']*$s['retail_price'], 16, " ", STR_PAD_LEFT);
             $inner .= $sr . $item . $qty .  $retail .  $total;
         }
         $print['inner'] = $inner;
