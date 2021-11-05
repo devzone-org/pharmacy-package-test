@@ -155,7 +155,7 @@ class PrintController extends Controller
             $refunded = $total_refund['refund'];
         }
 
-        $add_bracket = abs(number_format($refunded, 2));
+        $add_bracket = number_format(abs($refunded), 2);
         $add_bracket = '(' . $add_bracket . ')';
         $print['refund'] = str_pad("Sale Returns", 45, " ", STR_PAD_LEFT) .
             str_pad($add_bracket, 19, " ", STR_PAD_LEFT);
