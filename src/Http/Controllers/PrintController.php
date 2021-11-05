@@ -50,7 +50,7 @@ class PrintController extends Controller
                 ->where('sr.sale_id', $sl->refunded_id)
                 ->where('sr.refunded_id', $sale_id)
                 ->select('sd.*', 'p.name as product_name', 's.patient_id', 'e.name as referred_by',
-                    'u.name as sale_by', 's.sale_at', 's.is_credit', 'sr.refund_qty')
+                    'u.name as sale_by', 's.sale_at', 's.is_credit','sr.refund_qty')
                 ->get();
             $first = $refund->first();
             $this->refunds = $refund->toArray();
@@ -128,7 +128,7 @@ class PrintController extends Controller
 
             $item = substr('-'.$s['product_name'], 0, 25);
             $item = str_pad($item, 25, " ");
-            $qty = str_pad('-'.$s['qty'], 8, " ", STR_PAD_LEFT);
+            $qty = str_pad('-'.$s['refund_qty'], 8, " ", STR_PAD_LEFT);
             $retail = str_pad('-'.$s['retail_price'], 12, " ", STR_PAD_LEFT);
             $total = str_pad('-'.$s['total'], 16, " ", STR_PAD_LEFT);
             $inner .= $sr . $item . $qty .  $retail .  $total;

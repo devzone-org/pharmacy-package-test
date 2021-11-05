@@ -27,6 +27,7 @@ class Transaction extends Component
     public function mount($sale_id)
     {
         $this->sale_id = $sale_id;
+
         $sl = Sale::find($sale_id);
         $sale = Sale::from('sales as s')
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
