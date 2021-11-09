@@ -8,10 +8,13 @@ use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Sale\SaleRefund;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use App\Models\Hospital\Employees\Employee;
 
 class SaleTransaction extends Component
 {
     public $salemen = [];
+    public $doctors = [];
+    public $doctor_id = [];
     public $salesman_id;
     public $range;
     public $from;
@@ -21,6 +24,7 @@ class SaleTransaction extends Component
 
     public function mount()
     {
+
         $this->salemen = Sale::from('sales as s')
             ->join('users as u', 'u.id', '=', 's.sale_by')
             ->groupBy('s.sale_by')
@@ -30,6 +34,7 @@ class SaleTransaction extends Component
         $this->from = date('Y-m-d', strtotime('-7 days'));
         $this->to = date('Y-m-d');
         $this->range = 'seven_days';
+        $this->doctors = Employee::where('is_doctor', 't')->where('status', 't')->get()->toArray();
         $this->search();
     }
 
@@ -43,9 +48,18 @@ class SaleTransaction extends Component
         $this->report = Sale::from('sales as s')
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
             ->leftJoin('patients as p', 'p.id', '=', 's.patient_id')
+            ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
             ->join('users as u', 'u.id', '=', 's.sale_by')
             ->when(!empty($this->salesman_id), function ($q) {
                 return $q->where('s.sale_by', $this->salesman_id);
+            })
+            ->when(!empty($this->doctor_id), function ($q) {
+                if ($this->doctor_id == 'walk') {
+                    return $q->whereNull('s.referred_by');
+                } else {
+                    return $q->where('s.referred_by', $this->doctor_id);
+                }
+
             })
             ->when(!empty($this->to), function ($q) {
                 return $q->whereDate('s.sale_at', '<=', $this->to);
@@ -53,7 +67,7 @@ class SaleTransaction extends Component
             ->when(!empty($this->from), function ($q) {
                 return $q->whereDate('s.sale_at', '>=', $this->from);
             })
-            ->select('s.sale_at', 's.id', 'p.name as patient_name', DB::raw('sum(sd.qty*sd.supply_price) as cos'),
+            ->select('s.sale_at', 'e.name as doctor', 's.is_credit', 's.is_paid', 's.id', 'p.name as patient_name', DB::raw('sum(sd.qty*sd.supply_price) as cos'),
                 DB::raw('sum(sd.total) as total'), DB::raw('sum(sd.total_after_disc) as total_after_disc'),
                 'u.name as sale_by')
             ->orderBy('s.id', 'desc')

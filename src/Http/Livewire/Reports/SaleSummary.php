@@ -43,6 +43,7 @@ class SaleSummary extends Component
             ->select(
                 DB::raw('DATE(s.sale_at) as date'),
                 DB::raw('sum(sd.total) as total'),
+                DB::raw('sum(s.on_account) as credit'),
                 DB::raw('sum(sd.qty*sd.supply_price) as cos'),
                 DB::raw('count(DISTINCT(s.id)) as no_of_sale'),
                 DB::raw('count(DISTINCT(s.patient_id)) as unique_customers'),

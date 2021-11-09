@@ -115,37 +115,37 @@
                                         <td class="px-3 py-3   text-sm font-medium text-gray-500">
                                             {{ $loop->iteration  }}
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Products" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{$r['product_name']}}
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Qty Sold" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['qty'])}}
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Qty Returned" class="px-3 py-3 text-center  text-sm text-gray-500">
                                            {{number_format($r['refund_qty'])}}
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Net Qty" class="px-3 py-3 text-center  text-sm text-gray-500">
                                            {{number_format($r['total_sale_qty'])}}
                                         </td>
-                                        <td class="px-3 py-3  text-center text-sm text-gray-500">
+                                        <td title="Sale (PKR)" class="px-3 py-3  text-center text-sm text-gray-500">
                                             {{number_format($r['total'],2)}}
                                         </td>
-                                        <td class="px-3 py-3  text-center text-sm text-gray-500">
+                                        <td title="Discount (PKR)" class="px-3 py-3  text-center text-sm text-gray-500">
                                             {{number_format($r['total']-$r['total_after_disc'],2)}}
                                         </td>
-                                        <td class="px-3 py-3  text-center text-sm text-gray-500">
+                                        <td title="Sale Return (PKR)" class="px-3 py-3  text-center text-sm text-gray-500">
                                             {{number_format($r['total_refund'],2)}}
                                         </td>
-                                        <td class="px-3 py-3  text-center text-sm text-gray-500">
+                                        <td title="Net Sale (PKR)" class="px-3 py-3  text-center text-sm text-gray-500">
                                             {{number_format($r['total_after_refund'],2)}}
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="COS (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['cos'],2)}}
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Gross Profit (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['total_after_refund']-$r['cos'],2)}}
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Gross Margin (%)" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             @php
                                                 $total_after_dis=$r['total_after_refund']== 0 ? 1 : $r['total_after_refund'];
                                             @endphp

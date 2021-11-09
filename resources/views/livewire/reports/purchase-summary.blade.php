@@ -58,12 +58,19 @@
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900   ">
                                     Sr #
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
-                                    Supplier Name
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                    PO #
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Order Placement Date
                                 </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                    Order Receiving Date
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
+                                    Supplier Name
+                                </th>
+
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     PO Created By
                                 </th>
@@ -71,13 +78,9 @@
                                     PO Approved By
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    PO #
-                                </th>
 
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Order Receiving Date
-                                </th>
+
+
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     GRN #
                                 </th>
@@ -117,23 +120,26 @@
                                             {{ $loop->iteration  }}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{$r['supplier_name']}}
+                                            {{$r['po_no']}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{!empty($r['placement_date']) ? date('d M Y',strtotime($r['placement_date'])) : '-'}}
                                         </td>
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            {{!empty($r['receiving_date']) ? date('d M Y',strtotime($r['receiving_date'])) : '-' }}
+                                        </td>
+                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            {{$r['supplier_name']}}
+                                        </td>
+
                                         <td class="px-3 py-3  text-center text-sm text-gray-500">
                                             {{$r['created_by']}}
                                         </td>
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{$r['approved_by']}}
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{$r['po_no']}}
-                                        </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{!empty($r['receiving_date']) ? date('d M Y',strtotime($r['receiving_date'])) : '-' }}
-                                        </td>
+
+
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{$r['grn_no']}}
                                         </td>

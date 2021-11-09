@@ -73,6 +73,7 @@
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Net Sales (PKR)
                                 </th>
+
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     COS (PKR)
                                 </th>
@@ -105,25 +106,25 @@
                                         <td class="px-3 py-3   text-sm font-medium text-gray-500">
                                             {{ $loop->iteration  }}
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{date('d M Y',strtotime($r['date']))}}
+                                        <td title="Sale Date" class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            {{date('D d M Y',strtotime($r['date']))}}
                                         </td>
-                                        <td class="px-3 py-3  text-center text-sm text-gray-500">
+                                        <td title="Sales (PKR)" class="px-3 py-3  text-center text-sm text-gray-500">
                                             {{number_format($r['total'],2)}}
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Discount (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             ({{number_format($r['total']-$r['total_after_disc'],2)}})
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Sales Return (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             ({{number_format($r['sale_return'],2)}})
                                         </td>
-                                        <td class="px-3 py-3  text-center text-sm text-gray-500">
+                                        <td title="Net Sales (PKR)" class="px-3 py-3  text-center text-sm text-gray-500">
                                             {{number_format($r['total_after_disc']-$r['sale_return'],2)}}
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="COS (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['cos'],2)}}
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Gross Profit (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['total_after_disc']-$r['sale_return']-$r['cos'],2)}}
                                         </td>
 
@@ -131,20 +132,20 @@
                                             $total_after_disc=$r['total_after_disc']-$r['sale_return'];
                                             $total_after_disc=empty($total_after_disc) ? 1 :$total_after_disc;
                                         @endphp
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Gross Margin" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format((($r['total_after_disc']-$r['sale_return']-$r['cos'])/$total_after_disc)*100,2)}}
                                             %
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="# of Sales" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{$r['no_of_sale']}}
                                         </td>
-                                        <td class="px-3 py-3  text-center text-sm text-gray-500">
+                                        <td title="Unique Customers" class="px-3 py-3  text-center text-sm text-gray-500">
                                             {{$r['unique_customers']}}
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Avg Sales Value (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['total_after_disc']/$r['no_of_sale'],2)}}
                                         </td>
-                                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Avg Items per sale" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['no_of_sale']/$r['no_of_items'],2)}}
                                         </td>
                                     </tr>

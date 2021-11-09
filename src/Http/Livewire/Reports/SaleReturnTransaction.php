@@ -6,6 +6,7 @@ namespace Devzone\Pharmacy\Http\Livewire\Reports;
 
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Sale\SaleRefund;
+use Devzone\Pharmacy\Models\Sale\SaleRefundDetail;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -40,28 +41,30 @@ class SaleReturnTransaction extends Component
 
     public function search()
     {
-        $this->report = SaleRefund::from('sale_refunds as sr')
-            ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
-            ->join('sales as s', 's.id', '=', 'sr.sale_id')
-            ->join('products as pr', 'pr.id', '=', 'sd.product_id')
-            ->leftJoin('patients as p', 'p.id', '=', 's.patient_id')
+        $this->report = SaleRefundDetail::from('sale_refund_details as srd')
+            ->join('sales as s', 's.id', '=', 'srd.sale_id')
+            ->join('sales as rs', 'rs.id', '=', 'srd.refunded_id')
+            ->leftJoin('patients as p', 'p.id', '=', 'rs.patient_id')
+            ->join('products as pr', 'pr.id', '=', 'srd.product_id')
+            ->join('sale_details as sd', 'sd.id', 'srd.sale_detail_id')
+            ->leftJoin('users as sb','sb.id','=','s.sale_by')
+            ->leftJoin('users as rb','rb.id','=','rs.sale_by')
+            ->select('srd.created_at as return_date', 's.sale_at as original_sale_date',
+                'srd.refunded_id as invoice_no', 'p.name as patient_name', 'p.mr_no', 'pr.name as product_name',
+                's.gross_total as original_invoice_total', 'srd.refund_qty','sb.name as sale_by','rb.name as return_by',
+                DB::raw('(sd.retail_price_after_disc*srd.refund_qty) as refund_value'))
             ->when(!empty($this->salesman_id), function ($q) {
-                return $q->where('s.sale_by', $this->salesman_id);
+                return $q->where('rs.sale_by', $this->salesman_id);
             })
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('sr.updated_at', '<=', $this->to);
+                return $q->whereDate('srd.created_at', '<=', $this->to);
             })
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('sr.updated_at', '>=', $this->from);
+                return $q->whereDate('srd.created_at', '>=', $this->from);
             })
-            ->select('s.sale_at', 'sd.sale_id', 'sr.id', 'pr.name as product_name',
-                'sr.updated_at as return_date',
-                DB::raw('sum((sd.total_after_disc/sd.qty)*sr.refund_qty) as return_value'),
-                DB::raw("(SELECT SUM(sale_details.total_after_disc) FROM sale_details
-                                WHERE sale_details.sale_id = sr.sale_id) as total"),
-                DB::raw('sum(sd.total_after_disc) as return_total'), 'sr.refund_qty',
-                'p.name as patient_name')
-            ->groupBy('sr.sale_detail_id')->orderBy('sr.updated_at','desc')->get()->toArray();
+            ->orderBy('srd.created_at', 'desc')
+            ->get()->toArray();
+
     }
 
     public function resetSearch()

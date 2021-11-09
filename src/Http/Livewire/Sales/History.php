@@ -20,6 +20,8 @@ class History extends Component
     public $patient_id;
     public $patient_name;
     public $type;
+    public $product_id;
+    public $product_name;
 
     public function mount()
     {
@@ -36,10 +38,11 @@ class History extends Component
     {
         $history = Sale::from("sales as s")
             ->join('users as u', 'u.id', '=', 's.sale_by')
+            ->leftJoin('sale_details as sd', 'sd.sale_id', '=', 's.id')
             ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
             ->leftJoin('patients as p', 'p.id', '=', 's.patient_id')
-            ->whereNull('admission_id')
-            ->whereNull('procedure_id');
+            ->whereNull('s.admission_id')
+            ->whereNull('s.procedure_id');
 
         if (!empty($this->receipt)) {
             $history = $history->where('s.id', $this->receipt);
@@ -50,15 +53,18 @@ class History extends Component
                 return $q->whereDate('s.sale_at', '<=', $this->to);
             })->when(!empty($this->patient_id), function ($q) {
                 return $q->where('s.patient_id', $this->patient_id);
-            })->when(!empty($this->type), function ($q) {
+            })->when(!empty($this->product_id), function ($q) {
+                return $q->where('sd.product_id', $this->product_id);
+            })
+                ->when(!empty($this->type), function ($q) {
                 if ($this->type == 'sale') {
-                    return $q->whereNull('s.refunded_id')->where('s.is_credit','f');
+                    return $q->whereNull('s.refunded_id')->where('s.is_credit', 'f');
                 }
-                if($this->type == 'credit'){
-                    return $q->whereNull('s.refunded_id')->where('s.is_credit','t');
+                if ($this->type == 'credit') {
+                    return $q->whereNull('s.refunded_id')->where('s.is_credit', 't');
                 }
-                if($this->type == 'refund'){
-                    return $q->where('s.refunded_id','>',0);
+                if ($this->type == 'refund') {
+                    return $q->where('s.refunded_id', '>', 0);
                 }
             });
         }
@@ -73,14 +79,16 @@ class History extends Component
             's.is_refund',
             's.receive_amount',
             's.payable_amount',
-            's.refunded_id',
+
             's.is_credit',
             's.is_paid',
             's.on_account',
             'p.name as patient_name',
             'p.mr_no',
             'e.name as referred_by'
-        )->orderBy('s.id', 'desc')->paginate(100);
+        )
+            ->groupBy('sd.sale_id')
+            ->orderBy('s.id', 'desc')->paginate(100);
 
         return view('pharmacy::livewire.sales.history', ['history' => $history]);
     }
@@ -92,7 +100,7 @@ class History extends Component
 
     public function resetSearch()
     {
-        $this->reset(['receipt','type','patient_id','patient_name']);
+        $this->reset(['receipt', 'type', 'patient_id', 'patient_name', 'product_id', 'product_name']);
         $this->resetPage();
 
     }

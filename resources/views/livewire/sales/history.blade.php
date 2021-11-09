@@ -9,6 +9,15 @@
                 </div>
 
                 <div class="col-span-8 sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">Product</label>
+                    <input wire:model="product_name" readonly
+                           wire:click="searchableOpenModal('product_id', 'product_name', 'product')"
+                           type="text"
+                           autocomplete="off"
+                           class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+
+                <div class="col-span-8 sm:col-span-2">
                     <label for="receipt" class="block text-sm font-medium text-gray-700">Patient</label>
                     <input type="text" readonly wire:model.defer="patient_name" wire:click="searchPatient"
                            autocomplete="off"

@@ -3,7 +3,7 @@
         <div class="bg-white py-6 px-4 space-y-6 sm:p-6 ">
             <div class="grid grid-cols-8 gap-6">
                 <div class="col-span-8 sm:col-span-2">
-                    <label for="salesman" class="block text-sm font-medium text-gray-700">Salesman</label>
+                    <label for="salesman" class="block text-sm font-medium text-gray-700">Return By</label>
                     <select wire:model.defer="salesman_id" id="salesman"
                             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                         <option value="">All</option>
@@ -62,7 +62,7 @@
 
                         <div class="bg-white py-6 px-4 sm:p-6 ">
                             <h3 class="text-lg leading-6  text-center font-medium text-gray-900">{{ env('APP_NAME') }}</h3>
-                            <p class="text-md leading-6  text-center  text-gray-900">Pharmacy Sales Return Transaction
+                            <p class="text-md leading-6  text-center font-medium text-gray-900">Pharmacy Sales Return Transaction
                                 Report</p>
                             <p class="text-md leading-6  text-center  text-gray-900">Statement period
                                 from {{ date('d M, Y',strtotime($from)) }} to {{ date('d M, Y',strtotime($to)) }}</p>
@@ -74,6 +74,9 @@
                             <tr>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Sr #
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
+                                    Status
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
                                     Return Date
@@ -102,6 +105,12 @@
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
                                     Qty Returned Value
                                 </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                    Sale By
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                    Return By
+                                </th>
                             </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -110,34 +119,51 @@
                                     <td class="px-3 py-3 text-center  text-sm font-medium text-gray-500">
                                         {{ $loop->iteration  }}
                                     </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                    <td title="Status" class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                          Sales Return
+                                        </span>
+                                    </td>
+                                    <td title="Return Date" class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{ date('d M, Y h:i A',strtotime($h['return_date'])) }}
                                     </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{ date('d M, Y h:i A',strtotime($h['sale_at'])) }}
+                                    <td title="Original Sale Date" class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        {{ date('d M, Y h:i A',strtotime($h['original_sale_date'])) }}
                                     </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{ $h['sale_id']  }}
+                                    <td title="Invoice #" class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <a target="_blank" href="{{ url('pharmacy/sales/transaction/view').'/'.$h['invoice_no'] }}">
+                                        {{ $h['invoice_no']  }}
                                     </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                    <td title="Patient" class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{ !empty($h['patient_name']) ? $h['patient_name'] : 'Walk in' }}
+                                        <br>
+                                        {{ $h['mr_no'] }}
                                     </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                    <td title="Product Returned" class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{ $h['product_name'] }}
                                     </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        PKR {{ number_format($h['total'],2) }}
+                                    <td title="Invoice Total Sale Value" class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        PKR {{ number_format($h['original_invoice_total'],2) }}
                                     </td>
-                                    <td class="px-3 py-3  text-center text-sm text-gray-500">
+                                    <td title="Qty Returned" class="px-3 py-3  text-center text-sm text-gray-500">
                                         {{ $h['refund_qty'] }}
                                     </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        PKR {{ number_format($h['return_value'],2) }}
+                                    <td title="Qty Returned Value" class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        PKR {{ number_format($h['refund_value'],2) }}
+                                    </td>
+
+                                    <td title="Sale By" class="px-3 py-3 text-center  text-sm text-gray-500">
+                                         {{ $h['sale_by'] }}
+                                    </td>
+
+                                    <td title="Return By" class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        {{ $h['return_by'] }}
                                     </td>
                                 </tr>
                             @endforeach
                             <tr class="bg-gray-50">
-                                <th scope="col" colspan="7" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                                <th scope="col" colspan="8"
+                                    class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
 
                                 </th>
 
@@ -146,10 +172,13 @@
                                 </th>
 
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    PKR {{ number_format(collect($report)->sum('return_value'),2) }}
+                                    PKR {{ number_format(collect($report)->sum('refund_value'),2) }}
 
                                 </th>
+                                <th scope="col" colspan="2"
+                                    class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
 
+                                </th>
 
                             </tr>
                             </tbody>
