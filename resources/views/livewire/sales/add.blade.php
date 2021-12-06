@@ -1,6 +1,6 @@
 <div class="max-w-full  ">
 
-    <div class="h-screen flex  border-t bg-gray-100">
+    <div class=" flex  border-t bg-gray-100">
 
 
         <!-- Static sidebar for desktop -->
@@ -14,7 +14,6 @@
                             <div>
 
                                 <dl class="space-y-4 ">
-
 
 
                                     @if(empty($admission_id) && empty($procedure_id))
@@ -40,40 +39,42 @@
                                             </dd>
                                         </div>
 
+                                        @if(!$pending_sale)
+                                            <div>
+                                                <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
+                                                    Sale On Credit
+                                                </dt>
+                                                <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
+                                                    <p>
+                                                        <input type="checkbox" wire:model="credit"
+                                                               class="focus:ring-red-500 h-8 w-8 text-red-600 border-gray-300 rounded">
 
-                                        <div>
-                                            <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
-                                                Sale On Credit
-                                            </dt>
-                                            <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
-                                                <p>
-                                                    <input  type="checkbox" wire:model="credit" class="focus:ring-red-500 h-8 w-8 text-red-600 border-gray-300 rounded">
+                                                    </p>
+                                                </dd>
+                                            </div>
 
-                                                </p>
-                                            </dd>
-                                        </div>
+                                            <div>
+                                                <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
+                                                    Credit Limit
+                                                </dt>
+                                                <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
+                                                    <p>
+                                                        PKR {{ number_format($customer_credit_limit) }}
+                                                    </p>
+                                                </dd>
+                                            </div>
 
-                                        <div>
-                                            <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
-                                                  Credit Limit
-                                            </dt>
-                                            <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
-                                                <p>
-                                                    PKR {{ number_format($customer_credit_limit) }}
-                                                </p>
-                                            </dd>
-                                        </div>
-
-                                        <div>
-                                            <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
-                                                  Closing Balance
-                                            </dt>
-                                            <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
-                                                <p>
-                                                    PKR {{ number_format($customer_previous_credit) }}
-                                                </p>
-                                            </dd>
-                                        </div>
+                                            <div>
+                                                <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
+                                                    Closing Balance
+                                                </dt>
+                                                <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
+                                                    <p>
+                                                        PKR {{ number_format($customer_previous_credit) }}
+                                                    </p>
+                                                </dd>
+                                            </div>
+                                        @endif
                                     @endif
                                     <div class=" border-t pt-2">
                                         <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
@@ -114,7 +115,7 @@
                         <div class="flex-1 min-w-0">
                             <h2 class="text-2xl mb-3 font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
                                 @if(empty($admission_id) && empty($procedure_id))
-                                     @if($credit) Credit @endif Sale Invoice
+                                    @if($credit) Credit @endif Sale Invoice
                                 @else
                                     Inter Transfer IPD Medicine
                                 @endif
@@ -145,7 +146,13 @@
                     @if($admission)
                           Transfer Medicine (F2)
                       @else
-                          Complete Sale (F2)
+                        @if($pending_sale)
+                          Pending Sale
+                          @else
+                          Complete Sale
+                            @endif
+                              (F2)
+
                       @endif
                   </button>
                 </span>
@@ -435,10 +442,11 @@
                                         </th>
                                         <th scope="col" colspan="2"
                                             class="w-10   px-2 py-2 @if($credit==true) bg-red-50 @endif  border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
- 
-                                            <input type="number" wire:model.debounce.300ms="received" onClick="this.select();"
+
+                                            <input type="number" wire:model.debounce.300ms="received"
+                                                   onClick="this.select();"
                                                    id="received" @if($credit==true) disabled @endif
- 
+
                                                    wire:keydown.enter="saleComplete"
                                                    class="p-0 focus:ring-0 block w-full @if($credit==true) bg-red-50 @endif  text-xl border-0 font-medium text-gray-500 text-center "
                                                    autocomplete="off">
@@ -475,7 +483,7 @@
                                         <td scope="col" colspan="5"
                                             class="w-10 bg-gray-50 border-0 text-center text-sm  text-gray-500  tracking-wider">
                                             <div class="flex -m-1">
- 
+
                                 <span class="inline-flex items-center px-3 bg-gray-50 text-gray-500 text-xl font-medium">
                                   Handed over to
                                 </span>
@@ -499,7 +507,7 @@
     </div>
 
 
-    <div id="add_modal"  x-data="{ open: @entangle('add_modal') }" x-cloak x-show="open"
+    <div id="add_modal" x-data="{ open: @entangle('add_modal') }" x-cloak x-show="open"
          class="fixed z-50 inset-0 overflow-y-auto ">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div x-show="open" x-description="Background overlay, show/hide based on modal state."
@@ -765,46 +773,49 @@
                         <h3 class="text-lg leading-6 font-medium text-gray-900">Patient Credit Details</h3>
                     </div>
                     <form wire:submit.prevent="addCreditor">
-                    <div class="grid grid-cols-6 gap-6 ">
+                        <div class="grid grid-cols-6 gap-6 ">
 
-                        <div class="col-span-6">
-                            <label   class="block text-sm font-medium text-gray-700">Patient Name</label>
-                            <input type="text"  wire:model="patient_name" readonly class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            <div class="col-span-6">
+                                <label class="block text-sm font-medium text-gray-700">Patient Name</label>
+                                <input type="text" wire:model="patient_name" readonly
+                                       class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            </div>
+
+                            <div class="col-span-6 sm:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700">Care of</label>
+                                <select wire:model.defer="customers.care_of"
+                                        class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                    <option value=""></option>
+                                    @foreach($employees as $e)
+                                        <option value="{{ $e['id'] }}">{{ $e['name'] }}</option>
+                                    @endforeach
+                                </select>
+                                @error('customers.care_of')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="col-span-6 sm:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700">Credit Limit</label>
+                                <input type="number" wire:model.defer="customers.credit_limit"
+                                       class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                @error('customers.credit_limit')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
                         </div>
-
-                        <div class="col-span-6 sm:col-span-3">
-                            <label   class="block text-sm font-medium text-gray-700">Care of</label>
-                            <select wire:model.defer="customers.care_of"  class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                                <option value=""></option>
-                                @foreach($employees as $e)
-                                    <option value="{{ $e['id'] }}">{{ $e['name'] }}</option>
-                                @endforeach
-                            </select>
-                            @error('customers.care_of')
-                            <p class="mt-2 text-sm text-red-600"  >{{ $message }}</p>
-                            @enderror
+                        <div class="py-3 mt-3 text-right ">
+                            <button type="button"
+                                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm"
+                                    @click="open = false">
+                                Close
+                            </button>
+                            <button type="submit"
+                                    class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-gray-900 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
+                                Add
+                            </button>
                         </div>
-
-                        <div class="col-span-6 sm:col-span-3">
-                            <label   class="block text-sm font-medium text-gray-700">Credit Limit</label>
-                            <input type="number" wire:model.defer="customers.credit_limit"   class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                            @error('customers.credit_limit')
-                            <p class="mt-2 text-sm text-red-600"  >{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                    </div>
-                    <div class="py-3 mt-3 text-right ">
-                        <button type="button"
-                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm"
-                                @click="open = false">
-                            Close
-                        </button>
-                        <button type="submit"
-                                class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-gray-900 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
-                            Add
-                        </button>
-                    </div>
                     </form>
                 </div>
 

@@ -18,6 +18,8 @@ use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Customer;
 use Devzone\Pharmacy\Models\InventoryLedger;
 use Devzone\Pharmacy\Models\ProductInventory;
+use Devzone\Pharmacy\Models\Sale\PendingSale;
+use Devzone\Pharmacy\Models\Sale\PendingSaleDetail;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Sale\SaleDetail;
 use Devzone\Pharmacy\Models\Sale\SaleIssuance;
@@ -86,6 +88,8 @@ class Add extends Component
     public $patient_referred_by;
     public $patient_age;
     public $has_contact = true;
+    public $pending_sale = false;
+    public $pending_sale_id ;
 
 
     protected $listeners = ['openSearch', 'searchReferredBy', 'searchPatient', 'searchCustomer', 'emitCustomerIdCredit', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
@@ -96,6 +100,14 @@ class Add extends Component
 
     public function mount($admission_id = null, $procedure_id = null, $doctor_id = null)
     {
+
+        if (auth()->user()->can('add-pending-sale')) {
+            $this->pending_sale = true;
+        } else {
+            $this->pending_sale = false;
+        }
+
+        $this->validatePendingSale();
         $this->admission_id = $admission_id;
         $this->procedure_id = $procedure_id;
         if (!empty($this->admission_id) && !empty($this->procedure_id)) {
@@ -393,6 +405,48 @@ class Add extends Component
             if (empty($this->sales)) {
                 throw new \Exception('Unable to complete because invoice is empty.');
             }
+
+            if (auth()->user()->can('add-pending-sale')) {
+
+                $pending_sale_id = PendingSale::create([
+                    'patient_id' => $this->patient_id,
+                    'referred_by' => $this->referred_by_id,
+                    'sale_by' => Auth::id(),
+                    'sale_at' => date('Y-m-d H:i:s'),
+                    'sub_total' => collect($this->sales)->sum('total'),
+                    'gross_total' => collect($this->sales)->sum('total_after_disc'),
+                ])->id;
+
+                foreach ($this->sales as $s) {
+
+                    $total = $s['retail_price'] * $s['s_qty'];
+
+                    $discount = round(($s['disc'] / 100) * $total, 2);
+                    $after_total = $total - $discount;
+
+                    PendingSaleDetail::create([
+                        'sale_id' => $pending_sale_id,
+                        'product_id' => $s['product_id'],
+
+                        'qty' => $s['s_qty'],
+                        'supply_price' => $s['supply_price'],
+                        'retail_price' => $s['retail_price'],
+                        'total' => $total,
+                        'disc' => $s['disc'],
+                        'total_after_disc' => $after_total,
+                        'retail_price_after_disc' => $after_total / $s['s_qty']
+                    ]);
+
+                }
+
+
+                $this->resetAll();
+                $this->searchableReset();
+                $this->success = 'Sale has been added to pending list.';
+                DB::commit();
+                return;
+            }
+
             if (empty($this->credit)) {
                 if (empty($this->received) && $this->admission == false) {
                     throw new \Exception('Please enter received amount.');
@@ -404,6 +458,7 @@ class Add extends Component
                 if (empty($this->customer_id)) {
                     throw new \Exception('Please select patient to credit sale.');
                 }
+
                 $customer_account = Customer::join('chart_of_accounts as coa', 'coa.id', '=', 'customers.account_id')
                     ->where('customers.id', $this->customer_id)
                     ->select('coa.name', 'customers.*')
@@ -443,12 +498,13 @@ class Add extends Component
                     throw new \Exception('Handed over field is required.');
                 }
             }
+
             $sale_receipt_no = Voucher::instance()->advances()->get();
             $total_after_disc = collect($this->sales)->sum('total_after_disc');
             $sale_id = Sale::create([
                 'patient_id' => $this->patient_id,
                 'referred_by' => $this->referred_by_id,
-                'sale_by' => Auth::id(),
+                'sale_by' => !empty($this->pending_sale_id) ? $this->sales[0]['sale_by'] : Auth::id(),
                 'sale_at' => date('Y-m-d H:i:s'),
                 'remarks' => $this->remarks,
                 'receive_amount' => $this->received,
@@ -597,9 +653,14 @@ class Add extends Component
                     'handed_over_to' => $this->handed_over,
                 ]);
             }
+            if(!empty($this->pending_sale_id)){
+                PendingSale::where('id',$this->pending_sale_id)->delete();
+                PendingSaleDetail::where('sale_id',$this->pending_sale_id)->delete();
+            }
             $this->resetAll();
             $this->searchableReset();
             $this->success = 'Sale has been complete with receipt #' . $sale_id;
+
             DB::commit();
             $this->emit('printInvoice', $sale_id, $this->admission_id, $this->procedure_id);
         } catch (\Exception $e) {
@@ -610,7 +671,7 @@ class Add extends Component
 
     public function resetAll()
     {
-        $this->reset(['sales', 'referred_by_id', 'referred_by_name', 'success', 'patient_id', 'patient_name', 'customer_credit_limit',
+        $this->reset(['sales', 'referred_by_id','pending_sale_id', 'referred_by_name', 'success', 'patient_id', 'patient_name', 'customer_credit_limit',
             'payable', 'received', 'remarks', 'discount', 'error', 'customer_id_credit', 'customer_id', 'account_id', 'customer_previous_credit', 'customer_name_credit', 'credit']);
     }
 
@@ -709,5 +770,33 @@ class Add extends Component
         $this->patient_contact_whatsApp = 't';
 
         $this->reset('add_patient_name', 'credit', 'customer_id', 'account_id', 'customer_previous_credit', 'customer_credit_limit', 'father_husband_name', 'patient_gender', 'patient_contact', 'patient_contact_2', 'patient_contact_3', 'patient_relation', 'patient_dob', 'patient_age', 'patient_doctor', 'patient_registration_date', 'patient_address', 'patient_city', 'patient_referred_by');
+    }
+
+    public function validatePendingSale(){
+            $input = request()->all();
+            if(!empty($input['pending_sale_id'])){
+                $this->pending_sale_id = $input['pending_sale_id'];
+                $sales = PendingSale::from('pending_sales as ps')
+                    ->join('pending_sale_details as psd','ps.id','=','psd.sale_id')
+                    ->join('products as p','p.id','psd.product_id')
+                    ->where('ps.id',$this->pending_sale_id)
+                    ->select('psd.product_id','psd.qty as s_qty','ps.sale_by','psd.total_after_disc','psd.total','p.name as item','psd.retail_price','psd.disc','ps.patient_id','ps.referred_by')
+                    ->get();
+                foreach ($sales as $key => $sale) {
+                    $this->sales[] = $sale;
+                }
+                if(!empty($sales[0]['patient_id'])){
+                    $patient =Patient::find($sales[0]['patient_id']);
+                    $this->patient_id = $patient['id'];
+                    $this->patient_name = $patient['name'];
+                }
+
+                if(!empty($sales[0]['referred_by'])){
+                    $doctor =Employee::find($sales[0]['referred_by']);
+                    $this->referred_by_id = $doctor['id'];
+                    $this->referred_by_name = $doctor['name'];
+                }
+
+            }
     }
 }

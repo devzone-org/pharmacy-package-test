@@ -28,6 +28,21 @@
              class="absolute  z-10 -ml-4 mt-3 transform px-2 w-screen max-w-md sm:px-0 lg:ml-0 lg:left-1/2 lg:-translate-x-1/2">
             <div class="rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 overflow-hidden">
                 <div class="relative grid gap-6 bg-white px-5 py-6 sm:gap-8 sm:p-8">
+                <a href="{{ url('pharmacy/pending-sales') }}"
+                       class="-m-3 p-3 flex items-center rounded-lg hover:bg-gray-100 {{ Request::segment(2)=='sales' && empty(Request::segment(3))  ? 'bg-gray-100' : ''}} ">
+                        <svg class="flex-shrink-0 h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+
+                        <div class="ml-4">
+                            <p class="text-base font-medium text-gray-900">
+                                Pending Sales
+                            </p>
+                            <p class="mt-1 text-sm text-gray-500">
+                                History of all Pending sales.
+                            </p>
+                        </div>
+                    </a>
+
+
                     <a href="{{ url('pharmacy/sales') }}"
                        class="-m-3 p-3 flex items-center rounded-lg hover:bg-gray-100 {{ Request::segment(2)=='sales' && empty(Request::segment(3))  ? 'bg-gray-100' : ''}} ">
                         <svg class="flex-shrink-0 h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>

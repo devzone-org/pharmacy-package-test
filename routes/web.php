@@ -1,9 +1,7 @@
 <?php
 
-
 use Devzone\Pharmacy\Http\Controllers\PrintController;
 use Illuminate\Support\Facades\Route;
-
 
 Route::get('/', function () {
     return view('pharmacy::dashboard');
@@ -129,6 +127,11 @@ Route::get('purchases/stock-adjustment', function () {
 Route::get('sales', function () {
     return view('pharmacy::sales.history');
 });
+
+Route::get('pending-sales', function () {
+    return view('pharmacy::sales.pending-sales');
+});
+
 Route::get('sales/add', function () {
     return view('pharmacy::sales.add');
 });
@@ -191,7 +194,7 @@ Route::get('report/inventory-ledger', function () {
 });
 
 Route::get('print/sale/{id}', [PrintController::class, 'print']);
- 
+
 
 Route::get('update-retail',function (){
 
@@ -203,7 +206,7 @@ Route::get('update-retail',function (){
     }
 });
 Route::get('opening-stock', function (){
- 
+
     \Devzone\Pharmacy\Models\InventoryLedger::truncate();
     $inventory=\Devzone\Pharmacy\Models\ProductInventory::groupBy('product_id')
         ->select('product_id',\Illuminate\Support\Facades\DB::raw('sum(qty) as qty'))
