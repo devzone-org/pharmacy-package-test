@@ -43,6 +43,7 @@ class ProductsAdd extends Component
         'rack_id' => 'nullable|integer',
         'reorder_level' => 'nullable|integer',
         'reorder_qty' => 'nullable|integer',
+        'control_medicine' => 'required'
     ];
 
 
