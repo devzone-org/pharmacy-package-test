@@ -146,6 +146,12 @@ class PurchaseAdd extends Component
                     'retail_price' => $o['retail_price'] / $o['packing'],
                     'total_cost' => $o['cost_of_price'] * $o['qty'],
                 ]);
+
+                Product::find($o['id'])->update([
+                    'salt'=> $o['salt']??null,
+                    'cost_of_price'=> $o['cost_of_price'],
+                    'retail_price'=> $o['retail_price'],
+                ]);
             }
             DB::commit();
             $this->success = 'Purchase order has been created and awaiting for approval.';
