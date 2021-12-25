@@ -34,6 +34,7 @@ class PurchaseAdd extends Component
         'supplier_invoice' => 'nullable|string',
         'order_list' => 'required',
         'order_list.*.qty' => 'required|integer',
+        'order_list.*.salt' => 'nullable|string',
         'order_list.*.cost_of_price' => 'required|numeric',
         'order_list.*.retail_price' => 'required|numeric'
     ];
