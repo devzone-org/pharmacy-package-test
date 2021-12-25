@@ -63,11 +63,13 @@ class PurchaseAdd extends Component
     {
         $array = explode(".", $name);
         if ($array[0] == 'order_list') {
-            if (empty($value) || !is_numeric($value)) {
-                $this->order_list[$array[1]][$array[2]] = 0;
-            }
-            if (in_array($array[2], ['qty', 'cost_of_price'])) {
-                $this->order_list[$array[1]]['total_cost'] = round($this->order_list[$array[1]]['qty'] * $this->order_list[$array[1]]['cost_of_price'], 2);
+            if ($array[2] != 'salt') {
+                if (empty($value) || !is_numeric($value)) {
+                    $this->order_list[$array[1]][$array[2]] = 0;
+                }
+                if (in_array($array[2], ['qty', 'cost_of_price'])) {
+                    $this->order_list[$array[1]]['total_cost'] = round($this->order_list[$array[1]]['qty'] * $this->order_list[$array[1]]['cost_of_price'], 2);
+                }
             }
         }
     }
@@ -148,9 +150,9 @@ class PurchaseAdd extends Component
                 ]);
 
                 Product::find($o['id'])->update([
-                    'salt'=> $o['salt']??null,
-                    'cost_of_price'=> $o['cost_of_price'],
-                    'retail_price'=> $o['retail_price'],
+                    'salt' => $o['salt'] ?? null,
+                    'cost_of_price' => $o['cost_of_price'],
+                    'retail_price' => $o['retail_price'],
                 ]);
             }
             DB::commit();
