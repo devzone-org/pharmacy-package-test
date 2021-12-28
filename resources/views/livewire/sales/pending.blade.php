@@ -4,10 +4,6 @@
             <div class="grid grid-cols-8 gap-6">
 
 
-
-
-
-
                 <div class="col-span-8 sm:col-span-2">
                     <label for="from" class="block text-sm font-medium text-gray-700">Sale From</label>
                     <input type="date" wire:model.defer="from" id="from" autocomplete="off"
@@ -18,6 +14,23 @@
                     <label for="to" class="block text-sm font-medium text-gray-700">Sale To</label>
                     <input type="date" wire:model.defer="to" id="to" autocomplete="off"
                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+
+                <div class="col-span-8 sm:col-span-2">
+                    <label for="type" class="block text-sm font-medium text-gray-700">Type</label>
+                    <select type="text" wire:model.defer="status" id="type"
+                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value=""></option>
+                        <option value="e-pre">E-Prescription</option>
+                        <option value="n-pre">Pending</option>
+                    </select>
+                </div>
+
+                <div class="col-span-8 sm:col-span-2">
+                    <button type="button" wire:click="search"
+                            class="bg-white mt-6 py-2 px-4 rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm">
+                        Search
+                    </button>
                 </div>
 
 
@@ -46,8 +59,6 @@
                                 </th>
 
 
-
-
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                                     Sale At
                                 </th>
@@ -71,10 +82,9 @@
                                     Net Sale
                                 </th>
 
-
-
-
-
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                    Type
+                                </th>
 
 
                                 <th scope="col" class="relative px-3 py-3">
@@ -89,10 +99,17 @@
                                         {{ $loop->iteration + ( $history->firstItem() - 1)   }}
                                     </td>
 
-
+                                    @php
+                                        $time_pass=\Carbon\Carbon::create($h->sale_at)->diffForHumans();
+                                    @endphp
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         {{ date('d M, y h:i A',strtotime($h->sale_at)) }}
-
+                                        @if(\Carbon\Carbon::create($h->sale_at)->diffInMinutes(now()) >= 10)
+                                            <br>
+                                            <span class="mt-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                                {{$time_pass}}
+                                            </span>
+                                        @endif
                                     </td>
 
                                     <td class="px-3 py-3   text-sm text-gray-500">
@@ -122,10 +139,25 @@
                                         {{ number_format($h->gross_total,2) }}
                                     </td>
 
+                                    <td class="px-3 py-3 text-sm text-gray-500">
+                                        @if(empty($h->opd_id))
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-yellow-100 text-yellow-800">
+                                                Pending
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-green-100 text-green-800">
+                                                E-Prescription
+                                            </span>
+                                        @endif
+                                    </td>
+
                                     <td class="px-3 py-3   text-right text-sm font-medium">
                                         <div class="flex flex-row-reverse">
-                                        <a href="#" class="text-red-600" wire:click="delete('{{ $h->id }}')">   Delete  </a>
-<a class="text-indigo-600 pr-2" href="{{ url('pharmacy/sales/add') }}?pending_sale_id={{ $h->id }}">Complete</a>
+                                            <a href="#" class="text-red-600" wire:click="delete('{{ $h->id }}')">
+                                                Delete</a>
+                                            <a class="text-indigo-600 pr-2"
+                                               href="{{ url('pharmacy/sales/add') }}?pending_sale_id={{ $h->id }}">Complete
+                                                |</a>
 
                                         </div>
                                     </td>

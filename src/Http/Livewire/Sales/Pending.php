@@ -14,11 +14,12 @@ use Devzone\Pharmacy\Models\Sale\PendingSaleDetail;
 
 class Pending extends Component
 {
-    use    WithPagination;
+    use WithPagination;
 
 
     public $from;
     public $to;
+    public $status;
 
 
     public function mount()
@@ -26,7 +27,6 @@ class Pending extends Component
         $this->from = date('Y-m-d', strtotime('-1 month'));
         $this->to = date('Y-m-d');
     }
-
 
 
     public function render()
@@ -38,24 +38,27 @@ class Pending extends Component
             ->leftJoin('patients as p', 'p.id', '=', 's.patient_id');
 
 
-
-            $history = $history->when(!empty($this->from), function ($q) {
-                return $q->whereDate('s.sale_at', '>=', $this->from);
-            })->when(!empty($this->to), function ($q) {
-                return $q->whereDate('s.sale_at', '<=', $this->to);
-            }) ;
-
+        $history = $history->when(!empty($this->from), function ($q) {
+            return $q->whereDate('s.sale_at', '>=', $this->from);
+        })->when(!empty($this->to), function ($q) {
+            return $q->whereDate('s.sale_at', '<=', $this->to);
+        })->when(!empty($this->status), function ($q) {
+            if ($this->status == 'e-pre') {
+                return $q->whereNotNull('s.opd_id');
+            } else {
+                return $q->whereNull('s.opd_id');
+            }
+        });
 
 
         $history = $history->select(
             's.id',
             's.sub_total',
             's.gross_total',
+            's.opd_id',
 
             'u.name as sale_by',
             's.sale_at',
-
-
 
 
             'p.name as patient_name',
@@ -63,7 +66,7 @@ class Pending extends Component
             'e.name as referred_by'
         )
             ->groupBy('sd.sale_id')
-            ->orderBy('s.id', 'desc')->paginate(100);
+            ->orderBy('s.created_at')->paginate(100);
 
         return view('pharmacy::livewire.sales.pending', ['history' => $history]);
     }
@@ -78,9 +81,10 @@ class Pending extends Component
         $this->resetPage();
     }
 
-    public function delete($id){
+    public function delete($id)
+    {
         PendingSale::find($id)->delete();
-        PendingSaleDetail::where('sale_id',$id)->delete();
+        PendingSaleDetail::where('sale_id', $id)->delete();
         $this->search();
     }
 }
