@@ -252,6 +252,14 @@
                                     </th>
                                     <th scope="col"
                                         class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
+                                        Sale
+                                    </th>
+                                    <th scope="col"
+                                        class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
+                                        Pending
+                                    </th>
+                                    <th scope="col"
+                                        class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
                                         Qty
                                     </th>
                                     <th scope="col"
@@ -296,6 +304,15 @@
                                                             class="text-red-500 text-sm">(Required Quantity is {{$s['required_qty']}})</span>
                                                 @endif
                                             @endif
+                                        </td>
+                                        <td class="px-2   text-left   border-r  text-md text-gray-500">
+{{--                                            <label for="sale_type1" hidden></label>--}}
+{{--                                            <input type="radio" wire:model="sales.{{ $key }}.sale_type" name="sale_type" id="sale_type1"--}}
+{{--                                                   class="p-0 block  text-md text-center ">--}}
+{{--                                            <br>--}}
+{{--                                            <label for="sale_type2" hidden></label>--}}
+{{--                                            <input type="radio" wire:model="sales.{{ $key }}.sale_type" name="sale_type" id="sale_type2"--}}
+{{--                                                   class="p-0 block  text-md text-center ">--}}
                                         </td>
                                         <td class="px-2   text-left   border-r  text-md text-gray-500">
                                             <input type="number" wire:model.lazy="sales.{{ $key }}.s_qty"
