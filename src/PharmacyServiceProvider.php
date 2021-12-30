@@ -26,6 +26,7 @@ use Devzone\Pharmacy\Http\Livewire\MasterData\Racks;
 use Devzone\Pharmacy\Http\Livewire\MasterData\SupplierAdd;
 use Devzone\Pharmacy\Http\Livewire\MasterData\SupplierEdit;
 use Devzone\Pharmacy\Http\Livewire\MasterData\SupplierList;
+use Devzone\Pharmacy\Http\Livewire\MasterData\SupplierProductsList;
 use Devzone\Pharmacy\Http\Livewire\MasterData\UserCreditLimits;
 use Devzone\Pharmacy\Http\Livewire\Payments\Supplier\Add;
 use Devzone\Pharmacy\Http\Livewire\Payments\Supplier\Edit;
@@ -103,6 +104,7 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('master-data.products-add', ProductsAdd::class);
         Livewire::component('master-data.products-edit', ProductsEdit::class);
         Livewire::component('master-data.products-list', ProductsList::class);
+        Livewire::component('master-data.supplier-products-list', SupplierProductsList::class);
 
         Livewire::component('master-data.supplier-add', SupplierAdd::class);
         Livewire::component('master-data.supplier-edit', SupplierEdit::class);
@@ -170,6 +172,8 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('purchase.stock-adjustment', StockAdjustment::class);
         Livewire::component('purchase.stock-adjustment-listing', StockAdjustmentListing::class);
         Livewire::component('dashboard.hourly-trends',HourlyTrends::class);
+
+
     }
 
     /**

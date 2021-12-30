@@ -65,10 +65,17 @@
                         <div class="bg-white py-6 px-4 space-y-6 sm:p-6 ">
                             <div class="flex justify-between items-center">
                                 <h3 class="text-lg leading-6 font-medium text-gray-900">Product List</h3>
-                                <a href="{{ url('pharmacy/master-data/products/add') }}"
-                                   class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    Add new Product
-                                </a>
+                                <div class="flex justify-between items-center space-x-2">
+                                    <a href="{{ url('pharmacy/master-data/products/add') }}"
+                                       class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        Add new Product
+                                    </a>
+                                    <a href="{{ url('pharmacy/master-data/products/supplier') }}"
+                                       class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                        Supplier Products
+                                    </a>
+                                </div>
+
                             </div>
 
 
