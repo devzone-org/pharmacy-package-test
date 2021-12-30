@@ -4,6 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Purchases;
 
 
+use Carbon\Carbon;
 use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount;
@@ -15,6 +16,7 @@ use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\PurchaseOrder;
 use Devzone\Pharmacy\Models\Supplier;
 use Exception;
+use http\Message;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -39,6 +41,7 @@ class PurchaseReceive extends Component
     public $advance_tax_amount = 0;
     public $deleted = [];
     public $success;
+    public $current_date;
 
     protected $rules = [
         'supplier_id' => 'required|integer',
@@ -49,7 +52,8 @@ class PurchaseReceive extends Component
         'order_list.*.disc' => 'nullable|numeric',
         'order_list.*.cost_of_price' => 'required|numeric',
         'order_list.*.retail_price' => 'required|numeric',
-        'order_list.*.expiry' => 'required'
+        'order_list.*.expiry' => 'required',
+        'advance_tax' => 'numeric|lte:100|gte:0'
     ];
 
     protected $validationAttributes = [
@@ -59,6 +63,11 @@ class PurchaseReceive extends Component
 
     public function mount($purchase_id)
     {
+
+
+        $this->delivery_date = date('Y-m-d');
+
+
 
         $this->purchase_id = $purchase_id;
         if (\Devzone\Pharmacy\Models\PurchaseReceive::where('purchase_id', $purchase_id)->exists()) {
@@ -85,7 +94,10 @@ class PurchaseReceive extends Component
         $this->supplier_invoice = $purchase->supplier_invoice;
         $this->supplier_id = $purchase->supplier_id;
         $this->supplier_name = $purchase->supplier_name;
-        $this->delivery_date = $purchase->delivery_date;
+        if(! empty($purchase->delivery_date)){
+            $this->delivery_date = $purchase->delivery_date;
+        }
+
 
         $details = PurchaseOrder::from('purchase_orders as po')
             ->join('products as p', 'p.id', '=', 'po.product_id')
@@ -173,15 +185,22 @@ class PurchaseReceive extends Component
             }
         }
 
-        if ($name == 'advance_tax') {
-            $total_amount = collect($this->order_list)->sum('total_cost');
-            if (!empty($this->advance_tax)) {
-                $this->advance_tax_amount = $total_amount * ($this->advance_tax / 100);
-            } else {
-                $this->advance_tax_amount = 0;
+
+
+            if ($name == 'advance_tax') {
+                if ($this->advance_tax > 100 || $this->advance_tax < 0) {
+                    $this->advance_tax = 0;
+                    $this->addError('error','Advance Tax cannot be greater than 100% & less than 0%.');
+                }
+                $total_amount = collect($this->order_list)->sum('total_cost');
+                if (!empty($this->advance_tax)) {
+                    $this->advance_tax_amount = $total_amount * ($this->advance_tax / 100);
+                } else {
+                    $this->advance_tax_amount = 0;
+                }
             }
+
         }
-    }
 
 
     public function updatedSearchProducts($value)

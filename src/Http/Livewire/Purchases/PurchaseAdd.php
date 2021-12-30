@@ -44,6 +44,11 @@ class PurchaseAdd extends Component
         'order_list' => 'Products',
     ];
 
+    public function mount(){
+
+        $this->expected_date =date('Y-m-d');
+    }
+
     public function render()
     {
         return view('pharmacy::livewire.purchases.purchase-add');
