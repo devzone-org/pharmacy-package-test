@@ -235,6 +235,7 @@
 
                                     <td class="px-3 py-3   text-right text-sm font-medium">
                                         <div class="flex flex-row-reverse">
+                                            @can('12.refund-sale')
                                             <a class="text-red-600 cursor-pointer  " target="_blank"
                                                href="{{ url('pharmacy/sales/refund/') }}/{{$h->id}}?type=refund">
                                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
@@ -244,6 +245,8 @@
                                                           clip-rule="evenodd"></path>
                                                 </svg>
                                             </a>
+                                            @endcan
+                                            @can('12.reprint-sale')
                                             <a class="text-indigo-600 cursor-pointer " href="javascript:void(0);"
                                                onclick="window.open('{{ url('pharmacy/print/sale/').'/'.$h->id }}','receipt-print','height=150,width=400');">
                                                 <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20"
@@ -253,6 +256,8 @@
                                                           clip-rule="evenodd"></path>
                                                 </svg>
                                             </a>
+                                            @endcan
+
                                             <a class="text-green-600 cursor-pointer  " target="_blank"
                                                href="{{ url('pharmacy/sales/transaction/view') }}/{{$h->id}}">
                                                 <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20"
@@ -263,6 +268,7 @@
                                                           clip-rule="evenodd"></path>
                                                 </svg>
                                             </a>
+
                                         </div>
                                     </td>
                                 </tr>

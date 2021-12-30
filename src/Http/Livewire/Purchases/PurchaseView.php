@@ -70,14 +70,17 @@ class PurchaseView extends Component
 
     public function markAsApproved($id)
     {
-        $purchase = Purchase::find($id);
-        if ($purchase['status'] == 'approval-awaiting') {
-            $purchase->update([
-                'approved_at' => date('Y-m-d H:i:s'),
-                'approved_by' => Auth::user()->id,
-                'status' => 'awaiting-delivery'
-            ]);
+        if(auth()->user()->can('12.purchase-order-approve')){
+            $purchase = Purchase::find($id);
+            if ($purchase['status'] == 'approval-awaiting') {
+                $purchase->update([
+                    'approved_at' => date('Y-m-d H:i:s'),
+                    'approved_by' => Auth::user()->id,
+                    'status' => 'awaiting-delivery'
+                ]);
+            }
         }
+
 
     }
 

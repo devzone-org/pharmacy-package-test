@@ -76,6 +76,9 @@ class RefundList extends Component
             if (!empty($supplier_refund->approved_at)) {
                 throw new \Exception('Payment already refunded.');
             }
+            if(!auth()->user()->can('12.approve-supplier-returns')){
+                throw new \Exception(env('PERMISSION_ERROR','Access Denied'));
+            }
             $supplier = Supplier::find($supplier_refund['supplier_id']);
 
             $refund_details = SupplierRefundDetail::from('supplier_refund_details as srd')
