@@ -280,7 +280,7 @@
                 </tr>
 
                 <tr>
-                    <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Recoverable Advance Tax u/s 236(%)</th>
+                    <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Recoverable Advance Tax u/s 236(H)(%)</th>
                     <th colspan="3" class="px-3 py-3    text-left text-lg font-medium text-gray-900 ">
 
                         <input name="" wire:model="advance_tax" type="number" step="0.1" max="100" min="0"
