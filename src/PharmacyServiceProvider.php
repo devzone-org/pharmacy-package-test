@@ -2,6 +2,7 @@
 
 namespace Devzone\Pharmacy;
 
+use Devzone\Pharmacy\Console\DumpMasterData;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\CustomisedSalesReturns;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\CustomisedSalesSummary;
 use Devzone\Pharmacy\Http\Livewire\Dashboard\CustomisedSalesSummaryDoctorwise;
@@ -200,7 +201,9 @@ class PharmacyServiceProvider extends ServiceProvider
         ], 'pharmacy.views');*/
 
         // Registering package commands.
-        // $this->commands([]);
+         $this->commands([
+             DumpMasterData::class
+         ]);
     }
 
     /**

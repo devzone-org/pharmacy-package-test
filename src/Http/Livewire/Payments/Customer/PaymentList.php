@@ -12,6 +12,7 @@ use Devzone\Pharmacy\Models\Payments\CustomerPaymentDetail;
 use Devzone\Pharmacy\Models\Payments\SupplierPayment;
 use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\Sale\Sale;
+use http\Env;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -93,6 +94,9 @@ class PaymentList extends Component
         try {
             $id = $this->primary_id;
             DB::beginTransaction();
+            if (!auth()->user()->can('12.approve-customer-payments')) {
+                throw new \Exception(env('PERMISSION_ERROR', 'Access Denied'));
+            }
             $customer_payment = CustomerPayment::findOrFail($id);
 
             if (!empty($customer_payment->approved_at)) {
@@ -111,15 +115,15 @@ class PaymentList extends Component
             $amount = Sale::whereIn('id', $sales)->sum('gross_total');
 
             $refund_entries = \Devzone\Pharmacy\Models\Sale\SaleRefund::from('sale_refunds as sr')
-                ->join('sale_details as sd','sd.id','=','sr.sale_detail_id')
-                ->whereIn('sr.sale_id',$sales)
+                ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
+                ->whereIn('sr.sale_id', $sales)
                 ->groupBy('sr.sale_id')
                 ->select(\Illuminate\Support\Facades\DB::raw('sum(sr.refund_qty * sd.retail_price_after_disc) as total_refunded'))
                 ->get();
 
             $return_amount = $refund_entries->sum('total_refunded');
             $diff = $amount - $return_amount;
-            if ($diff!= $customer_payment['amount']) {
+            if ($diff != $customer_payment['amount']) {
                 throw new \Exception('Receive amount mismatch.');
             }
             $vno = Voucher::instance()->voucher()->get();

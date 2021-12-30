@@ -13,7 +13,8 @@
                 </h2>
 
             </div>
-            <div class="mt-5 flex lg:mt-0 lg:ml-4 ">
+            @can('12.reprint-sale')
+                <div class="mt-5 flex lg:mt-0 lg:ml-4 ">
                 <span class="ml-3">
                    <a class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       href="javascript:void(0);"
@@ -21,7 +22,8 @@
                        Print Sale
                    </a>
                 </span>
-            </div>
+                </div>
+            @endcan
 
         </div>
 
@@ -268,7 +270,8 @@
                     </th>
                     <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
                         class="w-10   px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        ({{ number_format(abs(collect($sales_ref)->where('sale_qty','<','0')->sum('total_after_disc')),2) }})
+                        ({{ number_format(abs(collect($sales_ref)->where('sale_qty','<','0')->sum('total_after_disc')),2) }}
+                        )
                     </th>
                 </tr>
                 <tr class="bg-gray-50">

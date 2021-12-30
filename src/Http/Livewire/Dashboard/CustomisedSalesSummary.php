@@ -87,10 +87,10 @@ class CustomisedSalesSummary extends Component
 
         foreach ($sale as $key => $s) {
             $first = collect($sale_return)->where($this->type, $s[$this->type])->first();
-            $sale[$key]['return_total'] = $first['return_total'];
-            $sale[$key]['net_sale'] = $sale[$key]['total_after_disc'] - $first['return_total'];
-            $sale[$key]['return_cos'] = $first['return_cos'];
-            $sale[$key]['net_cos'] = $sale[$key]['cos'] - $first['return_cos'];
+            $sale[$key]['return_total'] = $first['return_total'] ?? 0;
+            $sale[$key]['net_sale'] = $sale[$key]['total_after_disc'] - ($first['return_total'] ?? 0);
+            $sale[$key]['return_cos'] = $first['return_cos'] ?? 0;
+            $sale[$key]['net_cos'] = $sale[$key]['cos'] - ($first['return_cos'] ?? 0);
             $sale[$key]['gross_profit'] = $sale[$key]['net_sale'] - $sale[$key]['net_cos'];
         }
 
