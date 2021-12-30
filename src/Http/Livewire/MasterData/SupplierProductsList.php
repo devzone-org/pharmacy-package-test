@@ -51,6 +51,7 @@ class SupplierProductsList extends Component
             ->limit(1000)
             ->get()
             ->toArray();
+
     }
 
     public function resetSearch()
