@@ -129,7 +129,7 @@
                     </th>
                     <th scope="col"
                         class="w-28  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                        S.P
+                        P.C
                     </th>
                     <th scope="col"
                         class="w-16  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
@@ -280,14 +280,12 @@
                 </tr>
 
                 <tr>
-                    <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Recoverable Advance Tax u/s 236(H)</th>
-                    <th colspan="3" class="px-3 py-3    text-left text-lg font-medium text-gray-900   ">
-                        <select name="" wire:model="advance_tax"
+                    <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Recoverable Advance Tax u/s 236(H)(%)</th>
+                    <th colspan="3" class="px-3 py-3    text-left text-lg font-medium text-gray-900 ">
+
+                        <input name="" wire:model="advance_tax" type="number" step="0.1" max="100" min="0"
                         class="block w-full   border border-gray-300 rounded-md shadow-sm py-1 px-1 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500  text-lg">
-                            <option value=""></option>
-                            <option value="0.5">0.5%</option>
-                            <option value="1">1%</option>
-                        </select>
+                        </input>
                     </th>
                 </tr>
 
