@@ -73,7 +73,12 @@
                                 <div class="col-span-8 sm:col-span-2">
                                     <button type="button" wire:click="search"
                                             class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                        Search
+                                        <div wire:loading wire:target="search">
+                                            Searching...
+                                        </div>
+                                        <div wire:loading.remove wire:target="search">
+                                            Search
+                                        </div>
                                     </button>
 
                                     <button type="button" wire:click="resetSearch"
@@ -138,7 +143,7 @@
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($all_products as $key=> $m)
-                                        <tr class="{{ !empty($m->type) ? 'bg-red-50':'' }}">
+                                        <tr class="{{ !empty($m->type) ? 'bg-red-50':'' }}" wire:key="{{$loop->index}}">
                                             <td class="px-3 py-3   text-sm font-medium text-gray-500">
                                                 {{ $loop->iteration }}
                                             </td>
@@ -161,26 +166,26 @@
                                             </td>
                                             <td class="px-3 py-3   text-sm text-gray-500">
                                                 <label for="manufacturer" class="sr-only block text-sm font-medium text-gray-700">Manufacturer</label>
-{{--                                                <select wire:model="all_products.{{$key}}.manufacture_id"--}}
-{{--                                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"--}}
-{{--                                                        id="manufacturer">--}}
-{{--                                                    <option value=""></option>--}}
-{{--                                                    @foreach($manufacturers as $i => $man)--}}
-{{--                                                        <option value="{{$man->id}}">{{$man->name}}</option>--}}
-{{--                                                    @endforeach--}}
-{{--                                                </select>--}}
+                                                <select wire:model="all_products.{{$key}}.manufacture_id"
+                                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                        id="manufacturer">
+                                                    <option value=""></option>
+                                                    @foreach($manufacturers as $i => $man)
+                                                        <option value="{{$man->id}}" wire:key="{{$loop->index}}">{{$man->name}}</option>
+                                                    @endforeach
+                                                </select>
                                             </td>
 
                                             <td class="px-3 py-3   text-sm text-gray-500">
                                                 <label for="supplier" class="sr-only block text-sm font-medium text-gray-700">Supplier</label>
-{{--                                                <select wire:model="all_products.{{$key}}.supplier_id"--}}
-{{--                                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"--}}
-{{--                                                        id="supplier">--}}
-{{--                                                    <option value=""></option>--}}
-{{--                                                    @foreach($suppliers as $i => $sup)--}}
-{{--                                                        <option value="{{$sup->id}}">{{$sup->name}}</option>--}}
-{{--                                                    @endforeach--}}
-{{--                                                </select>--}}
+                                                <select wire:model="all_products.{{$key}}.supplier_id"
+                                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                        id="supplier">
+                                                    <option value=""></option>
+                                                    @foreach($suppliers as $i => $sup)
+                                                        <option value="{{$sup->id}}" wire:key="{{$loop->index}}">{{$sup->name}}</option>
+                                                    @endforeach
+                                                </select>
                                             </td>
 
 

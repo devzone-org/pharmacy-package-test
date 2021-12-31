@@ -250,10 +250,10 @@
                                         class="  px-2   border-r py-2 text-left text-md font-medium text-gray-500  tracking-wider">
                                         Item
                                     </th>
-                                    <th scope="col"
-                                        class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
-                                        Sale
-                                    </th>
+{{--                                    <th scope="col"--}}
+{{--                                        class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">--}}
+{{--                                        Sale--}}
+{{--                                    </th>--}}
                                     <th scope="col"
                                         class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
                                         Pending
