@@ -27,13 +27,11 @@
                     <label for="status"
                            class="block text-sm font-medium text-gray-600">Search {{ ucwords(str_replace('_', ' ', $searchable_type))  }}</label>
                     @if($searchable_type == 'item')
-                        <div x-init="console.log('Helllloooooooo.')">
-                        <input type="text" x-ref="searchField"
+                        <input type="text"
                                wire:model.debounce.500ms="searchable_query"
                                id="searchable_query"
                                class="shadow-sm mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                autocomplete="off">
-                        </div>
                     @else
                         <input type="text"
                                wire:model.debounce.500ms="searchable_query"

@@ -894,11 +894,11 @@
             input.focus();
             input.select();
         }
-        if (event.keyCode == 121) {
-            event.preventDefault();
-            event.stopPropagation();
-            window.livewire.emit('searchCustomer');
-        }
+        // if (event.keyCode == 121) {
+        //     event.preventDefault();
+        //     event.stopPropagation();
+        //     window.livewire.emit('searchCustomer');
+        // }
         if (event.keyCode == 122) {
             event.preventDefault();
             event.stopPropagation();
