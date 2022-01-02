@@ -250,10 +250,10 @@
                                         class="  px-2   border-r py-2 text-left text-md font-medium text-gray-500  tracking-wider">
                                         Item
                                     </th>
-                                    <th scope="col"
-                                        class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
-                                        Sale
-                                    </th>
+{{--                                    <th scope="col"--}}
+{{--                                        class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">--}}
+{{--                                        Sale--}}
+{{--                                    </th>--}}
                                     <th scope="col"
                                         class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
                                         Pending
@@ -894,11 +894,11 @@
             input.focus();
             input.select();
         }
-        if (event.keyCode == 121) {
-            event.preventDefault();
-            event.stopPropagation();
-            window.livewire.emit('searchCustomer');
-        }
+        // if (event.keyCode == 121) {
+        //     event.preventDefault();
+        //     event.stopPropagation();
+        //     window.livewire.emit('searchCustomer');
+        // }
         if (event.keyCode == 122) {
             event.preventDefault();
             event.stopPropagation();

@@ -242,7 +242,7 @@ class Add extends Component
                     }
                 }
 
-                $data['s_qty'] = 1;
+                $data['s_qty'] = $this->product_qty;
                 $data['disc'] = 0;
                 $data['total'] = $data['retail_price'];
                 $data['total_after_disc'] = $data['retail_price'];
@@ -256,6 +256,10 @@ class Add extends Component
                     $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'];
                 }
             }
+            $this->searchable_query = '';
+            $this->searchable_data = [];
+            $this->product_qty = null;
+            $this->emit('focusInput');
         }
     }
 

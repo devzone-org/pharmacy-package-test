@@ -22,6 +22,9 @@ Route::get('master-data/racks', function () {
 Route::get('master-data/products', function () {
     return view('pharmacy::master_data.products-list');
 });
+Route::get('master-data/products/supplier', function () {
+    return view('pharmacy::master_data.supplier-products-list');
+});
 Route::get('master-data/products/add', function () {
     return view('pharmacy::master_data.products-add');
 });
