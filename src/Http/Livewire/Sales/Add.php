@@ -244,8 +244,8 @@ class Add extends Component
 
                 $data['s_qty'] = $this->product_qty;
                 $data['disc'] = 0;
-                $data['total'] = $data['retail_price'];
-                $data['total_after_disc'] = $data['retail_price'];
+                $data['total'] = $data['retail_price'] * $this->product_qty;
+                $data['total_after_disc'] = $data['retail_price'] * $this->product_qty;
                 $this->sales[] = $data;
             } else {
                 $key = array_keys($check)[0];
