@@ -6,7 +6,7 @@
 <header class=" not-printable bg-white shadow">
     <div class="absolute">
         <a href="{{ url('dashboard') }}">
-        <img class="p-4 mt-1 w-24" src="{{ asset(env('CLIENT_LOGO')) }}" alt="">
+        <img class="p-4 mt-1 w-24" src="{{ asset(env('CLIENT_LOGO', '/images/default.png')) }}" alt="">
         </a>
     </div>
     <div class="mx-auto ml-20 px-2 sm:px-4 lg:divide-y lg:divide-gray-200 lg:px-8">
