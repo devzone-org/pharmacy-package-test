@@ -294,33 +294,33 @@
                         </td>
 
                         <td class="px-3 py-3 text-center   border  text-sm text-gray-500">
-                            {{  $record['qty'] }}
+                            {{  optional($record)['qty'] }}
                         </td>
                         <td class="px-3 py-3 text-center   border  text-sm text-gray-500">
-                            {{  $record['bonus'] }}
+                            {{  optional($record)['bonus'] }}
 
                         </td>
                         <td class="px-3 py-3  text-center  border  text-sm text-gray-500">
-                            {{  $record['bonus'] + $record['qty'] }}
+                            {{  optional($record)['bonus'] + optional($record)['qty'] }}
                         </td>
                         <td class="px-3 py-3 text-center   border  text-sm text-gray-500">
-                            {{ $record['cost_of_price'] }}
-                        </td>
-
-                        <td class="px-3 py-3 text-center   border  text-sm text-gray-500">
-                            {{ $record['discount'] }}
+                            {{ optional($record)['cost_of_price'] }}
                         </td>
 
                         <td class="px-3 py-3 text-center   border  text-sm text-gray-500">
-                            {{ $record['after_disc_cost'] }}
+                            {{ optional($record)['discount'] }}
+                        </td>
+
+                        <td class="px-3 py-3 text-center   border  text-sm text-gray-500">
+                            {{ optional($record)['after_disc_cost'] }}
                         </td>
 
                         <td class="px-3 py-3 text-center    border text-sm text-gray-500">
-                            {{ $record['retail_price'] }}
+                            {{ optional($record)['retail_price'] }}
                         </td>
 
                         <td class="px-3 py-3 text-center  border   text-sm text-gray-500">
-                            {{ $record['total_cost'] }}
+                            {{ optional($record)['total_cost'] }}
                         </td>
 
 
