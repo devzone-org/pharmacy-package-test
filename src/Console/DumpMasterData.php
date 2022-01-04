@@ -35,6 +35,7 @@ class DumpMasterData extends Command
         Permission::updateOrCreate(['name' => '12.purchase-orders'], ['guard_name' => 'web', 'description' => 'Purchase Orders List', 'portal' => 'pharmacy', 'section' => 'purchases']);
         Permission::updateOrCreate(['name' => '12.purchase-order-create'], ['guard_name' => 'web', 'description' => 'Create Purchase Order', 'portal' => 'pharmacy', 'section' => 'purchases']);
         Permission::updateOrCreate(['name' => '12.purchase-order-approve'], ['guard_name' => 'web', 'description' => 'Approve Purchase order', 'portal' => 'pharmacy', 'section' => 'purchases']);
+        Permission::updateOrCreate(['name' => '12.purchase-order-approve-receive'], ['guard_name' => 'web', 'description' => 'Approve receive order if inventory changed', 'portal' => 'pharmacy', 'section' => 'purchases']);
         Permission::updateOrCreate(['name' => '12.view-purchase-order'], ['guard_name' => 'web', 'description' => 'View Specific Purchase order', 'portal' => 'pharmacy', 'section' => 'purchases']);
         Permission::updateOrCreate(['name' => '12.receive-purchase-order'], ['guard_name' => 'web', 'description' => 'Receive Purchase Order', 'portal' => 'pharmacy', 'section' => 'purchases']);
         Permission::updateOrCreate(['name' => '12.purchase-order-comparison'], ['guard_name' => 'web', 'description' => 'Specific Purchase Order Comparison ', 'portal' => 'pharmacy', 'section' => 'purchases']);

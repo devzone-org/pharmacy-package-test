@@ -49,8 +49,8 @@ class PurchaseCompare extends Component
             ->leftJoin('users as a', 'a.id', '=', 'p.approved_by')
             ->where('p.id', $this->purchase_id)
             ->select(
-                'p.id','p.supplier_id','p.supplier_invoice','p.grn_no','p.delivery_date','p.status','p.approved_at','p.advance_tax','p.receipt_no',
-                's.name as supplier_name','c.name as created_by','a.name as approved_by','c.created_at')
+                'p.id', 'p.supplier_id', 'p.supplier_invoice', 'p.grn_no', 'p.delivery_date', 'p.status', 'p.approved_at', 'p.advance_tax', 'p.receipt_no',
+                's.name as supplier_name', 'c.name as created_by', 'a.name as approved_by', 'c.created_at')
             ->orderBy('p.id', 'desc')
             ->first();
 
@@ -65,12 +65,12 @@ class PurchaseCompare extends Component
             ->where('po.purchase_id', $this->purchase_id)
             ->select('po.*', 'p.name', 'p.salt', 'p.packing')
             ->get();
-        $supplier_payment_details=SupplierPaymentDetail::from('supplier_payment_details as spd')
-            ->join('supplier_payments as sp','sp.id','=','spd.supplier_payment_id')
-            ->join('users as u','u.id','=','sp.added_by')
-            ->leftJoin('users as us','us.id','=','sp.approved_by')
-            ->where('spd.order_id',$this->purchase_id)
-            ->select('sp.created_at','sp.approved_at','u.name as added_by','us.name as approved_by')
+        $supplier_payment_details = SupplierPaymentDetail::from('supplier_payment_details as spd')
+            ->join('supplier_payments as sp', 'sp.id', '=', 'spd.supplier_payment_id')
+            ->join('users as u', 'u.id', '=', 'sp.added_by')
+            ->leftJoin('users as us', 'us.id', '=', 'sp.approved_by')
+            ->where('spd.order_id', $this->purchase_id)
+            ->select('sp.created_at', 'sp.approved_at', 'u.name as added_by', 'us.name as approved_by')
             ->first();
 
         $this->purchase = $purchase;
@@ -113,7 +113,7 @@ class PurchaseCompare extends Component
 
         $overall = collect($overall);
 
-        return view('pharmacy::livewire.purchases.purchase-compare', ['purchase' => $purchase, 'overall' => $overall,'supplier_payment_details'=>$supplier_payment_details]);
+        return view('pharmacy::livewire.purchases.purchase-compare', ['purchase' => $purchase, 'overall' => $overall, 'supplier_payment_details' => $supplier_payment_details]);
     }
 
 
@@ -147,7 +147,10 @@ class PurchaseCompare extends Component
             if (empty($this->purchase->delivery_date)) {
                 throw new \Exception("Delivery date not updated.");
             }
-            if(Purchase::where('status', 'received')->where('id', $this->purchase_id)->exists()){
+            if (!auth()->user()->can('12.purchase-order-approve-receive')) {
+                throw new \Exception(env('PERMISSION_ERROR'));
+            }
+            if (Purchase::where('status', 'received')->where('id', $this->purchase_id)->exists()) {
                 throw new \Exception("Already receive order.");
             }
             $inventory = ChartOfAccount::where('reference', 'pharmacy-inventory-5')->first();
@@ -169,9 +172,6 @@ class PurchaseCompare extends Component
             $description = "RECEIVED INVENTORY amounting total PKR " . number_format($amount, 2) . "/- + Recoverable Advance Tax u/s 236(h)(" . $this->purchase['advance_tax'] . "%) amount PKR " .
                 number_format($advance_tax_amount, 2) . "/- = Net Payable to supplier '" . $supplier['name'] . "' PKR " . number_format($amount + $advance_tax_amount, 2) .
                 "/- against PO # " . $this->purchase_id . " & invoice # INV-" . $this->purchase->receipt_no . " & GRN # " . $grn_no . " received by " . Auth::user()->name . " on dated " . date('d M, Y h:i A');
-
-
-
 
 
             $vno = Voucher::instance()->voucher()->get();
@@ -223,7 +223,7 @@ class PurchaseCompare extends Component
                         'order_id' => $this->purchase_id,
                         'increase' => $r->bonus,
                         'type' => 'purchase-bonus',
-                        'description' => "[BONUS] ".$description
+                        'description' => "[BONUS] " . $description
                     ]);
                 }
             }
