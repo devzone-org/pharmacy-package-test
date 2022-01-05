@@ -100,7 +100,14 @@
                                id="date">
                     </div>
 
-
+                    @if(!empty($supplier_id))
+                    <div class="col-span-6 sm:col-span-2">
+                        <button type="button" wire:click="inDemand"
+                                class="bg-indigo-600 border border-transparent rounded-md shadow-sm mt-6 py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
+                            Supplier's In Demand Products
+                        </button>
+                    </div>
+                    @endif
 
 
 
