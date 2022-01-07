@@ -33,12 +33,17 @@
                                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                     </div>
                     <div class="col-span-3">
-                        <button type="button" wire:click="search"
+                        <button type="button" wire:click="search" wire:loading.attr="disabled"
                                 class=" bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            Search
+                            <div wire:loading wire:target="search">
+                                Searching ...
+                            </div>
+                            <div wire:loading.remove wire:target="search">
+                                Search
+                            </div>
                         </button>
 
-                        <button type="button" wire:click="resetSearch"
+                        <button type="button" wire:click="resetSearch" wire:loading.attr="disabled"
                                 class="ml-2 bg-red-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                             Reset
                         </button>
