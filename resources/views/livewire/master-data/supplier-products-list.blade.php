@@ -71,7 +71,7 @@
                                 </div>
 
                                 <div class="col-span-8 sm:col-span-2">
-                                    <button type="button" wire:click="search"
+                                    <button type="button" wire:click="search" wire:loading.attr="disabled"
                                             class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                         <div wire:loading wire:target="search">
                                             Searching...

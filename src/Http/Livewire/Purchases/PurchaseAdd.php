@@ -27,6 +27,7 @@ class PurchaseAdd extends Component
     public $order_list = [];
 
     public $success;
+    protected $listeners = ['emitSupplierId'];
 
     protected $rules = [
         'supplier_id' => 'required|integer',
@@ -44,14 +45,44 @@ class PurchaseAdd extends Component
         'order_list' => 'Products',
     ];
 
-    public function mount(){
+    public function mount()
+    {
 
-        $this->expected_date =date('Y-m-d');
+        $this->expected_date = date('Y-m-d');
     }
 
     public function render()
     {
         return view('pharmacy::livewire.purchases.purchase-add');
+    }
+
+    public function emitSupplierId()
+    {
+
+    }
+
+    public function inDemand()
+    {
+        $search = Product::from('products as p')
+            ->where('p.supplier_id', $this->supplier_id)
+            ->select('p.*')
+            ->groupBy('p.id')->get();
+        $data = $search->toArray();
+        if (!empty($data)){
+            $this->order_list = null;
+            foreach ($data as $key=>$d){
+                $this->order_list[] = [
+                    'id' => $d['id'],
+                    'name' => $d['name'],
+                    'qty' => 1,
+                    'cost_of_price' => $d['cost_of_price'],
+                    'retail_price' => $d['retail_price'],
+                    'salt' => $d['salt'],
+                    'total_cost' => $d['cost_of_price'],
+                    'packing' => $d['packing']
+                ];
+            }
+        }
     }
 
     public function openProductModal()
