@@ -27,9 +27,14 @@
                 </div>
 
                 <div class="col-span-8 sm:col-span-2">
-                    <button type="button" wire:click="search"
+                    <button type="button" wire:click="search" wire:loading.attr="disabled"
                             class="bg-white mt-6 py-2 px-4 rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm">
-                        Search
+                        <div wire:loading wire:target="search">
+                            Searching ...
+                        </div>
+                        <div wire:loading.remove wire:target="search">
+                            Search
+                        </div>
                     </button>
                 </div>
 

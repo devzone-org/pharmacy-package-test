@@ -335,7 +335,7 @@
                     </div>
 
                     <div class="  py-3   text-right  ">
-                        <button type="button" wire:click="updateManufacture"
+                        <button type="button" wire:click="updateManufacture" wire:loading.attr="disabled"
                                 class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
                             Update
                         </button>
