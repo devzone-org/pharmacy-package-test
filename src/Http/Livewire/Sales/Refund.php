@@ -252,7 +252,9 @@ class Refund extends Component
     {
         $old_sale = $this->old_sales[$key];
         $data = collect($this->refunds)->where('id', $old_sale['id'])->firstWhere('sale_id', $this->sale_id);
-
+        if(empty($data['qty'])){
+            $data['qty'] = 0;
+        }
         if ($old_sale['qty'] > $data['qty']) {
             $old_sale['s_qty'] = $old_sale['qty'];
             $old_sale['qty'] = $old_sale['qty'] - $data['qty'];
