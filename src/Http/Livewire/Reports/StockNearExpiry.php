@@ -110,7 +110,7 @@ class StockNearExpiry extends Component
 
     public function resetSearch()
     {
-        $this->reset('norcotics','product_id', 'product_name', 'rack_id', 'rack_name', 'category_id', 'category_name', 'manufacture_id', 'manufacture_name', 'supplier_id', 'supplier_name');
+        $this->reset('product_id', 'product_name', 'rack_id', 'rack_name', 'category_id', 'category_name', 'manufacture_id', 'manufacture_name', 'supplier_id', 'supplier_name');
         $this->search();
     }
 }

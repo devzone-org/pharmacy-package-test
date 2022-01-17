@@ -10,8 +10,7 @@
                 </a>
             </h3>
             <p class="mt-2 text-sm text-gray-500">
-                Doloribus dolores nostrum quia qui natus officia quod et dolorem. Sit repellendus qui ut at blanditiis
-                et quo et molestiae.
+                Update data of all pharmaceutics Manufacturers involved with the Hospital Pharmacy.
             </p>
         </div>
         <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400"
@@ -33,8 +32,7 @@
                 </a>
             </h3>
             <p class="mt-2 text-sm text-gray-500">
-                Doloribus dolores nostrum quia qui natus officia quod et dolorem. Sit repellendus qui ut at blanditiis
-                et quo et molestiae.
+                Add different Categories for all pharmaceutics to track your products better.
             </p>
         </div>
         <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400"
@@ -56,8 +54,7 @@
                 </a>
             </h3>
             <p class="mt-2 text-sm text-gray-500">
-                Doloribus dolores nostrum quia qui natus officia quod et dolorem. Sit repellendus qui ut at blanditiis
-                et quo et molestiae.
+                Update & Assign Racks for your pharmaceutics to arrange & track the products better.
             </p>
         </div>
         <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400"
@@ -79,8 +76,7 @@
                 </a>
             </h3>
             <p class="mt-2 text-sm text-gray-500">
-                Doloribus dolores nostrum quia qui natus officia quod et dolorem. Sit repellendus qui ut at blanditiis
-                et quo et molestiae.
+                Update data for all of your pharmaceutical Products & map them with their Suppliers & Manufacturers.
             </p>
         </div>
         <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400"
@@ -102,8 +98,7 @@
                 </a>
             </h3>
             <p class="mt-2 text-sm text-gray-500">
-                Doloribus dolores nostrum quia qui natus officia quod et dolorem. Sit repellendus qui ut at blanditiis
-                et quo et molestiae.
+                Manage the data of your pharmaceutics Suppliers.
             </p>
         </div>
         <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400"
@@ -124,8 +119,7 @@
                 </a>
             </h3>
             <p class="mt-2 text-sm text-gray-500">
-                Doloribus dolores nostrum quia qui natus officia quod et dolorem. Sit repellendus qui ut at blanditiis
-                et quo et molestiae.
+                Manage & track records for pharmaceutical customers on credit (Creditors).
             </p>
         </div>
         <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400"
@@ -150,8 +144,7 @@
                 </a>
             </h3>
             <p class="mt-2 text-sm text-gray-500">
-                Doloribus dolores nostrum quia qui natus officia quod et dolorem. Sit repellendus qui ut at blanditiis
-                et quo et molestiae.
+                Manage the Credit Limits of users involved with the Hospital Pharmacy.
             </p>
         </div>
         <span class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400"

@@ -18,8 +18,8 @@ class CustomisedSalesSummaryUserwise extends Component
 
     public function mount()
     {
-        $this->type='date';
-        $this->date=date('Y-m-d');
+        $this->type = 'date';
+        $this->date = date('Y-m-d');
         $this->prepareDate();
     }
 
@@ -92,17 +92,17 @@ class CustomisedSalesSummaryUserwise extends Component
             ->toArray();
 
         foreach ($sale as $key => $s) {
-                $first = collect($sale_return)->where($this->type, $s[$this->type])->where('sale_by', $s['sale_by'])->first();
-                $sale[$key]['return_total'] = $first['return_total'];
-                $sale[$key]['return_cos'] = $first['return_cos'];
-                $sale[$key]['net_sale'] = $sale[$key]['total_after_disc'] - $first['return_total'];
+            $first = collect($sale_return)->where($this->type, $s[$this->type])->where('sale_by', $s['sale_by'])->first();
+            $sale[$key]['return_total'] = $first['return_total'] ?? 0;
+            $sale[$key]['return_cos'] = $first['return_cos'] ?? 0;
+            $sale[$key]['net_sale'] = $sale[$key]['total_after_disc'] - ($first['return_total'] ?? 0);
         }
 
         $user_name = array_unique(collect($sale)->pluck('user')->toArray());
 
         foreach ($this->label as $l) {
-            foreach ($user_name as $us){
-                $record = collect($sale)->where('user',$us)->where($this->type, $l['format'])->first();
+            foreach ($user_name as $us) {
+                $record = collect($sale)->where('user', $us)->where($this->type, $l['format'])->first();
                 if (empty($record)) {
                     $this->data[] = [
                         "{$this->type}" => $l['format'],
@@ -121,7 +121,7 @@ class CustomisedSalesSummaryUserwise extends Component
         }
 
 
-        foreach(collect($this->data)->groupBy('user')->toArray() as $user => $details){
+        foreach (collect($this->data)->groupBy('user')->toArray() as $user => $details) {
             $this->result[] = [
                 'name' => $user,
                 'data' => collect($details)->pluck('net_sale')->toArray()

@@ -71,13 +71,13 @@ class PaymentList extends Component
         return view('pharmacy::livewire.payments.supplier.payment-list', ['payments' => $payments]);
     }
 
-    public function markAsApproved($id, $date,$supplier_name,$amt,$paid_from)
+    public function markAsApproved($id, $date, $supplier_name, $amt, $paid_from)
     {
         $this->payment_date = $date;
         $this->primary_id = $id;
-        $this->approval_supplier_name=$supplier_name;
-        $this->amt=$amt;
-        $this->paid_from=$paid_from;
+        $this->approval_supplier_name = $supplier_name;
+        $this->amt = $amt;
+        $this->paid_from = $paid_from;
         $this->confirm_dialog = true;
     }
 
@@ -90,7 +90,7 @@ class PaymentList extends Component
         ]);
 
         $this->markAsApprovedConfirm();
-        $this->reset(['payment_date', 'primary_id','approval_supplier_name','amt','paid_from']);
+        $this->reset(['payment_date', 'primary_id', 'approval_supplier_name', 'amt', 'paid_from']);
         $this->confirm_dialog = false;
     }
 
@@ -101,7 +101,9 @@ class PaymentList extends Component
             $id = $this->primary_id;
             DB::beginTransaction();
             $supplier_payment = SupplierPayment::findOrFail($id);
-
+            if (!auth()->user()->can('12.approve-supplier-payments')) {
+                throw new \Exception(env('PERMISSION_ERROR', 'Access Denied'));
+            }
             if (!empty($supplier_payment->approved_at)) {
                 throw new \Exception('Payment already approved.');
             }
@@ -119,7 +121,7 @@ class PaymentList extends Component
                 throw new \Exception('Un adjusted returns that you select already mark as settled.');
             }
 
-            $supplier_payment_receipt_no=Voucher::instance()->advances()->get();
+            $supplier_payment_receipt_no = Voucher::instance()->advances()->get();
             $pay_from = ChartOfAccount::findOrFail($supplier_payment->pay_from);
             $supplier = Supplier::findOrFail($supplier_payment->supplier_id);
 
@@ -146,8 +148,8 @@ class PaymentList extends Component
             }
 
             $description = "PAYMENT Amounting total PKR " . number_format(abs($diff), 2) .
-            "/- to supplier '".$supplier['name']."' against PO # " . implode(', ', $orders). " & invoice # inv-". $supplier_payment_receipt_no .
-                  ". Payment from '".$pay_from['name']."' by user " . Auth::user()->name . " on dated ".date('d M, Y h:i A');
+                "/- to supplier '" . $supplier['name'] . "' against PO # " . implode(', ', $orders) . " & invoice # inv-" . $supplier_payment_receipt_no .
+                ". Payment from '" . $pay_from['name'] . "' by user " . Auth::user()->name . " on dated " . date('d M, Y h:i A');
 
             $bank->voucherNo($vno)->date($this->payment_date)->reference('supplier-payment')
                 ->approve()->description($description)->execute();
@@ -172,7 +174,7 @@ class PaymentList extends Component
                 'approved_by' => Auth::user()->id,
                 'approved_at' => date('Y-m-d H:i:s'),
                 'payment_date' => $this->payment_date,
-                'receipt_no'=>$supplier_payment_receipt_no,
+                'receipt_no' => $supplier_payment_receipt_no,
             ]);
 
             DB::commit();

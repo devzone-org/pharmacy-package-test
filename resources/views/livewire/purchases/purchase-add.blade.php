@@ -83,6 +83,7 @@
                         </div>
 
 
+ 
                         <div class="col-span-6 sm:col-span-2">
                             <label for="name" class="block text-sm font-medium text-gray-700">Supplier</label>
                             <input wire:model="supplier_name" readonly
@@ -93,6 +94,16 @@
                                    id="name">
                         </div>
 
+ 
+                    @if(!empty($supplier_id))
+                    <div class="col-span-6 sm:col-span-2">
+                        <button type="button" wire:click="inDemand"
+                                class="bg-indigo-600 border border-transparent rounded-md shadow-sm mt-6 py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
+                            Supplier's In Demand Products
+                        </button>
+                    </div>
+                    @endif
+ 
 
                         <div class="col-span-6 sm:col-span-2">
                             <label for="date" class="block text-sm font-medium text-gray-700">Expected Delivery
@@ -241,7 +252,12 @@
             <div class="px-4 py-3 bg-gray-50 text-right sm:px-6 border-t">
                 <button type="submit"
                         class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
-                    Add
+                    <div wire:loading>
+                        Adding ...
+                    </div>
+                    <div wire:loading.remove>
+                        Add
+                    </div>
                 </button>
             </div>
         </div>

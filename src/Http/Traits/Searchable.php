@@ -18,6 +18,9 @@ use Illuminate\Support\Str;
 
 trait Searchable
 {
+    public $product_qty;
+    public $value_set = false;
+
     public $searchable_query = '';
     public $searchable_emit_only = false;
     public $searchable_data = [];
