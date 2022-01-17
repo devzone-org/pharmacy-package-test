@@ -74,7 +74,7 @@ Route::get('purchases/view/{id}', function ($id) {
     return view('pharmacy::purchases.purchase-view', compact('id'));
 });
 
-Route::get('purchases/purchase-order/view/{pdf?}', [\Devzone\Pharmacy\Http\Controllers\PdfController::class , 'PoDownloadPDF']);
+Route::get('purchases/purchase-order/view/pdf', [\Devzone\Pharmacy\Http\Controllers\PdfController::class , 'PoDownloadPDF']);
 
 
 Route::get('purchases/edit/{id}', function ($id) {
