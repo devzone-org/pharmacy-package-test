@@ -15,10 +15,14 @@ class PurchaseView extends Component
 {
     public $purchase_id;
     public $basic_info = false;
+    public $success;
+
 
     public $grn_no;
     public $delivery_date;
     public $supplier_invoice;
+    public $description_check ;
+    public $purchase_description;
 
     public function mount($purchase_id)
     {
@@ -39,7 +43,7 @@ class PurchaseView extends Component
             ->where('p.id', $this->purchase_id)
             ->select(
                 'p.id', 'p.supplier_invoice', 'p.grn_no', 'p.is_paid', 'p.delivery_date', 'p.status', 'p.supplier_id', 'p.approved_at', 'p.advance_tax', 'p.created_at',
-                's.name as supplier_name', 'a.name as approved_by', 'c.name as created_by')
+                's.name as supplier_name', 'a.name as approved_by', 'c.name as created_by', 'p.description')
             ->first();
         if ($purchase->status == 'received') {
             $details = \Devzone\Pharmacy\Models\PurchaseReceive::from('purchase_receives as pr')
@@ -80,6 +84,52 @@ class PurchaseView extends Component
         }
 
     }
+
+    public function setVoid()
+    {
+
+        $id = $this->purchase_id;
+        $purchase= Purchase::find($id);
+        $this->validate(['purchase_description' => 'required'], [], ['purchase_description' => 'Description']);
+        DB::beginTransaction();
+        try {
+            if ($purchase) {
+                if ($purchase->status == 'awaiting-delivery') {
+                    Purchase::where('id', $id)->where('status', 'awaiting-delivery')->update(['status' => 'Void', 'approved_by' => auth()->id(), 'description' => $this->purchase_description]);
+                    DB::commit();
+                    $this->success = 'Purchase Order Voided Successfully.';
+                    $this->description_check = false;
+                    return view('pharmacy::livewire.purchases.purchase-view', [$this->purchase_id]);
+                }else{
+                    $this->addError('Error', 'Only Approved Status can be Voided');
+                    $this->description_check =false;
+                    return view('pharmacy::livewire.purchases.purchase-view', [$this->purchase_id]);
+                }
+            } else {
+                $this->addError('Error', 'Record not found.');
+                $this->description_check =false;
+                return view('pharmacy::livewire.purchases.purchase-view', [$this->purchase_id]);
+            }
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            $this->addError('Error', 'Status could not be updated');
+            $this->description_check =false;
+            return view('pharmacy::livewire.purchases.purchase-view', [$this->purchase_id]);
+        }
+
+    }
+
+    public function openDescription()
+    {
+        $this->description_check = true;
+    }
+
+    public function closeDescription()
+    {
+        $this->resetErrorBag();
+        $this->description_check = false;
+    }
+
 
     public function removePurchase($id)
     {

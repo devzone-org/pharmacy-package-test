@@ -17,6 +17,47 @@
 
     <div class="space-y-6   col-span-3">
         <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-4">
+            @if($description_check != true)
+
+            @include('pharmacy::include.errors')
+            @if(!empty($success))
+                <div class="rounded-md bg-green-50 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <!-- Heroicon name: check-circle -->
+                            <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg"
+                                 viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd"
+                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                      clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-green-800">
+                                {{ $success }}
+                            </p>
+                        </div>
+                        <div class="ml-auto pl-3">
+                            <div class="-mx-1.5 -my-1.5">
+                                <button type="button" wire:click="$set('success', '')"
+                                        class="inline-flex bg-green-50 rounded-md p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-green-50 focus:ring-green-600">
+                                    <span class="sr-only">Dismiss</span>
+                                    <!-- Heroicon name: x -->
+                                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg"
+                                         viewBox="0 0 20 20"
+                                         fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd"
+                                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                              clip-rule="evenodd"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+            @endif
+
             <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
                 <div>
                     <h3 class="text-lg leading-6 font-medium text-gray-900">
@@ -25,13 +66,29 @@
 
                 </div>
                 <div class="flex items-center">
+                    @if($purchase->status !== 'Void')
                     @if(empty($purchase->approved_by))
                         <button type="button" wire:click="markAsApproved('{{ $purchase_id }}')"
                                 class="mr-4 bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
                             Mark as Approve
                         </button>
+                    @elseif($purchase->status == 'awaiting-delivery')
+                        <button type="button" wire:click="openDescription"
+                                class="mr-4 bg-gray-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600">
+                            Void
+                        </button>
+
+                            <a href="{{url('pharmacy/purchases/purchase-order/view/pdf')}}?purchase_id={{$purchase_id}}" target="_blank"
+                                class="mr-4 bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
+                            Download Invoice
+                        </a>
                     @endif
-                    <div class="relative inline-block text-left" x-data="{open:false}">
+                    @endif
+
+                        @if($purchase->status != 'Void')
+
+
+                        <div class="relative inline-block text-left" x-data="{open:false}">
                         <div>
                             <button type="button" x-on:click="open=true" @click.away="open=false;"
                                     class="  rounded-full flex items-center text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
@@ -49,6 +106,8 @@
                         <div x-show="open"
                              class="origin-top-right absolute right-0 mt-2 w-56 z-10 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
                              role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+
+
                             <div class="py-1" role="none">
 
                                 <button wire:click="openBasicInfo"
@@ -77,9 +136,12 @@
                                 @endif
 
 
+
                             </div>
                         </div>
+
                     </div>
+                        @endif
 
                 </div>
             </div>
@@ -150,6 +212,12 @@
                                         class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
                                Stock Receiving <br>In-process
                             </span>
+                            @elseif($purchase->status == 'Void')
+                                <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text--black-800">
+                             Void
+                            </span>
+
 
                             @elseif($purchase->status == 'received')
                                 @if($purchase->is_paid=='f')
@@ -261,6 +329,19 @@
                             @endif
                         </dd>
                     </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm  font-medium font-medium text-gray-500">
+                            Description
+                        </dt>
+                        <dd class="mt-1 text-sm font-medium text-gray-900">
+                            @if(!empty($purchase->description))
+                                {{ $purchase->description }}
+                            @else
+                                -
+                            @endif
+                        </dd>
+                    </div>
+
 
                 </dl>
             </div>
@@ -580,5 +661,7 @@
         </div>
     </div>
     @include('pharmacy::include.po-basic-info')
+    @include('pharmacy::include.po-description')
+
 </div>
 

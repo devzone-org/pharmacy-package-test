@@ -283,7 +283,7 @@
                     <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Recoverable Advance Tax u/s 236(%)</th>
                     <th colspan="3" class="px-3 py-3    text-left text-lg font-medium text-gray-900 ">
 
-                        <input name="" wire:model="advance_tax" type="number" step="0.1" max="100" min="0"
+                        <input name="" wire:model="advance_tax" type="number" step="0.01" max="100" min="0"
                         class="block w-full   border border-gray-300 rounded-md shadow-sm py-1 px-1 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500  text-lg">
                         </input>
                     </th>
@@ -422,6 +422,7 @@
                         <p class="text-sm opacity-25 pt-0 p-3">{{ empty($product_data) ? 'No Record Found': '' }}</p>
                     @endif
                 @endif
+            </div>
             </div>
         </div>
     </div>

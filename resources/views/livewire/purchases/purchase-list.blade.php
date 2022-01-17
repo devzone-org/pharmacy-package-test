@@ -284,6 +284,11 @@
                                     class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
                                Stock Receiving <br>In-process
                             </span>
+                        @elseif($m->status == 'Void')
+                            <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                           Void
+                            </span>
                         @elseif($m->status == 'received')
                             @if($m->is_paid=='f')
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
@@ -372,12 +377,18 @@
                                         <a href="#" wire:click="removePurchase('{{ $m->id }}')"
                                            class="text-red-700 block w-full text-left px-4 py-2 text-sm hover:bg-red-200"
                                            role="menuitem" tabindex="-1">Remove Order</a>
+
+
                                     @else
                                         @if($m->status == 'awaiting-delivery' )
                                             <a href="{{ url('pharmacy/purchases/receive/') }}/{{$m->id}}"
                                                class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                                role="menuitem" tabindex="-1">Receive Order</a>
-                                        @else
+
+                                            <a href="{{ url('pharmacy/purchases/view') }}/{{$m->id}}"
+                                               class="text-red-700 block w-full text-left px-4 py-2 text-sm hover:bg-red-200"
+                                               role="menuitem" tabindex="-1">Void</a>
+                                        @elseif($m->status != 'Void')
                                             <a href="{{ url('pharmacy/purchases/compare/') }}/{{$m->id}}"
                                                class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                                role="menuitem" tabindex="-1">Order Comparison Report</a>

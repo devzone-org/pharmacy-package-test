@@ -262,11 +262,12 @@ class PurchaseReceive extends Component
 
     public function create()
     {
+
         $this->validate();
         try {
             DB::beginTransaction();
             $purchase_receipt_no = Voucher::instance()->advances()->get();
-            Purchase::where('id', $this->purchase_id)->update([
+            Purchase::where('id', $this->purchase_id)->where('status', 'awaiting-delivery')->update([
                 'supplier_id' => $this->supplier_id,
                 'supplier_invoice' => $this->supplier_invoice,
                 'delivery_date' => $this->delivery_date,

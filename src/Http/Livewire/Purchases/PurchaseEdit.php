@@ -4,6 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Purchases;
 
 
+use App\Models\Purchases;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Product;
 use Devzone\Pharmacy\Models\Purchase;
@@ -90,6 +91,9 @@ class PurchaseEdit extends Component
     {
         return view('pharmacy::livewire.purchases.purchase-edit');
     }
+
+
+
 
     public function openProductModal()
     {
