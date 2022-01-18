@@ -268,6 +268,12 @@ class PurchaseReceive extends Component
             if (empty($po['approved_at'])) {
                 throw new Exception('Purchase order is not approved.');
             }
+
+            if ($po['status'] == 'Void') {
+                throw new Exception('Purchase order already voided.');
+            }
+
+
             $purchase_receipt_no = Voucher::instance()->advances()->get();
             Purchase::where('id', $this->purchase_id)->whereNotNull('approved_at')->where('status', 'awaiting-delivery')->update([
                 'supplier_id' => $this->supplier_id,
