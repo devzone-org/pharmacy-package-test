@@ -1095,6 +1095,9 @@
                 Qty
             </th>
             <th>
+                No. of Pieces
+            </th>
+            <th>
                 Supplier Cost
             </th>
 
@@ -1116,6 +1119,9 @@
                     {{ $m->salt }}
                 </td>
                 <td>
+                    {{$m->qty/$m->packing}}
+                </td>
+                <td>
                     {{ $m->qty }}
                 </td>
                 <td>
@@ -1135,6 +1141,9 @@
             </th>
             <th>
                 Total
+            </th>
+            <th>
+                {{ number_format($details->sum('quantity'),2) }}
             </th>
             <th>
                 {{ number_format($details->sum('qty'),2) }}
