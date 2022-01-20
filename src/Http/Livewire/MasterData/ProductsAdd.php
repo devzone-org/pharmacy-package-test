@@ -30,6 +30,8 @@ class ProductsAdd extends Component
     public $type;
     public $control_medicine;
     public $temperature;
+    public $discount_check = 'f';
+    public $max_disc;
 
 
     protected $rules = [
@@ -43,7 +45,8 @@ class ProductsAdd extends Component
         'rack_id' => 'nullable|integer',
         'reorder_level' => 'nullable|integer',
         'reorder_qty' => 'nullable|integer',
-        'control_medicine' => 'required'
+        'control_medicine' => 'required',
+        'max_disc' => 'nullable|numeric|between:0,100',
     ];
 
 
@@ -63,6 +66,8 @@ class ProductsAdd extends Component
             'packing' => $this->packing,
             'cost_of_price' => !empty($this->cost_of_price) ? $this->cost_of_price : 0,
             'retail_price' => !empty($this->retail_price) ? $this->retail_price : 0,
+            'max_discount' => $this->max_disc ?: null,
+            'discountable' => $this->discount_check,
             'rack_id' => $this->rack_id,
             'manufacture_id' => $this->manufacture_id,
             'category_id' => $this->category_id,

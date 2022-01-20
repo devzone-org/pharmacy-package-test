@@ -37,6 +37,8 @@ class ProductsEdit extends Component
     public $temperature;
     public $previous;
     public $next;
+    public $discount_check;
+    public $max_disc;
 
     protected $rules = [
         'name' => 'required|string',
@@ -49,6 +51,7 @@ class ProductsEdit extends Component
         'rack_id' => 'nullable|integer',
         'reorder_level' => 'nullable|integer',
         'reorder_qty' => 'nullable|integer',
+        'max_disc' => 'nullable|numeric|between:0,100',
     ];
 
     public function mount($primary_id)
@@ -86,6 +89,8 @@ class ProductsEdit extends Component
             $this->control_medicine = $products['control_medicine'];
             $this->narcotics = $products['narcotics'] == 't' ? true : false;
             $this->temperature=$products['temperature'];
+            $this->discount_check = $products['discountable'];
+            $this->max_disc = $products['max_discount'];
 
             // get previous user id
             $this->previous = Product::where('id', '<', $products['id'])->max('id');
@@ -128,6 +133,8 @@ class ProductsEdit extends Component
             'packing' => $this->packing,
             'cost_of_price' => !empty($this->cost_of_price) ? $this->cost_of_price : 0,
             'retail_price' => !empty($this->retail_price) ? $this->retail_price : 0,
+            'max_discount' => $this->max_disc ?: null,
+            'discountable' => $this->discount_check,
             'rack_id' => $this->rack_id,
             'manufacture_id' => $this->manufacture_id,
             'category_id' => $this->category_id,

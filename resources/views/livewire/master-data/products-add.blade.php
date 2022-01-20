@@ -2,12 +2,15 @@
 
     <div class="pb-5 border-gray-200">
         <h3 class="text-lg leading-6 font-medium text-gray-900 flex items-center">
-        <a href="{{ url('pharmacy/master-data/products') }}" class="p-3 bg-gray-200 border-2 rounded-md  border-gray-400 cursor-pointer hover:bg-gray-300 ">
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path
-                    fill-rule="evenodd"
-                    d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                    clip-rule="evenodd"></path></svg>
-        </a>
+            <a href="{{ url('pharmacy/master-data/products') }}"
+               class="p-3 bg-gray-200 border-2 rounded-md  border-gray-400 cursor-pointer hover:bg-gray-300 ">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                            fill-rule="evenodd"
+                            d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                            clip-rule="evenodd"></path>
+                </svg>
+            </a>
             <span class="ml-4">Product List</span>
         </h3>
     </div>
@@ -139,6 +142,24 @@
                                id="retail_price">
                     </div>
 
+                    <div class="col-span-6 sm:col-span-2">
+                        <label for="discount_check" class="block text-sm font-medium text-gray-700">Discount Available</label>
+                        <select wire:model="discount_check" id="discount_check"
+                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value="f">No</option>
+                            <option value="t">Yes</option>
+                        </select>
+                    </div>
+
+                    @if($discount_check == 't')
+                        <div class="col-span-6 sm:col-span-2">
+                            <label for="max_disc" class="block text-sm font-medium text-gray-700">Max Discount</label>
+                            <input wire:model="max_disc" type="number" step="0.01" min="0" max="100" autocomplete="off"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                   id="max_disc">
+                        </div>
+                    @endif
+
 
                     <div class="col-span-6 sm:col-span-2">
                         <label for="manufacture" class="block text-sm font-medium text-gray-700">Manufacture</label>
@@ -186,7 +207,8 @@
                     </div>
 
                     <div class="col-span-6 sm:col-span-2">
-                        <label for="control_medicine" class="block text-sm font-medium text-gray-700">Control Medicine</label>
+                        <label for="control_medicine" class="block text-sm font-medium text-gray-700">Control
+                            Medicine</label>
                         <select wire:model="control_medicine" id="control_medicine"
                                 class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                             <option value=""></option>
@@ -209,7 +231,7 @@
                         <label class="block text-sm font-medium text-gray-700">Temperature</label>
                         <input wire:model="temperature" type="text" autocomplete="off"
                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                               >
+                        >
                     </div>
 
                     <div class="col-span-6 sm:col-span-2">
