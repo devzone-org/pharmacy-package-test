@@ -158,6 +158,24 @@
                                id="retail_price">
                     </div>
 
+                    <div class="col-span-6 sm:col-span-2">
+                        <label for="discount_check" class="block text-sm font-medium text-gray-700">Discount Available</label>
+                        <select wire:model="discount_check" id="discount_check"
+                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value="f">No</option>
+                            <option value="t">Yes</option>
+                        </select>
+                    </div>
+
+                    @if($discount_check == 't')
+                        <div class="col-span-6 sm:col-span-2">
+                            <label for="max_disc" class="block text-sm font-medium text-gray-700">Max Discount</label>
+                            <input wire:model="max_disc" type="number" step="0.01" min="0" max="100" autocomplete="off"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                   id="max_disc">
+                        </div>
+                    @endif
+
 
                     <div class="col-span-6 sm:col-span-2">
                         <label for="manufacture" class="block text-sm font-medium text-gray-700">Manufacture</label>

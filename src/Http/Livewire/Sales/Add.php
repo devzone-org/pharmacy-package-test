@@ -25,6 +25,7 @@ use Devzone\Pharmacy\Models\Sale\SaleDetail;
 use Devzone\Pharmacy\Models\Sale\SaleIssuance;
 use Devzone\Pharmacy\Models\Sale\UserTill;
 use Devzone\Pharmacy\Models\UserLimit;
+use http\Env;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -91,6 +92,9 @@ class Add extends Component
     public $pending_sale = false;
     public $pending_sale_id;
 
+    public $rounded = 0;
+    public $after_round_off = 0;
+
 
     protected $listeners = ['openSearch', 'searchReferredBy', 'searchPatient', 'searchCustomer', 'emitCustomerIdCredit', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
 
@@ -136,7 +140,7 @@ class Add extends Component
                     ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
                     ->where('pm.procedure_id', $this->procedure_id)
                     ->where('pi.qty', '>', 0)
-                    ->select('p.name as item', 'p.retail_price as product_price', 'pm.qty as required_qty',
+                    ->select('p.name as item', 'p.retail_price as product_price', 'p.discountable', 'p.max_discount', 'pm.qty as required_qty',
                         'pi.qty as available_qty', 'pi.retail_price', 'pro.name as procedure_name',
                         'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'r.name as rack', 'r.tier')
                     ->groupBy('p.id')
@@ -164,6 +168,8 @@ class Add extends Component
                         's_qty' => $sale_qty,
                         'required_qty' => $required_qty,
                         'retail_price' => $medicine['retail_price'],
+                        'discount_check' => $medicine['discountable'],
+                        'max_discount' => $medicine['max_discount'],
                         'product_price' => $medicine['product_price'],
                         'supply_price' => $medicine['supply_price'],
                         'disc' => 0,
@@ -303,9 +309,20 @@ class Add extends Component
                 }
                 $this->sales[$array[1]]['total'] = round($this->sales[$array[1]]['s_qty'] * $this->sales[$array[1]]['retail_price'], 2);
 
-                if ($this->sales[$array[1]]['disc'] >= 0 || $this->sales[$array[1]]['disc'] <= 100) {
-                    $discount = round(($this->sales[$array[1]]['disc'] / 100) * $this->sales[$array[1]]['total'], 2);
-                    $this->sales[$array[1]]['total_after_disc'] = $this->sales[$array[1]]['total'] - $discount;
+
+
+                if ($this->sales[$array[1]]['disc'] >= 0 && $this->sales[$array[1]]['disc'] <= 100) {
+                    if ($this->sales[$array[1]]['discountable'] == 't'){
+                        if (!empty($this->sales[$array[1]]['disc']) && $this->sales[$array[1]]['disc'] > $this->sales[$array[1]]['max_discount']){
+                            $this->sales[$array[1]]['disc'] = $this->sales[$array[1]]['max_discount'];
+                        }
+                        $discount = round(($this->sales[$array[1]]['disc'] / 100) * $this->sales[$array[1]]['total'], 2);
+                        $this->sales[$array[1]]['total_after_disc'] = $this->sales[$array[1]]['total'] - $discount;
+                    } else{
+                        $this->sales[$array[1]]['disc'] = 0;
+                    }
+                }else{
+                    $this->sales[$array[1]]['disc'] = 0;
                 }
             }
         }
@@ -314,16 +331,25 @@ class Add extends Component
 
     public function updatedDiscount($value)
     {
-        if (empty($value) || !is_numeric($value)) {
+        if (empty($value) || !is_numeric($value) || $value < 0 || $value > 100) {
             $this->discount = 0;
             $value = 0;
         }
 
-        foreach ($this->sales as $key => $s) {
-            if ($value >= 0 || $value <= 100) {
-                $discount = round(($value / 100) * $this->sales[$key]['total'], 2);
-                $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'] - $discount;
-                $this->sales[$key]['disc'] = $value;
+        if ($value != 0) {
+            foreach ($this->sales as $key => $s) {
+                if ($s['discountable'] == 't') {
+                    $disc = $value;
+                    if (!empty($s['max_discount'])) {
+                        if ($value >= $s['max_discount']){
+                            $disc = $s['max_discount'];
+                        }
+                    }
+
+                    $discount = round(($disc / 100) * $this->sales[$key]['total'], 2);
+                    $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'] - $discount;
+                    $this->sales[$key]['disc'] = $disc;
+                }
             }
         }
 
@@ -455,8 +481,19 @@ class Add extends Component
                 if (empty($this->received) && $this->admission == false) {
                     throw new \Exception('Please enter received amount.');
                 }
-                if ($this->admission == false && $this->received < collect($this->sales)->sum('total_after_disc')) {
-                    throw new \Exception('Received amount should be greater than PKR ' . collect($this->sales)->sum('total_after_disc') . "/-");
+                //Round off code
+                $this->after_round_off = collect($this->sales)->sum('total_after_disc'); //gross-price
+                $min_bill = env('MIMIMUM_ROUNDOFF_BILL', 50);
+
+                if (env('ROUNDOFF_CHECK', false) && $this->after_round_off > $min_bill) {
+                    $v1 = $this->after_round_off;
+                    $v2 = round($v1 / 5) * 5;
+                    $this->rounded = $v2 - $v1;
+                    $this->after_round_off = $v2;
+                }
+
+                if ($this->admission == false && $this->received < $this->after_round_off) {
+                    throw new \Exception('Received amount should be greater than PKR ' . $this->after_round_off . "/-");
                 }
             } else {
                 if (empty($this->customer_id)) {
@@ -517,6 +554,8 @@ class Add extends Component
                 'remarks' => $this->remarks,
                 'receive_amount' => $this->received,
                 'payable_amount' => !empty($this->credit) ? 0 : $this->payable,
+                'rounded_inc' => $this->rounded > 0 ? $this->rounded : null,
+                'rounded_dec' => $this->rounded < 0 ? $this->rounded : null,
                 'sub_total' => collect($this->sales)->sum('total'),
                 'gross_total' => collect($this->sales)->sum('total_after_disc'),
                 'admission_id' => $this->admission_id ?? null,
@@ -587,7 +626,7 @@ class Add extends Component
                     }
                 }
             }
-            $accounts = COA::whereIn('reference', ['pharmacy-inventory-5', 'income-pharmacy-5', 'cost-of-sales-pharmacy-5'])->get();
+            $accounts = COA::whereIn('reference', ['pharmacy-inventory-5', 'income-pharmacy-5', 'cost-of-sales-pharmacy-5', 'exp-invoice-rounding-off'])->get();
 
             $amounts = SaleDetail::where('sale_id', $sale_id)->select(DB::raw('SUM(total_after_disc) as sale'), DB::raw('SUM(qty * supply_price) as cost'))->first();
             $customer_name = $this->patient_name ?? 'walking customer';
@@ -635,7 +674,30 @@ class Add extends Component
                     GeneralJournal::instance()->account($customer_account->account_id)->debit($amounts['sale'])->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                 } else {
-                    GeneralJournal::instance()->account(Auth::user()->account_id)->debit($amounts['sale'])->voucherNo($vno)
+//                    Rounding off changes are here!
+                    $min_bill = env('MIMIMUM_ROUNDOFF_BILL', 50);
+                    $rounded = 0;
+                    if (env('ROUNDOFF_CHECK', false) && $amounts['sale'] > $min_bill) {
+                        $v1 = $amounts['sale'];
+                        $v2 = round($v1 / 5) * 5;
+                        $rounded = $v2 - $v1;
+                        $round_acc_id = $accounts->where('reference', 'exp-invoice-rounding-off')->first()->id;
+
+                        if ($rounded < 0 && env('ROUNDOFF_DEC')) {
+
+                            GeneralJournal::instance()->account($round_acc_id)->debit(abs($rounded))->voucherNo($vno)
+                                ->date(date('Y-m-d'))->approve()->reference('exp-invoice-rounding-off')->description($description)->execute();
+
+                        } elseif ($rounded > 0 && env('ROUNDOFF_INC')) {
+
+                            GeneralJournal::instance()->account($round_acc_id)->credit(abs($rounded))->voucherNo($vno)
+                                ->date(date('Y-m-d'))->approve()->reference('exp-invoice-rounding-off')->description($description)->execute();
+                        }
+                    }
+
+//                    Idr tak...
+
+                    GeneralJournal::instance()->account(Auth::user()->account_id)->debit($amounts['sale'] + $rounded)->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                 }
 

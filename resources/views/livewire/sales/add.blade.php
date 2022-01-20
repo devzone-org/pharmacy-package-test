@@ -332,7 +332,7 @@
                                         </td>
                                         @if($admission==false)
                                             <td class="px-2  text-center border-r text-md text-gray-500">
-                                                <input type="number" step="0.01" wire:model.lazy="sales.{{ $key }}.disc"
+                                                <input type="number" step="0.01" min="0" max="100" wire:model.lazy="sales.{{ $key }}.disc"
                                                        onClick="this.select();"
                                                        class="text-center p-0 focus:ring-0 block w-full   text-md border-0  "
                                                        autocomplete="off">
@@ -404,7 +404,7 @@
                                     </th>
                                 </tr>
                                 <tr class="bg-gray-50">
-                                    <th rowspan="{{ $admission==true? '2' : '4' }}"
+                                    <th rowspan="{{ $admission==true? '2' : '5' }}"
                                         colspan="{{ $admission==true? '2' : '3' }}"
                                         class="  border-r   bg-white text-md font-medium text-gray-500  tracking-wider">
 
@@ -449,6 +449,16 @@
                                     </th>
                                 </tr>
                                 @if($admission==false && $credit == false)
+                                    <tr class="bg-gray-50">
+                                        <th scope="col" colspan="4"
+                                            class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
+                                            After Round-off
+                                        </th>
+                                        <th scope="col" colspan="2"
+                                            class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
+                                            {{ number_format(round(collect($sales)->sum('total_after_disc')/5)*5 ,2) }}
+                                        </th>
+                                    </tr>
                                     <tr>
                                         <th scope="col" colspan="4"
                                             class="w-7 px-2 text-left border-r py-2 @if($credit==true) bg-red-50 @endif text-xl font-medium text-gray-500  tracking-wider">
