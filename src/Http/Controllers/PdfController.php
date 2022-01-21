@@ -37,7 +37,7 @@ class PdfController
             $details = PurchaseOrder::from('purchase_orders as po')
                 ->join('products as p', 'p.id', '=', 'po.product_id')
                 ->where('po.purchase_id', $purchase_id)
-                ->select('po.*', 'p.name', 'p.salt')
+                ->select('po.*', 'p.name', 'p.salt','p.packing',DB::raw('(po.qty/p.packing) as quantity'))
                 ->get();
         }
         $purchase_receive = \Devzone\Pharmacy\Models\PurchaseReceive::where('purchase_id', $purchase_id)
