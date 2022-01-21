@@ -19,18 +19,17 @@
 {{--    <br/><br/>--}}
 {{--    <button type="button" onclick="doPrinting();">Print Now...</button>--}}
 </div>
+<script src="{{ url('js/print/bluebird.min.js') }}"></script>
+<script src="{{ url('js/print/jquery-slim.min.js') }}"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bluebird/3.3.5/bluebird.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 
 <!--IMPORTANT: BE SURE YOU HONOR THIS JS LOAD ORDER-->
-<script src="https://jsprintmanager.azurewebsites.net/scripts/cptable.js"></script>
-<script src="https://jsprintmanager.azurewebsites.net/scripts/cputils.js"></script>
-<script src="https://jsprintmanager.azurewebsites.net/scripts/JSESCPOSBuilder.js"></script>
-<script src="https://jsprintmanager.azurewebsites.net/scripts/JSPrintManager.js"></script>
-<script src="https://jsprintmanager.azurewebsites.net/scripts/zip.js"></script>
-<script src="https://jsprintmanager.azurewebsites.net/scripts/zip-ext.js"></script>
-<script src="https://jsprintmanager.azurewebsites.net/scripts/deflate.js"></script>
+<script src="{{ url('js/print/scripts/cptable.js') }}"></script>
+<script src="{{ url('js/print/scripts/cputils.js') }}"></script>
+<script src="{{ url('js/print/scripts/zip.js') }}"></script>
+<script src="{{ url('js/print/scripts/zip-ext.js') }}"></script>
+<script src="{{ url('js/print/JSESCPOSBuilder.js') }}"></script>
+<script src="{{ url('js/print/scripts/JSPrintManager.js') }}"></script>
 
 <script>
     var clientPrinters = null;
