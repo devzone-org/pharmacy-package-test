@@ -1020,7 +1020,7 @@
 
 <div class="bg-white">
 
-        @include('include.pdf-header')
+    @include('include.pdf-header')
 
     <table class=" table p-0  " style="font-size: 13px ">
         <tbody class="">
@@ -1095,7 +1095,10 @@
                 Qty
             </th>
             <th>
-                No. of Pieces
+                Pieces in Packing
+            </th>
+            <th>
+                Total Qty
             </th>
             <th>
                 Supplier Cost
@@ -1122,6 +1125,9 @@
                     {{$m->qty/$m->packing}}
                 </td>
                 <td>
+                    {{$m->packing}}
+                </td>
+                <td>
                     {{ $m->qty }}
                 </td>
                 <td>
@@ -1146,8 +1152,12 @@
                 {{ number_format($details->sum('quantity'),2) }}
             </th>
             <th>
+                {{ number_format($details->sum('packing'),2) }}
+            </th>
+            <th>
                 {{ number_format($details->sum('qty'),2) }}
             </th>
+
             <th>
                 {{ number_format($details->sum('cost_of_price'),2) }}
             </th>
