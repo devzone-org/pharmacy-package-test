@@ -43,6 +43,7 @@
                                         <option value="receiving">Stock Receiving In-process</option>
                                         <option value="received-f">Stock Received - Invoice Unpaid</option>
                                         <option value="received-t">Order Complete - Invoice Paid</option>
+                                        <option value="Void">Void</option>
                                     </select>
                                 </div>
 
