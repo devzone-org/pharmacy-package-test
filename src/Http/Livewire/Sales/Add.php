@@ -126,6 +126,11 @@ class Add extends Component
                 if (!empty($this->admission_details)) {
                     $this->admission_details = $this->admission_details->toArray();
                 }
+                $proce  = DB::table('procedures')->where('id',$procedure_id)->get();
+                $procedure_name = '';
+                if($proce->isNotEmpty()){
+                    $procedure_name = $proce->first()->name;
+                }
 
                 $medicines = \App\Models\Hospital\ProcedureMedicine::from('procedure_medicines as pm')
                     ->join('procedures as pro', 'pro.id', '=', 'pm.procedure_id')
@@ -142,7 +147,8 @@ class Add extends Component
                     ->groupBy('p.id')
                     ->orderBy('pi.qty', 'desc')->get()->toArray();
 
-                $this->admission_details['procedure_name'] = collect($medicines)->first()['procedure_name'];
+
+                $this->admission_details['procedure_name'] = $procedure_name;
                 $this->hospital_info = Hospital::first()->toArray();
                 foreach ($medicines as $medicine) {
                     $required_qty = null;
