@@ -211,7 +211,10 @@ trait Searchable
             if (env('SCOUT_SEARCH', false)) {
                 $search = $search->whereIn('p.id', $product_ids);
             } else {
-                $search = $search;
+                $search = $search->where(function ($q) use ($value) {
+                    return $q->orWhere('p.name', 'LIKE', '%' . $value . '%')
+                        ->orWhere('p.salt', 'LIKE', '%' . $value . '%');
+                });
             }
 
             $search = $search->select('p.name as item', DB::raw('SUM(qty) as qty'),
