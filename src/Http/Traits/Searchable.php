@@ -42,7 +42,7 @@ trait Searchable
         'referred_by' => ['name'],
         'item' => ['item', 'qty', 'retail_price', 'rack', 'tier', 'packing'],
         'adjustment_items' => ['item', 'qty', 'expiry'],
-        'customer'=>['name','care_of', 'credit_limit']
+        'customer' => ['name', 'care_of', 'credit_limit']
     ];
 
 
@@ -89,8 +89,8 @@ trait Searchable
 
     public function searchableSelection($key = null)
     {
-        if(empty($this->searchable_data)){
-            return ;
+        if (empty($this->searchable_data)) {
+            return;
         }
         if (!empty($key)) {
             $this->highlight_index = $key;
@@ -197,19 +197,34 @@ trait Searchable
 
         if ($this->searchable_type == 'item') {
             $product_ids = [];
-            $records = Product::search($value)->take(20)->get();
-            if ($records->isNotEmpty()){
-                $product_ids = $records->pluck('id')->toArray();
+            $ids_ordered = "-1";
+            if (env('SCOUT_SEARCH', false)) {
+                $records = Product::search($value)->take(20)->get();
+                if ($records->isNotEmpty()) {
+                    $product_ids = $records->pluck('id')->toArray();
+                    $ids_ordered = implode(',', $product_ids);
+                }
             }
             $search = Product::from('products as p')
                 ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
-                ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
-                ->whereIn('p.id', $product_ids)
-                ->select('p.name as item', DB::raw('SUM(qty) as qty'),
-                    'pi.retail_price', 'p.retail_price as product_price',
-                    'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'p.discountable', 'p.max_discount', 'r.name as rack', 'r.tier')
+                ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id');
+            if (env('SCOUT_SEARCH', false)) {
+                $search = $search->whereIn('p.id', $product_ids);
+            } else {
+                $search = $search;
+            }
+
+            $search = $search->select('p.name as item', DB::raw('SUM(qty) as qty'),
+                'pi.retail_price', 'p.retail_price as product_price',
+                'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'p.discountable', 'p.max_discount', 'r.name as rack', 'r.tier')
                 ->groupBy('p.id')
-                ->groupBy('pi.retail_price')->orderBy('qty', 'desc')->get();
+                ->groupBy('pi.retail_price');
+            if (env('SCOUT_SEARCH', false)) {
+                $search = $search->orderByRaw("FIELD(p.id, $ids_ordered)");
+            } else {
+                $search = $search->orderBy('qty', 'desc');
+            }
+            $search = $search->get();
             if ($search->isNotEmpty()) {
                 $this->searchable_data = $search->toArray();
             } else {
@@ -217,15 +232,14 @@ trait Searchable
             }
         }
 
-        if ($this->searchable_type == 'adjustment_items')
-        {
+        if ($this->searchable_type == 'adjustment_items') {
             $search = Product::from('products as p')
                 ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
                 ->where(function ($q) use ($value) {
                     return $q->orWhere('p.name', 'LIKE', '%' . $value . '%')
                         ->orWhere('p.salt', 'LIKE', '%' . $value . '%');
-                })->select('p.name as item', DB::raw('SUM(qty) as qty'),'p.id',
-                      'pi.expiry')
+                })->select('p.name as item', DB::raw('SUM(qty) as qty'), 'p.id',
+                    'pi.expiry')
                 ->groupBy('p.id')
                 ->groupBy('pi.expiry')->orderBy('qty', 'desc')->orderBy('p.name', 'asc')->get();
             if ($search->isNotEmpty()) {
@@ -251,7 +265,7 @@ trait Searchable
                 return $q->orWhere('name', 'LIKE', '%' . $value . '%')
                     ->orWhere('mr_no', 'LIKE', '%' . $value . '%')
                     ->orWhere('phone', 'LIKE', '%' . $value . '%');
-            })->select('mr_no', 'name', 'phone', 'id','customer_id','account_id')->get();
+            })->select('mr_no', 'name', 'phone', 'id', 'customer_id', 'account_id')->get();
             if ($search->isNotEmpty()) {
                 $this->searchable_data = $search->toArray();
             } else {
@@ -273,11 +287,11 @@ trait Searchable
             }
         }
         if ($this->searchable_type == 'customer') {
-            $search=Customer::from('customers as c')
-                ->join('employees as e','e.id','=','c.employee_id')
-                ->where(function ($q) use ($value){
-                        return $q->orWhere('c.name','LIKE','%'.$value.'%');
-                })->select('c.name','c.credit_limit','e.name as care_of','c.id')->get();
+            $search = Customer::from('customers as c')
+                ->join('employees as e', 'e.id', '=', 'c.employee_id')
+                ->where(function ($q) use ($value) {
+                    return $q->orWhere('c.name', 'LIKE', '%' . $value . '%');
+                })->select('c.name', 'c.credit_limit', 'e.name as care_of', 'c.id')->get();
             if ($search->isNotEmpty()) {
                 $this->searchable_data = $search->toArray();
             } else {
