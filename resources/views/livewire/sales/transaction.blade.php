@@ -422,6 +422,27 @@
                                     </th>
                                 </tr>
 
+                                @if($first['is_credit'] == 'f')
+                                    @php
+                                        $val = 0;
+                                        $after_roundoff = 0;
+                                        if (!empty($first['rounded_inc'])){
+                                            $val = $first['rounded_inc'];
+                                        }elseif (!empty($first['rounded_dec'])){
+                                            $val = 1 * $first['rounded_dec'];
+                                        }
+                                        $after_roundoff = $refunded - ($first['gross_total'] + $val)
+                                    @endphp
+                                    <tr>
+                                        <th colspan="5" class="px-2 py-2 text-right border-r text-md text-gray-900">
+                                            After Round-Off Cash
+                                        </th>
+                                        <th colspan="3" class="px-2 py-2 text-center border-r text-md text-gray-900">
+                                                {{ number_format(abs($after_roundoff),2) }}
+                                        </th>
+                                    </tr>
+                                @endif
+
                                 <tr>
                                     <th colspan="5" class="px-2 py-2 text-right border-r text-md text-gray-900">
                                         Credit

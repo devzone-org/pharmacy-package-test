@@ -196,15 +196,18 @@ trait Searchable
         }
 
         if ($this->searchable_type == 'item') {
+            $product_ids = [];
+            $records = Product::search($value)->take(20)->get();
+            if ($records->isNotEmpty()){
+                $product_ids = $records->pluck('id')->toArray();
+            }
             $search = Product::from('products as p')
                 ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
                 ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
-                ->where(function ($q) use ($value) {
-                    return $q->orWhere('p.name', 'LIKE', '%' . $value . '%')
-                        ->orWhere('p.salt', 'LIKE', '%' . $value . '%');
-                })->select('p.name as item', DB::raw('SUM(qty) as qty'),
+                ->whereIn('p.id', $product_ids)
+                ->select('p.name as item', DB::raw('SUM(qty) as qty'),
                     'pi.retail_price', 'p.retail_price as product_price',
-                    'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'r.name as rack', 'r.tier')
+                    'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'p.discountable', 'p.max_discount', 'r.name as rack', 'r.tier')
                 ->groupBy('p.id')
                 ->groupBy('pi.retail_price')->orderBy('qty', 'desc')->get();
             if ($search->isNotEmpty()) {
