@@ -310,17 +310,18 @@ class Add extends Component
                 $this->sales[$array[1]]['total'] = round($this->sales[$array[1]]['s_qty'] * $this->sales[$array[1]]['retail_price'], 2);
 
 
-
+                $discount = 0;
                 if ($this->sales[$array[1]]['disc'] >= 0 && $this->sales[$array[1]]['disc'] <= 100) {
                     if ($this->sales[$array[1]]['discountable'] == 't'){
                         if (!empty($this->sales[$array[1]]['disc']) && $this->sales[$array[1]]['disc'] > $this->sales[$array[1]]['max_discount']){
                             $this->sales[$array[1]]['disc'] = $this->sales[$array[1]]['max_discount'];
                         }
                         $discount = round(($this->sales[$array[1]]['disc'] / 100) * $this->sales[$array[1]]['total'], 2);
-                        $this->sales[$array[1]]['total_after_disc'] = $this->sales[$array[1]]['total'] - $discount;
+
                     } else{
                         $this->sales[$array[1]]['disc'] = 0;
                     }
+                    $this->sales[$array[1]]['total_after_disc'] = $this->sales[$array[1]]['total'] - $discount;
                 }else{
                     $this->sales[$array[1]]['disc'] = 0;
                 }
