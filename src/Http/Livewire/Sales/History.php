@@ -6,9 +6,12 @@ namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Sale\Sale;
+use Devzone\Pharmacy\Models\Sale\SaleDetail;
+use Devzone\Pharmacy\Models\Sale\SaleRefundDetail;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
+
 
 class History extends Component
 {
@@ -36,9 +39,15 @@ class History extends Component
 
     public function render()
     {
+        $details = [];
+        if (!empty($this->product_id)) {
+            $details = SaleDetail::where('product_id', $this->product_id)->get()->pluck('sale_id')->toArray();
+            $refund_details = SaleRefundDetail::where('product_id', $this->product_id)->get()->unique('refunded_id')->pluck('refunded_id')->toArray();
+            $details = array_unique(array_merge($details, $refund_details));
+        }
+
         $history = Sale::from("sales as s")
-            ->join('users as u', 'u.id', '=', 's.sale_by')
-            ->leftJoin('sale_details as sd', 'sd.sale_id', '=', 's.id')
+            ->leftjoin('users as u', 'u.id', '=', 's.sale_by')
             ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
             ->leftJoin('patients as p', 'p.id', '=', 's.patient_id')
             ->whereNull('s.admission_id')
@@ -53,20 +62,20 @@ class History extends Component
                 return $q->whereDate('s.sale_at', '<=', $this->to);
             })->when(!empty($this->patient_id), function ($q) {
                 return $q->where('s.patient_id', $this->patient_id);
-            })->when(!empty($this->product_id), function ($q) {
-                return $q->where('sd.product_id', $this->product_id);
+            })->when(!empty($details), function ($q) use ($details) {
+                return $q->whereIn('s.id', $details);
             })
                 ->when(!empty($this->type), function ($q) {
-                if ($this->type == 'sale') {
-                    return $q->whereNull('s.refunded_id')->where('s.is_credit', 'f');
-                }
-                if ($this->type == 'credit') {
-                    return $q->whereNull('s.refunded_id')->where('s.is_credit', 't');
-                }
-                if ($this->type == 'refund') {
-                    return $q->where('s.refunded_id', '>', 0);
-                }
-            });
+                    if ($this->type == 'sale') {
+                        return $q->whereNull('s.refunded_id')->where('s.is_credit', 'f');
+                    }
+                    if ($this->type == 'credit') {
+                        return $q->whereNull('s.refunded_id')->where('s.is_credit', 't');
+                    }
+                    if ($this->type == 'refund') {
+                        return $q->where('s.refunded_id', '>', 0);
+                    }
+                });
         }
 
         $history = $history->select(
@@ -87,7 +96,6 @@ class History extends Component
             'p.mr_no',
             'e.name as referred_by'
         )
-            ->groupBy('sd.sale_id')
             ->orderBy('s.id', 'desc')->paginate(100);
 
         return view('pharmacy::livewire.sales.history', ['history' => $history]);

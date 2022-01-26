@@ -507,7 +507,7 @@ class Add extends Component
                     $this->rounded = $v2 - $v1;
                     $this->after_round_off = $v2;
                 }
-
+//                dump($this->after_round_off, $this->rounded);
                 if ($this->admission == false && $this->received < $this->after_round_off) {
                     throw new \Exception('Received amount should be greater than PKR ' . $this->after_round_off . "/-");
                 }
@@ -570,8 +570,8 @@ class Add extends Component
                 'remarks' => $this->remarks,
                 'receive_amount' => $this->received,
                 'payable_amount' => !empty($this->credit) ? 0 : $this->payable,
-                'rounded_inc' => $this->rounded > 0 ? $this->rounded : null,
-                'rounded_dec' => $this->rounded < 0 ? $this->rounded : null,
+                'rounded_inc' => $this->rounded > 0 ? abs($this->rounded) : null,
+                'rounded_dec' => $this->rounded < 0 ? abs($this->rounded) : null,
                 'sub_total' => collect($this->sales)->sum('total'),
                 'gross_total' => collect($this->sales)->sum('total_after_disc'),
                 'admission_id' => $this->admission_id ?? null,

@@ -42,7 +42,7 @@ class PrintController extends Controller
         $first = $sale->first();
         if (!empty($sl->refunded_id)) {
             $refund = Sale::from('sales as s')
-                ->join('sale_refunds as sr', 'sr.refunded_id', '=', 's.id')
+                ->join('sale_refund_details as sr', 'sr.refunded_id', '=', 's.id')
                 ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
                 ->join('products as p', 'p.id', '=', 'sr.product_id')
                 ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')

@@ -220,11 +220,25 @@ class Refund extends Component
             $value = 0;
         }
 
-        foreach ($this->sales as $key => $s) {
-            if ($value >= 0 || $value <= 100) {
-                $discount = round(($value / 100) * $this->sales[$key]['total'], 2);
-                $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'] - $discount;
-                $this->sales[$key]['disc'] = $value;
+        if (empty($value) || !is_numeric($value) || $value < 0 || $value > 100) {
+            $this->discount = 0;
+            $value = 0;
+        }
+
+        if ($value != 0) {
+            foreach ($this->sales as $key => $s) {
+                if ($s['discountable'] == 't') {
+                    $disc = $value;
+                    if (!empty($s['max_discount'])) {
+                        if ($value >= $s['max_discount']){
+                            $disc = $s['max_discount'];
+                        }
+                    }
+
+                    $discount = round(($disc / 100) * $this->sales[$key]['total'], 2);
+                    $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'] - $discount;
+                    $this->sales[$key]['disc'] = $disc;
+                }
             }
         }
 
@@ -269,8 +283,244 @@ class Refund extends Component
         }
     }
 
+    public function refundSaleComplete()
+    {
+        try {
+            if (empty($this->refunds)) {
+                throw new \Exception('Refund invoice is empty.');
+            }
+            if (empty(Auth::user()->account_id)) {
+                throw new \Exception('Cash in Hand - ' . Auth::user()->name . ' not found.');
+            }
+
+            $refund_cost = 0;
+            $refund_retail = 0;
+
+            $sales_cost = 0;
+            $sales_retail = 0;
+
+            foreach (collect($this->refunds)->where('new', '1')->all() as $r) {
+                $refund_cost = $refund_cost + ($r['qty'] * $r['supply_price']);
+                $refund_retail = $refund_retail + ($r['total_after_disc']);
+            }
+
+            DB::beginTransaction();
+
+            $refund = false;
+            $sale = Sale::find($this->sale_id);
+            $sale_receipt_no = Voucher::instance()->advances()->get();
+            $dif = collect($this->sales)->sum('total_after_disc') + collect($this->refunds)->where('restrict', true)->sum('total_after_disc') - collect($this->refunds)->sum('total_after_disc');
+            $new_sub_total = collect($this->sales)->sum('total');
+            $new_total_after_disc = collect($this->sales)->sum('total_after_disc');
+
+            $total_refund = collect($this->refunds)->sum('total_after_disc') - collect($this->refunds)->where('restrict', true)->sum('total_after_disc');
+            if ($dif > 0) {
+                if ($this->received == '') {
+                    throw new \Exception('Please Enter Received Amount');
+                }
+                if ($this->received < $dif) {
+                    throw new \Exception('Received Amount is Not Valid');
+                }
+                $change_due = $this->received != '' ? $this->received - $dif : 0;
+            } else {
+                if ($this->credit==false){
+                    if ($this->received == '') {
+                        throw new \Exception('Please Enter Paid Amount');
+                    }
+
+                    if ($this->received < abs($dif)) {
+                        throw new \Exception('Paid Amount is Not Valid');
+                    }
+                    $change_due = abs($dif) - $this->received;
+                }
+
+            }
+
+            $newSale = $sale->replicate();
+            $newSale->created_at = Carbon::now();
+            $newSale->sale_at = date('Y-m-d H:i:s');
+            $newSale->sale_by = Auth::user()->id;
+            $newSale->refunded_id = $sale->id;
+            $newSale->sub_total = $new_sub_total;
+            $newSale->gross_total = $new_total_after_disc;
+            $newSale->receive_amount = $this->received;
+            $newSale->payable_amount = $change_due ?? abs($dif);
+            $newSale->is_refund = 'f';
+            $newSale->receipt_no = $sale_receipt_no;
+            $newSale->on_account=abs($dif);
+            $newSale->save();
+            foreach ($this->refunds as $r) {
+                if (isset($r['restrict'])) {
+                    continue;
+                }
+                $limit = SaleDetail::from('sale_details as sd')
+                    ->leftJoin('sale_refunds as sr', 'sr.sale_detail_id', '=', 'sd.id')
+                    ->where('sd.product_id', $r['product_id'])
+                    ->where('sd.sale_id', $r['sale_id'])
+                    ->select('sd.id', 'sd.qty', 'sr.refund_qty')
+                    ->get();
+                $total_limit = $limit->sum('qty') - $limit->sum('refund_qty');
+                $qty_tobe_refunded = $r['qty'];
+
+                if ($qty_tobe_refunded <= $total_limit) {
+                    foreach ($limit as $l) {
+                        $available_qty = $l->qty - $l->refund_qty;
+                        if ($qty_tobe_refunded > 0 && $available_qty > 0) {
+
+                            if ($qty_tobe_refunded > $available_qty) {
+                                $dec = $available_qty;
+                            } else {
+                                $dec = $qty_tobe_refunded;
+                            }
+
+                            $qty_tobe_refunded = $qty_tobe_refunded - $dec;
+                            SaleRefund::updateOrCreate([
+                                'sale_id' => $r['sale_id'],
+                                'sale_detail_id' => $l->id,
+                                'product_id' => $r['product_id']
+                            ], [
+                                'refund_qty' => $dec + $l->refund_qty,
+                                'refunded_id' => $newSale->id
+                            ]);
+                            \Devzone\Pharmacy\Models\Sale\SaleRefundDetail::create([
+                                'sale_id' => $r['sale_id'],
+                                'sale_detail_id' => $l->id,
+                                'product_id' => $r['product_id'],
+                                'refund_qty' => $dec,
+                                'refunded_id' => $newSale->id
+                            ]);
+
+                            ProductInventory::find($r['product_inventory_id'])->increment('qty', $dec);
+                            InventoryLedger::create([
+                                'product_id' => $r['product_id'],
+                                'increase' => $dec,
+                                'type' => 'sale-refund',
+                                'description' => "Refund on dated " . date('d M, Y H:i:s') .
+                                    " against receipt #" . $this->sale_id
+                            ]);
+                        }
+                    }
+                    $refund = true;
+                }
+
+            }
+            if ($refund) {
+                Sale::find($this->sale_id)->update([
+                    'is_refund' => 't'
+                ]);
+            }
+            $cash_acount = Auth::user()->account_id;
+            $description = $this->getDescription($refund_retail, $sales_retail);
+            $vno = Voucher::instance()->voucher()->get();
+            $accounts = ChartOfAccount::whereIn('reference', ['cost-of-sales-pharmacy-5', 'income-pharmacy-5', 'income-return-pharmacy-5', 'pharmacy-inventory-5'])->get();
+
+            $dif = $refund_retail - $sales_retail;
+            if ($this->credit==false){
+                $test[]=8;
+                if ($dif > 0) {
+                    GeneralJournal::instance()->account($cash_acount)->reference('customer-refund')->credit(abs($dif))->voucherNo($vno)
+                        ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                } else {
+                    GeneralJournal::instance()->account($cash_acount)->reference('customer-refund')->debit(abs($dif))->voucherNo($vno)
+                        ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                }
+            }else{
+                $test[]=9;
+                $customer_account=Customer::from('customers as c')
+                    ->join('chart_of_accounts as coa','coa.id','=','c.account_id')
+                    ->where('c.id',$this->customer_id)
+                    ->select('c.id','coa.name as account_name','coa.id as account_id')
+                    ->first();
+                if ($this->old_sales[0]['patient_id'] > 0) {
+                    $patient= 'to patient ' . $this->old_sales[0]['patient_name'] . ' against MR# ' . $this->old_sales[0]['mr_no'] . '. ';
+                } else {
+                    $patient= 'to walking customer. ';
+                }
+                $description='Refunded: PKR ' . number_format($refund_retail, 2) . $patient .' Customer Account:  '.$customer_account->account_name.' : adjusted on ' . date('d M, Y') . ' by ' . Auth::user()->name;
+                GeneralJournal::instance()->account($customer_account->account_id)->reference('customer-refund')->credit($refund_retail)->voucherNo($vno)
+                    ->date(date('Y-m-d'))->approve()->description($description)->execute();
+            }
+
+            foreach ($accounts as $a) {
+                if ($sales_retail > 0) {
+                    if ($a->reference == 'cost-of-sales-pharmacy-5') {
+                        GeneralJournal::instance()->account($a->id)->reference('customer-refund')->debit($sales_cost)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    }
+                    if ($a->reference == 'pharmacy-inventory-5') {
+                        GeneralJournal::instance()->account($a->id)->reference('customer-refund')->credit($sales_cost)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    }
+                    if ($a->reference == 'income-pharmacy-5') {
+                        GeneralJournal::instance()->account($a->id)->reference('customer-refund')->credit($sales_retail)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    }
+                }
+
+                if ($refund_retail > 0) {
+                    if ($a->reference == 'cost-of-sales-pharmacy-5') {
+                        GeneralJournal::instance()->account($a->id)->reference('customer-refund')->credit($refund_cost)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    }
+                    if ($a->reference == 'pharmacy-inventory-5') {
+                        GeneralJournal::instance()->account($a->id)->reference('customer-refund')->debit($refund_cost)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    }
+                    if ($a->reference == 'income-return-pharmacy-5') {
+                        GeneralJournal::instance()->account($a->id)->reference('customer-refund')->debit($refund_retail)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    }
+                }
+            }
+
+
+            $this->searchableReset();
+            $this->success = 'Refund has been complete with receipt #' . $this->sale_id;
+
+
+
+            DB::commit();
+            return redirect()->to('pharmacy/sales/refund/' . $this->sale_id . '?type=refund');
+        }catch (\Exception $ex){
+            DB::rollback();
+            $this->addError('error', $ex->getMessage());
+        }
+    }
+
+    public function issueSaleComplete()
+    {
+        try {
+            if (empty($this->sales)) {
+                throw new \Exception('No item added in invoice.');
+            }
+            if (empty(Auth::user()->account_id)) {
+                throw new \Exception('Cash in Hand - ' . Auth::user()->name . ' not found.');
+            }
+            if (!empty($this->admission_id) && !empty($this->procedure_id)) {
+                if (empty($this->handed_over) && $this->type == 'issue') {
+                    throw new \Exception('Handed over field is required.');
+                }
+            }
+            DB::beginTransaction();
+            $sales_cost = 0;
+            $sales_retail = 0;
+
+            foreach ($this->sales as $r) {
+                $sales_cost = $sales_cost + ($r['s_qty'] * $r['supply_price']);
+                $sales_retail = $sales_retail + ($r['total_after_disc']);
+            }
+
+
+            DB::commit();
+        }catch (\Exception $ex){
+            DB::rollback();
+            $this->addError('error', $ex->getMessage());
+        }
+    }
+
     public function saleComplete()
     {
+        $test = [];
         try {
             if ($this->type == 'refund') {
                 if (empty($this->refunds)) {
@@ -315,6 +565,7 @@ class Refund extends Component
  
             $total_refund = collect($this->refunds)->sum('total_after_disc') - collect($this->refunds)->where('restrict', true)->sum('total_after_disc');
             if ($dif > 0) {
+                $test[]=1;
                 if ($this->received == '') {
                     throw new \Exception('Please Enter Received Amount');
                 }
@@ -324,6 +575,7 @@ class Refund extends Component
                 $change_due = $this->received != '' ? $this->received - $dif : 0;
             } else {
                 if ($this->credit==false){
+                    $test[]=2;
                     if ($this->received == '') {
                         throw new \Exception('Please Enter Paid Amount');
                     }
@@ -409,7 +661,8 @@ class Refund extends Component
                 ]);
             }
             if (!empty($this->sales)) {
-                foreach ($this->sales as $s) {
+                $test[]=3;
+                foreach ($this->sales as $key=> $s) {
                     $inv = ProductInventory::where('product_id', $s['product_id'])
                         ->where('supply_price', $s['supply_price'])
                         ->where('qty', '>', 0)->get();
@@ -452,7 +705,21 @@ class Refund extends Component
                             }
                             $total = $s['retail_price'] * $dec;
 
-                            $discount = round(($s['disc'] / 100) * $total, 2);
+                            $discount = 0;
+                            if ($s['discountable'] == 't') {
+                                $disc = $this->sales[$key]['disc'];
+                                if (!empty($s['max_discount'])) {
+                                    if ($this->sales[$key]['disc'] >= $s['max_discount']){
+                                        $disc = $s['max_discount'];
+                                    }
+                                }
+
+                                $discount = round(($disc / 100) * $this->sales[$key]['total'], 2);
+                                $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'] - $discount;
+                                $this->sales[$key]['disc'] = $disc;
+                                $total = $this->sales[$key]['total'];
+                            }
+
                             $after_total = $total - $discount;
                             SaleDetail::create([
                                 'sale_id' => $newSale->id,
@@ -464,6 +731,7 @@ class Refund extends Component
                                 'total' => $total,
                                 'disc' => $s['disc'],
                                 'total_after_disc' => $after_total,
+                                'retail_price_after_disc' => $s['retail_price'],
                             ]);
                         }
                     }
@@ -472,6 +740,11 @@ class Refund extends Component
             }
             $cash_acount = Auth::user()->account_id;
             if (!empty($this->admission_id) && !empty($this->procedure_id)) {
+
+
+
+
+                $test[]=4;
                 $admission_details = \App\Models\Hospital\AdmissionJobDetail::from('admission_job_details as ajd')
                     ->join('admissions as a', 'a.id', '=', 'ajd.admission_id')
                     ->join('procedures as p', 'p.id', '=', 'ajd.procedure_id')
@@ -484,6 +757,7 @@ class Refund extends Component
                 }
                 $diff = $refund_retail - $sales_retail;
                 if (class_exists(\App\Models\Hospital\AdmissionPaymentDetail::class)) {
+                    $test[]=5;
                     $check = \App\Models\Hospital\AdmissionPaymentDetail::from('admission_payment_details as apd')
                         ->where('apd.admission_id', $this->admission_id)
                         ->where('apd.procedure_id', $this->procedure_id)
@@ -496,12 +770,14 @@ class Refund extends Component
                     $cash_acount = $ipd_medicine_account->id;
                 }
                 if (!empty($this->handed_over)) {
+                    $test[]=6;
                     SaleIssuance::create([
                         'sale_id' => $this->sale_id,
                         'handed_over_to' => $this->handed_over,
                     ]);
                 }
             } else {
+                $test[]=7;
                 $description = $this->getDescription($refund_retail, $sales_retail);
             }
             $vno = Voucher::instance()->voucher()->get();
@@ -509,6 +785,7 @@ class Refund extends Component
 
             $dif = $refund_retail - $sales_retail;
             if ($this->credit==false){
+                $test[]=8;
                 if ($dif > 0) {
                     GeneralJournal::instance()->account($cash_acount)->reference('customer-refund')->credit(abs($dif))->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->description($description)->execute();
@@ -517,6 +794,7 @@ class Refund extends Component
                         ->date(date('Y-m-d'))->approve()->description($description)->execute();
                 }
             }else{
+                $test[]=9;
                 $customer_account=Customer::from('customers as c')
                     ->join('chart_of_accounts as coa','coa.id','=','c.account_id')
                     ->where('c.id',$this->customer_id)
@@ -571,11 +849,17 @@ class Refund extends Component
 
 
             if (empty($this->admission_id) && empty($this->procedure_id)) {
+                $test[]=10;
+//                dd($test);
                 return redirect()->to('pharmacy/sales/refund/' . $this->sale_id . '?type=refund');
             } else {
                 if ($this->type == 'refund') {
+                    $test[]=11;
+//                    dd($test);
                     return redirect()->to('pharmacy/sales/refund/' . $this->sale_id . '?type=refund&admission_id=' . $this->admission_id . '&procedure_id=' . $this->procedure_id);
                 } elseif ($this->type == 'issue') {
+                    $test[]=12;
+//                    dd($test);
                     $this->emit('printInvoice', $this->sale_id, $this->admission_id, $this->procedure_id);
 //                    return redirect()->to('pharmacy/sales/refund/' . $this->sale_id . '?type=issue&admission_id=' . $this->admission_id . '&procedure_id=' . $this->procedure_id);
                 }
