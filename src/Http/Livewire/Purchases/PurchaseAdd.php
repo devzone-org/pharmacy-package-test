@@ -179,6 +179,10 @@ class PurchaseAdd extends Component
                 'status' => 'approval-awaiting'
             ])->id;
             foreach ($this->order_list as $o) {
+                $check = PurchaseOrder::where('purchase_id', $purchase_id)->where('product_id', $o['id'])->get()->first();
+                if (!empty($check)){
+                    throw new \Exception('An Unknown Error Occurred!');
+                }
                 PurchaseOrder::create([
                     'purchase_id' => $purchase_id,
                     'product_id' => $o['id'],

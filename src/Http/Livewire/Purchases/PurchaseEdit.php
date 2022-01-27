@@ -213,6 +213,10 @@ class PurchaseEdit extends Component
                         'total_cost' => $o['cost_of_price'] * $o['qty'],
                     ]);
                 } else {
+                    $check = PurchaseOrder::where('purchase_id', $this->purchase_id)->where('product_id', $o['id'])->get()->first();
+                    if (!empty($check)){
+                        throw new \Exception('An Unknown Error Occurred!');
+                    }
                     PurchaseOrder::create([
                         'purchase_id' => $this->purchase_id,
                         'product_id' => $o['id'],
