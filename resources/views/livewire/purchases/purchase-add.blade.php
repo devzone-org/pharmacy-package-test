@@ -204,7 +204,7 @@
 
 
                         <td class="px-3 py-3 w-7   text-right text-sm font-medium">
-                            <svg wire:click="removeProduct('{{ $key }}')"
+                            <svg wire:click="removeProduct('{{ $key }}')" wire:loading.attr="disabled"
                                  class="w-6 h-6 text-red-600 cursor-pointer hover:text-red-800" fill="currentColor"
                                  viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd"

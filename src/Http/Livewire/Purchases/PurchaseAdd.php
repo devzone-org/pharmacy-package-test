@@ -68,9 +68,9 @@ class PurchaseAdd extends Component
             ->select('p.*')
             ->groupBy('p.id')->get();
         $data = $search->toArray();
-        if (!empty($data)){
+        if (!empty($data)) {
             $this->order_list = null;
-            foreach ($data as $key=>$d){
+            foreach ($data as $key => $d) {
                 $this->order_list[] = [
                     'id' => $d['id'],
                     'name' => $d['name'],
@@ -93,7 +93,9 @@ class PurchaseAdd extends Component
 
     public function removeProduct($key)
     {
-        unset($this->order_list[$key]);
+        if (isset($this->order_list[$key])) {
+            unset($this->order_list[$key]);
+        }
     }
 
     public function updated($name, $value)

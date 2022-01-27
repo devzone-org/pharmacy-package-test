@@ -104,11 +104,14 @@ class PurchaseEdit extends Component
     public function removeProduct($key)
     {
 
-        $data = ($this->order_list[$key]);
-        if (isset($data['purchase_order_id']) && !empty($data['purchase_order_id'])) {
-            $this->deleted[] = $data['purchase_order_id'];
+        if (isset($this->order_list[$key])){
+            $data = ($this->order_list[$key]);
+            if (isset($data['purchase_order_id']) && !empty($data['purchase_order_id'])) {
+                $this->deleted[] = $data['purchase_order_id'];
+            }
+            unset($this->order_list[$key]);
         }
-        unset($this->order_list[$key]);
+
     }
 
     public function updated($name, $value)
