@@ -429,7 +429,7 @@
                                         if (!empty($first['rounded_inc'])){
                                             $val = $first['rounded_inc'];
                                         }elseif (!empty($first['rounded_dec'])){
-                                            $val = 1 * $first['rounded_dec'];
+                                            $val = -1 * $first['rounded_dec'];
                                         }
                                         $after_roundoff = $refunded - ($first['gross_total'] + $val)
                                     @endphp

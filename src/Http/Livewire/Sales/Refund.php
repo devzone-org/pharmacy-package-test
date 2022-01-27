@@ -66,7 +66,7 @@ class Refund extends Component
             ->leftJoin('procedures as pro', 'pro.id', '=', 's.procedure_id')
             ->leftJoin('customers as c','c.id','=','s.customer_id')
             ->where('s.id', $this->sale_id)
-            ->select('sd.*', DB::raw('sum(sd.qty) as qty'), 'pr.name as item', 's.remarks', 's.receive_amount', 's.payable_amount', 's.sub_total', 's.gross_total'
+            ->select('sd.*', DB::raw('sum(sd.qty) as qty'), 'pr.name as item', 's.remarks', 's.receive_amount', 's.rounded_inc', 's.rounded_dec', 's.payable_amount', 's.sub_total', 's.gross_total'
                 , 's.patient_id', 's.referred_by', 's.admission_id', 's.procedure_id','s.customer_id','s.on_account','s.is_credit','s.on_account', 'c.name as customer_name','e.name as referred_by_name', 'p.mr_no', 'p.name as patient_name',
                 'pro.name as procedure_name')
             ->groupBy('sd.id')
@@ -140,10 +140,10 @@ class Refund extends Component
             }
 
             if (empty($check)) {
-                $data['s_qty'] = 1;
+                $data['s_qty'] = $this->product_qty > $data['qty'] ? $data['qty'] : $this->product_qty;
                 $data['disc'] = 0;
-                $data['total'] = $price;
-                $data['total_after_disc'] = $price;
+                $data['total'] = $price * $data['s_qty'];
+                $data['total_after_disc'] = $price * $data['s_qty'];
                 $this->sales[] = $data;
             } else {
                 $key = array_keys($check)[0];
@@ -154,6 +154,10 @@ class Refund extends Component
                     $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'];
                 }
             }
+            $this->searchable_query = '';
+            $this->searchable_data = [];
+            $this->product_qty = null;
+            $this->emit('focusInput');
         }
     }
 
@@ -183,10 +187,22 @@ class Refund extends Component
                 }
                 $this->sales[$array[1]]['total'] = round($this->sales[$array[1]]['s_qty'] * $this->sales[$array[1]]['retail_price'], 2);
 
-                if ($this->sales[$array[1]]['disc'] >= 0 || $this->sales[$array[1]]['disc'] <= 100) {
-                    $discount = round(($this->sales[$array[1]]['disc'] / 100) * $this->sales[$array[1]]['total'], 2);
+                $discount = 0;
+                if ($this->sales[$array[1]]['disc'] >= 0 && $this->sales[$array[1]]['disc'] <= 100) {
+                    if ($this->sales[$array[1]]['discountable'] == 't'){
+                        if (!empty($this->sales[$array[1]]['disc']) && $this->sales[$array[1]]['disc'] > $this->sales[$array[1]]['max_discount']){
+                            $this->sales[$array[1]]['disc'] = $this->sales[$array[1]]['max_discount'];
+                        }
+                        $discount = round(($this->sales[$array[1]]['disc'] / 100) * $this->sales[$array[1]]['total'], 2);
+
+                    } else{
+                        $this->sales[$array[1]]['disc'] = 0;
+                    }
                     $this->sales[$array[1]]['total_after_disc'] = $this->sales[$array[1]]['total'] - $discount;
+                }else{
+                    $this->sales[$array[1]]['disc'] = 0;
                 }
+
             }
         }
 
@@ -204,7 +220,7 @@ class Refund extends Component
                 $this->refunds[$array[1]]['total'] = round($this->refunds[$array[1]]['qty'] * $this->refunds[$array[1]]['retail_price'], 2);
 
 
-                if ($this->refunds[$array[1]]['disc'] >= 0 || $this->refunds[$array[1]]['disc'] <= 100) {
+                if ($this->refunds[$array[1]]['disc'] >= 0 && $this->refunds[$array[1]]['disc'] <= 100) {
                     $discount = round(($this->refunds[$array[1]]['disc'] / 100) * $this->refunds[$array[1]]['total'], 2);
                     $this->refunds[$array[1]]['total_after_disc'] = $this->refunds[$array[1]]['total'] - $discount;
                 }
@@ -731,7 +747,7 @@ class Refund extends Component
                                 'total' => $total,
                                 'disc' => $s['disc'],
                                 'total_after_disc' => $after_total,
-                                'retail_price_after_disc' => $s['retail_price'],
+                                'retail_price_after_disc' => $after_total / $dec,
                             ]);
                         }
                     }

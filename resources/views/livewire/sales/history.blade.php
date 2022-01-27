@@ -219,12 +219,28 @@
                                         @endif
                                     </td>
 
+                                    @php
+                                        $val = 0;
+                                        $after_roundoff = 0;
+                                        if (!empty($h->rounded_inc)){
+                                            $val = $h->rounded_inc;
+                                        }elseif (!empty($h->rounded_dec)){
+                                            $val = -1 * $h->rounded_dec;
+                                        }
+                                        $after_roundoff = ($h->gross_total + $val)
+                                    @endphp
+
                                     <td class="px-3 py-3 text-sm text-gray-500">
                                         @if($refunded - $h->gross_total > 0)
-                                            ({{ number_format(abs($refunded - $h->gross_total),2) }})
+                                            @if($h->is_credit == 'f')
+                                                ({{ number_format(abs($refunded - $after_roundoff),2) }})
+                                            @elseif($h->is_credit != 'f')
+                                                ({{ number_format(abs($refunded - $h->gross_total),2) }})
+                                            @endif
+
                                         @else
                                             @if($h->is_credit == 'f')
-                                                {{ number_format(abs($refunded - $h->gross_total),2) }}
+                                                {{ number_format(abs($refunded - $after_roundoff),2) }}
                                             @else
                                                 -
                                             @endif
