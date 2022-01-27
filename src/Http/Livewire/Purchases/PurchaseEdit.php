@@ -104,11 +104,14 @@ class PurchaseEdit extends Component
     public function removeProduct($key)
     {
 
-        $data = ($this->order_list[$key]);
-        if (isset($data['purchase_order_id']) && !empty($data['purchase_order_id'])) {
-            $this->deleted[] = $data['purchase_order_id'];
+        if (isset($this->order_list[$key])){
+            $data = ($this->order_list[$key]);
+            if (isset($data['purchase_order_id']) && !empty($data['purchase_order_id'])) {
+                $this->deleted[] = $data['purchase_order_id'];
+            }
+            unset($this->order_list[$key]);
         }
-        unset($this->order_list[$key]);
+
     }
 
     public function updated($name, $value)
@@ -210,6 +213,10 @@ class PurchaseEdit extends Component
                         'total_cost' => $o['cost_of_price'] * $o['qty'],
                     ]);
                 } else {
+                    $check = PurchaseOrder::where('purchase_id', $this->purchase_id)->where('product_id', $o['id'])->get()->first();
+                    if (!empty($check)){
+                        throw new \Exception('An Unknown Error Occurred!');
+                    }
                     PurchaseOrder::create([
                         'purchase_id' => $this->purchase_id,
                         'product_id' => $o['id'],
