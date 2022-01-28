@@ -173,11 +173,11 @@
                             {{ number_format($m['packing']*$m['qty'],2) }}
                         </td>
                         <td class="px-3 py-3   text-sm text-gray-500">
-                            <input type="number" onclick="this.select()"  class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" wire:model="order_list.{{$key}}.cost_of_price">
+                            <input type="number" step="0.01" onclick="this.select()"  class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" wire:model="order_list.{{$key}}.cost_of_price">
 
                         </td>
                         <td class="px-3 py-3   text-sm text-gray-500">
-                            <input type="number" onclick="this.select()"  class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" wire:model="order_list.{{$key}}.retail_price">
+                            <input type="number" step="0.01" onclick="this.select()"  class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" wire:model="order_list.{{$key}}.retail_price">
 
                         </td>
 
