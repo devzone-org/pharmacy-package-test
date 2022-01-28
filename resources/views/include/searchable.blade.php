@@ -19,7 +19,7 @@
              x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
              x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
              class="inline-block align-bottom bg-white rounded-lg  text-left overflow-hidden shadow-xl transform transition-all
-              sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full  "
+              sm:my-18 sm:align-middle w-full sm:max-w-4xl "
              role="dialog" aria-modal="true" aria-labelledby="modal-headline">
 
             <div class="   px-2 pt-2 pb-2">
@@ -73,7 +73,7 @@
                                     <tr class="hover:bg-indigo-600 hover:text-white" :class="{'bg-indigo-600 text-white' : h_light=={{$key}}, 'text-gray-500' : h_light!={{$key}}}"
                                         >
                                         @foreach($searchable_column[$searchable_type] as $c)
-                                            <td class="px-2 py-2 whitespace-nowrap text-sm ">
+                                            <td class="px-2 whitespace-nowrap text-sm ">
                                                     @if($c=='retail_price')
                                                         {{ empty($a[$c]) ? $a['product_price'] : $a[$c] }}
                                                     @else
@@ -81,9 +81,9 @@
                                                     @endif
                                             </td>
                                         @endforeach
-                                        <td class="px-2 py-2 whitespace-nowrap text-sm ">
+                                        <td class="px-2 py-1 whitespace-nowrap text-sm ">
                                             <input type="number" min="0" @keyup.tab="h_light={{$key}}"  wire:model.defer="product_qty" wire:keydown.enter="searchableSelection('{{$key}}')"
-                                                   class="text-black shadow-sm mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                                   class="px-2 py-1 relative text-black focus:ring-gray-200 focus:border-indigo-500 w-full text-sm border-gray-300 rounded"
                                                    autocomplete="off">
                                         </td>
                                     </tr>

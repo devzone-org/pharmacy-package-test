@@ -130,6 +130,11 @@ class Add extends Component
                 if (!empty($this->admission_details)) {
                     $this->admission_details = $this->admission_details->toArray();
                 }
+                $proce  = DB::table('procedures')->where('id',$procedure_id)->get();
+                $procedure_name = '';
+                if($proce->isNotEmpty()){
+                    $procedure_name = $proce->first()->name;
+                }
 
                 $medicines = \App\Models\Hospital\ProcedureMedicine::from('procedure_medicines as pm')
                     ->join('procedures as pro', 'pro.id', '=', 'pm.procedure_id')
@@ -146,7 +151,8 @@ class Add extends Component
                     ->groupBy('p.id')
                     ->orderBy('pi.qty', 'desc')->get()->toArray();
 
-                $this->admission_details['procedure_name'] = collect($medicines)->first()['procedure_name'];
+
+                $this->admission_details['procedure_name'] = $procedure_name;
                 $this->hospital_info = Hospital::first()->toArray();
                 foreach ($medicines as $medicine) {
                     $required_qty = null;
@@ -248,10 +254,10 @@ class Add extends Component
                     }
                 }
 
-                $data['s_qty'] = $this->product_qty;
+                $data['s_qty'] = $this->product_qty > $data['qty'] ? $data['qty'] : $this->product_qty;
                 $data['disc'] = 0;
-                $data['total'] = $data['retail_price'] * $this->product_qty;
-                $data['total_after_disc'] = $data['retail_price'] * $this->product_qty;
+                $data['total'] = $data['retail_price'] * $data['s_qty'];
+                $data['total_after_disc'] = $data['retail_price'] * $data['s_qty'];
                 $this->sales[] = $data;
             } else {
                 $key = array_keys($check)[0];
@@ -357,13 +363,13 @@ class Add extends Component
 
     public function updatedReceived($value)
     {
-        if ($value < 0) {
+        if ($value < 0 || $value > 10000000) {
             $this->received = 0;
         }
         if (empty($value) || !is_numeric($value)) {
-            $value = 0;
+            $this->received = 0;
         }
-        $this->payable = $value - collect($this->sales)->sum('total_after_disc');
+        $this->payable = $this->received - round(collect($this->sales)->sum('total_after_disc')/5)*5;
     }
 
     public function removeEntry($key)
@@ -434,6 +440,21 @@ class Add extends Component
             DB::beginTransaction();
             if (empty($this->sales)) {
                 throw new \Exception('Unable to complete because invoice is empty.');
+            }
+
+            foreach ($this->sales as $key => $s) {
+                if ($s['discountable'] == 't') {
+                    $disc = $this->sales[$key]['disc'];
+                    if (!empty($s['max_discount'])) {
+                        if ($this->sales[$key]['disc'] >= $s['max_discount']){
+                            $disc = $s['max_discount'];
+                        }
+                    }
+
+                    $discount = round(($disc / 100) * $this->sales[$key]['total'], 2);
+                    $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'] - $discount;
+                    $this->sales[$key]['disc'] = $disc;
+                }
             }
 
             if (auth()->user()->can('add-pending-sale')) {
