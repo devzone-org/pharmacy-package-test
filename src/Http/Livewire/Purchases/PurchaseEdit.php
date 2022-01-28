@@ -122,6 +122,7 @@ class PurchaseEdit extends Component
                 $this->order_list[$array[1]][$array[2]] = 0;
             }
             if (in_array($array[2], ['qty', 'cost_of_price'])) {
+                $this->order_list[$array[1]]['cost_of_price'] = round($this->order_list[$array[1]]['cost_of_price'],2);
                 $this->order_list[$array[1]]['total_cost'] = round($this->order_list[$array[1]]['qty'] * $this->order_list[$array[1]]['cost_of_price'], 2);
             }
         }
@@ -213,9 +214,9 @@ class PurchaseEdit extends Component
                         'total_cost' => $o['cost_of_price'] * $o['qty'],
                     ]);
                 } else {
-                    $check = PurchaseOrder::where('purchase_id', $this->purchase_id)->where('product_id', $o['id'])->get()->first();
-                    if (!empty($check)){
-                        throw new \Exception('An Unknown Error Occurred!');
+                    $check = PurchaseOrder::where('purchase_id', $this->purchase_id)->where('product_id', $o['id'])->exists();
+                    if ($check){
+                        continue;
                     }
                     PurchaseOrder::create([
                         'purchase_id' => $this->purchase_id,
@@ -230,6 +231,7 @@ class PurchaseEdit extends Component
             }
             DB::commit();
             $this->success = 'Purchase order has been updated.';
+            $this->redirect($this->purchase_id);
 
         } catch (\Exception $e) {
             $this->addError('supplier_name', $e->getMessage());
