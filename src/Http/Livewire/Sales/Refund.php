@@ -48,9 +48,11 @@ class Refund extends Component
     public $admission_details = [];
     public $hospital_info = [];
     public $handed_over;
-    public $credit=false;
+    public $credit = false;
     public $customer_id;
     public $customer_name;
+    public $new_sale_rounded;
+    public $new_sale_after_roundoff;
     protected $listeners = ['openSearch', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
 
     public function mount($primary_id, $type)
@@ -64,10 +66,10 @@ class Refund extends Component
             ->leftJoin('patients as p', 'p.id', '=', 's.patient_id')
             ->join('products as pr', 'pr.id', '=', 'sd.product_id')
             ->leftJoin('procedures as pro', 'pro.id', '=', 's.procedure_id')
-            ->leftJoin('customers as c','c.id','=','s.customer_id')
+            ->leftJoin('customers as c', 'c.id', '=', 's.customer_id')
             ->where('s.id', $this->sale_id)
             ->select('sd.*', DB::raw('sum(sd.qty) as qty'), 'pr.name as item', 's.remarks', 's.receive_amount', 's.rounded_inc', 's.rounded_dec', 's.payable_amount', 's.sub_total', 's.gross_total'
-                , 's.patient_id', 's.referred_by', 's.admission_id', 's.procedure_id','s.customer_id','s.on_account','s.is_credit','s.on_account', 'c.name as customer_name','e.name as referred_by_name', 'p.mr_no', 'p.name as patient_name',
+                , 's.patient_id', 's.referred_by', 's.admission_id', 's.procedure_id', 's.customer_id', 's.on_account', 's.is_credit', 's.on_account', 'c.name as customer_name', 'e.name as referred_by_name', 'p.mr_no', 'p.name as patient_name',
                 'pro.name as procedure_name')
             ->groupBy('sd.id')
             ->orderBy('sd.product_id')
@@ -77,9 +79,9 @@ class Refund extends Component
         $first = collect($this->old_sales)->first();
         $this->admission_id = $first['admission_id'];
         $this->procedure_id = $first['procedure_id'];
-        $this->customer_id=$first['customer_id'];
-        $this->customer_name=$first['customer_name'];
-        $this->credit=$first['is_credit']=='t' ? true : false;
+        $this->customer_id = $first['customer_id'];
+        $this->customer_name = $first['customer_name'];
+        $this->credit = $first['is_credit'] == 't' ? true : false;
         $this->hospital_info = \App\Models\Hospital\Hospital::first()->toArray();
         if (!empty($this->admission_id) && !empty($this->procedure_id)) {
             $this->admission_details = \App\Models\Hospital\Admission::from('admissions as a')
@@ -189,17 +191,17 @@ class Refund extends Component
 
                 $discount = 0;
                 if ($this->sales[$array[1]]['disc'] >= 0 && $this->sales[$array[1]]['disc'] <= 100) {
-                    if ($this->sales[$array[1]]['discountable'] == 't'){
-                        if (!empty($this->sales[$array[1]]['disc']) && $this->sales[$array[1]]['disc'] > $this->sales[$array[1]]['max_discount']){
+                    if ($this->sales[$array[1]]['discountable'] == 't') {
+                        if (!empty($this->sales[$array[1]]['disc']) && $this->sales[$array[1]]['disc'] > $this->sales[$array[1]]['max_discount']) {
                             $this->sales[$array[1]]['disc'] = $this->sales[$array[1]]['max_discount'];
                         }
                         $discount = round(($this->sales[$array[1]]['disc'] / 100) * $this->sales[$array[1]]['total'], 2);
 
-                    } else{
+                    } else {
                         $this->sales[$array[1]]['disc'] = 0;
                     }
                     $this->sales[$array[1]]['total_after_disc'] = $this->sales[$array[1]]['total'] - $discount;
-                }else{
+                } else {
                     $this->sales[$array[1]]['disc'] = 0;
                 }
 
@@ -246,7 +248,7 @@ class Refund extends Component
                 if ($s['discountable'] == 't') {
                     $disc = $value;
                     if (!empty($s['max_discount'])) {
-                        if ($value >= $s['max_discount']){
+                        if ($value >= $s['max_discount']) {
                             $disc = $s['max_discount'];
                         }
                     }
@@ -262,10 +264,14 @@ class Refund extends Component
 
     public function updatedReceived($value)
     {
-        if (empty($value) || !is_numeric($value)) {
-            $value = 0;
+        if ($value < 0 || $value > 10000000) {
+            $this->received = 0;
         }
-        $this->payable = $value - collect($this->sales)->sum('total_after_disc');
+        if (empty($value) || !is_numeric($value)) {
+            $this->received = 0;
+        }
+        $this->payable = $this->received - round(collect($this->sales)->sum('total_after_disc') / 5) * 5;
+//        $this->payable = $value - collect($this->sales)->sum('total_after_disc');
     }
 
     public function removeEntry($key)
@@ -282,7 +288,7 @@ class Refund extends Component
     {
         $old_sale = $this->old_sales[$key];
         $data = collect($this->refunds)->where('id', $old_sale['id'])->firstWhere('sale_id', $this->sale_id);
-        if(empty($data['qty'])){
+        if (empty($data['qty'])) {
             $data['qty'] = 0;
         }
         if ($old_sale['qty'] > $data['qty']) {
@@ -339,7 +345,7 @@ class Refund extends Component
                 }
                 $change_due = $this->received != '' ? $this->received - $dif : 0;
             } else {
-                if ($this->credit==false){
+                if ($this->credit == false) {
                     if ($this->received == '') {
                         throw new \Exception('Please Enter Paid Amount');
                     }
@@ -363,7 +369,7 @@ class Refund extends Component
             $newSale->payable_amount = $change_due ?? abs($dif);
             $newSale->is_refund = 'f';
             $newSale->receipt_no = $sale_receipt_no;
-            $newSale->on_account=abs($dif);
+            $newSale->on_account = abs($dif);
             $newSale->save();
             foreach ($this->refunds as $r) {
                 if (isset($r['restrict'])) {
@@ -431,8 +437,8 @@ class Refund extends Component
             $accounts = ChartOfAccount::whereIn('reference', ['cost-of-sales-pharmacy-5', 'income-pharmacy-5', 'income-return-pharmacy-5', 'pharmacy-inventory-5'])->get();
 
             $dif = $refund_retail - $sales_retail;
-            if ($this->credit==false){
-                $test[]=8;
+            if ($this->credit == false) {
+                $test[] = 8;
                 if ($dif > 0) {
                     GeneralJournal::instance()->account($cash_acount)->reference('customer-refund')->credit(abs($dif))->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->description($description)->execute();
@@ -440,19 +446,19 @@ class Refund extends Component
                     GeneralJournal::instance()->account($cash_acount)->reference('customer-refund')->debit(abs($dif))->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->description($description)->execute();
                 }
-            }else{
-                $test[]=9;
-                $customer_account=Customer::from('customers as c')
-                    ->join('chart_of_accounts as coa','coa.id','=','c.account_id')
-                    ->where('c.id',$this->customer_id)
-                    ->select('c.id','coa.name as account_name','coa.id as account_id')
+            } else {
+                $test[] = 9;
+                $customer_account = Customer::from('customers as c')
+                    ->join('chart_of_accounts as coa', 'coa.id', '=', 'c.account_id')
+                    ->where('c.id', $this->customer_id)
+                    ->select('c.id', 'coa.name as account_name', 'coa.id as account_id')
                     ->first();
                 if ($this->old_sales[0]['patient_id'] > 0) {
-                    $patient= 'to patient ' . $this->old_sales[0]['patient_name'] . ' against MR# ' . $this->old_sales[0]['mr_no'] . '. ';
+                    $patient = 'to patient ' . $this->old_sales[0]['patient_name'] . ' against MR# ' . $this->old_sales[0]['mr_no'] . '. ';
                 } else {
-                    $patient= 'to walking customer. ';
+                    $patient = 'to walking customer. ';
                 }
-                $description='Refunded: PKR ' . number_format($refund_retail, 2) . $patient .' Customer Account:  '.$customer_account->account_name.' : adjusted on ' . date('d M, Y') . ' by ' . Auth::user()->name;
+                $description = 'Refunded: PKR ' . number_format($refund_retail, 2) . $patient . ' Customer Account:  ' . $customer_account->account_name . ' : adjusted on ' . date('d M, Y') . ' by ' . Auth::user()->name;
                 GeneralJournal::instance()->account($customer_account->account_id)->reference('customer-refund')->credit($refund_retail)->voucherNo($vno)
                     ->date(date('Y-m-d'))->approve()->description($description)->execute();
             }
@@ -494,10 +500,9 @@ class Refund extends Component
             $this->success = 'Refund has been complete with receipt #' . $this->sale_id;
 
 
-
             DB::commit();
             return redirect()->to('pharmacy/sales/refund/' . $this->sale_id . '?type=refund');
-        }catch (\Exception $ex){
+        } catch (\Exception $ex) {
             DB::rollback();
             $this->addError('error', $ex->getMessage());
         }
@@ -528,7 +533,7 @@ class Refund extends Component
 
 
             DB::commit();
-        }catch (\Exception $ex){
+        } catch (\Exception $ex) {
             DB::rollback();
             $this->addError('error', $ex->getMessage());
         }
@@ -539,7 +544,7 @@ class Refund extends Component
         $test = [];
         try {
             if ($this->type == 'refund') {
-                if (empty($this->refunds)) {
+                if (empty(collect($this->refunds)->where('new', '1')->all())) {
                     throw new \Exception('Refund invoice is empty.');
                 }
             } elseif ($this->type == 'issue') {
@@ -566,6 +571,7 @@ class Refund extends Component
                 $refund_retail = $refund_retail + ($r['total_after_disc']);
             }
 
+
             foreach ($this->sales as $r) {
                 $sales_cost = $sales_cost + ($r['s_qty'] * $r['supply_price']);
                 $sales_retail = $sales_retail + ($r['total_after_disc']);
@@ -578,10 +584,21 @@ class Refund extends Component
             $dif = collect($this->sales)->sum('total_after_disc') + collect($this->refunds)->where('restrict', true)->sum('total_after_disc') - collect($this->refunds)->sum('total_after_disc');
             $new_sub_total = collect($this->sales)->sum('total');
             $new_total_after_disc = collect($this->sales)->sum('total_after_disc');
- 
+
             $total_refund = collect($this->refunds)->sum('total_after_disc') - collect($this->refunds)->where('restrict', true)->sum('total_after_disc');
+            $this->new_sale_after_roundoff = $new_total_after_disc;
+
+            if (!$this->credit && env('ROUNDOFF_CHECK', false) && $new_total_after_disc >= env('MIMIMUM_ROUNDOFF_BILL', 50)) {
+                $dif = round(collect($this->sales)->sum('total_after_disc') / 5) * 5 + collect($this->refunds)->where('restrict', true)->sum('total_after_disc') - round(collect($this->refunds)->sum('total_after_disc') / 5) * 5;
+                $v1 = $this->new_sale_after_roundoff;
+                $v2 = round($v1 / 5) * 5;
+                $this->new_sale_rounded = $v2 - $v1;
+                $this->$this->new_sale_after_roundoff = $v2;
+            }
+            dump(collect($this->sales)->sum('total_after_disc'), collect($this->refunds)->where('restrict', true)->sum('total_after_disc'), collect($this->refunds)->sum('total_after_disc'));
+            dd($dif, $new_sub_total, $new_total_after_disc, $total_refund);
             if ($dif > 0) {
-                $test[]=1;
+                $test[] = 1;
                 if ($this->received == '') {
                     throw new \Exception('Please Enter Received Amount');
                 }
@@ -590,8 +607,8 @@ class Refund extends Component
                 }
                 $change_due = $this->received != '' ? $this->received - $dif : 0;
             } else {
-                if ($this->credit==false){
-                    $test[]=2;
+                if ($this->credit == false) {
+                    $test[] = 2;
                     if ($this->received == '') {
                         throw new \Exception('Please Enter Paid Amount');
                     }
@@ -614,7 +631,7 @@ class Refund extends Component
             $newSale->payable_amount = $change_due ?? abs($dif);
             $newSale->is_refund = 'f';
             $newSale->receipt_no = $sale_receipt_no;
-            $newSale->on_account=abs($dif);
+            $newSale->on_account = abs($dif);
             $newSale->save();
             foreach ($this->refunds as $r) {
                 if (isset($r['restrict'])) {
@@ -677,8 +694,8 @@ class Refund extends Component
                 ]);
             }
             if (!empty($this->sales)) {
-                $test[]=3;
-                foreach ($this->sales as $key=> $s) {
+                $test[] = 3;
+                foreach ($this->sales as $key => $s) {
                     $inv = ProductInventory::where('product_id', $s['product_id'])
                         ->where('supply_price', $s['supply_price'])
                         ->where('qty', '>', 0)->get();
@@ -725,7 +742,7 @@ class Refund extends Component
                             if ($s['discountable'] == 't') {
                                 $disc = $this->sales[$key]['disc'];
                                 if (!empty($s['max_discount'])) {
-                                    if ($this->sales[$key]['disc'] >= $s['max_discount']){
+                                    if ($this->sales[$key]['disc'] >= $s['max_discount']) {
                                         $disc = $s['max_discount'];
                                     }
                                 }
@@ -758,9 +775,7 @@ class Refund extends Component
             if (!empty($this->admission_id) && !empty($this->procedure_id)) {
 
 
-
-
-                $test[]=4;
+                $test[] = 4;
                 $admission_details = \App\Models\Hospital\AdmissionJobDetail::from('admission_job_details as ajd')
                     ->join('admissions as a', 'a.id', '=', 'ajd.admission_id')
                     ->join('procedures as p', 'p.id', '=', 'ajd.procedure_id')
@@ -773,7 +788,7 @@ class Refund extends Component
                 }
                 $diff = $refund_retail - $sales_retail;
                 if (class_exists(\App\Models\Hospital\AdmissionPaymentDetail::class)) {
-                    $test[]=5;
+                    $test[] = 5;
                     $check = \App\Models\Hospital\AdmissionPaymentDetail::from('admission_payment_details as apd')
                         ->where('apd.admission_id', $this->admission_id)
                         ->where('apd.procedure_id', $this->procedure_id)
@@ -786,22 +801,22 @@ class Refund extends Component
                     $cash_acount = $ipd_medicine_account->id;
                 }
                 if (!empty($this->handed_over)) {
-                    $test[]=6;
+                    $test[] = 6;
                     SaleIssuance::create([
                         'sale_id' => $this->sale_id,
                         'handed_over_to' => $this->handed_over,
                     ]);
                 }
             } else {
-                $test[]=7;
+                $test[] = 7;
                 $description = $this->getDescription($refund_retail, $sales_retail);
             }
             $vno = Voucher::instance()->voucher()->get();
             $accounts = ChartOfAccount::whereIn('reference', ['cost-of-sales-pharmacy-5', 'income-pharmacy-5', 'income-return-pharmacy-5', 'pharmacy-inventory-5'])->get();
 
             $dif = $refund_retail - $sales_retail;
-            if ($this->credit==false){
-                $test[]=8;
+            if ($this->credit == false) {
+                $test[] = 8;
                 if ($dif > 0) {
                     GeneralJournal::instance()->account($cash_acount)->reference('customer-refund')->credit(abs($dif))->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->description($description)->execute();
@@ -809,19 +824,19 @@ class Refund extends Component
                     GeneralJournal::instance()->account($cash_acount)->reference('customer-refund')->debit(abs($dif))->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->description($description)->execute();
                 }
-            }else{
-                $test[]=9;
-                $customer_account=Customer::from('customers as c')
-                    ->join('chart_of_accounts as coa','coa.id','=','c.account_id')
-                    ->where('c.id',$this->customer_id)
-                    ->select('c.id','coa.name as account_name','coa.id as account_id')
+            } else {
+                $test[] = 9;
+                $customer_account = Customer::from('customers as c')
+                    ->join('chart_of_accounts as coa', 'coa.id', '=', 'c.account_id')
+                    ->where('c.id', $this->customer_id)
+                    ->select('c.id', 'coa.name as account_name', 'coa.id as account_id')
                     ->first();
                 if ($this->old_sales[0]['patient_id'] > 0) {
-                    $patient= 'to patient ' . $this->old_sales[0]['patient_name'] . ' against MR# ' . $this->old_sales[0]['mr_no'] . '. ';
+                    $patient = 'to patient ' . $this->old_sales[0]['patient_name'] . ' against MR# ' . $this->old_sales[0]['mr_no'] . '. ';
                 } else {
-                    $patient= 'to walking customer. ';
+                    $patient = 'to walking customer. ';
                 }
-                $description='Refunded: PKR ' . number_format($refund_retail, 2) . $patient .' Customer Account:  '.$customer_account->account_name.' : adjusted on ' . date('d M, Y') . ' by ' . Auth::user()->name;
+                $description = 'Refunded: PKR ' . number_format($refund_retail, 2) . $patient . ' Customer Account:  ' . $customer_account->account_name . ' : adjusted on ' . date('d M, Y') . ' by ' . Auth::user()->name;
                 GeneralJournal::instance()->account($customer_account->account_id)->reference('customer-refund')->credit($refund_retail)->voucherNo($vno)
                     ->date(date('Y-m-d'))->approve()->description($description)->execute();
             }
@@ -865,16 +880,16 @@ class Refund extends Component
 
 
             if (empty($this->admission_id) && empty($this->procedure_id)) {
-                $test[]=10;
+                $test[] = 10;
 //                dd($test);
                 return redirect()->to('pharmacy/sales/refund/' . $this->sale_id . '?type=refund');
             } else {
                 if ($this->type == 'refund') {
-                    $test[]=11;
+                    $test[] = 11;
 //                    dd($test);
                     return redirect()->to('pharmacy/sales/refund/' . $this->sale_id . '?type=refund&admission_id=' . $this->admission_id . '&procedure_id=' . $this->procedure_id);
                 } elseif ($this->type == 'issue') {
-                    $test[]=12;
+                    $test[] = 12;
 //                    dd($test);
                     $this->emit('printInvoice', $this->sale_id, $this->admission_id, $this->procedure_id);
 //                    return redirect()->to('pharmacy/sales/refund/' . $this->sale_id . '?type=issue&admission_id=' . $this->admission_id . '&procedure_id=' . $this->procedure_id);

@@ -345,7 +345,7 @@
                                             {{ number_format($s['total_after_disc'],2) }}
                                         </td>
                                         <td class="  w-10 cursor-pointer px-2 py-3   border-r text-center text-md font-medium text-red-700  tracking-wider  ">
-                                            <svg wire:click="removeEntry('{{ $key }}')" class="w-5 h-5 "
+                                            <svg wire:click="removeEntry('{{ $key }}')" wire:loading.attr="disabled" class="w-5 h-5 "
                                                  fill="currentColor"
                                                  viewBox="0 0 20 20"
                                                  xmlns="http://www.w3.org/2000/svg">
