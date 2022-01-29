@@ -9,11 +9,11 @@ use App\Models\Hospital\AdmissionJobDetail;
 use App\Models\Hospital\Employees\Employee;
 use App\Models\Hospital\Hospital;
 use App\Models\Hospital\Patient;
+use Devzone\Ams\Helper\ChartOfAccount;
 use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
-use Devzone\Ams\Helper\ChartOfAccount;
-use Devzone\Ams\Models\Ledger;
 use Devzone\Ams\Models\ChartOfAccount as COA;
+use Devzone\Ams\Models\Ledger;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Customer;
 use Devzone\Pharmacy\Models\InventoryLedger;
@@ -25,7 +25,6 @@ use Devzone\Pharmacy\Models\Sale\SaleDetail;
 use Devzone\Pharmacy\Models\Sale\SaleIssuance;
 use Devzone\Pharmacy\Models\Sale\UserTill;
 use Devzone\Pharmacy\Models\UserLimit;
-use http\Env;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -437,23 +436,37 @@ class Add extends Component
     public function saleComplete()
     {
         try {
+            $total_discount_give = 0;
             DB::beginTransaction();
             if (empty($this->sales)) {
                 throw new \Exception('Unable to complete because invoice is empty.');
             }
+            $this->reset(['success']);
 
             foreach ($this->sales as $key => $s) {
                 if ($s['discountable'] == 't') {
-                    $disc = $this->sales[$key]['disc'];
+                    $disc = 0;
                     if (!empty($s['max_discount'])) {
-                        if ($this->sales[$key]['disc'] >= $s['max_discount']){
+                        if ($this->sales[$key]['disc'] >= $s['max_discount']) {
                             $disc = $s['max_discount'];
+                        } else {
+                            $disc = $this->sales[$key]['disc'];
                         }
                     }
 
                     $discount = round(($disc / 100) * $this->sales[$key]['total'], 2);
                     $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'] - $discount;
                     $this->sales[$key]['disc'] = $disc;
+                    $packing = 1;
+                    if (!empty($s['packing'])) {
+                        $packing = $s['packing'];
+                    }
+                    $after_discount_retail = ($this->sales[$key]['total_after_disc']) / $s['s_qty'];
+                    if ($after_discount_retail < ($s['product_supply_price'] / $packing)) {
+                        throw new \Exception('You cannot give ' . $disc . '% to ' . $s['item']);
+                    }
+
+                    $total_discount_give = $total_discount_give + $discount;
                 }
             }
 
@@ -566,7 +579,12 @@ class Add extends Component
             }
 
             $sale_receipt_no = Voucher::instance()->advances()->get();
+            $sub_total = collect($this->sales)->sum('total');
             $total_after_disc = collect($this->sales)->sum('total_after_disc');
+            if ($sub_total - $total_after_disc > $total_discount_give) {
+                throw new \Exception('Total discount is more than as you given to customer. Please recheck sale.');
+            }
+
             $sale_id = Sale::create([
                 'patient_id' => $this->patient_id,
                 'referred_by' => $this->referred_by_id,

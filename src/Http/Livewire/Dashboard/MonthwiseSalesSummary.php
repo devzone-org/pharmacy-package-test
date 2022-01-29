@@ -40,7 +40,7 @@ class MonthwiseSalesSummary extends Component
             ->whereBetween('s.sale_at', [$this->from, $this->to])
             ->select(
                 's.sale_at',
-                DB::raw('MONTH(s.sale_at) as month'),
+                DB::raw('DATE_FORMAT(s.sale_at,"%Y%m") as month'),
                 DB::raw('sum(sd.total_after_disc) as total'),
                 DB::raw('count(distinct(s.id)) as no_of_sale'),
                 DB::raw('sum(sr.refund_qty) as refund'),
@@ -61,7 +61,7 @@ class MonthwiseSalesSummary extends Component
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
             ->whereBetween('s.sale_at', [$this->from, $this->to])
             ->select (
-                DB::raw('MONTH(s.sale_at) as month'),
+                DB::raw('DATE_FORMAT(s.sale_at,"%Y%m") as month'),
                 DB::raw('sum(sd.total) as total'),
                 DB::raw('sum(sd.qty*sd.supply_price) as cos'),
                 DB::raw('count(DISTINCT(s.id)) as no_of_sale'),
@@ -78,7 +78,7 @@ class MonthwiseSalesSummary extends Component
             ->join('sales as s', 's.id', '=', 'sr.sale_id')
             ->whereBetween('s.sale_at', [$this->from, $this->to])
             ->select(
-                DB::raw('MONTH(s.sale_at) as month'),
+                DB::raw('DATE_FORMAT(s.sale_at,"%Y%m") as month'),
                 DB::raw('sum((sd.total_after_disc/sd.qty)*sr.refund_qty) as return_total'),
                 DB::raw('sum(sd.supply_price*sr.refund_qty) as return_cos')
             )
@@ -94,7 +94,7 @@ class MonthwiseSalesSummary extends Component
             ->whereBetween('pr.created_at', [$this->from, $this->to])
             ->select(
                 'pr.created_at',
-                DB::raw('MONTH(pr.created_at) as month'),
+                DB::raw('DATE_FORMAT(pr.created_at,"%Y%m") as month'),
                 DB::raw('sum(pr.total_cost) as total'),
 
             )
@@ -102,6 +102,7 @@ class MonthwiseSalesSummary extends Component
             ->orderBy('month', 'DESC')
             ->get()
             ->toArray();
+
         $pharmacy_account = ChartOfAccount::where('reference', 'pharmacy-inventory-5')->first();
 
         $stock_closing_as_at = Ledger::where('account_id', $pharmacy_account->id)
