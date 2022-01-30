@@ -368,7 +368,7 @@ class Add extends Component
         if (empty($value) || !is_numeric($value)) {
             $this->received = 0;
         }
-        $this->payable = $this->received - round(collect($this->sales)->sum('total_after_disc')/5)*5;
+        $this->payable = $this->received - (collect($this->sales)->sum('total_after_disc'));
     }
 
     public function removeEntry($key)
@@ -581,9 +581,10 @@ class Add extends Component
             $sale_receipt_no = Voucher::instance()->advances()->get();
             $sub_total = collect($this->sales)->sum('total');
             $total_after_disc = collect($this->sales)->sum('total_after_disc');
-            if ($sub_total - $total_after_disc > $total_discount_give) {
+            if (round($sub_total - $total_after_disc, 2) > round($total_discount_give, 2)) {
                 throw new \Exception('Total discount is more than as you given to customer. Please recheck sale.');
             }
+            //dd(round($sub_total - $total_after_disc, 2), round($total_discount_give, 2));
 
             $sale_id = Sale::create([
                 'patient_id' => $this->patient_id,
