@@ -462,8 +462,11 @@ class Add extends Component
                         $packing = $s['packing'];
                     }
                     $after_discount_retail = ($this->sales[$key]['total_after_disc']) / $s['s_qty'];
-                    if ($after_discount_retail < ($s['product_supply_price'] / $packing)) {
-                        throw new \Exception('You cannot give ' . $disc . '% to ' . $s['item']);
+                    if (round($after_discount_retail, 2) < round($s['product_supply_price'] / $packing, 2)) {
+                        $avail_pe = round($s['product_supply_price'] / $s['product_price'], 4);
+                        $avail_per = round((1 - $avail_pe) * 100, 4);
+
+                        throw new \Exception('Maximum discount possible ' . $avail_per . '% on ' . $s['item']);
                     }
 
                     $total_discount_give = $total_discount_give + $discount;
