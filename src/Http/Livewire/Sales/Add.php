@@ -878,7 +878,7 @@ class Add extends Component
         $this->patient_id = $created_patient->id;
         $this->patient_name = $created_patient->mr_no . ' - ' . $created_patient->name;
         $this->referred_by_id = $created_patient->doctor_id;
-        $this->referred_by_name = collect($this->doctors)->where('id', $this->referred_by_id)->first()['name'];
+        $this->referred_by_name = collect($this->doctors)->where('id', $this->referred_by_id)->first()['name'] ?? null;
         $this->add_modal = false;
         $this->patient_contact_whatsApp = 't';
 
