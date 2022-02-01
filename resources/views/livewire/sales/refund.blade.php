@@ -420,7 +420,7 @@
                     </th>
                     <th scope="col" colspan="2"
                         class="w-12 px-2 py-2 border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                            {{ number_format( collect($old_sales)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc') ,2) }}
+                        {{ number_format( collect($old_sales)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc') ,2) }}
                     </th>
                 </tr>
                 <tr class="bg-gray-50">
@@ -456,12 +456,14 @@
                 <tr class="bg-gray-50">
                     <th scope="col" colspan="3"
                         class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
-                        Gross Total @if(!$credit && env('ROUNDOFF_CHECK', false) && collect($sales)->sum('total_after_disc') >= env('MIMIMUM_ROUNDOFF_BILL', 50)) <br><span class="text-xs"> (After Round Off)</span> @endif
+                        Gross
+                        Total @if(!$credit && env('ROUNDOFF_CHECK', false) && collect($sales)->sum('total_after_disc') >= env('MIMIMUM_ROUNDOFF_BILL', 50))
+                            <br><span class="text-xs"> (After Round Off)</span> @endif
                     </th>
                     <th scope="col" colspan="2"
                         class="w-12 cursor-pointer px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
                         @if(!$credit && env('ROUNDOFF_CHECK', false) && collect($sales)->sum('total_after_disc') >= env('MIMIMUM_ROUNDOFF_BILL', 50))
-                            {{ number_format(round(collect($sales)->sum('total_after_disc')/5)*5,2) }}
+                            {{ number_format(round(collect($sales)->sum('total_after_disc')/5)*5, 2) }}
                         @else
                             {{ number_format(collect($sales)->sum('total_after_disc'),2) }}
                         @endif
@@ -471,38 +473,55 @@
                 <tr>
                     <th scope="col" colspan="3"
                         class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
-                        Refunded @if(!$credit) <br><span class="text-xs"> (After Round Off)</span> @endif
+                        Refunded
                     </th>
                     <th scope="col" colspan="2"
                         class="w-12 px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
-                        @php
-                            $round = 0;
-                            if (isset($refunds[0]['rounded_inc']) && !empty($refunds[0]['rounded_inc'])){
-                                $round = $refunds[0]['rounded_inc'];
-                            }elseif (isset($refunds[0]['rounded_dec']) && !empty($refunds[0]['rounded_dec'])){
-                                $round = -1 * $refunds[0]['rounded_dec'];
-                            }
-                        @endphp
+{{--                        @php--}}
+{{--                            $round = 0;--}}
+{{--                            if (empty(collect($refunds)->where('restrict',true)->sum('total_after_disc'))){--}}
+{{--                                if (isset($refunds[0]['rounded_inc']) && !empty($refunds[0]['rounded_inc'])){--}}
+{{--                                    $round = $refunds[0]['rounded_inc'];--}}
+{{--                                }elseif (isset($refunds[0]['rounded_dec']) && !empty($refunds[0]['rounded_dec'])){--}}
+{{--                                    $round = -1 * $refunds[0]['rounded_dec'];--}}
+{{--                                }--}}
+{{--                            }--}}
+
+{{--                        @endphp--}}
                         @if(!$credit)
-                            {{ number_format( collect($refunds)->sum('total_after_disc')+$round - collect($refunds)->where('restrict',true)->sum('total_after_disc') ,2) }}
+                            {{ number_format( collect($refunds)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc') ,2) }}
                         @elseif($credit)
-                            ({{ number_format(collect($refunds)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }})
+                            ({{ number_format(collect($refunds)->sum('total_after_disc') - collect($refunds)->where('restrict',true)->sum('total_after_disc'),2) }}
+                            )
                         @endif
                     </th>
                 </tr>
+{{--                @php--}}
+{{--                    $rounded_off_sale_total = collect($sales)->sum('total_after_disc');--}}
+{{--                        if(!$this->credit){--}}
+{{--                            if (env('ROUNDOFF_CHECK', false) && collect($sales)->sum('total_after_disc') >= env('MIMIMUM_ROUNDOFF_BILL', 50)){--}}
+{{--                                $rounded_off_sale_total = round(collect($sales)->sum('total_after_disc')/5)*5;--}}
+{{--                            }--}}
+{{--                            if (empty(collect($refunds)->where('restrict',true)->sum('total_after_disc'))){--}}
+{{--                                $dif = ($rounded_off_sale_total) + (collect($refunds)->where('restrict',true)->sum('total_after_disc')) - (collect($refunds)->sum('total_after_disc')+$round);--}}
+{{--                            }else{--}}
+{{--                                $dif = ($rounded_off_sale_total) + (collect($refunds)->where('restrict',true)->sum('total_after_disc')) - (collect($refunds)->sum('total_after_disc'));--}}
+{{--                            }--}}
+{{--                        }--}}
+{{--                        else{--}}
+{{--                            $dif = ($rounded_off_sale_total) + (collect($refunds)->where('restrict',true)->sum('total_after_disc')) - (collect($refunds)->sum('total_after_disc'));--}}
+{{--                        }--}}
+{{--                @endphp--}}
                 @php
-                    $rounded_off_sale_total = collect($sales)->sum('total_after_disc');
-                        if(!$this->credit){
-                            if (env('ROUNDOFF_CHECK', false) && collect($sales)->sum('total_after_disc') >= env('MIMIMUM_ROUNDOFF_BILL', 50)){
+                    if(!$this->credit && env('ROUNDOFF_CHECK', false) && collect($sales)->sum('total_after_disc') >= env('MIMIMUM_ROUNDOFF_BILL', 50)){
                                 $rounded_off_sale_total = round(collect($sales)->sum('total_after_disc')/5)*5;
-                            }
-                            $dif = ($rounded_off_sale_total) + (collect($refunds)->where('restrict',true)->sum('total_after_disc')) - (collect($refunds)->sum('total_after_disc')+$round);
-                        }
-                        else{
-                            $dif = ($rounded_off_sale_total) + (collect($refunds)->where('restrict',true)->sum('total_after_disc')) - (collect($refunds)->sum('total_after_disc'));
-                        }
+                                $dif = ($rounded_off_sale_total) + (collect($refunds)->where('restrict',true)->sum('total_after_disc')) - (collect($refunds)->sum('total_after_disc'));
+                    }
+                    else{
+                        $dif = (collect($sales)->sum('total_after_disc')) + (collect($refunds)->where('restrict',true)->sum('total_after_disc')) - (collect($refunds)->sum('total_after_disc'));
+                    }
                 @endphp
-{{--                Checks from env to be incorporated yet--}}
+
                 <tr class="bg-gray-50">
                     <th scope="col" colspan="3"
                         class="w-7 px-2   border-r py-2 text-right text-md font-medium text-gray-500  tracking-wider">
@@ -511,7 +530,8 @@
                         @else
                             Payable
                         @endif
-                            @if(!$credit && env('ROUNDOFF_CHECK', false) && collect($sales)->sum('total_after_disc') >= env('MIMIMUM_ROUNDOFF_BILL', 50)) <br><span class="text-xs"> (After Round Off)</span> @endif
+                        @if(!$credit && env('ROUNDOFF_CHECK', false) && collect($sales)->sum('total_after_disc') >= env('MIMIMUM_ROUNDOFF_BILL', 50))
+                            <br><span class="text-xs"> (After Round Off)</span> @endif
                     </th>
                     <th scope="col" colspan="2"
                         class="w-12 px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
@@ -576,7 +596,7 @@
                         <th scope="col" colspan="2"
                             class="w-10 cursor-pointer px-0 py-0 border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">
                             @if($dif>0)
-                                {{$received != '' ? $received-$dif : 0}}
+                                {{$received != '' ? number_format($received-$dif,2) : 0}}
                             @else
                                 0
                             @endif

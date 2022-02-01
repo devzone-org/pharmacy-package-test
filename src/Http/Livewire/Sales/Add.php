@@ -311,19 +311,25 @@ class Add extends Component
 
 
                 $discount = 0;
-                if ($this->sales[$array[1]]['disc'] >= 0 && $this->sales[$array[1]]['disc'] <= 100) {
-                    if ($this->sales[$array[1]]['discountable'] == 't'){
-                        if (!empty($this->sales[$array[1]]['disc']) && $this->sales[$array[1]]['disc'] > $this->sales[$array[1]]['max_discount']){
-                            $this->sales[$array[1]]['disc'] = $this->sales[$array[1]]['max_discount'];
-                        }
-                        $discount = round(($this->sales[$array[1]]['disc'] / 100) * $this->sales[$array[1]]['total'], 2);
+                if ($this->sales[$array[1]]['disc'] > 0 && $this->sales[$array[1]]['disc'] <= 100) {
+                    if ($this->sales[$array[1]]['discountable'] == 't') {
+                        if (!empty($this->sales[$array[1]]['max_discount'])) {
+                            if ($this->sales[$array[1]]['disc'] >= $this->sales[$array[1]]['max_discount']) {
+                                $this->sales[$array[1]]['disc'] = $this->sales[$array[1]]['max_discount'];
+                            }
 
-                    } else{
+                            $discount = round(($this->sales[$array[1]]['disc'] / 100) * $this->sales[$array[1]]['total'], 2);
+                        }else {
+                            $this->sales[$array[1]]['disc'] = 0;
+                        }
+
+                    } else {
                         $this->sales[$array[1]]['disc'] = 0;
                     }
                     $this->sales[$array[1]]['total_after_disc'] = $this->sales[$array[1]]['total'] - $discount;
-                }else{
+                } else {
                     $this->sales[$array[1]]['disc'] = 0;
+                    $this->sales[$array[1]]['total_after_disc'] = $this->sales[$array[1]]['total'] - $discount;
                 }
             }
         }
@@ -340,10 +346,12 @@ class Add extends Component
         if ($value != 0) {
             foreach ($this->sales as $key => $s) {
                 if ($s['discountable'] == 't') {
-                    $disc = $value;
+                    $disc = 0;
                     if (!empty($s['max_discount'])) {
-                        if ($value >= $s['max_discount']){
+                        if ($value >= $s['max_discount']) {
                             $disc = $s['max_discount'];
+                        }else{
+                            $disc = $value;
                         }
                     }
 
@@ -364,7 +372,11 @@ class Add extends Component
         if (empty($value) || !is_numeric($value)) {
             $this->received = 0;
         }
-        $this->payable = $this->received - round(collect($this->sales)->sum('total_after_disc')/5)*5;
+        if (empty($this->credit) && env('ROUNDOFF_CHECK', false) && collect($this->sales)->sum('total_after_disc') >= env('MIMIMUM_ROUNDOFF_BILL', 50)) {
+            $this->payable = $this->received - round(collect($this->sales)->sum('total_after_disc') / 5) * 5;
+        } else {
+            $this->payable = $this->received - collect($this->sales)->sum('total_after_disc');
+        }
     }
 
     public function removeEntry($key)
@@ -439,10 +451,12 @@ class Add extends Component
 
             foreach ($this->sales as $key => $s) {
                 if ($s['discountable'] == 't') {
-                    $disc = $this->sales[$key]['disc'];
+                    $disc = 0;
                     if (!empty($s['max_discount'])) {
-                        if ($this->sales[$key]['disc'] >= $s['max_discount']){
+                        if ($this->sales[$key]['disc'] >= $s['max_discount']) {
                             $disc = $s['max_discount'];
+                        } else {
+                            $disc = $this->sales[$key]['disc'];
                         }
                     }
 

@@ -250,14 +250,6 @@
                                         class="  px-2   border-r py-2 text-left text-md font-medium text-gray-500  tracking-wider">
                                         Item
                                     </th>
-{{--                                    <th scope="col"--}}
-{{--                                        class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">--}}
-{{--                                        Sale--}}
-{{--                                    </th>--}}
-{{--                                    <th scope="col"--}}
-{{--                                        class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">--}}
-{{--                                        Pending--}}
-{{--                                    </th>--}}
                                     <th scope="col"
                                         class="w-20 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
                                         Qty
@@ -284,10 +276,6 @@
                                         class="w-32 px-2 py-2   border-r text-center text-md font-medium text-gray-500  tracking-wider">
                                         Gross Total
                                     </th>
-{{--                                    <th scope="col"--}}
-{{--                                        class="w-10 cursor-pointer px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">--}}
-
-{{--                                    </th>--}}
                                 </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
@@ -305,15 +293,6 @@
                                                 @endif
                                             @endif
                                         </td>
-{{--                                        <td class="px-2   text-left   border-r  text-md text-gray-500">--}}
-{{--                                            <label for="sale_type1" hidden></label>--}}
-{{--                                            <input type="radio" wire:model="sales.{{ $key }}.sale_type" name="sale_type" id="sale_type1"--}}
-{{--                                                   class="p-0 block  text-md text-center ">--}}
-{{--                                            <br>--}}
-{{--                                            <label for="sale_type2" hidden></label>--}}
-{{--                                            <input type="radio" wire:model="sales.{{ $key }}.sale_type" name="sale_type" id="sale_type2"--}}
-{{--                                                   class="p-0 block  text-md text-center ">--}}
-{{--                                        </td>--}}
                                         <td class="px-2   text-left   border-r  text-md text-gray-500">
                                             <input type="number" wire:model.lazy="sales.{{ $key }}.s_qty"
                                                    onClick="this.select();"
@@ -450,6 +429,7 @@
                                 </tr>
                                 @if($admission==false && $credit == false)
                                     <tr class="bg-gray-50">
+                                    @if(env('ROUNDOFF_CHECK', false))
                                         <th scope="col" colspan="4"
                                             class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
                                             After Round-off
@@ -458,6 +438,7 @@
                                             class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
                                             {{ number_format(round(collect($sales)->sum('total_after_disc')/5)*5 ,2) }}
                                         </th>
+                                    @endif
                                     </tr>
                                     <tr>
                                         <th scope="col" colspan="4"
