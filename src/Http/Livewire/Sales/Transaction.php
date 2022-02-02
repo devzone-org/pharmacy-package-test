@@ -29,19 +29,21 @@ class Transaction extends Component
         $this->sale_id = $sale_id;
 
         $sl = Sale::find($sale_id);
-        $sale = Sale::from('sales as s')
-            ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
-            ->join('products as p', 'p.id', '=', 'sd.product_id')
-            ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
-            ->join('users as u', 'u.id', '=', 's.sale_by')
-            ->where('s.id', $sale_id)
-            ->select('sd.*', 'p.name as product_name', 's.patient_id', 'e.name as referred_by',
-                'u.name as sale_by', 's.sale_at', 's.is_credit', 's.rounded_inc', 's.rounded_dec')
-            ->get();
-        $first = $sale->first();
-        if (!empty($sl->refunded_id)) {
+        if (empty($sl->refunded_id)) {
+            $sale = Sale::from('sales as s')
+                ->leftjoin('sale_details as sd', 'sd.sale_id', '=', 's.id')
+                ->join('products as p', 'p.id', '=', 'sd.product_id')
+                ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
+                ->join('users as u', 'u.id', '=', 's.sale_by')
+                ->where('s.id', $sale_id)
+                ->select('sd.*', 'p.name as product_name', 's.patient_id', 'e.name as referred_by',
+                    'u.name as sale_by', 's.sale_at', 's.is_credit', 's.rounded_inc', 's.rounded_dec')
+                ->get();
+            $first = $sale->first();
+            $this->sales = $sale->toArray();
+        }else{
             $refund = Sale::from('sales as s')
-                ->join('sale_refunds as sr', 'sr.refunded_id', '=', 's.id')
+                ->join('sale_refund_details as sr', 'sr.refunded_id', '=', 's.id')
                 ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
                 ->join('products as p', 'p.id', '=', 'sr.product_id')
                 ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
@@ -56,7 +58,7 @@ class Transaction extends Component
         }
 
         $this->first = $sl->toArray();
-        $this->sales = $sale->toArray();
+
         $this->referred_by = $first['referred_by'];
         $this->on_credit = ($first['is_credit'] == 't') ? true : false;
         $this->sale_at = $first['sale_at'];

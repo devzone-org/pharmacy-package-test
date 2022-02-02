@@ -204,7 +204,7 @@
                                         @endphp
                                         @if(!empty($h->refunded_id))
                                             @php
-                                                $total_refund = \Devzone\Pharmacy\Models\Sale\SaleRefund::from('sale_refunds as sr')
+                                                $total_refund = \Devzone\Pharmacy\Models\Sale\SaleRefundDetail::from('sale_refund_details as sr')
                                                          ->join('sale_details as sd','sd.id','=','sr.sale_detail_id')
                                                          ->where('sr.sale_id',$h->refunded_id)
                                                          ->where('sr.refunded_id',$h->id)
@@ -219,12 +219,28 @@
                                         @endif
                                     </td>
 
+                                    @php
+                                        $val = 0;
+                                        $after_roundoff = 0;
+                                        if (!empty($h->rounded_inc)){
+                                            $val = $h->rounded_inc;
+                                        }elseif (!empty($h->rounded_dec)){
+                                            $val = -1 * $h->rounded_dec;
+                                        }
+                                        $after_roundoff = ($h->gross_total + $val)
+                                    @endphp
+
                                     <td class="px-3 py-3 text-sm text-gray-500">
                                         @if($refunded - $h->gross_total > 0)
-                                            ({{ number_format(abs($refunded - $h->gross_total),2) }})
+                                            @if($h->is_credit == 'f')
+                                                ({{ number_format(abs($refunded - $after_roundoff),2) }})
+                                            @elseif($h->is_credit != 'f')
+                                                ({{ number_format(abs($refunded - $h->gross_total),2) }})
+                                            @endif
+
                                         @else
                                             @if($h->is_credit == 'f')
-                                                {{ number_format(abs($refunded - $h->gross_total),2) }}
+                                                {{ number_format(abs($refunded - $after_roundoff),2) }}
                                             @else
                                                 -
                                             @endif
@@ -241,26 +257,28 @@
                                     <td class="px-3 py-3   text-right text-sm font-medium">
                                         <div class="flex flex-row-reverse">
                                             @can('12.refund-sale')
-                                            <a class="text-red-600 cursor-pointer  " target="_blank"
-                                               href="{{ url('pharmacy/sales/refund/') }}/{{$h->id}}?type=refund">
-                                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
-                                                     xmlns="http://www.w3.org/2000/svg">
-                                                    <path fill-rule="evenodd"
-                                                          d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm4.707 3.707a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L8.414 9H10a3 3 0 013 3v1a1 1 0 102 0v-1a5 5 0 00-5-5H8.414l1.293-1.293z"
-                                                          clip-rule="evenodd"></path>
-                                                </svg>
-                                            </a>
+                                                @if($h->gross_total > 0)
+                                                    <a class="text-red-600 cursor-pointer  " target="_blank"
+                                                       href="{{ url('pharmacy/sales/refund/') }}/{{$h->id}}?type=refund">
+                                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
+                                                             xmlns="http://www.w3.org/2000/svg">
+                                                            <path fill-rule="evenodd"
+                                                                  d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm4.707 3.707a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L8.414 9H10a3 3 0 013 3v1a1 1 0 102 0v-1a5 5 0 00-5-5H8.414l1.293-1.293z"
+                                                                  clip-rule="evenodd"></path>
+                                                        </svg>
+                                                    </a>
+                                                @endif
                                             @endcan
                                             @can('12.reprint-sale')
-                                            <a class="text-indigo-600 cursor-pointer " href="javascript:void(0);"
-                                               onclick="window.open('{{ url('pharmacy/print/sale/').'/'.$h->id }}','receipt-print','height=150,width=400');">
-                                                <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20"
-                                                     xmlns="http://www.w3.org/2000/svg">
-                                                    <path fill-rule="evenodd"
-                                                          d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
-                                                          clip-rule="evenodd"></path>
-                                                </svg>
-                                            </a>
+                                                <a class="text-indigo-600 cursor-pointer " href="javascript:void(0);"
+                                                   onclick="window.open('{{ url('pharmacy/print/sale/').'/'.$h->id }}','receipt-print','height=150,width=400');">
+                                                    <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20"
+                                                         xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd"
+                                                              d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+                                                              clip-rule="evenodd"></path>
+                                                    </svg>
+                                                </a>
                                             @endcan
 
                                             <a class="text-green-600 cursor-pointer  " target="_blank"

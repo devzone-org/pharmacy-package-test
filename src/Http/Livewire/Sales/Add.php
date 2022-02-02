@@ -315,19 +315,26 @@ class Add extends Component
                 $this->sales[$array[1]]['total'] = round($this->sales[$array[1]]['s_qty'] * $this->sales[$array[1]]['retail_price'], 2);
 
 
+                $discount = 0;
+                if ($this->sales[$array[1]]['disc'] > 0 && $this->sales[$array[1]]['disc'] <= 100) {
+                    if ($this->sales[$array[1]]['discountable'] == 't') {
+                        if (!empty($this->sales[$array[1]]['max_discount'])) {
+                            if ($this->sales[$array[1]]['disc'] >= $this->sales[$array[1]]['max_discount']) {
+                                $this->sales[$array[1]]['disc'] = $this->sales[$array[1]]['max_discount'];
+                            }
 
-                if ($this->sales[$array[1]]['disc'] >= 0 && $this->sales[$array[1]]['disc'] <= 100) {
-                    if ($this->sales[$array[1]]['discountable'] == 't'){
-                        if (!empty($this->sales[$array[1]]['disc']) && $this->sales[$array[1]]['disc'] > $this->sales[$array[1]]['max_discount']){
-                            $this->sales[$array[1]]['disc'] = $this->sales[$array[1]]['max_discount'];
+                            $discount = round(($this->sales[$array[1]]['disc'] / 100) * $this->sales[$array[1]]['total'], 2);
+                        }else {
+                            $this->sales[$array[1]]['disc'] = 0;
                         }
-                        $discount = round(($this->sales[$array[1]]['disc'] / 100) * $this->sales[$array[1]]['total'], 2);
-                        $this->sales[$array[1]]['total_after_disc'] = $this->sales[$array[1]]['total'] - $discount;
-                    } else{
+
+                    } else {
                         $this->sales[$array[1]]['disc'] = 0;
                     }
-                }else{
+                    $this->sales[$array[1]]['total_after_disc'] = $this->sales[$array[1]]['total'] - $discount;
+                } else {
                     $this->sales[$array[1]]['disc'] = 0;
+                    $this->sales[$array[1]]['total_after_disc'] = $this->sales[$array[1]]['total'] - $discount;
                 }
             }
         }
@@ -344,10 +351,12 @@ class Add extends Component
         if ($value != 0) {
             foreach ($this->sales as $key => $s) {
                 if ($s['discountable'] == 't') {
-                    $disc = $value;
+                    $disc = 0;
                     if (!empty($s['max_discount'])) {
-                        if ($value >= $s['max_discount']){
+                        if ($value >= $s['max_discount']) {
                             $disc = $s['max_discount'];
+                        }else{
+                            $disc = $value;
                         }
                     }
 
@@ -368,7 +377,14 @@ class Add extends Component
         if (empty($value) || !is_numeric($value)) {
             $this->received = 0;
         }
-        $this->payable = $this->received - (collect($this->sales)->sum('total_after_disc'));
+ 
+        if (empty($this->credit) && env('ROUNDOFF_CHECK', false) && collect($this->sales)->sum('total_after_disc') >= env('MIMIMUM_ROUNDOFF_BILL', 50)) {
+            $this->payable = $this->received - round(collect($this->sales)->sum('total_after_disc') / 5) * 5;
+        } else {
+            $this->payable = $this->received - collect($this->sales)->sum('total_after_disc');
+        }
+ 
+      
     }
 
     public function removeEntry($key)
@@ -528,7 +544,7 @@ class Add extends Component
                     $this->rounded = $v2 - $v1;
                     $this->after_round_off = $v2;
                 }
-
+//                dump($this->after_round_off, $this->rounded);
                 if ($this->admission == false && $this->received < $this->after_round_off) {
                     throw new \Exception('Received amount should be greater than PKR ' . $this->after_round_off . "/-");
                 }
@@ -597,8 +613,8 @@ class Add extends Component
                 'remarks' => $this->remarks,
                 'receive_amount' => $this->received,
                 'payable_amount' => !empty($this->credit) ? 0 : $this->payable,
-                'rounded_inc' => $this->rounded > 0 ? $this->rounded : null,
-                'rounded_dec' => $this->rounded < 0 ? $this->rounded : null,
+                'rounded_inc' => $this->rounded > 0 ? abs($this->rounded) : null,
+                'rounded_dec' => $this->rounded < 0 ? abs($this->rounded) : null,
                 'sub_total' => collect($this->sales)->sum('total'),
                 'gross_total' => collect($this->sales)->sum('total_after_disc'),
                 'admission_id' => $this->admission_id ?? null,
