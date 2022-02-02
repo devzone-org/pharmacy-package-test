@@ -9,11 +9,11 @@ use App\Models\Hospital\AdmissionJobDetail;
 use App\Models\Hospital\Employees\Employee;
 use App\Models\Hospital\Hospital;
 use App\Models\Hospital\Patient;
+use Devzone\Ams\Helper\ChartOfAccount;
 use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
-use Devzone\Ams\Helper\ChartOfAccount;
-use Devzone\Ams\Models\Ledger;
 use Devzone\Ams\Models\ChartOfAccount as COA;
+use Devzone\Ams\Models\Ledger;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Customer;
 use Devzone\Pharmacy\Models\InventoryLedger;
@@ -25,7 +25,6 @@ use Devzone\Pharmacy\Models\Sale\SaleDetail;
 use Devzone\Pharmacy\Models\Sale\SaleIssuance;
 use Devzone\Pharmacy\Models\Sale\UserTill;
 use Devzone\Pharmacy\Models\UserLimit;
-use http\Env;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -130,6 +129,11 @@ class Add extends Component
                 if (!empty($this->admission_details)) {
                     $this->admission_details = $this->admission_details->toArray();
                 }
+                $proce  = DB::table('procedures')->where('id',$procedure_id)->get();
+                $procedure_name = '';
+                if($proce->isNotEmpty()){
+                    $procedure_name = $proce->first()->name;
+                }
 
                 $medicines = \App\Models\Hospital\ProcedureMedicine::from('procedure_medicines as pm')
                     ->join('procedures as pro', 'pro.id', '=', 'pm.procedure_id')
@@ -146,7 +150,8 @@ class Add extends Component
                     ->groupBy('p.id')
                     ->orderBy('pi.qty', 'desc')->get()->toArray();
 
-                $this->admission_details['procedure_name'] = collect($medicines)->first()['procedure_name'];
+
+                $this->admission_details['procedure_name'] = $procedure_name;
                 $this->hospital_info = Hospital::first()->toArray();
                 foreach ($medicines as $medicine) {
                     $required_qty = null;
@@ -372,11 +377,14 @@ class Add extends Component
         if (empty($value) || !is_numeric($value)) {
             $this->received = 0;
         }
+ 
         if (empty($this->credit) && env('ROUNDOFF_CHECK', false) && collect($this->sales)->sum('total_after_disc') >= env('MIMIMUM_ROUNDOFF_BILL', 50)) {
             $this->payable = $this->received - round(collect($this->sales)->sum('total_after_disc') / 5) * 5;
         } else {
             $this->payable = $this->received - collect($this->sales)->sum('total_after_disc');
         }
+ 
+      
     }
 
     public function removeEntry($key)
@@ -444,10 +452,12 @@ class Add extends Component
     public function saleComplete()
     {
         try {
+            $total_discount_give = 0;
             DB::beginTransaction();
             if (empty($this->sales)) {
                 throw new \Exception('Unable to complete because invoice is empty.');
             }
+            $this->reset(['success']);
 
             foreach ($this->sales as $key => $s) {
                 if ($s['discountable'] == 't') {
@@ -463,6 +473,19 @@ class Add extends Component
                     $discount = round(($disc / 100) * $this->sales[$key]['total'], 2);
                     $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'] - $discount;
                     $this->sales[$key]['disc'] = $disc;
+                    $packing = 1;
+                    if (!empty($s['packing'])) {
+                        $packing = $s['packing'];
+                    }
+                    $after_discount_retail = ($this->sales[$key]['total_after_disc']) / $s['s_qty'];
+                    if (round($after_discount_retail, 2) < round($s['product_supply_price'] / $packing, 2)) {
+                        $avail_pe = round($s['product_supply_price'] / $s['product_price'], 4);
+                        $avail_per = round((1 - $avail_pe) * 100, 4);
+
+                        throw new \Exception('Maximum discount possible ' . $avail_per . '% on ' . $s['item']);
+                    }
+
+                    $total_discount_give = $total_discount_give + $discount;
                 }
             }
 
@@ -575,7 +598,13 @@ class Add extends Component
             }
 
             $sale_receipt_no = Voucher::instance()->advances()->get();
+            $sub_total = collect($this->sales)->sum('total');
             $total_after_disc = collect($this->sales)->sum('total_after_disc');
+            if (round($sub_total - $total_after_disc, 2) > round($total_discount_give, 2)) {
+                throw new \Exception('Total discount is more than as you given to customer. Please recheck sale.');
+            }
+            //dd(round($sub_total - $total_after_disc, 2), round($total_discount_give, 2));
+
             $sale_id = Sale::create([
                 'patient_id' => $this->patient_id,
                 'referred_by' => $this->referred_by_id,
@@ -865,7 +894,7 @@ class Add extends Component
         $this->patient_id = $created_patient->id;
         $this->patient_name = $created_patient->mr_no . ' - ' . $created_patient->name;
         $this->referred_by_id = $created_patient->doctor_id;
-        $this->referred_by_name = collect($this->doctors)->where('id', $this->referred_by_id)->first()['name'];
+        $this->referred_by_name = collect($this->doctors)->where('id', $this->referred_by_id)->first()['name'] ?? null;
         $this->add_modal = false;
         $this->patient_contact_whatsApp = 't';
 

@@ -204,7 +204,7 @@
 
 
                         <td class="px-3 py-3 w-7   text-right text-sm font-medium">
-                            <svg wire:click="removeProduct('{{ $key }}')"
+                            <svg wire:click="removeProduct('{{ $key }}')" wire:loading.attr="disabled"
                                  class="w-6 h-6 text-red-600 cursor-pointer hover:text-red-800" fill="currentColor"
                                  viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd"
@@ -252,10 +252,10 @@
             <div class="px-4 py-3 bg-gray-50 text-right sm:px-6 border-t">
                 <button type="submit"
                         class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
-                    <div wire:loading>
+                    <div wire:loading wire:target="create">
                         Adding ...
                     </div>
-                    <div wire:loading.remove>
+                    <div wire:loading.remove wire:target="create">
                         Add
                     </div>
                 </button>

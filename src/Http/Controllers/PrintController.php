@@ -114,8 +114,9 @@ class PrintController extends Controller
         $print['heading'] = str_pad("#", 3, " ") . str_pad("Item", 25, " ") . str_pad("Qty", 8, " ", STR_PAD_LEFT) . str_pad("Unit", 12, " ", STR_PAD_LEFT) . str_pad("Total", 16, " ", STR_PAD_LEFT);
         $inner = "";
         foreach ($this->sales as $key => $s) {
+            $product = preg_replace("/[^A-Za-z0-9\s]/","",$s['product_name']);
             $sr = str_pad(++$key, 3, " ");
-            $item = substr($s['product_name'], 0, 25);
+            $item = substr($product, 0, 25);
             $item = str_pad($item, 25, " ");
             $qty = str_pad($s['qty'], 8, " ", STR_PAD_LEFT);
             $retail = str_pad($s['retail_price'], 12, " ", STR_PAD_LEFT);
@@ -125,8 +126,8 @@ class PrintController extends Controller
 
         foreach ($this->refunds as $key => $s) {
             $sr = str_pad(++$key + count($this->sales), 3, " ");
-
-            $item = substr('-'.$s['product_name'], 0, 25);
+            $product = preg_replace("/[^A-Za-z0-9\s]/","",$s['product_name']);
+            $item = substr('-'.$product, 0, 25);
             $item = str_pad($item, 25, " ");
             $qty = str_pad('-'.$s['refund_qty'], 8, " ", STR_PAD_LEFT);
             $retail = str_pad('-'.$s['retail_price'], 12, " ", STR_PAD_LEFT);

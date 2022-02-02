@@ -68,9 +68,9 @@ class PurchaseAdd extends Component
             ->select('p.*')
             ->groupBy('p.id')->get();
         $data = $search->toArray();
-        if (!empty($data)){
+        if (!empty($data)) {
             $this->order_list = null;
-            foreach ($data as $key=>$d){
+            foreach ($data as $key => $d) {
                 $this->order_list[] = [
                     'id' => $d['id'],
                     'name' => $d['name'],
@@ -93,7 +93,9 @@ class PurchaseAdd extends Component
 
     public function removeProduct($key)
     {
-        unset($this->order_list[$key]);
+        if (isset($this->order_list[$key])) {
+            unset($this->order_list[$key]);
+        }
     }
 
     public function updated($name, $value)
@@ -177,6 +179,10 @@ class PurchaseAdd extends Component
                 'status' => 'approval-awaiting'
             ])->id;
             foreach ($this->order_list as $o) {
+                $check = PurchaseOrder::where('purchase_id', $purchase_id)->where('product_id', $o['id'])->get()->first();
+                if (!empty($check)){
+                    throw new \Exception('An Unknown Error Occurred!');
+                }
                 PurchaseOrder::create([
                     'purchase_id' => $purchase_id,
                     'product_id' => $o['id'],
