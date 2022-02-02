@@ -432,11 +432,11 @@
                                     @if(env('ROUNDOFF_CHECK', false))
                                         <th scope="col" colspan="4"
                                             class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
-{{--                                            After Round-off--}}
+                                            After Round-off
                                         </th>
                                         <th scope="col" colspan="2"
                                             class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
-                                            {{--{{ number_format(round(collect($sales)->sum('total_after_disc')/5)*5 ,2) }}--}}
+                                            {{ number_format(round(collect($sales)->sum('total_after_disc')/5)*5 ,2) }}
                                         </th>
                                     @endif
                                     </tr>
