@@ -9,6 +9,7 @@ use Devzone\Pharmacy\Models\Product;
 use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\PurchaseOrder;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -25,7 +26,7 @@ class PurchaseAdd extends Component
     public $search_products;
     public $product_data = [];
     public $order_list = [];
-    public $sale_days = '-10 days';
+    public $sale_days = '10';
     public $demand_check = false;
 
     public $success;
@@ -65,18 +66,22 @@ class PurchaseAdd extends Component
 
     public function updatedSaleDays()
     {
-
+        $this->validate(['sale_days' => 'numeric|between:1,100']);
+        $this->order_list = [];
     }
 
     public function inDemand()
     {
+        $date = Carbon::now()->subDays($this->sale_days);
         $search = Product::from('products as p')
             ->join('sale_details as sd', 'sd.product_id', '=', 'p.id')
             ->where('p.status', 't')
             ->where('p.supplier_id', $this->supplier_id)
-            ->where('sd.created_at', '>=', date('Y-m-01', strtotime($this->sale_days)))
+            ->where('sd.created_at', '>=', $date)
             ->groupBy('sd.product_id')
+            ->select('p.id', 'p.name', 'p.cost_of_price', 'p.retail_price', 'p.salt', 'p.packing')
             ->get();
+//        dd(date('Y-m-01', strtotime($this->sale_days)));
         if ($search->isNotEmpty()) {
             $data = $search->toArray();
         } else {
@@ -98,12 +103,13 @@ class PurchaseAdd extends Component
                         'total_cost' => $d['cost_of_price'],
                         'packing' => $d['packing']
                     ];
-                } else {
-                    $key = array_keys($existing)[0];
-                    $qty = $this->order_list[$key]['qty'];
-                    $this->order_list[$key]['qty'] = $qty + 1;
-                    $this->order_list[$key]['total_cost'] = $this->order_list[$key]['qty'] * $this->order_list[$key]['cost_of_price'];
                 }
+//                else {
+//                    $key = array_keys($existing)[0];
+//                    $qty = $this->order_list[$key]['qty'];
+//                    $this->order_list[$key]['qty'] = $qty + 1;
+//                    $this->order_list[$key]['total_cost'] = $this->order_list[$key]['qty'] * $this->order_list[$key]['cost_of_price'];
+//                }
             }
         $this->demand_check = true;
         }
@@ -191,7 +197,7 @@ class PurchaseAdd extends Component
 
     public function create()
     {
-        dd($this->order_list);
+//        dd($this->order_list);
         $this->validate();
         try {
             DB::beginTransaction();

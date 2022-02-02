@@ -84,14 +84,7 @@
 
 
                     <div class="col-span-6 sm:col-span-2">
-                        <div class="flex justify-between">
-                            <label for="name" class="block text-sm font-medium text-gray-700">Supplier</label>
-                            @if(!empty($supplier_id))
-                                <a href="javascript:void(0);" class="block text-sm font-medium text-indigo-700"
-                                   wire:click="inDemand" wire:loading.attr="disabled">+ Supplier's
-                                    Products</a>
-                            @endif
-                        </div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Supplier</label>
                         <input wire:model="supplier_name" readonly
                                wire:click="searchableOpenModal('supplier_id','supplier_name','supplier')"
                                type="text"
@@ -109,24 +102,27 @@
                                id="date">
                     </div>
 
-                    @if(!empty($supplier_id) && $demand_check)
+                    @if(!empty($supplier_id))
                         <div class="col-span-6 sm:col-span-2">
-                            <label for="sale_days" class="block text-sm font-medium text-gray-700">Sales Of Days</label>
-                            <select type="text" wire:model="sale_days" id="sale_days"
-                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                <option value="-10 days">Last 10</option>
-                                <option value="-20 days">Last 20</option>
-                                <option value="-30 days">Last 30</option>
-                            </select>
+                            <div class="flex justify-between">
+                                <label for="sale_days" class="block text-sm font-medium text-gray-700">Sales Of
+                                    Days</label>
+                                <a href="javascript:void(0);" class="block text-sm font-medium text-indigo-700"
+                                   wire:click="inDemand" wire:loading.attr="disabled">+ Supplier's
+                                    Products</a>
+                            </div>
+                            <input type="number" autocomplete="off" wire:model="sale_days" id="sale_days"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+{{--                            <select type="text" wire:model="sale_days" id="sale_days"--}}
+{{--                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">--}}
+{{--                                <option value="10">Last 10</option>--}}
+{{--                                <option value="20">Last 20</option>--}}
+{{--                                <option value="30">Last 30</option>--}}
+{{--                            </select>--}}
                         </div>
                     @endif
 
-                    {{--                    <div class="col-span-6 sm:col-span-2">--}}
-                    {{--                        <button type="button" wire:click="inDemand"--}}
-                    {{--                                class="bg-indigo-600 border border-transparent rounded-md shadow-sm mt-6 py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">--}}
-                    {{--                            Supplier's Products--}}
-                    {{--                        </button>--}}
-                    {{--                    </div>--}}
+
 
 
                     <div class="col-span-6">

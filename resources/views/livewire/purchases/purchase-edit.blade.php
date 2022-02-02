@@ -103,6 +103,26 @@
                                id="date">
                     </div>
 
+                    @if(!empty($supplier_id))
+                        <div class="col-span-6 sm:col-span-2">
+                            <div class="flex justify-between">
+                                <label for="sale_days" class="block text-sm font-medium text-gray-700">Sales Of
+                                    Days</label>
+                                <a href="javascript:void(0);" class="block text-sm font-medium text-indigo-700"
+                                   wire:click="inDemand" wire:loading.attr="disabled">+ Supplier's
+                                    Products</a>
+                            </div>
+                            <input type="number" autocomplete="off" wire:model="sale_days" id="sale_days"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            {{--                            <select type="text" wire:model="sale_days" id="sale_days"--}}
+                            {{--                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">--}}
+                            {{--                                <option value="10">Last 10</option>--}}
+                            {{--                                <option value="20">Last 20</option>--}}
+                            {{--                                <option value="30">Last 30</option>--}}
+                            {{--                            </select>--}}
+                        </div>
+                    @endif
+
 
 
 
