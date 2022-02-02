@@ -31,6 +31,7 @@
                                         <div wire:click="searchPatient" class="cursor-pointer">
                                             <dt class="text-sm font-medium text-gray-500 sm:w-40 sm:flex-shrink-0">
                                                 Patient Name (F12)
+                                                @if($control_med_check) <span class="text-red-500">*</span> @endif
                                             </dt>
                                             <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
                                                 <p>
@@ -296,7 +297,7 @@
                                         <td class="px-2  text-center  border-r text-md font-medium text-gray-900">
                                             {{ $loop->iteration }}
                                         </td>
-                                        <td class="px-2 text-left border-r text-md text-gray-500">
+                                        <td class="px-2 text-left border-r text-md text-gray-500 @if($s['control_medicine']) text-red-500 @endif">
                                             {{ $s['item'] }}
                                             @if(isset($s['required_qty']))
                                                 @if(!empty($s['required_qty']))
