@@ -740,7 +740,11 @@ class Add extends Component
                         $v1 = $amounts['sale'];
                         $v2 = round($v1 / 5) * 5;
                         $rounded = $v2 - $v1;
-                        $round_acc_id = $accounts->where('reference', 'exp-invoice-rounding-off')->first()->id;
+                        $round_acc_id = $accounts->where('reference', 'exp-invoice-rounding-offss')->first();
+                        if (empty($round_acc_id)){
+                            throw new \Exception('Invoice Round Off Account not found!');
+                        }
+                        $round_acc_id = $round_acc_id->id;
 
                         if ($rounded < 0) {
 

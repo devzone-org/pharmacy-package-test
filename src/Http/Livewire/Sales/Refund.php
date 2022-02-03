@@ -603,7 +603,13 @@ class Refund extends Component
             }
             $vno = Voucher::instance()->voucher()->get();
             $accounts = ChartOfAccount::whereIn('reference', ['cost-of-sales-pharmacy-5', 'income-pharmacy-5', 'income-return-pharmacy-5', 'pharmacy-inventory-5', 'exp-invoice-rounding-off'])->get();
-            $round_acc_id = $accounts->where('reference', 'exp-invoice-rounding-off')->first()->id;
+
+            $round_acc_id = $accounts->where('reference', 'exp-invoice-rounding-off')->first();
+            if (empty($round_acc_id)){
+                throw new \Exception('Invoice Round Off Account not found!');
+            }
+            $round_acc_id = $round_acc_id->id;
+
             $dif = $refund_retail - $sales_retail;
             if ($this->credit == false) {
 
