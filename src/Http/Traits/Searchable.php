@@ -219,7 +219,7 @@ trait Searchable
 
             $search = $search->select('p.name as item', DB::raw('SUM(qty) as qty'),
                 'pi.retail_price', 'p.retail_price as product_price', 'p.cost_of_price as product_supply_price',
-                'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'p.discountable', 'p.max_discount', 'r.name as rack', 'r.tier')
+                'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'p.discountable', 'p.max_discount', 'r.name as rack', 'r.tier', 'p.control_medicine')
                 ->groupBy('p.id')
                 ->groupBy('pi.retail_price');
             if (env('SCOUT_SEARCH', false)) {
