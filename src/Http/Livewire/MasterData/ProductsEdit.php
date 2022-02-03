@@ -39,6 +39,9 @@ class ProductsEdit extends Component
     public $next;
     public $discount_check;
     public $max_disc;
+    public $all_categories;
+    public $all_manufacturers;
+    public $all_racks;
 
     protected $rules = [
         'name' => 'required|string',
@@ -57,6 +60,9 @@ class ProductsEdit extends Component
     public function mount($primary_id)
     {
         $this->primary_id = $primary_id;
+        $this->all_categories = \Devzone\Pharmacy\Models\Category::where('status', 't')->get();
+        $this->all_manufacturers = \Devzone\Pharmacy\Models\Manufacture::where('status', 't')->get();
+        $this->all_racks = \Devzone\Pharmacy\Models\Rack::where('status', 't')->get();
         $products = Product::from('products as p')
             ->where('p.id', $primary_id)
             ->leftJoin('manufactures as m', 'm.id', '=', 'p.manufacture_id')
