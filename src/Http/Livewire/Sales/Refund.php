@@ -607,12 +607,12 @@ class Refund extends Component
             $dif = $refund_retail - $sales_retail;
             if ($this->credit == false) {
 
-                if ($this->new_roundoff < 0 && env('ROUNDOFF_DEC')) {
+                if ($this->new_roundoff < 0) {
 
                     GeneralJournal::instance()->account($round_acc_id)->debit(abs($this->new_roundoff))->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->reference('exp-invoice-rounding-off')->description($description)->execute();
 
-                } elseif ($this->new_roundoff > 0 && env('ROUNDOFF_INC')) {
+                } elseif ($this->new_roundoff > 0) {
 
                     GeneralJournal::instance()->account($round_acc_id)->credit(abs($this->new_roundoff))->voucherNo($vno)
                         ->date(date('Y-m-d'))->approve()->reference('exp-invoice-rounding-off')->description($description)->execute();

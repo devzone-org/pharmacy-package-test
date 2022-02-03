@@ -742,12 +742,12 @@ class Add extends Component
                         $rounded = $v2 - $v1;
                         $round_acc_id = $accounts->where('reference', 'exp-invoice-rounding-off')->first()->id;
 
-                        if ($rounded < 0 && env('ROUNDOFF_DEC')) {
+                        if ($rounded < 0) {
 
                             GeneralJournal::instance()->account($round_acc_id)->debit(abs($rounded))->voucherNo($vno)
                                 ->date(date('Y-m-d'))->approve()->reference('exp-invoice-rounding-off')->description($description)->execute();
 
-                        } elseif ($rounded > 0 && env('ROUNDOFF_INC')) {
+                        } elseif ($rounded > 0) {
 
                             GeneralJournal::instance()->account($round_acc_id)->credit(abs($rounded))->voucherNo($vno)
                                 ->date(date('Y-m-d'))->approve()->reference('exp-invoice-rounding-off')->description($description)->execute();
