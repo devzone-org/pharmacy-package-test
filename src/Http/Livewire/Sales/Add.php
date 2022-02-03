@@ -90,6 +90,7 @@ class Add extends Component
     public $has_contact = true;
     public $pending_sale = false;
     public $pending_sale_id;
+    public $control_med_check = false;
 
     public $rounded = 0;
     public $after_round_off = 0;
@@ -257,6 +258,13 @@ class Add extends Component
                 $data['disc'] = 0;
                 $data['total'] = $data['retail_price'] * $data['s_qty'];
                 $data['total_after_disc'] = $data['retail_price'] * $data['s_qty'];
+
+                if ($data['control_medicine'] == 't'){
+                    $this->control_med_check = true;
+                    $data['control_medicine'] = true;
+                }else{
+                    $data['control_medicine'] = false;
+                }
                 $this->sales[] = $data;
             } else {
                 $key = array_keys($check)[0];
@@ -452,6 +460,9 @@ class Add extends Component
     public function saleComplete()
     {
         try {
+            if ($this->control_med_check && empty($this->patient_id)){
+                throw new \Exception('Patient information is required.');
+            }
             $total_discount_give = 0;
             DB::beginTransaction();
             if (empty($this->sales)) {
