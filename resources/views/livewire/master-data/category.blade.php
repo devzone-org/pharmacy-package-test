@@ -107,6 +107,25 @@
                         </select>
                     </div>
 
+                    <div class="col-span-6 sm:col-span-2">
+                        <label for="discountable" class="block text-sm font-medium text-gray-700">Discount Available</label>
+                        <select wire:model="discountable" id="discountable"
+                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value="f">No</option>
+                            <option value="t">Yes</option>
+                        </select>
+                    </div>
+
+                    @if($discountable == 't')
+                        <div class="col-span-6 sm:col-span-2">
+                            <label for="max_disc" class="block text-sm font-medium text-gray-700">Max Discount</label>
+                            <input wire:model="max_disc" type="number" step="0.01" min="0" max="100" autocomplete="off"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                   id="max_disc">
+                        </div>
+                    @endif
+
+
 
                 </div>
             </div>
@@ -301,6 +320,24 @@
                                 <option value="f">Inactive</option>
                             </select>
                         </div>
+
+                        <div class="col-span-6 sm:col-span-2">
+                            <label for="ediscountable" class="block text-sm font-medium text-gray-700">Discount Available</label>
+                            <select wire:model="ediscountable" id="ediscountable"
+                                    class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value="f">No</option>
+                                <option value="t">Yes</option>
+                            </select>
+                        </div>
+
+                        @if($ediscountable == 't')
+                            <div class="col-span-6 sm:col-span-2">
+                                <label for="emax_disc" class="block text-sm font-medium text-gray-700">Max Discount</label>
+                                <input wire:model="emax_disc" type="number" step="0.01" min="0" max="100" autocomplete="off"
+                                       class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                       id="emax_disc">
+                            </div>
+                        @endif
 
 
                     </div>
