@@ -217,9 +217,14 @@ Route::get('report/stock-in-out', function () {
 Route::get('report/inter-transfer-IPD-medicines', function () {
     return view('pharmacy::reports.inter-transfer-IPD-medicines');
 })->middleware('permission:12.inter-transfer-medicine-report');
+
 Route::get('report/inventory-ledger', function () {
     return view('pharmacy::reports.inventory-ledger');
 })->middleware('permission:12.inventory-ledger');
+
+Route::get('report/customer-receivables', function () {
+    return view('pharmacy::reports.customer-receivables');
+})->middleware('permission:12.inventory-ledger'); //New permission required.
 
 Route::get('print/sale/{id}', [PrintController::class, 'print']);
 
