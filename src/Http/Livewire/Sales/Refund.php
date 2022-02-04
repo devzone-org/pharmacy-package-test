@@ -686,10 +686,12 @@ class Refund extends Component
 
 
             if (empty($this->admission_id) && empty($this->procedure_id)) {
-                return redirect()->to('pharmacy/sales/refund/' . $this->sale_id . '?type=refund');
+//                return redirect()->to('pharmacy/sales/refund/' . $this->sale_id . '?type=refund');
+                return redirect()->to('pharmacy/sales');
             } else {
                 if ($this->type == 'refund') {
-                    return redirect()->to('pharmacy/sales/refund/' . $this->sale_id . '?type=refund&admission_id=' . $this->admission_id . '&procedure_id=' . $this->procedure_id);
+//                    return redirect()->to('pharmacy/sales/refund/' . $this->sale_id . '?type=refund&admission_id=' . $this->admission_id . '&procedure_id=' . $this->procedure_id);
+                    return redirect()->to('pharmacy/sales');
                 } elseif ($this->type == 'issue') {
                     $this->emit('printInvoice', $this->sale_id, $this->admission_id, $this->procedure_id);
 //                    return redirect()->to('pharmacy/sales/refund/' . $this->sale_id . '?type=issue&admission_id=' . $this->admission_id . '&procedure_id=' . $this->procedure_id);

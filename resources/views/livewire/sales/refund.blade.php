@@ -530,8 +530,6 @@
                         @else
                             Payable
                         @endif
-                        @if(!$credit && env('ROUNDOFF_CHECK', false) && collect($sales)->sum('total_after_disc') >= env('MIMIMUM_ROUNDOFF_BILL', 50))
-                            <br><span class="text-xs"> (After Round Off)</span> @endif
                     </th>
                     <th scope="col" colspan="2"
                         class="w-12 px-2 py-2   border-r text-center text-md font-medium text-gray-500 uppercase tracking-wider">

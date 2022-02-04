@@ -29,7 +29,7 @@ class Transaction extends Component
         $this->sale_id = $sale_id;
 
         $sl = Sale::find($sale_id);
-        if (empty($sl->refunded_id)) {
+        try {
             $sale = Sale::from('sales as s')
                 ->leftjoin('sale_details as sd', 'sd.sale_id', '=', 's.id')
                 ->join('products as p', 'p.id', '=', 'sd.product_id')
@@ -39,9 +39,8 @@ class Transaction extends Component
                 ->select('sd.*', 'p.name as product_name', 's.patient_id', 'e.name as referred_by',
                     'u.name as sale_by', 's.sale_at', 's.is_credit', 's.rounded_inc', 's.rounded_dec')
                 ->get();
-            $first = $sale->first();
             $this->sales = $sale->toArray();
-        }else{
+
             $refund = Sale::from('sales as s')
                 ->join('sale_refund_details as sr', 'sr.refunded_id', '=', 's.id')
                 ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
@@ -53,34 +52,43 @@ class Transaction extends Component
                 ->select('sd.*', 'p.name as product_name', 's.patient_id', 'e.name as referred_by',
                     'u.name as sale_by', 's.sale_at', 's.is_credit', 's.rounded_inc', 's.rounded_dec', 'sr.refund_qty')
                 ->get();
-            $first = $refund->first();
             $this->refunds = $refund->toArray();
-        }
 
-        $this->first = $sl->toArray();
 
-        $this->referred_by = $first['referred_by'];
-        $this->on_credit = ($first['is_credit'] == 't') ? true : false;
-        $this->sale_at = $first['sale_at'];
-        $this->sale_by = $first['sale_by'];
-
-        if (!empty($first['patient_id'])) {
-            $patient = Patient::from('patients as p')
-                ->where('p.id',$first['patient_id'])
-                ->leftJoin('customers as c', 'c.id', '=', 'p.customer_id')
-                ->select('p.name', 'p.mr_no', 'p.account_id', 'c.credit_limit')->first();
-
-            $this->patient_name = $patient['mr_no'] . ' - ' . $patient['name'];
-            $this->credit_limit = $patient['credit_limit'] ?? 0;
-
-            if (!empty($patient['account_id'])) {
-                $closing = Ledger::where('account_id', $patient['account_id'])
-                    ->select(DB::raw('sum(debit-credit) as closing'))->first();
-                $this->closing_balance = $closing['closing'];
+            if (empty($sl->refunded_id)) {
+                $first = $sale->first();
+            } else {
+                $first = $refund->first();
             }
+
+            $this->first = $sl->toArray();
+
+            $this->referred_by = $first['referred_by'];
+            $this->on_credit = $first['is_credit'] == 't';
+            $this->sale_at = $first['sale_at'];
+            $this->sale_by = $first['sale_by'];
+
+            if (!empty($first['patient_id'])) {
+                $patient = Patient::from('patients as p')
+                    ->where('p.id', $first['patient_id'])
+                    ->leftJoin('customers as c', 'c.id', '=', 'p.customer_id')
+                    ->select('p.name', 'p.mr_no', 'p.account_id', 'c.credit_limit')->first();
+
+                $this->patient_name = $patient['mr_no'] . ' - ' . $patient['name'];
+                $this->credit_limit = $patient['credit_limit'] ?? 0;
+
+                if (!empty($patient['account_id'])) {
+                    $closing = Ledger::where('account_id', $patient['account_id'])
+                        ->select(DB::raw('sum(debit-credit) as closing'))->first();
+                    $this->closing_balance = $closing['closing'];
+                }
+            }
+        }catch (\Exception $ex){
+            return redirect()->to('pharmacy/sales');
         }
 
 
+//        dd($this->first, $this->refunds, $this->sales);
     }
 
     public function render()
