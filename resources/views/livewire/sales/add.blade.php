@@ -430,7 +430,7 @@
                                 </tr>
                                 @if($admission==false && $credit == false)
                                     <tr class="bg-gray-50">
-                                    @if(env('ROUNDOFF_CHECK', false))
+                                    @if(env('ROUNDOFF_CHECK', false) && collect($sales)->sum('total_after_disc') >= env('MIMIMUM_ROUNDOFF_BILL', 50))
                                         <th scope="col" colspan="4"
                                             class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
                                             After Round-off
