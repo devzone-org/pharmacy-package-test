@@ -32,6 +32,9 @@ class ProductsAdd extends Component
     public $temperature;
     public $discount_check = 'f';
     public $max_disc;
+    public $all_categories;
+    public $all_manufacturers;
+    public $all_racks;
 
 
     protected $rules = [
@@ -48,6 +51,13 @@ class ProductsAdd extends Component
         'control_medicine' => 'required',
         'max_disc' => 'nullable|numeric|between:0,100',
     ];
+
+    public function mount()
+    {
+        $this->all_categories = \Devzone\Pharmacy\Models\Category::where('status', 't')->get();
+        $this->all_manufacturers = \Devzone\Pharmacy\Models\Manufacture::where('status', 't')->get();
+        $this->all_racks = \Devzone\Pharmacy\Models\Rack::where('status', 't')->get();
+    }
 
 
     public function render()
