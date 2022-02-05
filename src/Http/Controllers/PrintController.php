@@ -55,7 +55,6 @@ class PrintController extends Controller
             $first = $refund->first();
             $this->refunds = $refund->toArray();
         }
-
         $this->first = $sl->toArray();
         $this->sales = $sale->toArray();
         $this->referred_by = $first['referred_by'];
@@ -134,6 +133,15 @@ class PrintController extends Controller
             $total = str_pad('-'.$s['refund_qty']*$s['retail_price'], 16, " ", STR_PAD_LEFT);
             $inner .= $sr . $item . $qty .  $retail .  $total;
         }
+        //Round off
+        $val = 0;
+        if (!empty($this->first['rounded_inc'])){
+            $val = $this->first['rounded_inc'];
+        }elseif (!empty($this->first['rounded_dec'])){
+            $val = -1 * $this->first['rounded_dec'];
+        }
+        //
+
         $print['inner'] = $inner;
 
 
@@ -143,7 +151,7 @@ class PrintController extends Controller
         $print['discount'] = str_pad("Discount (PKR)", 45, " ", STR_PAD_LEFT) .
             str_pad(number_format($this->first['sub_total'] - $this->first['gross_total'], 2), 19, " ", STR_PAD_LEFT);
         $print['gross_total'] = str_pad("Sale after Discount", 45, " ", STR_PAD_LEFT) .
-            str_pad(number_format($this->first['gross_total'], 2), 19, " ", STR_PAD_LEFT);
+            str_pad(number_format($this->first['gross_total']+$val, 2), 19, " ", STR_PAD_LEFT);
         $refunded = 0;
         if (!empty($this->first['refunded_id'])) {
             $total_refund = \Devzone\Pharmacy\Models\Sale\SaleRefund::from('sale_refunds as sr')
@@ -156,16 +164,24 @@ class PrintController extends Controller
             $refunded = $total_refund['refund'];
         }
 
+
         $add_bracket = number_format(abs($refunded), 2);
         $add_bracket = '(' . $add_bracket . ')';
         $print['refund'] = str_pad("Sale Returns", 45, " ", STR_PAD_LEFT) .
             str_pad($add_bracket, 19, " ", STR_PAD_LEFT);
 
+        //After Round-off
+        $after_roundoff = 0;
+        $after_roundoff = $refunded - ($this->first['gross_total'] + $val);
+        if($this->first['is_credit'] != 'f'){
+            $after_roundoff = $refunded - $this->first['gross_total'];
+        }
+        //
+
         if ($this->first['gross_total'] - $refunded > 0) {
-            $net_sales = number_format(abs($this->first['gross_total'] - $refunded), 2);
+            $net_sales = number_format(abs($after_roundoff), 2);
         } else {
-            $net_sales =
-                '(' . number_format(abs($first['gross_total'] - $refunded), 2) . ')';
+            $net_sales = '(' . number_format(abs($after_roundoff), 2) . ')';
 
         }
         $print['net_total'] = str_pad("Net Sales", 45, " ", STR_PAD_LEFT) .
@@ -173,13 +189,15 @@ class PrintController extends Controller
 
         $cash_refund = "-";
         $cash_refund_text= "Cash";
-        if ($refunded - $this->first['gross_total'] > 0) {
+
+
+        if ($after_roundoff > 0) {
             $cash_refund_text= "(Refund)";
-            $cash_refund = '(' . number_format(abs($refunded - $this->first['gross_total']), 2) . ')';
+            $cash_refund = '(' . number_format(abs($after_roundoff), 2) . ')';
         } else {
             if ($this->first['is_credit'] == 'f') {
 
-                $cash_refund=     number_format(abs($refunded - $this->first['gross_total']), 2) ;
+                $cash_refund = number_format(abs($after_roundoff), 2);
             }
 
         }
