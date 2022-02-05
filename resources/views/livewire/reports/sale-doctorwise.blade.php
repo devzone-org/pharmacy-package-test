@@ -127,7 +127,7 @@
                             @if(!empty($report))
                                 @foreach($report as $r)
                                     <tr>
-                                        <td  class="px-3 py-3   text-sm font-medium text-gray-500">
+                                        <td class="px-3 py-3   text-sm font-medium text-gray-500">
                                             {{ $loop->iteration  }}
                                         </td>
                                         <td title="Doctor" class="px-3 py-3 text-center  text-sm text-gray-500">
@@ -142,21 +142,29 @@
                                         <td title="Discount (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             ({{number_format($r['total']-$r['total_after_disc'],2)}})
                                         </td>
-                                        <td title="Sales Return (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Sales Return (PKR)"
+                                            class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['total_refund'],2)}}
                                         </td>
-                                        <td title="Net Sales (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Net Sales (PKR)"
+                                            class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['total_after_refund'],2)}}
                                         </td>
                                         <td title="COS (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['cos'],2)}}
                                         </td>
-                                        <td title="Gross Profit (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Gross Profit (PKR)"
+                                            class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['total_after_refund']-$r['cos'],2)}}
                                         </td>
-                                        <td title="Gross Margin (%)" class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{number_format((($r['total_after_refund']-$r['cos'])/$r['total_after_refund'])*100,2)}}
-                                            %
+                                        <td title="Gross Margin (%)"
+                                            class="px-3 py-3 text-center  text-sm text-gray-500">
+                                            @if(empty(round($r['total_after_refund'], 2)))
+                                                0 %
+                                            @else
+                                                {{number_format((($r['total_after_refund']-$r['cos'])/round($r['total_after_refund'], 2)) * 100, 2)}}
+                                                %
+                                            @endif
                                         </td>
                                         <td title="# of Sales" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{$r['no_of_sale']}}
