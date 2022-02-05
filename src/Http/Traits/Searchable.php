@@ -227,7 +227,7 @@ trait Searchable
             } else {
                 $search = $search->orderBy('qty', 'desc');
             }
-            $search = $search->get();
+            $search = $search->limit(20)->get();
             if ($search->isNotEmpty()) {
                 $this->searchable_data = $search->toArray();
             } else {

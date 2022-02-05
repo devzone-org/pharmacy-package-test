@@ -227,7 +227,7 @@
                                         }elseif (!empty($h->rounded_dec)){
                                             $val = -1 * $h->rounded_dec;
                                         }
-                                        $after_roundoff = ($h->gross_total + $val)
+                                        $after_roundoff = ($h->gross_total + $val);
                                     @endphp
 
                                     <td class="px-3 py-3 text-sm text-gray-500">
