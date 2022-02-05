@@ -189,14 +189,6 @@
                         </select>
                     </div>
 
-{{--                    <div class="col-span-6 sm:col-span-2">--}}
-{{--                        <label for="manufacture" class="block text-sm font-medium text-gray-700">Manufacture</label>--}}
-{{--                        <input wire:model="manufacture_name" type="text" readonly--}}
-{{--                               wire:click="searchableOpenModal('manufacture_id','manufacture_name','manufacture')"--}}
-{{--                               autocomplete="off"--}}
-{{--                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"--}}
-{{--                               id="manufacture">--}}
-{{--                    </div>--}}
 
 
                     <div class="col-span-6 sm:col-span-2">
@@ -212,14 +204,6 @@
                         </select>
                     </div>
 
-{{--                    <div class="col-span-6 sm:col-span-2">--}}
-{{--                        <label for="rack" class="block text-sm font-medium text-gray-700">Rack #</label>--}}
-{{--                        <input wire:model="rack_name" type="text" readonly--}}
-{{--                               wire:click="searchableOpenModal('rack_id','rack_name','rack')"--}}
-{{--                               autocomplete="off"--}}
-{{--                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"--}}
-{{--                               id="rack">--}}
-{{--                    </div>--}}
 
                     <div class="col-span-6 sm:col-span-2">
                         <label for="category_id" class="block text-sm font-medium text-gray-700">Category</label>
@@ -234,14 +218,6 @@
                         </select>
                     </div>
 
-{{--                    <div class="col-span-6 sm:col-span-2">--}}
-{{--                        <label for="category" class="block text-sm font-medium text-gray-700">Category</label>--}}
-{{--                        <input wire:model="category_name" type="text" readonly--}}
-{{--                               wire:click="searchableOpenModal('category_id','category_name','category')"--}}
-{{--                               autocomplete="off"--}}
-{{--                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"--}}
-{{--                               id="category">--}}
-{{--                    </div>--}}
 
 
                     <div class="col-span-6 sm:col-span-2">
