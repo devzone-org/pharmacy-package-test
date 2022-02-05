@@ -434,10 +434,10 @@
                                         $after_roundoff = $refunded - ($first['gross_total'] + $val)
                                     @endphp
                                     <tr>
-                                        <th colspan="5" class="px-2 py-2 text-right border-r text-md text-gray-900">
+                                        <th colspan="5" class="px-2 py-2 text-right border-r text-md text-red-600">
                                             After Round-Off Cash
                                         </th>
-                                        <th colspan="3" class="px-2 py-2 text-center border-r text-md text-gray-900">
+                                        <th colspan="3" class="px-2 py-2 text-center border-r text-md text-red-600">
                                                 {{ number_format(abs($after_roundoff),2) }}
                                         </th>
                                     </tr>
