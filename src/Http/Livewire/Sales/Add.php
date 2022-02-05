@@ -651,6 +651,12 @@ class Add extends Component
                     if ($sale_qty > 0) {
                         $dec = 0;
                         $product_inv = ProductInventory::find($i->id);
+                        if (round($product_inv->supply_price, 2) > round($s['retail_price'], 2)) {
+                            throw new \Exception('You are selling ' . $s['item'] . ' at loss.');
+                        }
+                        if (round($product_inv->retail_price, 2) != round($s['retail_price'], 2)) {
+                            throw new \Exception('The retail price of ' . $s['item'] . ' is not correct.');
+                        }
                         if ($sale_qty <= $product_inv->qty) {
                             $dec = $sale_qty;
                             $product_inv->decrement('qty', $sale_qty);

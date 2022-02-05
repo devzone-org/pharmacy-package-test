@@ -301,10 +301,8 @@
                                                    autocomplete="off">
                                         </td>
                                         <td class="px-2  text-center  border-r text-md text-gray-500">
-                                            <input type="number" wire:model.lazy="sales.{{ $key }}.retail_price"
-                                                   onClick="this.select();"
-                                                   class="p-0 focus:ring-0 block w-full  text-md border-0 text-center "
-                                                   autocomplete="off">
+
+                                            {{ $s['retail_price'] }}
 
                                         </td>
                                         <td class="px-2 bg-gray-50  text-center border-r text-md text-gray-500">

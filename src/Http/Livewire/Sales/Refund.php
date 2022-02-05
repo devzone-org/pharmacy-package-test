@@ -318,6 +318,7 @@ class Refund extends Component
     public function saleComplete()
     {
         try {
+            $total_discount_give = 0;
             if ($this->type == 'refund') {
                 if (empty(collect($this->refunds)->where('new', '1')->all())) {
                     throw new \Exception('Refund invoice is empty.');
@@ -350,6 +351,37 @@ class Refund extends Component
             foreach ($this->sales as $r) {
                 $sales_cost = $sales_cost + ($r['s_qty'] * $r['supply_price']);
                 $sales_retail = $sales_retail + ($r['total_after_disc']);
+            }
+
+
+            foreach ($this->sales as $key => $s) {
+                if ($s['discountable'] == 't') {
+                    $disc = 0;
+                    if (!empty($s['max_discount'])) {
+                        if ($this->sales[$key]['disc'] >= $s['max_discount']) {
+                            $disc = $s['max_discount'];
+                        } else {
+                            $disc = $this->sales[$key]['disc'];
+                        }
+                    }
+
+                    $discount = round(($disc / 100) * $this->sales[$key]['total'], 2);
+                    $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'] - $discount;
+                    $this->sales[$key]['disc'] = $disc;
+                    $packing = 1;
+                    if (!empty($s['packing'])) {
+                        $packing = $s['packing'];
+                    }
+                    $after_discount_retail = ($this->sales[$key]['total_after_disc']) / $s['s_qty'];
+                    if (round($after_discount_retail, 2) < round($s['product_supply_price'] / $packing, 2)) {
+                        $avail_pe = round($s['product_supply_price'] / $s['product_price'], 4);
+                        $avail_per = round((1 - $avail_pe) * 100, 4);
+
+                        throw new \Exception('Maximum discount possible ' . $avail_per . '% on ' . $s['item']);
+                    }
+
+                    $total_discount_give = $total_discount_give + $discount;
+                }
             }
 
             DB::beginTransaction();
@@ -406,6 +438,9 @@ class Refund extends Component
                     $change_due = round(abs($rounded_dif) - $this->received, 2);
                 }
 
+            }
+            if (round($new_sub_total - $new_total_after_disc, 2) > round($total_discount_give, 2)) {
+                throw new \Exception('Total discount is more than as you given to customer. Please recheck sale.');
             }
             $newSale = $sale->replicate();
             $newSale->created_at = Carbon::now();
@@ -484,9 +519,9 @@ class Refund extends Component
             }
             if (!empty($this->sales)) {
                 foreach ($this->sales as $key => $s) {
+
                     $inv = ProductInventory::where('product_id', $s['product_id'])
-                        ->where('retail_price', $s['retail_price'])
-                        ->where('qty', '>', 0)->get();
+                        ->where('qty', '>', 0)->orderBy('id', 'asc')->get();
 
                     if ($inv->sum('qty') < $s['s_qty']) {
                         throw new \Exception('System does not have much inventory for the item ' . $s['item']);
@@ -497,6 +532,12 @@ class Refund extends Component
                         if ($sale_qty > 0) {
                             $dec = 0;
                             $product_inv = ProductInventory::find($i->id);
+                            if (round($product_inv->supply_price, 2) > round($s['retail_price'], 2)) {
+                                throw new \Exception('You are selling ' . $s['item'] . ' at loss.');
+                            }
+                            if (round($product_inv->retail_price, 2) != round($s['retail_price'], 2)) {
+                                throw new \Exception('The retail price of ' . $s['item'] . ' is not correct.');
+                            }
                             if ($sale_qty <= $product_inv->qty) {
                                 $dec = $sale_qty;
                                 $product_inv->decrement('qty', $sale_qty);
