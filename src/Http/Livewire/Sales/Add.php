@@ -130,9 +130,9 @@ class Add extends Component
                 if (!empty($this->admission_details)) {
                     $this->admission_details = $this->admission_details->toArray();
                 }
-                $proce  = DB::table('procedures')->where('id',$procedure_id)->get();
+                $proce = DB::table('procedures')->where('id', $procedure_id)->get();
                 $procedure_name = '';
-                if($proce->isNotEmpty()){
+                if ($proce->isNotEmpty()) {
                     $procedure_name = $proce->first()->name;
                 }
 
@@ -259,10 +259,10 @@ class Add extends Component
                 $data['total'] = $data['retail_price'] * $data['s_qty'];
                 $data['total_after_disc'] = $data['retail_price'] * $data['s_qty'];
 
-                if ($data['control_medicine'] == 't'){
+                if ($data['control_medicine'] == 't') {
                     $this->control_med_check = true;
                     $data['control_medicine'] = true;
-                }else{
+                } else {
                     $data['control_medicine'] = false;
                 }
                 $this->sales[] = $data;
@@ -332,7 +332,7 @@ class Add extends Component
                             }
 
                             $discount = round(($this->sales[$array[1]]['disc'] / 100) * $this->sales[$array[1]]['total'], 2);
-                        }else {
+                        } else {
                             $this->sales[$array[1]]['disc'] = 0;
                         }
 
@@ -363,7 +363,7 @@ class Add extends Component
                     if (!empty($s['max_discount'])) {
                         if ($value >= $s['max_discount']) {
                             $disc = $s['max_discount'];
-                        }else{
+                        } else {
                             $disc = $value;
                         }
                     }
@@ -385,14 +385,14 @@ class Add extends Component
         if (empty($value) || !is_numeric($value)) {
             $this->received = 0;
         }
- 
+
         if (empty($this->credit) && env('ROUNDOFF_CHECK', false) && collect($this->sales)->sum('total_after_disc') >= env('MIMIMUM_ROUNDOFF_BILL', 50)) {
             $this->payable = $this->received - round(collect($this->sales)->sum('total_after_disc') / 5) * 5;
         } else {
             $this->payable = $this->received - collect($this->sales)->sum('total_after_disc');
         }
- 
-      
+
+
     }
 
     public function removeEntry($key)
@@ -460,8 +460,10 @@ class Add extends Component
     public function saleComplete()
     {
         try {
-            if ($this->control_med_check && empty($this->patient_id)){
-                throw new \Exception('Patient information is required.');
+            if (!$this->admission) {
+                if ($this->control_med_check && empty($this->patient_id)) {
+                    throw new \Exception('Patient information is required.');
+                }
             }
             $total_discount_give = 0;
             DB::beginTransaction();
@@ -758,7 +760,7 @@ class Add extends Component
                         $v2 = round($v1 / 5) * 5;
                         $rounded = $v2 - $v1;
                         $round_acc_id = $accounts->where('reference', 'exp-invoice-rounding-off')->first();
-                        if (empty($round_acc_id)){
+                        if (empty($round_acc_id)) {
                             throw new \Exception('Invoice Round Off Account not found!');
                         }
                         $round_acc_id = $round_acc_id->id;
