@@ -198,7 +198,7 @@
                             <option value=""></option>
                             @if($all_racks->isNotEmpty())
                                 @foreach($all_racks as $key=>$ra)
-                                    <option value="{{$ra->id}}">{{$ra->name.$ra->tier}}</option>
+                                    <option value="{{$ra->id}}">{{$ra->name}}</option>
                                 @endforeach
                             @endif
                         </select>
