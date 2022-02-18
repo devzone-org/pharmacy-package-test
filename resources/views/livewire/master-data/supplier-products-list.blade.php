@@ -60,6 +60,18 @@
                                 </div>
 
                                 <div class="col-span-8 sm:col-span-2">
+                                    <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+                                    <select wire:model.defer="category_id"
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    >
+                                        <option value=""></option>
+                                        @foreach($categories as $i => $cat)
+                                            <option value="{{$cat->id}}">{{$cat->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-span-8 sm:col-span-2">
                                     <label for="show_data" class="block text-sm font-medium text-gray-700">Show Data</label>
                                     <select wire:model.defer="show_data"
                                             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
@@ -136,6 +148,10 @@
                                             Supplier
                                         </th>
 
+                                        <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                            Category
+                                        </th>
+
                                         <th scope="col" class="relative px-3 py-3">
                                             <span class="sr-only">Verify</span>
                                         </th>
@@ -184,6 +200,18 @@
                                                     <option value=""></option>
                                                     @foreach($suppliers as $i => $sup)
                                                         <option value="{{$sup->id}}" wire:key="{{$loop->index}}">{{$sup->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+
+                                            <td class="px-3 py-3   text-sm text-gray-500">
+                                                <label for="category" class="sr-only block text-sm font-medium text-gray-700">Category</label>
+                                                <select wire:model="all_products.{{$key}}.category_id"
+                                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                        id="supplier">
+                                                    <option value=""></option>
+                                                    @foreach($categories as $i => $cat)
+                                                        <option value="{{$cat->id}}" wire:key="{{$loop->index}}">{{$cat->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </td>
