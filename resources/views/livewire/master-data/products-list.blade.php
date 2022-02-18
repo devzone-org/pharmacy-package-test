@@ -133,7 +133,7 @@
                                 </th>
 
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Rack
+                                    Rack - Tier
                                 </th>
 
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
