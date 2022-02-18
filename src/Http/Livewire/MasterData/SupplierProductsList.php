@@ -54,7 +54,7 @@ class SupplierProductsList extends Component
             ->when(!empty($this->show_data),function($q){
                 return $q->where('p.narcotics', $this->show_data);
             })
-            ->limit(100)
+            ->limit(20)
             ->get()
             ->toArray();
 
