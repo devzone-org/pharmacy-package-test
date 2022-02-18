@@ -27,7 +27,13 @@ class Category extends Component
         'name' => 'required|string|unique:categories,name',
         'status' => 'required|in:t,f',
 //        'discountable'=> 'required|in:t,f',
-//        'max_disc'=> 'required_if:discountable,t|numeric|between:1,100',
+        'max_disc'=> 'required_if:discountable,t|numeric|between:1,100',
+    ];
+
+    protected $validationAttributes = [
+        'name'=>'Name',
+        'status'=>'Status',
+        'max_disc'=>'Max Discount'
     ];
 
 
@@ -97,8 +103,8 @@ class Category extends Component
                 'max_discount' => $this->emax_disc?:null,
             ]);
 
+            $this->reset(['edit_modal', 'estatus', 'ename', 'ediscountable', 'emax_disc', 'error']);
             $this->success = 'Record has been updated.';
-            $this->reset(['estatus', 'ename', 'ediscountable', 'emax_disc', 'edit_modal','error']);
         } catch (\Exception $ex){
             $this->addError('exception', $ex->getMessage());
         }
