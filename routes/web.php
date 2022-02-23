@@ -77,20 +77,19 @@ Route::group(['middleware' => 'permission:12.purchase-order-create'], function (
     Route::get('purchases/add', function () {
         return view('pharmacy::purchases.purchase-add');
     });
-  Route::get('purchases/edit/{id}', function ($id) {
-    return view('pharmacy::purchases.purchase-edit', compact('id'));
-});
+    Route::get('purchases/edit/{id}', function ($id) {
+        return view('pharmacy::purchases.purchase-edit', compact('id'));
+    });
 });
 Route::get('purchases/receive/{id}', function ($id) {
     return view('pharmacy::purchases.purchase-receive', compact('id'));
 })->middleware('permission:12.receive-purchase-order');
-Route::get('purchases/purchase-order/view/pdf', [\Devzone\Pharmacy\Http\Controllers\PdfController::class , 'PoDownloadPDF']);
-
+Route::get('purchases/purchase-order/view/pdf', [\Devzone\Pharmacy\Http\Controllers\PdfController::class, 'PoDownloadPDF']);
 
 
 Route::get('purchases/view/{id}', function ($id) {
     return view('pharmacy::purchases.purchase-view', compact('id'));
- 
+
 })->middleware('permission:12.view-purchase-order');
 Route::group(['middleware' => 'permission:12.purchase-orders'], function () {
     Route::get('purchases', function () {
@@ -141,13 +140,17 @@ Route::group(['middleware' => 'permission:12.stock-adjustment'], function () {
 });
 
 //Expiry Adjustment
-Route::get('purchases/expiry-adjustment/add', function () {
-    return view('pharmacy::purchases.expiry-adjustment');
+Route::group(['middleware' => 'permission:12.expiry-adjustment'], function () {
+
+    Route::get('purchases/expiry-adjustment/add', function () {
+        return view('pharmacy::purchases.expiry-adjustment');
+    });
+
+    Route::get('purchases/expiry-adjustment', function () {
+        return view('pharmacy::purchases.expiry-adjustment-listing');
+    });
 });
 
-Route::get('purchases/expiry-adjustment', function () {
-    return view('pharmacy::purchases.expiry-adjustment-listing');
-});
 //
 
 Route::get('sales', function () {
