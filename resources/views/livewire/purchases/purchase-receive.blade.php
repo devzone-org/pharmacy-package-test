@@ -14,8 +14,8 @@
         </h3>
     </div>
     <form wire:submit.prevent="create">
-        <div class="shadow sm:rounded-md sm:overflow-hidden">
-            <div class=" bg-white py-6 px-4 space-y-6 sm:p-6">
+        <div class="shadow sm:rounded-md sm:overflow-hidden" >
+            <div class="bg-white py-6 px-4 space-y-6 sm:p-6" >
                 <div>
                     <h3 class="text-lg leading-6 font-medium text-gray-900">Receive Purchase Order</h3>
                 </div>
@@ -95,7 +95,8 @@
 
                     <div class="col-span-6">
                         <p class="text-indigo-600 font-bold cursor-pointer inline-block"
-                           wire:click="openProductModal">+ Add Products</p>
+                           wire:click="openProductModal">+ Add Products
+                        </p>
                     </div>
                 </div>
 
@@ -166,7 +167,6 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                 @foreach($order_list as $key => $m)
-
 
                     <tr>
                         <td class="px-3 py-3  border text-sm font-medium text-gray-500">
@@ -241,6 +241,7 @@
                                       clip-rule="evenodd"></path>
                             </svg>
                         </td>
+
                     </tr>
 
 
@@ -285,18 +286,17 @@
                     <th scope="col" class="relative px-3 py-3">
                         <span class="sr-only">Edit</span>
                     </th>
-                    <th></th>
-                    <th></th>
                 </tr>
                 <tr>
-                    <th colspan="14">&nbsp;</th>
+                    <th colspan="16">&nbsp;</th>
                 </tr>
 
                 <tr>
                     <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Total Cost</th>
                     <th colspan="3" class="px-3 py-3    text-left text-lg font-medium text-gray-900   ">
                         {{ number_format(collect($order_list)->sum('total_cost'),2) }}
-                    </th>    <th colspan="3" class="px-3 py-3    text-left text-lg font-medium text-gray-900   ">
+                    </th>
+                    <th colspan="4" class="px-3 py-3    text-left text-lg font-medium text-gray-900   ">
                     </th>
                 </tr>
 
@@ -308,8 +308,8 @@
                         class="block w-full   border border-gray-300 rounded-md shadow-sm py-1 px-1 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500  text-lg">
                         </input>
                     </th>
-                    <th></th>
-                    <th></th>
+                    <th colspan="4" class="px-3 py-3    text-left text-lg font-medium text-gray-900 "></th>
+
                 </tr>
 
                 <tr>
@@ -317,16 +317,16 @@
                     <th colspan="3" class="px-3 py-3    text-left text-lg font-medium text-gray-900   ">
                         {{ number_format($advance_tax_amount,2) }}
                     </th>
-                    <th></th>
-                    <th></th>
+                    <th colspan="4" class="px-3 py-3    text-left text-lg font-medium text-gray-900   "></th>
+
                 </tr>
                 <tr>
                     <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Gross Cost</th>
                     <th colspan="3" class="px-3 py-3    text-left text-lg font-medium text-gray-900   ">
                         {{ number_format(collect($order_list)->sum('total_cost') + $advance_tax_amount,2) }}
                     </th>
-                    <th></th>
-                    <th></th>
+                    <th colspan="4" class="px-3 py-3    text-left text-lg font-medium text-gray-900   ">
+                    </th>
                 </tr>
 
                 </tbody>
