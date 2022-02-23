@@ -140,6 +140,16 @@ Route::group(['middleware' => 'permission:12.stock-adjustment'], function () {
     });
 });
 
+//Expiry Adjustment
+Route::get('purchases/expiry-adjustment/add', function () {
+    return view('pharmacy::purchases.expiry-adjustment');
+});
+
+Route::get('purchases/expiry-adjustment', function () {
+    return view('pharmacy::purchases.expiry-adjustment-listing');
+});
+//
+
 Route::get('sales', function () {
     return view('pharmacy::sales.history');
 })->middleware('permission:12.sale-history');

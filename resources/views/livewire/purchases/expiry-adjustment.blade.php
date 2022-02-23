@@ -1,32 +1,37 @@
 <div>
     <div class="pb-5 border-gray-200">
         <h3 class="text-lg leading-6 font-medium text-gray-900 flex items-center">
-            <a href="{{ url('pharmacy/purchases/stock-adjustment') }}"
+            <a href="{{ url('pharmacy/purchases/expiry-adjustment') }}"
                class="p-3 bg-gray-200 border-2 rounded-md  border-gray-400 cursor-pointer hover:bg-gray-300 ">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                     <path
-                        fill-rule="evenodd"
-                        d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                        clip-rule="evenodd"></path>
+                            fill-rule="evenodd"
+                            d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                            clip-rule="evenodd"></path>
                 </svg>
             </a>
             <span class="ml-4">Adjustment History</span>
         </h3>
     </div>
 
+
     <form action="#" method="POST">
         <div class="shadow sm:rounded-md sm:overflow-hidden">
-            <div class="bg-white py-6 flex   justify-between items-center  px-4  sm:p-6">
-                <div>
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">Stock Adjustment</h3>
-                    <p class="mt-1 text-sm text-gray-500">Here you can increase or decrease the stock.</p>
-                </div>
-                <div class="  ">
-                    <button type="button"
-                            wire:click="searchableOpenModal('product_id', 'product_name', 'adjustment_items')"
-                            class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Search Items
-                    </button>
+            <div class="bg-white">
+                @include('pharmacy::include.errors')
+                <div class="py-6 px-4 sm:p-6 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Expiry Adjustment</h3>
+                        <p class="mt-1 text-sm text-gray-500">Here you can increase or decrease the expiry of your
+                            products.</p>
+                    </div>
+                    <div class="  ">
+                        <button type="button"
+                                wire:click="searchableOpenModal('product_id', 'product_name', 'adjustment_items')"
+                                class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Search Items
+                        </button>
+                    </div>
                 </div>
 
             </div>
@@ -44,19 +49,15 @@
                         </th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Available Qty
+                            Order Id
                         </th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Expiry
+                            Old Expiry
                         </th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Indicator
-                        </th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Qty
+                            New Expiry
                         </th>
                         <th scope="col" class="relative px-6 py-3">
                             <span class="sr-only">Edit</span>
@@ -73,24 +74,16 @@
                                 {{ $a['item'] }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $a['qty'] }}
+                                #{{ $a['po_id'] }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $a['expiry'] }}
+                                {{ date('m/d/Y', strtotime($a['expiry'])) }}
                             </td>
 
                             <td class=" px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <select name="" wire:model="adjustments.{{ $key }}.indicator"
-                                        class=" w-48  px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    <option value="i">Increase</option>
-                                    <option value="d">Decrease</option>
-                                </select>
-                            </td>
-
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-
-                                <input type="number" wire:model.debounce="adjustments.{{ $key }}.a_qty"
-                                       class="  w-48  px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <input type="date" wire:model.lazy="adjustments.{{ $key }}.new_expiry" name="new_expiry"
+                                       id="new_expiry"
+                                       class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                             </td>
 
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -178,7 +171,7 @@
                         </div>
                     @endif
 
-                    <p class="text-red-600 text-lg">Please confirm that the inventory below is correct.</p>
+                    <p class="text-red-600 text-lg">Please confirm that the records below are correct.</p>
 
                 </div>
                 <table class="min-w-full divide-y divide-gray-200">
@@ -195,17 +188,12 @@
 
                         <th scope="col"
                             class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Current Qty
+                            Order Id
                         </th>
 
                         <th scope="col"
                             class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Indicator
-                        </th>
-
-                        <th scope="col"
-                            class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            After
+                            Expiry
                         </th>
 
 
@@ -222,23 +210,21 @@
                             </td>
 
                             <td class="px-3 py-1 whitespace-nowrap text-sm text-gray-500">
-                                {{ $a['qty'] }}
+                                #{{ $a['po_id'] }}
                             </td>
 
 
                             <td class="px-3 py-1 whitespace-nowrap text-sm text-gray-500">
-                                {{ $a['indicator'] == 'i'? 'Increase':'Decrease' }} By {{ $a['a_qty'] }}
-                            </td>
-
-                            <td class="px-3 py-1 whitespace-nowrap text-sm text-gray-500">
-                                {{$a['indicator'] == 'i' ? ($a['a_qty'] + $a['qty']) :($a['qty'] - $a['a_qty'])  }}
+                                {{ $a['expiry'].' ' }} {{ $a['expiry'] < $a['new_expiry'] ? 'Increased':'Decreased' }}
+                                To {{ $a['new_expiry'] }}
                             </td>
                         </tr>
                     @endforeach
                     <tr>
                         <th colspan="5">
                             <label for="" class="p-2 underline">Remarks*</label>
-                            <textarea name="" cols="30" rows="5"  wire:model.defer="remarks" class="p-2 focus:ring-0 block w-full border-0 text-md resize-none h-40  "></textarea>
+                            <textarea name="" cols="30" rows="5" wire:model.defer="remarks"
+                                      class="p-2 focus:ring-0 block w-full border-0 text-md resize-none h-40  "></textarea>
                         </th>
                     </tr>
                     </tbody>
