@@ -299,7 +299,7 @@
 
                             </tbody>
                         </table>
-                        @if($history->hasPages())
+                        @if(!empty($history) && $history->hasPages())
                             <div class="bg-white border-t px-3 py-2">
                                 {{ $history->links() }}
                             </div>
