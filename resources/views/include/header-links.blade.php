@@ -163,14 +163,29 @@
                     </a>
                     <a href="{{ url('pharmacy/purchases/stock-adjustment') }}"
                        class="-m-3 p-3 flex items-center rounded-lg hover:bg-gray-100 {{ Request::segment(2)=='purchases' && (Request::segment(3) == 'stock-adjustment')  ? 'bg-gray-100' : ''}} ">
-                        <svg class="flex-shrink-0 h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"></path></svg>
-
+                        <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
                         <div class="ml-4">
                             <p class="text-base font-medium text-gray-900">
                                 Stock Adjustment
                             </p>
                             <p class="mt-1 text-sm text-gray-500">
                                 Here you can adjust the stock.
+                            </p>
+                        </div>
+                    </a>
+                    <a href="{{ url('pharmacy/purchases/expiry-adjustment') }}"
+                       class="-m-3 p-3 flex items-center rounded-lg hover:bg-gray-100 {{ Request::segment(2)=='purchases' && (Request::segment(3) == 'expiry-adjustment')  ? 'bg-gray-100' : ''}} ">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                        <div class="ml-4">
+                            <p class="text-base font-medium text-gray-900">
+                                Expiry Adjustment
+                            </p>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Here you can adjust the expiry dates of products.
                             </p>
                         </div>
                     </a>

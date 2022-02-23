@@ -33,6 +33,8 @@ use Devzone\Pharmacy\Http\Livewire\Payments\Supplier\Add;
 use Devzone\Pharmacy\Http\Livewire\Payments\Supplier\Edit;
 use Devzone\Pharmacy\Http\Livewire\Payments\Supplier\PaymentList;
 use Devzone\Pharmacy\Http\Livewire\Payments\Supplier\View;
+use Devzone\Pharmacy\Http\Livewire\Purchases\ExpiryAdjustment;
+use Devzone\Pharmacy\Http\Livewire\Purchases\ExpiryAdjustmentListing;
 use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseAdd;
 use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseCompare;
 use Devzone\Pharmacy\Http\Livewire\Purchases\PurchaseEdit;
@@ -172,7 +174,9 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('dashboard.top-supplier-payables',TopSuppliersPayable::class);
 
         Livewire::component('purchase.stock-adjustment', StockAdjustment::class);
+        Livewire::component('purchase.expiry-adjustment', ExpiryAdjustment::class);
         Livewire::component('purchase.stock-adjustment-listing', StockAdjustmentListing::class);
+        Livewire::component('purchase.expiry-adjustment-listing', ExpiryAdjustmentListing::class);
         Livewire::component('dashboard.hourly-trends',HourlyTrends::class);
 
 

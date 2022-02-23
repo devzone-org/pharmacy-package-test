@@ -43,11 +43,16 @@ class StockAdjustment extends Component
     public function updated($name, $value)
     {
         $array = explode('.', $name);
-
         if (count($array) == 3) {
             if ($array[0] == 'adjustments') {
-                if ($array[2] == 'a_qty' && empty($value)) {
-                    $this->adjustments[$array[1]][$array[2]] = 0;
+                if ($array[2] == 'indicator' && $value == 'd' && $this->adjustments[$array[1]]['qty'] == 0) {
+                    $this->adjustments[$array[1]]['indicator'] = 'i';
+                } elseif ($array[2] == 'a_qty') {
+                    if (empty($value)) {
+                        $this->adjustments[$array[1]][$array[2]] = 1;
+                    } elseif ($this->adjustments[$array[1]]['indicator'] == 'd' && $this->adjustments[$array[1]]['qty'] < $value) {
+                        $this->adjustments[$array[1]][$array[2]] = 1;
+                    }
                 }
             }
         }
@@ -96,12 +101,12 @@ class StockAdjustment extends Component
 
                 if (empty($inventory)) {
                     $product = Product::find($a['id']);
-                    if(empty($product)){
+                    if (empty($product)) {
                         throw new \Exception($a['item'] . ' not found.');
                     }
                     $inventory = ProductInventory::create([
                         'product_id' => $a['id'],
-                        'qty' => 0 ,
+                        'qty' => 0,
                         'retail_price' => $product['cost_of_price'],
                         'supply_price' => $product['retail_price'],
                     ]);
@@ -113,7 +118,7 @@ class StockAdjustment extends Component
                     'product_id' => $find['product_id'],
                     'indicator' => $a['indicator'],
                     'qty' => $a['a_qty'],
-                    'current_qty' => $a['qty']?? 0,
+                    'current_qty' => $a['qty'] ?? 0,
                     'remarks' => $this->remarks,
                     'added_by' => Auth::id(),
                     'voucher_no' => $vno

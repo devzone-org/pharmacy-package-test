@@ -60,6 +60,8 @@ class DumpMasterData extends Command
         Permission::updateOrCreate(['name' => '12.stock-near-expiry-report'], ['guard_name' => 'web', 'description' => 'Stock near expiry Report', 'portal' => 'pharmacy', 'section' => 'reports']);
         Permission::updateOrCreate(['name' => '12.inter-transfer-medicine-report'], ['guard_name' => 'web', 'description' => 'Inter Transfer IPD Medicine Report', 'portal' => 'pharmacy', 'section' => 'reports']);
         Permission::updateOrCreate(['name' => '12.inventory-ledger'], ['guard_name' => 'web', 'description' => 'Inventory Ledger', 'portal' => 'pharmacy', 'section' => 'reports']);
+        Permission::updateOrCreate(['name' => '12.expiry-adjustment'], ['guard_name' => 'web', 'description' => 'Expiry Adjustment', 'portal' => 'pharmacy', 'section' => 'purchases']);
+
 
     }
 }
