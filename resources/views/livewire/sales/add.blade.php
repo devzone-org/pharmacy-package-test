@@ -126,37 +126,59 @@
 
 
                             <span class="ml-3">
-                  <button type="button" wire:click="searchableOpenModal('product_id', 'product_name', 'item')"
-                          class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                         xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round"
-                                                                  stroke-width="2"
-                                                                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    Search Item (F1)
-                  </button>
-                </span>
+                              <button type="button"
+                                      wire:click="searchableOpenModal('product_id', 'product_name', 'item')"
+                                      class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor"
+                                     viewBox="0 0 24 24"
+                                     xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round"
+                                                                              stroke-linejoin="round"
+                                                                              stroke-width="2"
+                                                                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                Search Item (F1)
+                              </button>
+                            </span>
+
+                            <span>
+                                @if(!$pending_sale)
+                                    <span class="ml-3">
+                                      <button type="button" wire:click="pendingSaleComplete"
+                                              wire:loading.attr="disabled"
+                                              class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+
+                                          <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none"
+                                               viewBox="0 0 24 24" stroke="currentColor">
+                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                          </svg>
+                                          Pending Sale
+                                      </button>
+                                    </span>
+                                @endif
+                            </span>
+
                             <span class="ml-3">
-                  <button type="button" wire:click="saleComplete" wire:loading.attr="disabled"
-                          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                              <button type="button" wire:click="saleComplete" wire:loading.attr="disabled"
+                                      class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
 
-                      <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                           xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                  <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                       xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round"
+                                                                                stroke-linejoin="round"
+                                                                                stroke-width="2"
+                                                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
 
-                    @if($admission)
-                          Transfer Medicine (F2)
-                      @else
-                        @if($pending_sale)
-                          Pending Sale
-                          @else
-                          Complete Sale
-                            @endif
-                              (F2)
+                                @if($admission)
+                                      Transfer Medicine (F2)
+                                  @else
+                                      @if($pending_sale)
+                                          Pending Sale
+                                      @else
+                                          Complete Sale
+                                      @endif
+                                        (F2)
 
-                      @endif
-                  </button>
-                </span>
+                                  @endif
+                              </button>
+                            </span>
 
                         </div>
 
@@ -310,7 +332,8 @@
                                         </td>
                                         @if($admission==false)
                                             <td class="px-2  text-center border-r text-md text-gray-500">
-                                                <input type="number" step="0.01" min="0" max="100" wire:model.lazy="sales.{{ $key }}.disc"
+                                                <input type="number" step="0.01" min="0" max="100"
+                                                       wire:model.lazy="sales.{{ $key }}.disc"
                                                        onClick="this.select();"
                                                        class="text-center p-0 focus:ring-0 block w-full   text-md border-0  "
                                                        autocomplete="off">
@@ -323,7 +346,8 @@
                                             {{ number_format($s['total_after_disc'],2) }}
                                         </td>
                                         <td class="  w-10 cursor-pointer px-2 py-3   border-r text-center text-md font-medium text-red-700  tracking-wider  ">
-                                            <svg wire:click="removeEntry('{{ $key }}')" wire:loading.attr="disabled" class="w-5 h-5 "
+                                            <svg wire:click="removeEntry('{{ $key }}')" wire:loading.attr="disabled"
+                                                 class="w-5 h-5 "
                                                  fill="currentColor"
                                                  viewBox="0 0 20 20"
                                                  xmlns="http://www.w3.org/2000/svg">
@@ -428,16 +452,16 @@
                                 </tr>
                                 @if($admission==false && $credit == false)
                                     <tr class="bg-gray-50">
-                                    @if(env('ROUNDOFF_CHECK', false) && collect($sales)->sum('total_after_disc') >= env('MIMIMUM_ROUNDOFF_BILL', 50))
-                                        <th scope="col" colspan="4"
-                                            class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-red-500  tracking-wider">
-                                            After Round-off
-                                        </th>
-                                        <th scope="col" colspan="2"
-                                            class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-red-500 uppercase tracking-wider">
-                                            {{ number_format(round(collect($sales)->sum('total_after_disc')/5)*5 ,2) }}
-                                        </th>
-                                    @endif
+                                        @if(env('ROUNDOFF_CHECK', false) && collect($sales)->sum('total_after_disc') >= env('MIMIMUM_ROUNDOFF_BILL', 50))
+                                            <th scope="col" colspan="4"
+                                                class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-red-500  tracking-wider">
+                                                After Round-off
+                                            </th>
+                                            <th scope="col" colspan="2"
+                                                class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-red-500 uppercase tracking-wider">
+                                                {{ number_format(round(collect($sales)->sum('total_after_disc')/5)*5 ,2) }}
+                                            </th>
+                                        @endif
                                     </tr>
                                     <tr>
                                         <th scope="col" colspan="4"

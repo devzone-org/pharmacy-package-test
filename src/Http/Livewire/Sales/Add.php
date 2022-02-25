@@ -89,6 +89,7 @@ class Add extends Component
     public $patient_age;
     public $has_contact = true;
     public $pending_sale = false;
+    public $pending_and_complete = false;
     public $pending_sale_id;
     public $control_med_check = false;
 
@@ -145,7 +146,7 @@ class Add extends Component
                     ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
                     ->where('pm.procedure_id', $this->procedure_id)
                     ->where('pi.qty', '>', 0)
-                    ->select('p.name as item', 'p.retail_price as product_price', 'p.discountable', 'p.max_discount', 'pm.qty as required_qty',
+                    ->select('p.name as item', 'p.retail_price as product_price', 'p.discountable', 'p.max_discount', 'p.control_medicine', 'pm.qty as required_qty',
                         'pi.qty as available_qty', 'pi.retail_price', 'pro.name as procedure_name',
                         'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'r.name as rack', 'r.tier')
                     ->groupBy('p.id')
@@ -457,6 +458,14 @@ class Add extends Component
         }
     }
 
+
+    public function pendingSaleComplete()
+    {
+        $this->pending_and_complete = true;
+        $this->saleComplete();
+    }
+
+
     public function saleComplete()
     {
         try {
@@ -502,7 +511,7 @@ class Add extends Component
                 }
             }
 
-            if (auth()->user()->can('add-pending-sale')) {
+            if (auth()->user()->can('add-pending-sale') || $this->pending_and_complete) {
 
                 $pending_sale_id = PendingSale::create([
                     'patient_id' => $this->patient_id,
@@ -540,6 +549,7 @@ class Add extends Component
                 $this->searchableReset();
                 $this->success = 'Sale has been added to pending list.';
                 DB::commit();
+                $this->pending_and_complete = false;
                 return;
             }
 
@@ -932,11 +942,16 @@ class Add extends Component
             $sales = PendingSale::from('pending_sales as ps')
                 ->join('pending_sale_details as psd', 'ps.id', '=', 'psd.sale_id')
                 ->join('products as p', 'p.id', 'psd.product_id')
+                ->join('product_inventories as pi', 'p.id', '=', 'pi.product_id')
                 ->where('ps.id', $this->pending_sale_id)
-                ->select('psd.product_id', 'psd.qty as s_qty', 'ps.sale_by', 'psd.total_after_disc', 'psd.total', 'p.name as item', 'psd.retail_price', 'psd.disc', 'ps.patient_id', 'ps.referred_by')
+                ->select('psd.product_id', 'psd.qty as s_qty', 'ps.sale_by','pi.supply_price', 'psd.total_after_disc', 'psd.total', 'p.name as item', 'p.control_medicine', 'p.discountable', 'max_discount', 'psd.retail_price', 'psd.disc', 'ps.patient_id', 'ps.referred_by')
+                ->groupBy('p.id')
                 ->get();
             foreach ($sales as $key => $sale) {
                 $this->sales[] = $sale;
+                if ($sale->control_medicine == 't'){
+                    $this->control_med_check = true;
+                }
             }
             if (!empty($sales[0]['patient_id'])) {
                 $patient = Patient::find($sales[0]['patient_id']);
