@@ -102,24 +102,29 @@
                                 <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                     {{ $admission->procedure_name  }}
                                 </td>
+                                @php
+                                    $amount = 0;
+                                    $issued = 0;
+                                    $returned = 0;
+                                    $x = \Devzone\Pharmacy\Models\Sale\Sale::where('admission_id', $admission->admission_id)->where('procedure_id', $admission->procedure_id)->get();
+                                    if ($x->isNotEmpty()){
+                                        $amount = empty($x->sum('gross_total'))?0:$x->sum('gross_total');
+                                        $issued = $x->whereNull('refunded_id')->count();
+                                        $returned = $x->whereNotNull('refunded_id')->count();
+                                    }
+                                @endphp
+
                                 <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                    {{ number_format((int)$admission->amount)  }}
+                                    {{ number_format((int)$amount, 2)  }}
                                 </td>
                                 <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                    @if(!empty($admission->sale_id))
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
-                                                  Issued
-                                            </span>
-                                        @if(!empty($admission->sold_By))
-                                            <br>
-                                            {{!empty($admission->sold_By) ? ' by '.$admission->sold_By : ''}}
-                                            <br> {{ !empty($admission->sale_at) ? '@ ' .date('d M Y H:i A',strtotime($admission->sale_at)) : '' }}
-                                        @endif
-                                    @else
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                                              Not Issued
+                                        <span class="my-1 inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                                            Issued: {{$issued}}
                                         </span>
-                                    @endif
+                                    <br>
+                                        <span class="my-1 inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            Return: {{$returned}}
+                                        </span>
                                 </td>
                                 <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                     {{ date('d M Y',strtotime($admission->admission_date)) }} {{date('H:i A',strtotime($admission->admission_time))}}
@@ -164,16 +169,21 @@
                                                        role="menuitem" tabindex="-1">Issue Medicines</a>
                                                 @endif
                                                 @if(!empty($admission->sale_id))
-                                                    <a href="{{url('pharmacy/sales/view/'.$admission->sale_id.'?admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id.'&doctor_id='.$admission->doctor_id)}}"
-                                                       class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                                       role="menuitem" tabindex="-1">View</a>
-                                                    @if(empty($admission->checkout_date))
-                                                        <a href="{{url('pharmacy/sales/refund/'.$admission->sale_id.'?type=issue&admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id.'&doctor_id='.$admission->doctor_id)}}"
+                                                        <a href="{{url('pharmacy/sales/admissions/detail/'.$admission->sale_id.'?admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id.'&doctor_id='.$admission->doctor_id)}}"
                                                            class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                                           role="menuitem" tabindex="-1">Issue More</a>
-                                                        <a href="{{url('pharmacy/sales/refund/'.$admission->sale_id.'?type=refund&admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id.'&doctor_id='.$admission->doctor_id)}}"
-                                                           class="text-red-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                                                           role="menuitem" tabindex="-1">Refund</a>
+                                                           role="menuitem" tabindex="-1">Details</a>
+                                                    @if(empty($admission->checkout_date))
+                                                            <a href="{{url('pharmacy/sales/add?admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id.'&doctor_id='.$admission->doctor_id)}}"
+                                                               class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                                               role="menuitem" tabindex="-1">Issue More</a>
+
+{{--                                                        <a href="{{url('pharmacy/sales/refund/'.$admission->sale_id.'?type=issue&admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id.'&doctor_id='.$admission->doctor_id)}}"--}}
+{{--                                                           class="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"--}}
+{{--                                                           role="menuitem" tabindex="-1">Issue More</a>--}}
+
+{{--                                                        <a href="{{url('pharmacy/sales/refund/'.$admission->sale_id.'?type=refund&admission_id='.$admission->admission_id.'&procedure_id='.$admission->procedure_id.'&doctor_id='.$admission->doctor_id)}}"--}}
+{{--                                                           class="text-red-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"--}}
+{{--                                                           role="menuitem" tabindex="-1">Refund</a>--}}
                                                     @endif
                                                 @endif
                                             </div>
