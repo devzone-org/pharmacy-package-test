@@ -163,6 +163,7 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('report.customer-receivables',\Devzone\Pharmacy\Http\Livewire\Reports\CustomerReceivables::class);
         Livewire::component('master-data.medicine',Medicine::class);
         Livewire::component('sales.admission-pharmacy',\Devzone\Pharmacy\Http\Livewire\Sales\AdmissionPharmacy::class);
+        Livewire::component('sales.admission-pharmacy-detail',\Devzone\Pharmacy\Http\Livewire\Sales\AdmissionPharmacyDetail::class);
         Livewire::component('dashboard.date',Date::class);
         Livewire::component('dashboard.customised-sales-summary',CustomisedSalesSummary::class);
         Livewire::component('dashboard.customised-sales-returns',CustomisedSalesReturns::class);

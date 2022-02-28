@@ -178,6 +178,9 @@ Route::get('sales/transaction/view/{id}', function ($id) {
 Route::get('sales/admissions', function () {
     return view('pharmacy::sales.admission-pharmacy');
 })->middleware('permission:12.ipd-medicine-issue');
+Route::get('sales/admissions/detail/{id}', function () {
+    return view('pharmacy::sales.admission-pharmacy-detail');
+})->middleware('permission:12.ipd-medicine-issue');
 
 Route::get('report/sale-transaction', function () {
     return view('pharmacy::reports.sale-transaction');

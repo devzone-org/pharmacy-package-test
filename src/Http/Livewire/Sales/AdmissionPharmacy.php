@@ -14,12 +14,14 @@ use Livewire\WithPagination;
 
 class AdmissionPharmacy extends Component
 {
-    use Searchable,WithPagination;
+    use Searchable, WithPagination;
     public $admission_no;
     public $patients;
     public $patient;
     public $from;
     public $to;
+
+
     public function render()
     {
         $admissions = AdmissionJobDetail::from('admission_job_details as ajd')
@@ -31,11 +33,7 @@ class AdmissionPharmacy extends Component
             ->join('patients as p', 'p.id', '=', 'apd.patient_id')
             ->join('employees as e', 'e.id', '=', 'ajd.doctor_id')
             ->join('procedures as pro', 'pro.id', '=', 'ajd.procedure_id')
-            ->leftJoin('sales as s',function ($q){
-                return $q->on('s.admission_id','=','apd.admission_id')
-                    ->on('s.procedure_id','=','apd.procedure_id');
-            })
-            ->leftJoin('users as u','u.id','=','s.sale_by')
+
             ->when(!empty($this->admission_no), function ($q) {
                 return $q->where('a.admission_no', 'like', '%' . $this->admission_no . '%');
             })
@@ -57,9 +55,9 @@ class AdmissionPharmacy extends Component
             ->select(
                 'ajd.admission_id', 'ajd.procedure_id', 'ajd.schedule_date', 'ajd.schedule_time',
                 'p.name as patient_name','p.mr_no as patient_mr', 'e.name as doctor_name', 'pro.name as procedure_name',
-                's.gross_total as amount', 'apd.medicines', 'apd.sale_id',
+                'apd.medicines', 'apd.sale_id',
                 'a.admission_no', 'a.admission_date', 'a.admission_time', 'a.checkout_date', 'a.checkout_time',
-                's.sale_at','u.name as sold_By','ajd.doctor_id'
+                'ajd.doctor_id'
             )
             ->paginate(10);
         return view('pharmacy::livewire.sales.admission-pharmacy', ['admissions' => $admissions]);
