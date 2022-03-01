@@ -5,7 +5,7 @@
                 <div class="grid grid-cols-10 gap-6">
                     <div class="col-span-6 sm:col-span-2">
                         <label class="block text-sm font-medium text-gray-700">Product</label>
-                        <input wire:model="product_name" readonly
+                        <input wire:model.defer="product_name" readonly
                                wire:click="searchableOpenModal('product_id', 'product_name', 'product')"
                                type="text"
                                autocomplete="off"
@@ -14,7 +14,7 @@
 
                     <div class="col-span-6 sm:col-span-2">
                         <label class="block text-sm font-medium text-gray-700">Manufacturer</label>
-                        <input wire:model="manufacture_name" readonly
+                        <input wire:model.defer="manufacture_name" readonly
                                wire:click="searchableOpenModal('manufacture_id','manufacture_name','manufacture')"
                                type="text"
                                autocomplete="off"
@@ -23,7 +23,7 @@
 
                     <div class="col-span-6 sm:col-span-2">
                         <label class="block text-sm font-medium text-gray-700">Type</label>
-                        <select wire:model="type"
+                        <select wire:model.defer="type"
                                 class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                             <option value="all">All</option>
                             <option value="reorder_level">Reorder Level</option>
