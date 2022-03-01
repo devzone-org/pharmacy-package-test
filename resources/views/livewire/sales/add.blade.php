@@ -140,7 +140,7 @@
                             </span>
 
                             <span>
-                                @if(!$pending_sale)
+                                @if(!$pending_sale && env('PHARMACY_PENDING_SALE',false))
                                     <span class="ml-3">
                                       <button type="button" wire:click="pendingSaleComplete"
                                               wire:loading.attr="disabled"

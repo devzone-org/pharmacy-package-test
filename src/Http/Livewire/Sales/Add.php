@@ -126,11 +126,13 @@ class Add extends Component
                     ->where('a.admission_id', $admission_id)
                     ->where('a.procedure_id', $procedure_id)
                     ->where('a.doctor_id', $doctor_id)
-                    ->select('p.mr_no', 'p.name', 'ad.admission_no', 'e.name as doctor')->first();
+                    ->select('p.mr_no', 'p.name', 'ad.admission_no', 'e.name as doctor', 'ad.patient_id', 'a.doctor_id')->first();
 
                 if (!empty($this->admission_details)) {
                     $this->admission_details = $this->admission_details->toArray();
                 }
+                $this->patient_id = $this->admission_details['patient_id'];
+                $this->referred_by_id = $this->admission_details['doctor_id'];
                 $proce = DB::table('procedures')->where('id', $procedure_id)->get();
                 $procedure_name = '';
                 if ($proce->isNotEmpty()) {
@@ -200,6 +202,40 @@ class Add extends Component
         $this->employees = (json_decode(json_encode($this->employees), true));
     }
 
+    public function validatePendingSale()
+    {
+        $input = request()->all();
+        if (!empty($input['pending_sale_id'])) {
+            $this->pending_sale_id = $input['pending_sale_id'];
+            $sales = PendingSale::from('pending_sales as ps')
+                ->join('pending_sale_details as psd', 'ps.id', '=', 'psd.sale_id')
+                ->join('products as p', 'p.id', 'psd.product_id')
+                ->join('product_inventories as pi', 'p.id', '=', 'pi.product_id')
+                ->where('ps.id', $this->pending_sale_id)
+                ->select('psd.product_id', 'psd.qty as s_qty', 'ps.sale_by', 'pi.supply_price', 'psd.total_after_disc', 'psd.total', 'p.name as item', 'p.control_medicine', 'p.discountable', 'max_discount', 'psd.retail_price', 'psd.disc', 'ps.patient_id', 'ps.referred_by')
+                ->groupBy('p.id')
+                ->get();
+            foreach ($sales as $key => $sale) {
+                $this->sales[] = $sale;
+                if ($sale->control_medicine == 't') {
+                    $this->control_med_check = true;
+                }
+            }
+            if (!empty($sales[0]['patient_id'])) {
+                $patient = Patient::find($sales[0]['patient_id']);
+                $this->patient_id = $patient['id'];
+                $this->patient_name = $patient['name'];
+            }
+
+            if (!empty($sales[0]['referred_by'])) {
+                $doctor = Employee::find($sales[0]['referred_by']);
+                $this->referred_by_id = $doctor['id'];
+                $this->referred_by_name = $doctor['name'];
+            }
+
+        }
+    }
+
     public function emitReferredById()
     {
         if (empty($this->admission_id) && empty($this->procedure_id)) {
@@ -208,19 +244,6 @@ class Add extends Component
             $this->referred_by_name = $data['name'];
             $this->searchableReset();
         }
-
-    }
-
-    public function checkCustomerBalances()
-    {
-
-        $customer_account = Customer::find($this->customer_id);
-        $this->customer_credit_limit = $customer_account->credit_limit;
-        $previous_credit = Ledger::where('account_id', $customer_account->account_id)
-            ->groupBy('account_id')
-            ->select(DB::raw('sum(debit-credit) as balance'))
-            ->first();
-        $this->customer_previous_credit = !empty($previous_credit) ? $previous_credit->balance : 0;
 
     }
 
@@ -421,6 +444,19 @@ class Add extends Component
         }
     }
 
+    public function checkCustomerBalances()
+    {
+
+        $customer_account = Customer::find($this->customer_id);
+        $this->customer_credit_limit = $customer_account->credit_limit;
+        $previous_credit = Ledger::where('account_id', $customer_account->account_id)
+            ->groupBy('account_id')
+            ->select(DB::raw('sum(debit-credit) as balance'))
+            ->first();
+        $this->customer_previous_credit = !empty($previous_credit) ? $previous_credit->balance : 0;
+
+    }
+
     public function addCreditor()
     {
         $validatedData = $this->validate([
@@ -458,13 +494,11 @@ class Add extends Component
         }
     }
 
-
     public function pendingSaleComplete()
     {
         $this->pending_and_complete = true;
         $this->saleComplete();
     }
-
 
     public function saleComplete()
     {
@@ -932,39 +966,5 @@ class Add extends Component
         $this->patient_contact_whatsApp = 't';
 
         $this->reset('add_patient_name', 'credit', 'customer_id', 'account_id', 'customer_previous_credit', 'customer_credit_limit', 'father_husband_name', 'patient_gender', 'patient_contact', 'patient_contact_2', 'patient_contact_3', 'patient_relation', 'patient_dob', 'patient_age', 'patient_doctor', 'patient_registration_date', 'patient_address', 'patient_city', 'patient_referred_by');
-    }
-
-    public function validatePendingSale()
-    {
-        $input = request()->all();
-        if (!empty($input['pending_sale_id'])) {
-            $this->pending_sale_id = $input['pending_sale_id'];
-            $sales = PendingSale::from('pending_sales as ps')
-                ->join('pending_sale_details as psd', 'ps.id', '=', 'psd.sale_id')
-                ->join('products as p', 'p.id', 'psd.product_id')
-                ->join('product_inventories as pi', 'p.id', '=', 'pi.product_id')
-                ->where('ps.id', $this->pending_sale_id)
-                ->select('psd.product_id', 'psd.qty as s_qty', 'ps.sale_by','pi.supply_price', 'psd.total_after_disc', 'psd.total', 'p.name as item', 'p.control_medicine', 'p.discountable', 'max_discount', 'psd.retail_price', 'psd.disc', 'ps.patient_id', 'ps.referred_by')
-                ->groupBy('p.id')
-                ->get();
-            foreach ($sales as $key => $sale) {
-                $this->sales[] = $sale;
-                if ($sale->control_medicine == 't'){
-                    $this->control_med_check = true;
-                }
-            }
-            if (!empty($sales[0]['patient_id'])) {
-                $patient = Patient::find($sales[0]['patient_id']);
-                $this->patient_id = $patient['id'];
-                $this->patient_name = $patient['name'];
-            }
-
-            if (!empty($sales[0]['referred_by'])) {
-                $doctor = Employee::find($sales[0]['referred_by']);
-                $this->referred_by_id = $doctor['id'];
-                $this->referred_by_name = $doctor['name'];
-            }
-
-        }
     }
 }

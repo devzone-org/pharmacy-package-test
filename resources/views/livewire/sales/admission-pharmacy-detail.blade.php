@@ -1,9 +1,9 @@
 <div>
     <div class="shadow mb-5 overflow-hidden border-b border-gray-200 sm:rounded-lg">
         <div class="bg-white py-6 px-4 space-y-6 sm:p-6 ">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">Admission Detail</h3>
-                </div>
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Admission Detail</h3>
+            </div>
             <div class="grid grid-cols-8 gap-6">
                 <div class="col-span-8 sm:col-span-2">
                     <dt class="block font-medium text-gray-700">Admission #</dt>
@@ -19,7 +19,7 @@
                 <div class="col-span-8 sm:col-span-2">
                     <dt class="block font-medium text-gray-700">Checkout Date & Time</dt>
                     @if(!empty($admission_details->checkout_date))
-                    <dd>{{date('d M, Y', strtotime($admission_details->checkout_date))}} {{date('h:i A', strtotime($admission_details->checkout_time))}}</dd>
+                        <dd>{{date('d M, Y', strtotime($admission_details->checkout_date))}} {{date('h:i A', strtotime($admission_details->checkout_time))}}</dd>
                     @else
                         <dd>-</dd>
                     @endif
@@ -40,9 +40,13 @@
                 <div class="col-span-8 sm:col-span-2">
                     <dt class="block font-medium text-gray-700">Status</dt>
                     @if($admission_details->status == 't')
-                        <dd><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Active</span></dd>
+                        <dd>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Active</span>
+                        </dd>
                     @else
-                        <dd><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">Inactive</span></dd>
+                        <dd>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">Inactive</span>
+                        </dd>
                     @endif
                 </div>
             </div>
@@ -58,11 +62,8 @@
                     <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
                         <div class="bg-white py-6 px-4 space-y-6 sm:p-6 ">
                             <div class="flex justify-between items-center">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900">Sale History</h3>
-                                <a href="{{ url("pharmacy/sales/add") }}"
-                                   class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    Add Sale
-                                </a>
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">Issue History</h3>
+
                             </div>
                         </div>
                         <table class="min-w-full divide-y divide-gray-200">
@@ -84,12 +85,10 @@
                                 </th>
 
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Patient
+                                    Handed To
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Referred by
-                                </th>
+
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                                     Sub Total
                                 </th>
@@ -107,9 +106,7 @@
                                     Cash / (Refund)
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
-                                    Credit
-                                </th>
+
 
 
                                 <th scope="col" class="relative px-3 py-3">
@@ -125,33 +122,19 @@
                                     </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         @if(empty($h->refunded_id))
-                                            @if(!empty($h->on_account) && $h->on_account > 0)
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                On Credit
+
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                Issue
                                             </span>
-                                            @else
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                                On Cash
-                                            </span>
-                                            @endif
+
 
                                         @else
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
                                                 Refund
                                             </span>
                                         @endif
-                                        <br>
-                                        @if($h->is_paid=='t')
-                                            <span class="inline-flex mt-1 items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                                Paid
-                                            </span>
-                                        @else
-                                            @if(empty($h->refunded_id))
-                                                <span class="inline-flex mt-1 items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                                                Not Paid
-                                            </span>
-                                            @endif
-                                        @endif
+
+
                                     </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         {{ $h->id }}
@@ -161,18 +144,14 @@
                                         {{ $h->sale_by }}
                                     </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
-                                        @if(!empty($h->patient_name))
-                                            {{ $h->patient_name }}
-                                            <br>
-                                            {{ $h->mr_no }}
-                                        @else
-                                            Walk in
+                                        @php
+                                            $issue_to= \Devzone\Pharmacy\Models\Sale\SaleIssuance::where('sale_id',$h->id)->get();
+                                        @endphp
+                                        @if($issue_to->isNotEmpty())
+                                            {{ $issue_to->first()->handed_over_to }}
                                         @endif
+                                    </td>
 
-                                    </td>
-                                    <td class="px-3 py-3   text-sm text-gray-500">
-                                        {{ $h->referred_by }}
-                                    </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         {{ number_format($h->sub_total,2) }}
                                     </td>
@@ -230,13 +209,7 @@
                                             @endif
                                         @endif
                                     </td>
-                                    <td class="px-3 py-3 text-sm text-gray-500">
-                                        @if($h->is_credit == 't')
-                                            {{ number_format(abs($refunded - $h->gross_total),2) }}
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
+
 
                                     <td class="px-3 py-3   text-right text-sm font-medium">
                                         <div class="flex flex-row-reverse">

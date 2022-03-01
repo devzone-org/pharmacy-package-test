@@ -59,7 +59,7 @@ class AdmissionPharmacy extends Component
                 'a.admission_no', 'a.admission_date', 'a.admission_time', 'a.checkout_date', 'a.checkout_time',
                 'ajd.doctor_id'
             )
-            ->paginate(10);
+            ->paginate(20);
         return view('pharmacy::livewire.sales.admission-pharmacy', ['admissions' => $admissions]);
     }
 

@@ -300,7 +300,13 @@ class PurchaseReceive extends Component
                     'batch_no' => $o['batch_no'] ?? null,
                     'expiry' => $o['expiry'] ?? null,
                 ]);
+
+                Product::find($o['id'])->update([
+                    'cost_of_price' => $o['cost_of_price'],
+                    'retail_price' => $o['retail_price'],
+                ]);
             }
+
             $is_auto_approve = true;
             $purchase_order = PurchaseOrder::where('purchase_id', $this->purchase_id)->get();
             foreach ($purchase_order as $p) {

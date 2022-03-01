@@ -256,9 +256,9 @@ class PurchaseEdit extends Component
                 if (!empty($o['purchase_order_id'])) {
                     PurchaseOrder::find($o['purchase_order_id'])->update([
                         'qty' => $o['qty'] * $o['packing'],
-                        'cost_of_price' => $o['cost_of_price'] / $o['packing'],
-                        'retail_price' => $o['retail_price'] / $o['packing'],
-                        'total_cost' => $o['cost_of_price'] * $o['qty'],
+                        'cost_of_price' => round($o['cost_of_price'] / $o['packing'],2),
+                        'retail_price' => round($o['retail_price'] / $o['packing'],2),
+                        'total_cost' => round($o['cost_of_price'] * $o['qty'],2),
                     ]);
                 } else {
                     $check = PurchaseOrder::where('purchase_id', $this->purchase_id)->where('product_id', $o['id'])->exists();
@@ -269,12 +269,16 @@ class PurchaseEdit extends Component
                         'purchase_id' => $this->purchase_id,
                         'product_id' => $o['id'],
                         'qty' => $o['qty'] * $o['packing'],
-                        'cost_of_price' => $o['cost_of_price'] / $o['packing'],
-                        'retail_price' => $o['retail_price'] / $o['packing'],
-                        'total_cost' => $o['cost_of_price'] * $o['qty'],
+                        'cost_of_price' => round($o['cost_of_price'] / $o['packing'],2),
+                        'retail_price' => round($o['retail_price'] / $o['packing'],2),
+                        'total_cost' => round($o['cost_of_price'] * $o['qty'],2),
                     ]);
                 }
+                Product::find($o['id'])->update([
 
+                    'cost_of_price' => $o['cost_of_price'],
+                    'retail_price' => $o['retail_price'],
+                ]);
             }
             DB::commit();
             $this->success = 'Purchase order has been updated.';
