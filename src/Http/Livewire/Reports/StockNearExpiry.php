@@ -7,6 +7,9 @@ use Carbon\Carbon;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Product;
 use Devzone\Pharmacy\Models\Sale\SaleDetail;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Collection;
 use Livewire\Component;
 
 class StockNearExpiry extends Component
@@ -16,6 +19,7 @@ class StockNearExpiry extends Component
     public $product_id;
     public $product_name;
     public $manufacture_id;
+    public $expiry_date;
     public $manufacture_name;
     public $rack_id;
     public $rack_name;
@@ -25,9 +29,14 @@ class StockNearExpiry extends Component
     public $supplier_name;
     public $type;
     public $report = [];
+    public $data = [];
 
     public function mount()
     {
+
+        $this->expiry_date = Carbon::now();
+        $this->expiry_date = $this->expiry_date->addMonths(3);
+
         $this->search();
     }
 
@@ -43,7 +52,7 @@ class StockNearExpiry extends Component
             ->join('product_inventories as pi', function ($q) {
                 return $q->on('pi.product_id', '=', 'p.id')
                     ->where('pi.qty', '>', '0')
-                    ->where('pi.expiry', '<=', date('Y-m-d', strtotime('+3 months')));
+                    ->where('pi.expiry', '<=', date('Y-m-d', strtotime($this->expiry_date)));
             })
             ->join('purchases as pur', 'pur.id', '=', 'pi.po_id')
             ->join('suppliers as s', 's.id', '=', 'pur.supplier_id')
@@ -106,7 +115,20 @@ class StockNearExpiry extends Component
                 $this->report[$key]['expiring_in'] = $diff->format("%m months, %d days");
             }
         }
+
+
     }
+
+    public function paginate($items, $perPage = 20, $page = null, $options = [])
+    {
+
+        $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
+        $items = $items instanceof Collection ? $items : Collection::make($items);
+
+        return new LengthAwarePaginator($items->forPage($page, $perPage), $items->count(), $perPage, $page, $options);
+
+    }
+
 
     public function resetSearch()
     {

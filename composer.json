@@ -13,7 +13,8 @@
     "keywords": ["Laravel", "Pharmacy"],
     "require": {
         "illuminate/support": "~7|~8",
-        "livewire/livewire": "^2.4"
+        "livewire/livewire": "^2.4",
+      "ext-http": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "~9.0",
