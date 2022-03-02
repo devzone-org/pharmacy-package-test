@@ -166,6 +166,7 @@
                                     </td>
                                 </tr>
                             @endforeach
+
                             <tr class="bg-gray-50">
                                 <th scope="col" colspan="8"
                                     class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
@@ -173,11 +174,11 @@
                                 </th>
 
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    {{ number_format(collect($report)->sum('refund_qty'),2) }}
+                                    {{ number_format($report->sum('refund_qty'),2) }}
                                 </th>
 
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    PKR {{ number_format(collect($report)->sum('refund_value'),2) }}
+                                    PKR {{ number_format($report->sum('refund_value'),2) }}
 
                                 </th>
                                 <th scope="col" colspan="2"
@@ -193,8 +194,14 @@
                     </div>
                 </div>
             </div>
+
+                {{ $report->links() }}
+
+
+
         </div>
 
-
     </div>
+
+
 </div>

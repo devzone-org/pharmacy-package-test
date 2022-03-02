@@ -29,6 +29,7 @@ class SaleDoctorwise extends Component
         $this->to = date('Y-m-d');
         $this->range = 'seven_days';
         $this->search();
+
     }
     public function render(){
         return view('pharmacy::livewire.reports.sale-doctorwise');

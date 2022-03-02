@@ -22,11 +22,11 @@
                     </div>
 
                     <div class="col-span-6 sm:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700">Type</label>
+                        <label class="block text-sm font-medium text-gray-700">Show By</label>
                         <select wire:model.defer="type"
                                 class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                             <option value="all">All</option>
-                            <option value="reorder_level">Reorder Level</option>
+                            <option value="reorder_level">Reorder Level greater than zero.</option>
                         </select>
                     </div>
 
@@ -140,10 +140,6 @@
                     </div>
                 </div>
             </div>
-
-        </div>
-        <div class="">
-                {{ $report->links() }}
 
         </div>
 

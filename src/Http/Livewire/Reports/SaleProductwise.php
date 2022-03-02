@@ -10,16 +10,16 @@ use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Sale\SaleDetail;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class SaleProductwise extends Component
 {
-    use Searchable;
+    use Searchable, WithPagination;
     public $range;
     public $from;
     public $to;
     public $product_id;
     public $product_name;
-    public $report = [];
     public $products = [];
     public $date_range = false;
 
@@ -31,11 +31,8 @@ class SaleProductwise extends Component
         $this->search();
     }
     public function render(){
-        return view('pharmacy::livewire.reports.sale-productwise');
-    }
-    public function search()
-    {
-        $this->report = Sale::from('sales as s')
+
+        $report = Sale::from('sales as s')
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
             ->leftJoin('sale_refunds as sr', 'sr.sale_detail_id', '=', 'sd.id')
             ->join('products as p','p.id','=','sd.product_id')
@@ -63,8 +60,44 @@ class SaleProductwise extends Component
             )
             ->groupBy('sd.product_id')
             ->orderBy('qty','DESC')
-            ->get()
-            ->toArray();
+            ->paginate(100);
+
+         return  view('pharmacy::livewire.reports.sale-productwise', ['report' => $report]);
+    }
+    public function search()
+    {
+
+        $this->resetPage();
+//        $this->report = Sale::from('sales as s')
+//            ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
+//            ->leftJoin('sale_refunds as sr', 'sr.sale_detail_id', '=', 'sd.id')
+//            ->join('products as p','p.id','=','sd.product_id')
+//            ->when(!empty($this->to), function ($q) {
+//                return $q->whereDate('s.sale_at', '<=', $this->to);
+//            })
+//            ->when(!empty($this->from), function ($q) {
+//                return $q->whereDate('s.sale_at', '>=', $this->from);
+//            })
+//            ->when(!empty($this->product_id),function ($q){
+//                return $q->where('sd.product_id',$this->product_id);
+//            })
+//            ->select(
+//                'p.name as product_name',
+//                DB::raw('sum(sd.total) as total'),
+//                DB::raw('sum(sd.total_after_disc) as total_after_disc'),
+//                DB::raw('sum(sr.refund_qty) as refund_qty'),
+//                DB::raw('sum(sd.qty) as qty'),
+//                DB::raw('sum(sd.qty) - sum(coalesce(sr.refund_qty,0)) as total_sale_qty'),
+//                DB::raw('sum((sd.qty - coalesce(sr.refund_qty,0)) * sd.supply_price) as cos'),
+//                DB::raw('sum(sd.total_after_disc) / sum(sd.qty) as unit'),
+//                DB::raw('sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0)) as total_refund'),
+//                DB::raw('sum(sd.total_after_disc) - (sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0))) as total_after_refund'),
+//                DB::raw('sum(sd.total_after_disc) - (sum(sd.total_after_disc) / sum(sd.qty) * sum(coalesce(sr.refund_qty,0))) - (sum((sd.qty - coalesce(sr.refund_qty,0)) * sd.supply_price)) as total_profit'),
+//            )
+//            ->groupBy('sd.product_id')
+//            ->orderBy('qty','DESC')
+//            ->get()
+//            ->toArray();
     }
     public function updatedRange($val)
     {

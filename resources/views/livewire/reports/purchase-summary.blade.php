@@ -1,7 +1,18 @@
 <div>
+    <form wire:submit.prevent = "search">
     <div class="shadow mb-5 overflow-hidden border-b border-gray-200 sm:rounded-lg">
         <div class="bg-white py-6 px-4 space-y-6 sm:p-6 ">
             <div class="grid grid-cols-10 gap-6">
+
+                <div class="col-span-6 sm:col-span-2">
+
+                    <label class="block text-sm font-medium text-gray-700">Supplier</label>
+                    <input wire:model="supplier_name" readonly
+                           wire:click="searchableOpenModal('supplier_id','supplier_name','supplier')"
+                           type="text"
+                           autocomplete="off"
+                           class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
                 <div class="col-span-8 sm:col-span-2">
                     <label class="block text-sm font-medium text-gray-700">Date Range</label>
                     <select wire:model="range"
@@ -27,7 +38,7 @@
                     </div>
                 @endif
                 <div class="col-span-8 sm:col-span-2">
-                    <button type="button" wire:click="search" wire:loading.attr="disabled"
+                    <button type="submit"
                             class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         <div wire:loading wire:target="search">
                             Searching ...
@@ -40,7 +51,7 @@
             </div>
         </div>
     </div>
-
+    </form>
 
     <div class=" shadow sm:rounded-md sm:overflow-hidden">
 
@@ -200,21 +211,21 @@
                                     </th>
 
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('cos'),2)}}
+                                        {{number_format($report->sum('cos'),2)}}
                                     </th>
 
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('cos') - collect($report)->sum('po_value'),2)}}
+                                        {{number_format($report->sum('cos') - $report->sum('po_value'),2)}}
                                     </th>
 
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('po_value'),2)}}
+                                        {{number_format($report->sum('po_value'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         {{number_format($total_tax,2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format($total_tax + collect($report)->sum('po_value'),2)}}
+                                        {{number_format($total_tax + $report->sum('po_value'),2)}}
                                     </th>
                                 </tr>
                             </tbody>
@@ -224,5 +235,8 @@
                 </div>
             </div>
         </div>
+        {{ $report->links() }}
+
     </div>
+    @include('pharmacy::include.searchable')
 </div>

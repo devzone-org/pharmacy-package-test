@@ -166,35 +166,35 @@
 
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('qty'))}}
+                                        {{number_format($report->sum('qty'))}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('refund_qty'))}}
+                                        {{number_format($report->sum('refund_qty'))}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_sale_qty'))}}
+                                        {{number_format($report->sum('total_sale_qty'))}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total'),2)}}
+                                        {{number_format($report->sum('total'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total')-collect($report)->sum('total_after_disc'),2)}}
+                                        {{number_format($report->sum('total')-collect($report)->sum('total_after_disc'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_refund'),2)}}
+                                        {{number_format($report->sum('total_refund'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_after_refund'),2)}}
+                                        {{number_format($report->sum('total_after_refund'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('cos'),2)}}
+                                        {{number_format($report->sum('cos'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_after_refund')-collect($report)->sum('cos'),2)}}
+                                        {{number_format($report->sum('total_after_refund')-collect($report)->sum('cos'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         @php
-                                            $gross_margin=((collect($report)->sum('total_after_refund')-collect($report)->sum('cos'))/collect($report)->sum('total_after_refund'))*100;
+                                            $gross_margin=$report->sum('total_after_refund')-$report->sum('cos')/$report->sum('total_after_refund')*100;
                                         @endphp
                                         {{number_format($gross_margin,2)}} %
                                     </th>
@@ -205,7 +205,11 @@
                     </div>
                 </div>
             </div>
+
+                {{ $report->links() }}
+
         </div>
+
     </div>
     @include('pharmacy::include.searchable')
 </div>

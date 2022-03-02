@@ -33,11 +33,9 @@ class StockNearExpiry extends Component
 
     public function mount()
     {
+        $this->expiry_date =  date('Y-m-d', strtotime('+3 months'));
 
-        $this->expiry_date = Carbon::now();
-        $this->expiry_date = $this->expiry_date->addMonths(3);
-
-        $this->search();
+            $this->search();
     }
 
     public function render()
@@ -128,7 +126,6 @@ class StockNearExpiry extends Component
         return new LengthAwarePaginator($items->forPage($page, $perPage), $items->count(), $perPage, $page, $options);
 
     }
-
 
     public function resetSearch()
     {

@@ -98,10 +98,10 @@
                                         Grand Total
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('credit_limit'), 2)}}
+                                        {{number_format($report->sum('credit_limit'), 2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_receivable'), 2)}}
+                                        {{number_format($report->sum('total_receivable'), 2)}}
                                     </th>
 
                                 </tr>
@@ -112,6 +112,7 @@
                 </div>
             </div>
         </div>
+        {{$report->links()}}
     </div>
     @include('pharmacy::include.searchable')
 </div>

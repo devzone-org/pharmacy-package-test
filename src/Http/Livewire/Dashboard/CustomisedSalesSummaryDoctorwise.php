@@ -30,6 +30,8 @@ class CustomisedSalesSummaryDoctorwise extends Component
         $this->date = date('Y-m-d');
 
         $this->prepareDate();
+
+
     }
 
     public function render()

@@ -9,15 +9,19 @@ use Devzone\Pharmacy\Models\Sale\SaleRefund;
 use Devzone\Pharmacy\Models\Sale\SaleRefundDetail;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class SaleReturnTransaction extends Component
 {
+
+    use WithPagination;
+
     public $salemen = [];
     public $salesman_id;
     public $range;
     public $from;
     public $to;
-    public $report = [];
+//    public $report = [];
     public $date_range = false;
 
     public function mount()
@@ -36,12 +40,7 @@ class SaleReturnTransaction extends Component
 
     public function render()
     {
-        return view('pharmacy::livewire.reports.sales-return-transaction');
-    }
-
-    public function search()
-    {
-        $this->report = SaleRefundDetail::from('sale_refund_details as srd')
+        $report = SaleRefundDetail::from('sale_refund_details as srd')
             ->join('sales as s', 's.id', '=', 'srd.sale_id')
             ->join('sales as rs', 'rs.id', '=', 'srd.refunded_id')
             ->leftJoin('patients as p', 'p.id', '=', 'rs.patient_id')
@@ -63,7 +62,38 @@ class SaleReturnTransaction extends Component
                 return $q->whereDate('srd.created_at', '>=', $this->from);
             })
             ->orderBy('srd.created_at', 'desc')
-            ->get()->toArray();
+            ->paginate(10);
+
+
+        return view('pharmacy::livewire.reports.sales-return-transaction',['report' => $report]);
+    }
+
+    public function search()
+    {
+        $this->resetPage();
+//        $this->report = SaleRefundDetail::from('sale_refund_details as srd')
+//            ->join('sales as s', 's.id', '=', 'srd.sale_id')
+//            ->join('sales as rs', 'rs.id', '=', 'srd.refunded_id')
+//            ->leftJoin('patients as p', 'p.id', '=', 'rs.patient_id')
+//            ->join('products as pr', 'pr.id', '=', 'srd.product_id')
+//            ->join('sale_details as sd', 'sd.id', 'srd.sale_detail_id')
+//            ->leftJoin('users as sb','sb.id','=','s.sale_by')
+//            ->leftJoin('users as rb','rb.id','=','rs.sale_by')
+//            ->select('srd.created_at as return_date', 's.sale_at as original_sale_date',
+//                'srd.refunded_id as invoice_no', 'p.name as patient_name', 'p.mr_no', 'pr.name as product_name',
+//                's.gross_total as original_invoice_total', 'srd.refund_qty','sb.name as sale_by','rb.name as return_by',
+//                DB::raw('(sd.retail_price_after_disc*srd.refund_qty) as refund_value'))
+//            ->when(!empty($this->salesman_id), function ($q) {
+//                return $q->where('rs.sale_by', $this->salesman_id);
+//            })
+//            ->when(!empty($this->to), function ($q) {
+//                return $q->whereDate('srd.created_at', '<=', $this->to);
+//            })
+//            ->when(!empty($this->from), function ($q) {
+//                return $q->whereDate('srd.created_at', '>=', $this->from);
+//            })
+//            ->orderBy('srd.created_at', 'desc')
+//            ->get()->toArray();
 
     }
 

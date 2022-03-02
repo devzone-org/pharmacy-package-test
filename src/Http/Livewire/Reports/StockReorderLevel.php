@@ -14,7 +14,7 @@ use Livewire\WithPagination;
 
 class StockReorderLevel extends Component
 {
-    use Searchable,WithPagination;
+    use Searchable, WithPagination;
 
     public $product_id;
     public $product_name;
@@ -22,17 +22,23 @@ class StockReorderLevel extends Component
     public $manufacture_id;
     public $manufacture_name;
     public $type;
-//    public $report = [];
+    public $report = [];
 
     public function mount()
     {
-
+        $this->search();
     }
 
     public function render()
     {
+        return view('pharmacy::livewire.reports.stock-reorder-level');
+    }
 
-        $report = [];
+    public function search()
+    {
+
+        $this->reset('report');
+
         $products = Product::from('products as p')
             ->join('product_inventories as pi', function ($q) {
                 return $q->on('pi.product_id', '=', 'p.id');
@@ -54,58 +60,15 @@ class StockReorderLevel extends Component
             ->orderBy('p.id', 'ASC')
             ->get();
         foreach ($products as $key => $product) {
-            $report[$key]['id'] = $product->id;
-            $report[$key]['item'] = $product->item;
-            $report[$key]['type'] = $product->type;
-            $report[$key]['manufacturer'] = $product->manufacturer;
-            $report[$key]['stock_in_hand'] = $product->inventories->sum('qty');
-            $report[$key]['reorder_level'] = $product->reorder_level;
-            $report[$key]['reorder_qty'] = $product->reorder_qty;
+            $this->report[$key]['id'] = $product->id;
+            $this->report[$key]['item'] = $product->item;
+            $this->report[$key]['type'] = $product->type;
+            $this->report[$key]['manufacturer'] = $product->manufacturer;
+            $this->report[$key]['stock_in_hand'] = $product->inventories->sum('qty');
+            $this->report[$key]['reorder_level'] = $product->reorder_level;
+            $this->report[$key]['reorder_qty'] = $product->reorder_qty;
         }
 
-        $report = $this->paginate($report);
-
-
-        return view('pharmacy::livewire.reports.stock-reorder-level', ['report' => $report]);
-    }
-
-    public function search()
-    {
-        $this->resetPage();
-
-//        $this->reset('report');
-//
-//        $products = Product::from('products as p')
-//            ->join('product_inventories as pi', function ($q) {
-//                return $q->on('pi.product_id', '=', 'p.id');
-//            })
-//            ->Join('manufactures as m', 'm.id', '=', 'p.manufacture_id')
-//            ->when(!empty($this->product_id), function ($q) {
-//                return $q->where('p.id', $this->product_id);
-//            })
-//            ->when(!empty($this->manufacture_id), function ($q) {
-//                return $q->where('p.manufacture_id', $this->manufacture_id);
-//            })
-//            ->when($this->type == 'reorder_level', function ($q) {
-//                return $q->where('p.reorder_level', '>', '0');
-//            })
-//            ->select(
-//                'p.id', 'p.name as item', 'p.type', 'p.reorder_level', 'p.reorder_qty', 'm.name as manufacturer',
-//            )
-//            ->groupBy('pi.product_id')
-//            ->orderBy('p.id', 'ASC')
-//            ->get();
-//        foreach ($products as $key => $product) {
-//            $this->report[$key]['id'] = $product->id;
-//            $this->report[$key]['item'] = $product->item;
-//            $this->report[$key]['type'] = $product->type;
-//            $this->report[$key]['manufacturer'] = $product->manufacturer;
-//            $this->report[$key]['stock_in_hand'] = $product->inventories->sum('qty');
-//            $this->report[$key]['reorder_level'] = $product->reorder_level;
-//            $this->report[$key]['reorder_qty'] = $product->reorder_qty;
-//        }
-//
-//       $this->paginate($this->report);
     }
 
     public function paginate($items, $perPage = 20, $page = null, $options = [])
@@ -114,7 +77,7 @@ class StockReorderLevel extends Component
         $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
         $items = $items instanceof Collection ? $items : Collection::make($items);
 
-       return new LengthAwarePaginator($items->forPage($page, $perPage), $items->count(), $perPage, $page, $options);
+        return new LengthAwarePaginator($items->forPage($page, $perPage), $items->count(), $perPage, $page, $options);
 
     }
 
