@@ -212,13 +212,17 @@ class Add extends Component
                 ->join('products as p', 'p.id', 'psd.product_id')
                 ->join('product_inventories as pi', 'p.id', '=', 'pi.product_id')
                 ->where('ps.id', $this->pending_sale_id)
-                ->select('psd.product_id', 'psd.qty as s_qty', 'ps.sale_by', 'pi.supply_price', 'psd.total_after_disc', 'psd.total', 'p.name as item', 'p.control_medicine', 'p.discountable', 'max_discount', 'psd.retail_price', 'psd.disc', 'ps.patient_id', 'ps.referred_by')
+                ->select('psd.product_id', 'psd.qty as s_qty', 'ps.sale_by', 'pi.supply_price', 'psd.total_after_disc', 'psd.total', 'p.name as item', 'p.packing', 'p.control_medicine', 'p.retail_price as product_price', 'p.cost_of_price as product_supply_price', 'p.discountable', 'p.max_discount', 'p.type', 'psd.retail_price', 'psd.disc', 'ps.patient_id', 'ps.referred_by')
                 ->groupBy('p.id')
                 ->get();
+
             foreach ($sales as $key => $sale) {
                 $this->sales[] = $sale;
                 if ($sale->control_medicine == 't') {
                     $this->control_med_check = true;
+                    $sale->control_medicine = true;
+                } else {
+                    $sale->control_medicine = false;
                 }
             }
             if (!empty($sales[0]['patient_id'])) {
