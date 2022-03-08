@@ -278,7 +278,9 @@ Route::get('tests', function () {
     $inv = \Devzone\Pharmacy\Models\ProductInventory::get();
     foreach ($inv as $i) {
         $pro = \Devzone\Pharmacy\Models\Product::find($i->product_id);
-        if(empty($pro['packing'])){
+
+        if (empty($pro['packing'])) {
+            echo $pro['name'] . "<br>";
             continue;
         }
         \Devzone\Pharmacy\Models\ProductInventory::where('id', $i->id)
