@@ -278,6 +278,9 @@ Route::get('tests', function () {
     $inv = \Devzone\Pharmacy\Models\ProductInventory::get();
     foreach ($inv as $i) {
         $pro = \Devzone\Pharmacy\Models\Product::find($i->product_id);
+        if(empty($pro['packing'])){
+            continue;
+        }
         \Devzone\Pharmacy\Models\ProductInventory::where('id', $i->id)
             ->update([
                 'retail_price' => round($pro['retail_price'] / $pro['packing'], 4),
