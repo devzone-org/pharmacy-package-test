@@ -107,8 +107,8 @@ class StockAdjustment extends Component
                     $inventory = ProductInventory::create([
                         'product_id' => $a['id'],
                         'qty' => 0,
-                        'retail_price' => $product['cost_of_price'],
-                        'supply_price' => $product['retail_price'],
+                        'retail_price' => $product['cost_of_price'] / $product['packing'],
+                        'supply_price' => $product['retail_price'] / $product['packing'],
                     ]);
 
                 }
