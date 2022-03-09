@@ -41,7 +41,7 @@ trait Searchable
         'patient' => ['mr_no', 'name', 'phone'],
         'referred_by' => ['name'],
         'item' => ['item', 'qty', 'retail_price', 'rack', 'tier', 'packing'],
-        'adjustment_items' => ['item', 'qty', 'expiry'],
+        'adjustment_items' => ['item', 'qty', 'expiry','packing'],
         'customer' => ['name', 'care_of', 'credit_limit']
     ];
 
@@ -242,7 +242,7 @@ trait Searchable
                     return $q->orWhere('p.name', 'LIKE', '%' . $value . '%')
                         ->orWhere('p.salt', 'LIKE', '%' . $value . '%');
                 })->select('p.name as item', DB::raw('SUM(qty) as qty'), 'p.id',
-                    'pi.expiry')
+                    'pi.expiry','p.packing')
                 ->groupBy('p.id')
                 ->groupBy('pi.expiry')->orderBy('qty', 'desc')->orderBy('p.name', 'asc')->get();
             if ($search->isNotEmpty()) {
