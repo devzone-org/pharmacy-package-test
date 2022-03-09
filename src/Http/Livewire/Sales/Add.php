@@ -775,12 +775,21 @@ class Add extends Component
                     }
                 }
                 if (class_exists(\App\Models\Hospital\AdmissionPaymentDetail::class)) {
+                    $old_sale = \App\Models\Hospital\AdmissionPaymentDetail::from('admission_payment_details as apd')->where('apd.admission_id', $this->admission_id)
+                        ->where('apd.procedure_id', $this->procedure_id)
+                        ->where('apd.medicines', 't')->first();
+
+                    $price = 0;
+                    if (!empty($old_sale)) {
+                        $price = $old_sale['amount'];
+                    }
+
                     \App\Models\Hospital\AdmissionPaymentDetail::from('admission_payment_details as apd')->where('apd.admission_id', $this->admission_id)
                         ->where('apd.procedure_id', $this->procedure_id)
                         ->where('apd.medicines', 't')
                         ->update([
                             'sale_id' => $sale_id,
-                            'amount' => $amounts->sale,
+                            'amount' => $price + $amounts->sale,
                         ]);
 
                     $ipd_medicine_account = COA::where('reference', 'payable-medicine-5')->first();

@@ -274,7 +274,7 @@ Route::get('opening-stock', function () {
     }
 });
 
-Route::get('tests', function () {
+Route::get('align-price-with-products', function () {
     $inv = \Devzone\Pharmacy\Models\ProductInventory::get();
     foreach ($inv as $i) {
         $pro = \Devzone\Pharmacy\Models\Product::find($i->product_id);

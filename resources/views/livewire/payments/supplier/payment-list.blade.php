@@ -295,7 +295,7 @@
                                        role="menuitem" tabindex="-1">View</a>
 
                                     @if(empty($m->approved_by))
-                                        <p wire:click="markAsApproved('{{ $m->id }}','{{ $m->payment_date }}','{{$m->supplier_name}}','{{$amts}}','{{$m->account_name}}')"
+                                        <p wire:click="markAsApproved('{{ $m->id }}','{{ $m->payment_date }}','{{str_replace("'",'',$m->supplier_name)}}','{{$amts}}','{{$m->account_name}}')"
                                            class="text-gray-700 cursor-pointer block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                                            role="menuitem" tabindex="-1">Mark as Approve
                                         </p>
