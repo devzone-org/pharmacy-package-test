@@ -197,7 +197,6 @@ class PurchaseAdd extends Component
 
     public function create()
     {
-//        dd($this->order_list);
         $this->validate();
         try {
             DB::beginTransaction();
@@ -227,6 +226,7 @@ class PurchaseAdd extends Component
                     'salt' => $o['salt'] ?? null,
                     'cost_of_price' => $o['cost_of_price'],
                     'retail_price' => $o['retail_price'],
+                    'supplier_id' => $this->supplier_id
                 ]);
             }
             DB::commit();

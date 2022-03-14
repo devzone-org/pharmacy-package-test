@@ -157,6 +157,9 @@
                         Total Qty
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        Closing Inventory
+                    </th>
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Supplier Cost
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
@@ -173,6 +176,10 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                 @foreach($order_list as $key => $m)
+                    @php
+                   $closing= \Devzone\Pharmacy\Models\ProductInventory::where('product_id',$m['id'])->where('qty','>','0')->sum('qty');
+                    @endphp
+
                     <tr>
                         <td class="px-3 py-3   text-sm font-medium text-gray-500">
                             {{ $loop->iteration }}
@@ -191,6 +198,9 @@
                         </td>
                         <td class="px-3 py-3   text-sm text-gray-500">
                             {{ number_format($m['packing']*$m['qty'],2) }}
+                        </td>
+                        <td class="px-3 py-3   text-sm text-gray-500">
+                            {{ number_format($closing,2) }}
                         </td>
                         <td class="px-3 py-3   text-sm text-gray-500">
                             <input type="number" step="0.01" onclick="this.select()"  class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" wire:model="order_list.{{$key}}.cost_of_price">
@@ -229,6 +239,8 @@
 
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+
+                    </th>  <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
 
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">

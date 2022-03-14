@@ -129,6 +129,10 @@
                         Total Qty
                     </th>
                     <th scope="col"
+                        class="w-16 border  text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                        Closing Inventory
+                    </th>
+                    <th scope="col"
                         class="w-28  border text-center px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         P.C
                     </th>
@@ -167,6 +171,9 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                 @foreach($order_list as $key => $m)
+                    @php
+                        $closing= \Devzone\Pharmacy\Models\ProductInventory::where('product_id',$m['id'])->where('qty','>','0')->sum('qty');
+                    @endphp
 
                     <tr>
                         <td class="px-3 py-3  border text-sm font-medium text-gray-500">
@@ -198,6 +205,10 @@
 
                         <td class="px-3   bg-gray-50 border text-sm  text-center text-gray-500">
                             {{ number_format(($m['qty'] + ($m['bonus']?? 0)),2) }}
+                        </td>
+
+                        <td class="px-3   bg-gray-50 border text-sm  text-center text-gray-500">
+                           {{$closing}}
                         </td>
                         <td class="p-0 border  text-sm text-gray-500">
                             <input type="number" step="0.01" onclick="this.select()"
@@ -268,6 +279,8 @@
                         {{ number_format(collect($order_list)->sum('cost_of_price'),2) }}
                     </th>
                     <th scope="col" class="px-3 py-3  border  text-center text-md font-medium text-gray-500   ">
+
+                    </th>  <th scope="col" class="px-3 py-3  border  text-center text-md font-medium text-gray-500   ">
 
                     </th>
                     <th scope="col" class="px-3 py-3 border  text-center text-md font-medium text-gray-500   ">

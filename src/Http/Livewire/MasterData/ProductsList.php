@@ -22,7 +22,8 @@ class ProductsList extends Component
             ->leftJoin('manufactures as m', 'm.id', '=', 'p.manufacture_id')
             ->leftJoin('categories as c', 'c.id', '=', 'p.category_id')
             ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
-            ->select('p.*', 'm.name as m_name', 'c.name as c_name', 'r.name as r_name', 'r.tier')
+            ->leftJoin('product_inventories as pi','pi.product_id','=','p.id')
+            ->select('p.*', 'm.name as m_name', 'c.name as c_name', 'r.name as r_name', 'r.tier','pi.qty')
             ->when(!empty($this->name),function($q){
                 return $q->where('p.name','LIKE','%'.$this->name.'%');
             })

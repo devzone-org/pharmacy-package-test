@@ -278,6 +278,7 @@ class PurchaseEdit extends Component
 
                     'cost_of_price' => $o['cost_of_price'],
                     'retail_price' => $o['retail_price'],
+                    'supplier_id' => $this->supplier_id
                 ]);
             }
             DB::commit();

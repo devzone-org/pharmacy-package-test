@@ -156,6 +156,9 @@
                         Total Qty
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                       Closing Inventory
+                    </th>
+                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Supplier Cost
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
@@ -172,6 +175,9 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                 @foreach($order_list as $key => $m)
+                    @php
+                        $closing= \Devzone\Pharmacy\Models\ProductInventory::where('product_id',$m['id'])->where('qty','>','0')->sum('qty');
+                    @endphp
                     <tr>
                         <td class="px-3 py-3   text-sm font-medium text-gray-500">
                             {{ $loop->iteration }}
@@ -194,6 +200,8 @@
                         </td>
                         <td class="px-3 py-3   text-sm text-gray-500">
                             {{ number_format($m['packing']*$m['qty'],2) }}
+                        </td> <td class="px-3 py-3   text-sm text-gray-500">
+                            {{ number_format($closing,2) }}
                         </td>
                         <td class="px-3 py-3   text-sm text-gray-500">
                             <input type="text" onclick="this.select()"
@@ -242,6 +250,8 @@
 
                     </th>
                     <th scope="col" colspan="" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+
+                    </th>  <th scope="col" colspan="" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
 
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">

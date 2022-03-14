@@ -34,13 +34,13 @@ trait Searchable
         'manufacture' => ['name', 'contact', 'address'],
         'rack' => ['name', 'tier'],
         'category' => ['name'],
-        'product' => ['name', 'generic', 'category', 'rack'],
+        'product' => ['name', 'generic','category', 'rack'],
         'supplier' => ['name', 'address', 'phone'],
         'pay_from' => ['name', 'code'],
         'receiving_account' => ['name', 'code'],
         'patient' => ['mr_no', 'name', 'phone'],
         'referred_by' => ['name'],
-        'item' => ['item', 'qty', 'retail_price', 'rack', 'tier', 'packing'],
+        'item' => ['item', 'qty', 'retail_price','manufacturer', 'rack', 'tier', 'packing'],
         'adjustment_items' => ['item', 'qty', 'expiry','packing'],
         'customer' => ['name', 'care_of', 'credit_limit']
     ];
@@ -207,7 +207,9 @@ trait Searchable
             }
             $search = Product::from('products as p')
                 ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
-                ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id');
+                ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
+            ->leftJoin('manufactures as m', 'm.id','=','p.manufacture_id');
+
             if (env('SCOUT_SEARCH', false)) {
                 $search = $search->whereIn('p.id', $product_ids);
             } else {
@@ -218,7 +220,7 @@ trait Searchable
             }
 
             $search = $search->select('p.name as item', DB::raw('SUM(qty) as qty'),
-                'pi.retail_price', 'p.retail_price as product_price', 'p.cost_of_price as product_supply_price',
+                'pi.retail_price', 'p.retail_price as product_price', 'p.cost_of_price as product_supply_price', 'm.name as manufacturer',
                 'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'p.discountable', 'p.max_discount', 'r.name as rack', 'r.tier', 'p.control_medicine')
                 ->groupBy('p.id')
                 ->groupBy('pi.retail_price');
