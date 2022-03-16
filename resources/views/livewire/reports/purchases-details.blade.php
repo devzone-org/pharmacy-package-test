@@ -10,6 +10,15 @@
                            class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                            id="supplier_name">
                 </div>
+
+                <div class="col-span-6 sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">Manufacturer</label>
+                    <input wire:model="manufacture_name" readonly
+                           wire:click="searchableOpenModal('manufacture_id','manufacture_name','manufacture')"
+                           type="text"
+                           autocomplete="off"
+                           class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
                 <div class="col-span-8 sm:col-span-2">
                     <label class="block text-sm font-medium text-gray-700">Date Range</label>
                     <select wire:model="range"

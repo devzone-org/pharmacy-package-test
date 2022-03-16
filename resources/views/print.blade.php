@@ -98,6 +98,7 @@
                         .feed()
 
                         .style([escpos.FontStyle.Bold])
+                        .text("{{$print['license_no']}}")
                         .text("{{ $print['invoice_no']  }}")
                         .style([escpos.FontStyle.Normal])
 

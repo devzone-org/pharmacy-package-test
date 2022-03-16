@@ -79,14 +79,14 @@
                                 class="mr-4 bg-gray-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600">
                             Void
                         </button>
+                    @endif
 
+                    @if($purchase->status == 'awaiting-delivery' || $purchase->status == 'received' || $purchase->status == 'receiving'  )
                         <a href="{{url('pharmacy/purchases/purchase-order/view/pdf')}}?purchase_id={{$purchase_id}}"
                            target="_blank"
                            class="mr-4 bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
                             Download Purchase Order
                         </a>
-
-
 
                     @endif
 

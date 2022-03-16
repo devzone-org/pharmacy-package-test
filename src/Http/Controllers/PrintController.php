@@ -80,6 +80,8 @@ class PrintController extends Controller
         $print['developer'] = env('RECEIPT_PRINTER_DEVELOPER');
         $print['developer_phone'] = env('RECEIPT_PRINTER_DEVELOPER_PHONE');
         $print['invoice_no'] = 'SALES INVOICE #' . $id;
+        $print['license_no'] = 'LICENSE #' . env('RECEIPT_LICENSE_NO');
+
         if ($this->on_credit) {
             $print['invoice_no'] = 'CREDIT SALES INVOICE #' . $id;
         }

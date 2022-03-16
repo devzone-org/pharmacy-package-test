@@ -90,6 +90,7 @@ class History extends Component
                 's.sub_total',
                 's.gross_total',
                 's.refunded_id',
+                's.remarks',
                 'u.name as sale_by',
                 's.sale_at',
                 's.is_refund',

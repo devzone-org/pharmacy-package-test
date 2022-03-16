@@ -73,12 +73,24 @@
                                     <tr class="hover:bg-indigo-600 hover:text-white" :class="{'bg-indigo-600 text-white' : h_light=={{$key}}, 'text-gray-500' : h_light!={{$key}}}"
                                         >
                                         @foreach($searchable_column[$searchable_type] as $c)
-                                            <td class="px-2 whitespace-nowrap text-sm ">
+                                            <td class="px-2 whitespace-nowrap text-sm">
+
                                                     @if($c=='retail_price')
                                                         {{ empty($a[$c]) ? $a['product_price'] : $a[$c] }}
+
                                                     @else
                                                         {{ $a[$c] }}
+
+                                                    @if($c == 'item' && !empty($a['salt']))
+
+                                                    <br>
+                                                    <button type="button" class="text-xs text-blue-500 hover:text-white focus:ring-indigo-500 focus:border-indigo-500" wire:click="itemSalt('{{$a['salt']}}')" >
+                                                            ({{$a['salt']}})
+                                                    </button>
                                                     @endif
+
+                                                @endif
+
                                             </td>
                                         @endforeach
                                         <td class="px-2 py-1 whitespace-nowrap text-sm ">
