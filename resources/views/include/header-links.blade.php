@@ -2,7 +2,7 @@
     <a href="{{ url('pharmacy') }}"
        class="{{ Request::segment(1)=='pharmacy' && empty(Request::segment(2))? $a_current : '' }} rounded-md py-2 px-3 inline-flex items-center text-sm font-medium text-gray-900 hover:bg-gray-50 hover:text-gray-900 active:bg-gray-50">
         Dashboard </a>
-    <div class="relative" x-data="{open:false}">
+    <div class="relative z-20" x-data="{open:false}">
         <button @click="open=true;"
                 class="{{ Request::segment(1)=='pharmacy' && Request::segment(2) == 'sales' ? $a_current : '' }} cursor-pointer  rounded-md py-2 px-3 inline-flex items-center text-sm font-medium text-gray-900 hover:bg-gray-50 hover:text-gray-900 focus-within:bg-gray-50 focus-within:outline-none"
                 aria-expanded="false">
@@ -97,7 +97,7 @@
             </div>
         </div>
     </div>
-    <div class="relative" x-data="{open:false}">
+    <div class="relative z-20" x-data="{open:false}">
         <button @click="open=true;"
                 class="{{ Request::segment(1)=='pharmacy' && Request::segment(2)=='purchases' ? $a_current : '' }} cursor-pointer  rounded-md py-2 px-3 inline-flex items-center text-sm font-medium text-gray-900 hover:bg-gray-50 hover:text-gray-900 focus-within:bg-gray-50 focus-within:outline-none"
                 aria-expanded="false">
@@ -194,7 +194,7 @@
             </div>
         </div>
     </div>
-    <div class="relative" x-data="{open:false}">
+    <div class="relative z-20" x-data="{open:false}">
 
         <button type="button" @click="open=true;"
                 class="{{ Request::segment(1)=='pharmacy' && Request::segment(2) == 'report' ? $a_current : '' }} cursor-pointer  rounded-md py-2 px-3 inline-flex items-center text-sm font-medium text-gray-900 hover:bg-gray-50 hover:text-gray-900 focus-within:bg-gray-50 focus-within:outline-none"
