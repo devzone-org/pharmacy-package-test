@@ -310,7 +310,7 @@
 
 
                                                   <div class="relative" x-cloak x-show.transition.origin.top="tooltip">
-                                                      <div class="absolute top-0 z-10 w-64 p-2 -mt-1 text-sm leading-tight text-white transform -translate-x-full -translate-y-full bg-gray-500 rounded-lg shadow-lg">
+                                                      <div class="absolute top-0 z-10 w-52 p-2 -mt-1 text-sm leading-tight text-white transform -translate-x-full -translate-y-full bg-gray-500 rounded-lg shadow-lg">
                                                               {{$h->remarks}}
 
                                                       </div>
