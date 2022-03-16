@@ -280,7 +280,7 @@ Route::get('align-price-with-products', function () {
         $pro = \Devzone\Pharmacy\Models\Product::find($i->product_id);
 
         if (empty($pro['packing'])) {
-            echo $pro['name'] . "<br>";
+            echo $pro['name'] ?? ''. "<br>";
             continue;
         }
         \Devzone\Pharmacy\Models\ProductInventory::where('id', $i->id)
