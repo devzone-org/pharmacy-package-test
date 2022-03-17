@@ -40,8 +40,8 @@ trait Searchable
         'receiving_account' => ['name', 'code'],
         'patient' => ['mr_no', 'name', 'phone'],
         'referred_by' => ['name'],
-        'item' => ['item', 'qty', 'retail_price', 'rack', 'tier', 'packing'],
-        'adjustment_items' => ['item', 'qty', 'expiry','packing'],
+        'item' => ['item', 'qty', 'retail_price', 'manufacturer', 'rack', 'tier', 'packing'],
+        'adjustment_items' => ['item', 'qty', 'expiry', 'packing'],
         'customer' => ['name', 'care_of', 'credit_limit']
     ];
 
@@ -113,6 +113,17 @@ trait Searchable
 
         if (strlen($value) > 1) {
             $this->searchQuery($value);
+        } else {
+            $this->searchable_data = [];
+        }
+    }
+
+    public function itemSalt($value)
+    {
+
+        if (strlen($value) > 1) {
+            $this->searchQuery($value);
+            $this->searchable_query = $value;
         } else {
             $this->searchable_data = [];
         }
@@ -207,7 +218,9 @@ trait Searchable
             }
             $search = Product::from('products as p')
                 ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
-                ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id');
+                ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
+                ->leftJoin('manufactures as m', 'm.id', '=', 'p.manufacture_id');
+
             if (env('SCOUT_SEARCH', false)) {
                 $search = $search->whereIn('p.id', $product_ids);
             } else {
@@ -218,7 +231,7 @@ trait Searchable
             }
 
             $search = $search->select('p.name as item', DB::raw('SUM(qty) as qty'),
-                'pi.retail_price', 'p.retail_price as product_price', 'p.cost_of_price as product_supply_price',
+                'pi.retail_price', 'p.retail_price as product_price', 'p.cost_of_price as product_supply_price', 'm.name as manufacturer', 'p.salt',
                 'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'p.discountable', 'p.max_discount', 'r.name as rack', 'r.tier', 'p.control_medicine')
                 ->groupBy('p.id')
                 ->groupBy('pi.retail_price');
@@ -242,7 +255,7 @@ trait Searchable
                     return $q->orWhere('p.name', 'LIKE', '%' . $value . '%')
                         ->orWhere('p.salt', 'LIKE', '%' . $value . '%');
                 })->select('p.name as item', DB::raw('SUM(qty) as qty'), 'p.id',
-                    'pi.expiry','p.packing')
+                    'pi.expiry', 'p.packing')
                 ->groupBy('p.id')
                 ->groupBy('pi.expiry')->orderBy('qty', 'desc')->orderBy('p.name', 'asc')->get();
             if ($search->isNotEmpty()) {

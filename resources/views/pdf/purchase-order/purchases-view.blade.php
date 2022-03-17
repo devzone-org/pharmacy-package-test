@@ -111,7 +111,7 @@ ini_set('display_errors', true);
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
         @foreach($details as $key => $m)
-            <tr>
+            <tr class="text-center">
                 <td>
                     {{ $loop->iteration }}
                 </td>

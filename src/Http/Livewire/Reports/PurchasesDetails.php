@@ -16,6 +16,8 @@ class PurchasesDetails extends Component
     public $to;
     public $supplier_id;
     public $supplier_name;
+    public $manufacture_id;
+    public $manufacture_name;
     public $report = [];
     public $date_range = false;
 
@@ -36,6 +38,7 @@ class PurchasesDetails extends Component
             ->leftJoin('purchase_receives as pr','pr.purchase_id','=','p.id')
             ->leftJoin('products as pro','pro.id','=','pr.product_id')
             ->leftJoin('suppliers as s','s.id','=','p.supplier_id')
+            ->leftJoin('manufactures as m','m.id','=','pro.manufacture_id')
 
             ->when(!empty($this->to), function ($q) {
                 return $q->whereDate('p.created_at', '<=', $this->to);
@@ -46,10 +49,13 @@ class PurchasesDetails extends Component
             ->when(!empty($this->supplier_id), function ($q) {
                 return $q->where('p.supplier_id', $this->supplier_id);
             })
+            ->when(!empty($this->manufacture_id), function ($q) {
+                return $q->where('pro.manufacture_id', $this->manufacture_id);
+            })
             ->orderBy('p.id','ASC')
             ->select(
                 'p.id as po_no','p.created_at as placement_date','p.delivery_date as receiving_date','p.grn_no','p.supplier_invoice',
-                's.name as supplier_name','pro.name as product_name',
+                's.name as supplier_name','pro.name as product_name', 'm.name as manufacture_name',
                 'p.advance_tax',
                 'pr.qty','pr.cost_of_price','pr.retail_price','pr.total_cost','pr.bonus','pr.discount','pr.batch_no','pr.expiry','pr.after_disc_cost'
             )

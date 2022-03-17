@@ -2,6 +2,23 @@
     <div class="shadow mb-5 overflow-hidden border-b border-gray-200 sm:rounded-lg">
         <div class="bg-white py-6 px-4 space-y-6 sm:p-6 ">
             <div class="grid grid-cols-10 gap-6">
+
+                <div class="col-span-6 sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">Supplier</label>
+                    <input wire:model="supplier_name" readonly
+                           wire:click="searchableOpenModal('supplier_id','supplier_name','supplier')"
+                           type="text"
+                           autocomplete="off"
+                           class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <div class="col-span-6 sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">Manufacturer</label>
+                    <input wire:model="manufacture_name" readonly
+                           wire:click="searchableOpenModal('manufacture_id','manufacture_name','manufacture')"
+                           type="text"
+                           autocomplete="off"
+                           class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
                 <div class="col-span-8 sm:col-span-2">
                     <label class="block text-sm font-medium text-gray-700">Date Range</label>
                     <select wire:model="range"
@@ -41,17 +58,17 @@
         </div>
     </div>
 
-
-    <div class=" shadow sm:rounded-md sm:overflow-hidden">
+    <div class=" shadow sm:rounded-md">
 
         <div class="flex flex-col">
-            <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="-my-2  sm:-mx-6 lg:-mx-8">
                 <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                    <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+                    <div class="shadow border-b border-gray-200 sm:rounded-lg">
 
                         <div class="bg-white py-6 px-4 sm:p-6 ">
                             <h3 class="text-lg leading-6  text-center font-medium text-gray-900">{{ env('APP_NAME') }}</h3>
-                            <p class="text-md leading-6  text-center  text-gray-900">Pharmacy Purchase Summary Report</p>
+                            <p class="text-md leading-6  text-center  text-gray-900">Pharmacy Purchase Summary
+                                Report</p>
                             <p class="text-md leading-6  text-center  text-gray-900">Statement period
                                 from {{ date('d M, Y',strtotime($from)) }} to {{ date('d M, Y',strtotime($to)) }}</p>
                         </div>
@@ -59,58 +76,59 @@
 
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
+
+
                             <tr>
-                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-900   ">
+                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Sr #
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     PO #
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
+                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Order Placement Date
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Order Receiving Date
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
+                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Supplier Name
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900   ">
+                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     PO Created By
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     PO Approved By
                                 </th>
 
 
-
-
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     GRN #
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Supplier Invoice #
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Invoice Payment Status
                                 </th>
 
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Total COS
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Discount
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
+                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     After Discount
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                   Tax
+                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                    Tax
                                 </th>
-                                <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900    ">
-                                    Grand Total
+                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+
+                                Grand Total
                                 </th>
                             </tr>
                             </thead>
@@ -179,11 +197,11 @@
 
                                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
                                             @php
-                                            $tax = 0;
-                                                if(!empty($r['advance_tax'])){
-                                                    $tax = $r['po_value'] /100 *$r['advance_tax'];
-                                                }
-                                                $total_tax = $total_tax + $tax;
+                                                $tax = 0;
+                                                    if(!empty($r['advance_tax'])){
+                                                        $tax = $r['po_value'] /100 *$r['advance_tax'];
+                                                    }
+                                                    $total_tax = $total_tax + $tax;
                                             @endphp
                                             {{number_format($tax,2)}}
                                         </td>
@@ -195,7 +213,8 @@
                                     </tr>
                                 @endforeach
                                 <tr class="bg-gray-50">
-                                    <th scope="col" colspan="10" class="px-3 py-3 text-left text-sm font-medium text-gray-500">
+                                    <th scope="col" colspan="10"
+                                        class="px-3 py-3 text-left text-sm font-medium text-gray-500">
 
                                     </th>
 
@@ -225,4 +244,16 @@
             </div>
         </div>
     </div>
+    @include('pharmacy::include.searchable')
 </div>
+
+<script>
+    document.addEventListener('livewire:load', () => {
+        Livewire.on('focusInput', postId => {
+            setTimeout(() => {
+                document.getElementById('searchable_query').focus();
+            }, 50);
+        })
+    });
+</script>
+

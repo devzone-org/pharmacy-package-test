@@ -410,7 +410,7 @@
                                         colspan="{{ $admission==true? '2' : '3' }}"
                                         class="  border-r   bg-white text-md font-medium text-gray-500  tracking-wider">
 
-                        <textarea name="" cols="30" rows="5" id="remarks"
+                        <textarea name="" cols="30" rows="5" id="remarks" wire:model.defer="remarks"
                                   class="p-0 focus:ring-0 block w-full border-0 text-md resize-none h-40  "></textarea>
 
 

@@ -5,9 +5,9 @@
                class="p-3 bg-gray-200 border-2 rounded-md  border-gray-400 cursor-pointer hover:bg-gray-300 ">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                     <path
-                        fill-rule="evenodd"
-                        d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                        clip-rule="evenodd"></path>
+                            fill-rule="evenodd"
+                            d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                            clip-rule="evenodd"></path>
                 </svg>
             </a>
             <span class="ml-4">Master Data</span>
@@ -125,6 +125,9 @@
                                     Retail Price
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                    Closing Inventory
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                                     Manufacture
                                 </th>
 
@@ -170,6 +173,10 @@
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         {{ number_format($m->retail_price,2) }}
                                     </td>
+
+                                    <td class="px-3 py-3   text-sm text-gray-500">
+                                        {{ $m->qty }}
+                                    </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         {{ $m->m_name }}
                                     </td>
@@ -185,12 +192,12 @@
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         @if($m->status == 't')
                                             <span
-                                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
   Active
 </span>
                                         @else
                                             <span
-                                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
   Inactive
 </span>
                                         @endif

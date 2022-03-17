@@ -50,12 +50,14 @@ class PurchaseView extends Component
                 ->join('products as p', 'p.id', '=', 'pr.product_id')
                 ->where('pr.purchase_id', $this->purchase_id)
                 ->select('pr.*', 'p.name', 'p.salt')
+                ->orderBy('pr.id','asc')
                 ->get();
         } else {
             $details = PurchaseOrder::from('purchase_orders as po')
                 ->join('products as p', 'p.id', '=', 'po.product_id')
                 ->where('po.purchase_id', $this->purchase_id)
                 ->select('po.*', 'p.name', 'p.salt')
+                ->orderBy('po.id','asc')
                 ->get();
         }
         $purchase_receive = \Devzone\Pharmacy\Models\PurchaseReceive::where('purchase_id', $this->purchase_id)
