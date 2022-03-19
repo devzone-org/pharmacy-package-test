@@ -62,8 +62,6 @@ class PurchaseReceive extends Component
 
     public function mount($purchase_id)
     {
-
-
         $this->delivery_date = date('Y-m-d');
 
 
@@ -123,6 +121,7 @@ class PurchaseReceive extends Component
             ];
         }
     }
+
 
     public function render()
     {
@@ -243,12 +242,15 @@ class PurchaseReceive extends Component
                     'retail_price' => $data['retail_price'],
                     'salt' => $data['salt'],
                     'total_cost' => $data['cost_of_price'],
+                    'total_retail_price' => round($data['retail_price'] * ($data['packing']) * (1 / $data['packing']) ,2),
+                    'profit' =>round($data['retail_price'] * ($data['packing']) * (1 / $data['packing']) - $data['cost_of_price'] * ($data['packing']) * (1 / $data['packing']), 2 ) ,
                     'packing' => $data['packing'],
                     'after_disc_cost' => $data['cost_of_price'],
                     'disc' => 0,
                     'bonus' => 0,
                     'total_qty' => 1
                 ];
+//                dd($this->order_list);
             } else {
                 $key = array_keys($existing)[0];
                 $qty = $this->order_list[$key]['qty'];
