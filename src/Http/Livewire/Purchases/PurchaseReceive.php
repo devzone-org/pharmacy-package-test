@@ -250,7 +250,6 @@ class PurchaseReceive extends Component
                     'bonus' => 0,
                     'total_qty' => 1
                 ];
-//                dd($this->order_list);
             } else {
                 $key = array_keys($existing)[0];
                 $qty = $this->order_list[$key]['qty'];
