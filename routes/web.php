@@ -167,6 +167,10 @@ Route::get('sales/add', function () {
 
 Route::get('sales/open-returns', function () {
     return view('pharmacy::sales.open-returns');
+})->middleware('permission:12.sale-history');
+
+Route::get('sales/open-returns/add/{id?}', function () {
+    return view('pharmacy::sales.open-returns-add');
 })->middleware('permission:12.refund-sale');
 
 Route::get('sales/refund/{id}', function ($id) {

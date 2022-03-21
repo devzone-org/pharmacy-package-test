@@ -142,6 +142,7 @@ class PharmacyServiceProvider extends ServiceProvider
 
         Livewire::component('sales.add', \Devzone\Pharmacy\Http\Livewire\Sales\Add::class);
         Livewire::component('sales.open-returns', \Devzone\Pharmacy\Http\Livewire\Sales\OpenReturns::class);
+        Livewire::component('sales.open-returns-add', \Devzone\Pharmacy\Http\Livewire\Sales\OpenReturnsAdd::class);
         Livewire::component('sales.history', \Devzone\Pharmacy\Http\Livewire\Sales\History::class);
         Livewire::component('sales.pending', \Devzone\Pharmacy\Http\Livewire\Sales\Pending::class);
         Livewire::component('sales.refund', \Devzone\Pharmacy\Http\Livewire\Sales\Refund::class);

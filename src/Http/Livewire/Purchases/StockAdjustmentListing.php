@@ -45,11 +45,12 @@ class StockAdjustmentListing extends Component
                 return $q->whereDate('sa.created_at', '<=',$this->to);
             })
             ->select('p.name', 'sa.indicator', 'sa.qty', 'sa.remarks', 'u.name as added_by', 'sa.voucher_no', 'sa.created_at')
-            ->paginate(50);
+            ->paginate(30);
         return view('pharmacy::livewire.purchases.stock-adjustment-listing', compact('stock'));
     }
 
     public function search(){
+        $this->resetPage();
         $this->product_id_id = $this->product_id;
     }
 
