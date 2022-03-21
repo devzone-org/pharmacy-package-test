@@ -25,6 +25,7 @@ use Devzone\Pharmacy\Models\Sale\SaleDetail;
 use Devzone\Pharmacy\Models\Sale\SaleIssuance;
 use Devzone\Pharmacy\Models\Sale\UserTill;
 use Devzone\Pharmacy\Models\UserLimit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -68,9 +69,15 @@ class Add extends Component
     public $customer_modal = false;
     public $customers = [];
     public $employees = [];
-
     public $doctors = [];
+
     public $add_modal = false;
+    public $add_sale_modal = false;
+
+    public $old_user_id;
+    public $user_email;
+    public $user_password;
+
     public $patient_mr;
     public $add_patient_name;
     public $father_husband_name;
@@ -103,8 +110,17 @@ class Add extends Component
         'add_patient_name' => 'patient name'
     ];
 
-    public function mount($admission_id = null, $procedure_id = null, $doctor_id = null)
+    public function mount($admission_id = null, $procedure_id = null, $doctor_id = null, Request $request)
     {
+
+        if (env('USER_CONFIRMATION', false)) {
+            if (!empty($request->get('old_user'))) {
+                $this->old_user_id = $request->get('old_user');
+            } else {
+                $this->old_user_id = \auth()->id();
+                $this->add_sale_modal = true;
+            }
+        }
 
         if (auth()->user()->can('add-pending-sale')) {
             $this->pending_sale = true;
@@ -498,6 +514,29 @@ class Add extends Component
         }
     }
 
+
+    public function confirmUser()
+    {
+        if (empty($this->user_email) || empty($this->user_password)) {
+            $this->addError('login', 'Please enter your credentials to proceed.');
+            return;
+        }
+
+        if (Auth::attempt(['email' => $this->user_email, 'password' => $this->user_password])) {
+            return $this->redirect('?old_user='.$this->old_user_id);
+        } else {
+            $this->addError('login', 'The provided credentials do not match our records.');
+        }
+    }
+
+
+    public function reloginUser()
+    {
+        \auth()->loginUsingId($this->old_user_id);
+        return redirect()->to('pharmacy/sales/add');
+    }
+
+
     public function pendingSaleComplete()
     {
         $this->pending_and_complete = true;
@@ -588,6 +627,9 @@ class Add extends Component
                 $this->success = 'Sale has been added to pending list.';
                 DB::commit();
                 $this->pending_and_complete = false;
+                if (env('USER_CONFIRMATION', false)){
+                    $this->reloginUser();
+                }
                 return;
             }
 
@@ -872,6 +914,9 @@ class Add extends Component
 
             DB::commit();
             $this->emit('printInvoice', $sale_id, $this->admission_id, $this->procedure_id);
+            if (env('USER_CONFIRMATION', false)){
+                $this->reloginUser();
+            }
         } catch (\Exception $e) {
             $this->error = $e->getMessage();
             DB::rollBack();
@@ -914,6 +959,14 @@ class Add extends Component
         $this->doctors = Employee::where('is_doctor', 't')->where('status', 't')->get()->toArray();
         $this->add_modal = true;
     }
+
+
+    public function closeSaleModal()
+    {
+        $this->reset('user_password');
+        $this->add_sale_modal = false;
+    }
+
 
     public function hasContact()
     {
