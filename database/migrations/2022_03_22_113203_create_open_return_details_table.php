@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateOpenReturnsTable extends Migration
+class CreateOpenReturnDetailsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,16 @@ class CreateOpenReturnsTable extends Migration
      */
     public function up()
     {
-        Schema::create('open_returns', function (Blueprint $table) {
+        Schema::create('open_return_details', function (Blueprint $table) {
             $table->id();
-            $table->text('remarks');
+            $table->unsignedBigInteger('open_return_id');
+            $table->unsignedBigInteger('product_id');
+            $table->date('expiry');
+            $table->unsignedInteger('qty');
+            $table->unsignedDecimal('retail_price');
             $table->unsignedDecimal('total');
+            $table->unsignedInteger('deduction');
             $table->unsignedDecimal('total_after_deduction');
-            $table->unsignedInteger('added_by');
             $table->timestamps();
         });
     }
@@ -30,6 +34,6 @@ class CreateOpenReturnsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('open_returns');
+        Schema::dropIfExists('open_return_details');
     }
 }

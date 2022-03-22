@@ -34,10 +34,11 @@ class OpenReturns extends Component
 
     }
 
+
+
     public function render()
     {
         $returns = OpenReturn::from('open_returns as or')
-            ->join('products as p', 'p.id', '=', 'or.product_id')
             ->join('users as u', 'u.id', '=', 'or.added_by')
             ->when(!empty($this->product_id_id), function ($q) {
                 return $q->where('or.product_id', $this->product_id_id);
@@ -48,7 +49,7 @@ class OpenReturns extends Component
             ->when(!empty($this->to), function ($q) {
                 return $q->whereDate('or.created_at', '<=',$this->to);
             })
-            ->select('p.name', 'or.*', 'u.name as added_by')
+            ->select('or.*', 'u.name as added_by')
             ->paginate(30);
         return view('pharmacy::livewire.sales.open-returns', ['returns' => $returns]);
     }

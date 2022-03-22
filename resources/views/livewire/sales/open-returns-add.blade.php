@@ -66,23 +66,32 @@
                 <div class="grid grid-cols-6 gap-6">
                     <div class="col-span-6 sm:col-span-2">
                         <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
-                        <input value="{{ date('Y-m-d') }}" readonly type="date" autocomplete="off"
-                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                               id="date">
+                        @if(!$is_view)
+                            <input value="{{ date('Y-m-d') }}" readonly type="date" autocomplete="off"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                   id="date">
+                        @else
+                            {{ date('d M, Y', strtotime($open_return_data[0]['created_at'])) }}
+                        @endif
                     </div>
 
 
                     <div class="col-span-6 sm:col-span-2">
                         <label for="created_by" class="block text-sm font-medium text-gray-700">Created By</label>
-                        <input value="{{ Auth::user()->name }}" readonly type="text" autocomplete="off"
-                               class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        >
+                        @if(!$is_view)
+                            <input value="{{ Auth::user()->name }}" readonly type="text" autocomplete="off"
+                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        @else
+                            {{ $open_return_data[0]['added_by'] }}
+                        @endif
                     </div>
 
-                    <div class="col-span-6">
-                        <p class="text-indigo-600 font-bold cursor-pointer inline-block"
-                           wire:click="openProductModal">+ Add Products in PO</p>
-                    </div>
+                    @if(!$is_view)
+                        <div class="col-span-6">
+                            <p class="text-indigo-600 font-bold cursor-pointer inline-block"
+                               wire:click="openProductModal">+ Add Products in PO</p>
+                        </div>
+                    @endif
                 </div>
 
 
@@ -119,99 +128,151 @@
                 </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                @foreach($returns as $key => $m)
-                    @php
-                        $closing= \Devzone\Pharmacy\Models\ProductInventory::where('product_id',$m['id'])->where('qty','>','0')->sum('qty');
-                    @endphp
-                    <tr>
-                        <td class="px-3 py-3   text-sm font-medium text-gray-500">
-                            {{ $loop->iteration }}
-                        </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
-                            {{ $m['name'] }}
-                        </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
-                            {{ $m['salt']??'-' }}
-                        </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
-                            <input type="number" onclick="this.select()"
-                                   class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                   wire:model.lazy="returns.{{$key}}.qty">
-                        </td>
+                @if(!$is_view)
+                    @foreach($returns as $key => $m)
+                        @php
+                            $closing= \Devzone\Pharmacy\Models\ProductInventory::where('product_id',$m['id'])->where('qty','>','0')->sum('qty');
+                        @endphp
+                        <tr>
+                            <td class="px-3 py-3   text-sm font-medium text-gray-500">
+                                {{ $loop->iteration }}
+                            </td>
+                            <td class="px-3 py-3   text-sm text-gray-500">
+                                {{ $m['name'] }}
+                            </td>
+                            <td class="px-3 py-3   text-sm text-gray-500">
+                                {{ $m['salt']??'-' }}
+                            </td>
+                            <td class="px-3 py-3   text-sm text-gray-500">
+                                <input type="number" onclick="this.select()"
+                                       class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                       wire:model.lazy="returns.{{$key}}.qty">
+                            </td>
 
-                        <td class="px-3 py-3   text-sm text-gray-500">
-                            <input type="date"
-                                   class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                   wire:model="returns.{{$key}}.expiry">
-                        </td>
-                        <td class="px-3 py-3 text-center text-sm text-gray-500">
-                            {{ number_format($m['retail_price'],2) }}
-                        </td>
-
-
-                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                            {{ number_format($m['total_cost'],2) }}
-                        </td>
+                            <td class="px-3 py-3   text-sm text-gray-500">
+                                <input type="date"
+                                       class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                       wire:model="returns.{{$key}}.expiry">
+                            </td>
+                            <td class="px-3 py-3 text-center text-sm text-gray-500">
+                                {{ number_format($m['retail_price'],2) }}
+                            </td>
 
 
-                        <td class="px-3 py-3 w-7   text-right text-sm font-medium">
-                            <svg wire:click="removeProduct('{{ $key }}')" wire:loading.attr="disabled"
-                                 class="w-6 h-6 text-red-600 cursor-pointer hover:text-red-800" fill="currentColor"
-                                 viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd"
-                                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                      clip-rule="evenodd"></path>
-                            </svg>
-                        </td>
-                    </tr>
-                @endforeach
+                            <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                {{ number_format($m['total_cost'],2) }}
+                            </td>
+
+
+                            <td class="px-3 py-3 w-7   text-right text-sm font-medium">
+                                <svg wire:click="removeProduct('{{ $key }}')" wire:loading.attr="disabled"
+                                     class="w-6 h-6 text-red-600 cursor-pointer hover:text-red-800" fill="currentColor"
+                                     viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd"
+                                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                          clip-rule="evenodd"></path>
+                                </svg>
+                            </td>
+                        </tr>
+                    @endforeach
+                @else
+                    @foreach($open_return_data as $k => $m)
+                        <tr>
+                            <td class="px-3 py-3   text-sm font-medium text-gray-500">
+                                {{ $loop->iteration }}
+                            </td>
+                            <td class="px-3 py-3   text-sm text-gray-500">
+                                {{ $m['name'] }}
+                            </td>
+                            <td class="px-3 py-3   text-sm text-gray-500">
+                                {{ $m['salt']??'-' }}
+                            </td>
+                            <td class="px-3 py-3   text-sm text-gray-500">
+                                {{ $m['qty'] }}
+                            </td>
+
+                            <td class="px-3 py-3   text-sm text-gray-500">
+                                {{ date('d M, Y', strtotime($m['expiry'])) }}
+                            </td>
+                            <td class="px-3 py-3 text-center text-sm text-gray-500">
+                                {{ number_format($m['retail_price'],2) }}
+                            </td>
+
+
+                            <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                {{ number_format($m['total'],2) }}
+                            </td>
+
+
+                            <td class="px-3 py-3 w-7   text-right text-sm font-medium">
+
+                            </td>
+                        </tr>
+                    @endforeach
+                @endif
                 <tr class="bg-gray-50 border-b">
                     <th scope="col" colspan="3" class="px-3 py-3 text-center text-sm font-medium text-gray-500   ">
                         Total
                     </th>
                     <th scope="col" colspan="2" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                        {{ number_format(collect($returns)->sum('qty'),2) }}
+                        {{ $is_view? number_format(collect($open_return_data)->sum('qty'),2) : number_format(collect($returns)->sum('qty'),2) }}
                     </th>
 
                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
-                        {{ number_format(collect($returns)->sum('retail_price'),2) }}
+                        {{ $is_view? number_format(collect($open_return_data)->sum('retail_price'), 2) : number_format(collect($returns)->sum('retail_price'),2) }}
                     </th>
 
                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
-                        {{ number_format(collect($returns)->sum('total_cost'),2) }}
+                        {{ $is_view? number_format($open_return_data[0]['grand_total'], 2) : number_format(collect($returns)->sum('total_cost'),2) }}
                     </th>
                     <th scope="col" class="relative px-3 py-3">
                         <span class="sr-only">Edit</span>
                     </th>
                 </tr>
                 <tr class="bg-gray-50 border-b">
-                    <th scope="col" colspan="5" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    <th colspan="5" rowspan="2"
+                        class="  border-r   bg-white text-md font-medium text-gray-500  tracking-wider">
+                        @if(!$is_view)
+                            Remarks<span class="text-red-600">*</span>
+                            <textarea name="" cols="5" id="remarks" wire:model.defer="remarks"
+                                      class="p-1 focus:ring-0 block w-full border-0 text-md resize-none h-28  "></textarea>
+                        @else
+                            {{ $open_return_data[0]['remarks'] }}
+                        @endif
+
 
                     </th>
 
                     <th scope="col" colspan="1" class="px-3 py-3 text-right text-xl text-gray-500    ">
                         Deduction (%)
                     </th>
-                    <th scope="col" colspan="1" class="px-3 py-3 text-left font-medium text-gray-500    ">
-                        <input type="number" onclick="this.select()"
-                               class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                               wire:model.lazy="deduction">
+                    <th scope="col" colspan="1" class="px-3 py-3 {{$is_view?'text-center': 'text-left'}} font-medium text-gray-500    ">
+                        @if(!$is_view)
+                            <input type="number" onclick="this.select()"
+                                   class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                   wire:model.lazy="deduction">
+                        @else
+                            {{ $open_return_data[0]['deduction'] }}
+                        @endif
                     </th>
+
                     <th scope="col" class="relative px-3 py-3">
                         <span class="sr-only">Edit</span>
                     </th>
+
                 </tr>
                 <tr class="bg-gray-50 border-b">
-                    <th scope="col" colspan="5" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-
-                    </th>
-
                     <th scope="col" colspan="1" class="px-3 py-3 text-right text-xl text-gray-500    ">
                         Total After Deduction
                     </th>
                     <th scope="col" colspan="1" class="px-3 py-3 text-center text-xl text-gray-500    ">
-                        {{ number_format(collect($returns)->sum('total_cost') - (collect($returns)->sum('total_cost')*$deduction/100), 2) }}
+                        @if(!$is_view)
+                            {{ number_format(collect($returns)->sum('total_cost') - (collect($returns)->sum('total_cost')*$deduction/100), 2) }}
+                        @else
+                            {{ number_format($open_return_data[0]['grand_total_after_deduction'], 2) }}
+                        @endif
                     </th>
+
                     <th scope="col" class="relative px-3 py-3">
                         <span class="sr-only">Edit</span>
                     </th>
@@ -219,17 +280,19 @@
                 </tr>
                 </tbody>
             </table>
-            <div class="px-4 py-3 bg-gray-50 text-right sm:px-6 border-t">
-                <button type="submit"
-                        class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
-                    <div wire:loading wire:target="create">
-                        Adding ...
-                    </div>
-                    <div wire:loading.remove wire:target="create">
-                        Add
-                    </div>
-                </button>
-            </div>
+            @if(!$is_view)
+                <div class="px-4 py-3 bg-gray-50 text-right sm:px-6 border-t">
+                    <button type="submit"
+                            class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
+                        <div wire:loading wire:target="create">
+                            Adding ...
+                        </div>
+                        <div wire:loading.remove wire:target="create">
+                            Add
+                        </div>
+                    </button>
+                </div>
+            @endif
         </div>
     </form>
 

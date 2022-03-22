@@ -67,15 +67,7 @@
                     </th>
                     <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Name
-                    </th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Qty
-                    </th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Retail Price
+                        Remarks
                     </th>
                     <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -83,19 +75,15 @@
                     </th>
                     <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Deduction
-                    </th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Total <br> (After Deduction)
                     </th>
                     <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Expiry
+                        Added By
                     </th>
                     <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Added By
+
                     </th>
 
                 </tr>
@@ -107,15 +95,7 @@
                             {{ $loop->iteration + ( $returns->firstItem() - 1)   }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $r->name }}
-                        </td>
-
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $r->qty }}
-                        </td>
-
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ number_format($r->retail_price, 2) }}
+                            {{ $r->remarks }}
                         </td>
 
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -123,20 +103,25 @@
                         </td>
 
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $r->deduction }} %
-                        </td>
-
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {{ number_format($r->total_after_deduction, 2) }}
-                        </td>
-
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ date('d M, Y', strtotime($r->expiry)) }}
                         </td>
 
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {{ $r->added_by }} @<br>
                             {{ date('d M, Y h:i A',strtotime($r->created_at)) }}
+                        </td>
+
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <a class="text-green-600 cursor-pointer" target="_blank"
+                               href="{{ url('pharmacy/sales/open-returns/add') }}/{{$r->id}}">
+                                <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                                    <path fill-rule="evenodd"
+                                          d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                          clip-rule="evenodd"></path>
+                                </svg>
+                            </a>
                         </td>
 
 

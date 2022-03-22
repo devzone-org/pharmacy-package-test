@@ -12,6 +12,7 @@ use Devzone\Pharmacy\Models\ProductInventory;
 use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\PurchaseOrder;
 use Devzone\Pharmacy\Models\Sale\OpenReturn;
+use Devzone\Pharmacy\Models\Sale\OpenReturnDetail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -21,28 +22,47 @@ class OpenReturnsAdd extends Component
     use Searchable;
 
     public $date;
+    public $remarks;
     public $products_modal = false;
     public $search_products;
     public $product_data = [];
     public $returns = [];
     public $deduction = 0;
     public $total_after_deduction;
+    public $open_return_data;
 
+    public $is_view = false;
     public $success;
 
     protected $rules = [
         'deduction' => 'required|numeric|between:0,100',
         'returns' => 'required',
         'returns.*.qty' => 'required|integer|gt:0',
-        'returns.*.expiry' => 'required|date|after:today'
+        'returns.*.expiry' => 'required|date|after:today',
+        'remarks' => 'required|string',
     ];
 
     protected $validationAttributes = [
         'returns' => 'Products',
+        'deduction' => 'Deduction %',
+        'remarks' => 'Remarks',
     ];
 
-    public function mount()
+    public function mount($id = null)
     {
+        $data = OpenReturn::find($id);
+        if (!empty($data)){
+            $this->open_return_data = OpenReturn::from('open_returns as or')
+                ->where('or.id', $id)
+                ->join('open_return_details as ord', 'ord.open_return_id', '=', 'or.id')
+                ->join('products as p', 'p.id', '=', 'ord.product_id')
+                ->join('users as u', 'u.id', '=', 'or.added_by')
+                ->select('p.name', 'p.salt', 'ord.*', 'or.remarks', 'or.total as grand_total', 'or.total_after_deduction as grand_total_after_deduction', 'u.name as added_by')
+                ->get()->toArray();
+            if (!empty($this->open_return_data)){
+                $this->is_view = true;
+            }
+        }
         $this->date = date('Y-m-d');
     }
 
@@ -152,6 +172,15 @@ class OpenReturnsAdd extends Component
 
         try {
             DB::beginTransaction();
+
+            $or = OpenReturn::create([
+                'remarks' => $this->remarks,
+                'total' => $total,
+                'total_after_deduction' => $this->total_after_deduction,
+                'added_by' => \auth()->id(),
+            ]);
+
+
             foreach ($this->returns as $k => $pro){
                 $inv = ProductInventory::create([
                     'product_id' => $pro['id'],
@@ -172,7 +201,8 @@ class OpenReturnsAdd extends Component
                     'description' => $des
                 ]);
 
-                OpenReturn::create([
+                OpenReturnDetail::create([
+                    'open_return_id' => $or->id,
                     'product_id' => $pro['id'],
                     'expiry' => $pro['expiry'],
                     'qty' => $pro['qty'],
@@ -180,14 +210,13 @@ class OpenReturnsAdd extends Component
                     'total' => $pro['total_cost'],
                     'deduction' => $this->deduction,
                     'total_after_deduction' => $pro['total_cost'] - ($pro['total_cost'] * $this->deduction/100),
-                    'added_by' => \auth()->id(),
                 ]);
             }
 
             // Account entries remain.
             DB::commit();
             $this->success = 'Product inventory updated successfully.';
-            $this->reset(['returns', 'date', 'deduction', 'total_after_deduction']);
+            $this->reset(['returns', 'date', 'deduction', 'total_after_deduction', 'remarks']);
         } catch (\Exception $e) {
             $this->addError('error', $e->getMessage());
             DB::rollBack();
