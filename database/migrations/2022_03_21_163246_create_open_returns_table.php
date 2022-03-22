@@ -19,6 +19,7 @@ class CreateOpenReturnsTable extends Migration
             $table->unsignedDecimal('total');
             $table->unsignedDecimal('total_after_deduction');
             $table->unsignedInteger('added_by');
+            $table->unsignedInteger('voucher');
             $table->timestamps();
         });
     }

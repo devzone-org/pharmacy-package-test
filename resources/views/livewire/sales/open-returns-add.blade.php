@@ -19,7 +19,7 @@
             <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
 
                 <div>
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">Add Open Return</h3>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">{{$is_view?'View':'Add'}} Open Return</h3>
                     <p class="text-sm text-gray-500">Return products without invoice.</p>
                 </div>
 

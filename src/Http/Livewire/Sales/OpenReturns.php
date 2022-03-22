@@ -25,6 +25,7 @@ class OpenReturns extends Component
     public $product_id_id;
     public $product_name;
 
+    public $voucher;
     public $from;
     public $to;
 
@@ -40,8 +41,8 @@ class OpenReturns extends Component
     {
         $returns = OpenReturn::from('open_returns as or')
             ->join('users as u', 'u.id', '=', 'or.added_by')
-            ->when(!empty($this->product_id_id), function ($q) {
-                return $q->where('or.product_id', $this->product_id_id);
+            ->when(!empty($this->voucher), function ($q) {
+                return $q->where('or.voucher', $this->voucher);
             })
             ->when(!empty($this->from), function ($q) {
                 return $q->whereDate('or.created_at', '>=',$this->from);
@@ -60,7 +61,7 @@ class OpenReturns extends Component
     }
 
     public function resetSearch(){
-        $this->reset(['product_id_id','product_id','product_name','from','to']);
+        $this->reset(['product_id_id','product_id','product_name','from','to', 'voucher']);
         $this->resetPage();
     }
 }
