@@ -61,8 +61,8 @@
                                         </th>
                                     @endforeach
                                     <th scope="col"
-                                        class="px-2 py-2 text-left text-xs font-medium text-gray-500   tracking-wider">
-                                        Order Qty
+                                        class="px-2 py-1 text-left text-xs font-medium text-gray-500   tracking-wider">
+                                        Qty
                                     </th>
 
 
@@ -95,7 +95,7 @@
                                         @endforeach
                                         <td class="px-2 py-1 whitespace-nowrap text-sm ">
                                             <input type="number" min="0" @keyup.tab="h_light={{$key}}"  wire:model.defer="product_qty" wire:keydown.enter="searchableSelection('{{$key}}')"
-                                                   class="px-2 py-1 relative text-black focus:ring-gray-200 focus:border-indigo-500 w-full text-sm border-gray-300 rounded"
+                                                   class="px-2 py-1 relative text-black focus:ring-gray-200 focus:border-indigo-500 w-20 text-sm border-gray-300 rounded"
                                                    autocomplete="off">
                                         </td>
                                     </tr>
