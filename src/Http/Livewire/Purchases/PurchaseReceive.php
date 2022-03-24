@@ -62,8 +62,6 @@ class PurchaseReceive extends Component
 
     public function mount($purchase_id)
     {
-
-
         $this->delivery_date = date('Y-m-d');
 
 
@@ -114,15 +112,16 @@ class PurchaseReceive extends Component
                 'cost_of_price' => round($data['cost_of_price'] * $data['packing'] ,2),
                 'after_disc_cost' => round($data['cost_of_price'] * $data['packing'],2),
                 'retail_price' => round($data['retail_price'] * $data['packing'], 2),
-                'total_retail_price' => round($data['retail_price'] * ($data['packing']) * ($data['qty'] / $data['packing']) ,2) ,
-                'profit' =>round($data['retail_price'] * ($data['packing']) * ($data['qty'] / $data['packing']) - $data['cost_of_price'] * ($data['packing']) * ($data['qty'] / $data['packing']), 2 ) ,
+                'total_retail_price' => round($data['retail_price'] * $data['qty'] ,2) ,
+                'profit' =>round(($data['retail_price'] * $data['qty']) - ($data['cost_of_price'] * $data['qty']), 2 ) ,
                 'salt' => $data['salt'],
-                'total_cost' => round($data['cost_of_price'] * ($data['packing']) * ($data['qty'] / $data['packing']), 2),
+                'total_cost' => round($data['cost_of_price'] * $data['qty'], 2),
                 'packing' => $data['packing'],
                 'total_qty' => $data['qty'] / $data['packing'],
             ];
         }
     }
+
 
     public function render()
     {
@@ -243,6 +242,8 @@ class PurchaseReceive extends Component
                     'retail_price' => $data['retail_price'],
                     'salt' => $data['salt'],
                     'total_cost' => $data['cost_of_price'],
+                    'total_retail_price' => $data['retail_price'],
+                    'profit' =>round($data['retail_price'] - $data['cost_of_price'], 2 ) ,
                     'packing' => $data['packing'],
                     'after_disc_cost' => $data['cost_of_price'],
                     'disc' => 0,
