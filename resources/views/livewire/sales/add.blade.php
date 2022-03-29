@@ -812,8 +812,13 @@
                         <div class="col-span-6 sm:col-span-6">
                             <label class="block text-sm font-medium text-gray-700">User Email<span
                                         class="text-red-500">*</span></label>
-                            <input wire:model.defer="user_email" type="email" autocomplete="off"
-                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <select wire:model.defer="user_email"
+                                    class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value=""></option>
+                                @foreach($sales_men as $s)
+                                    <option value="{{$s['email']}}">{{$s['name']}}<br> ({{$s['email']}})</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col-span-6 sm:col-span-6">
                             <label class="block text-sm font-medium text-gray-700">Password<span
@@ -831,7 +836,7 @@
                                         wire:click="closeSaleModal">
                                     Close
                                 </button>
-                                <button type="button" wire:click="confirmUser"
+                                <button type="button" wire:click="saleComplete"
                                         class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
                                     Proceed
                                 </button>

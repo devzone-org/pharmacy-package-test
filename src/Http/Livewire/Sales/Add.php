@@ -30,6 +30,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Spatie\Permission\Models\Permission;
 
 class Add extends Component
 {
@@ -70,6 +71,7 @@ class Add extends Component
     public $customers = [];
     public $employees = [];
     public $doctors = [];
+    public $sales_men = [];
 
     public $add_modal = false;
     public $add_sale_modal = false;
@@ -114,11 +116,16 @@ class Add extends Component
     {
 
         if (env('USER_CONFIRMATION', false)) {
+            $this->sales_men = Permission::from('permissions')
+                ->where('permissions.name', '12.add-sale')
+                ->join('model_has_permissions as mhp', 'mhp.permission_id', '=', 'permissions.id')
+                ->join('users', 'users.id', '=', 'mhp.model_id')
+                ->select('permissions.id as p_id', 'users.*')->get()->toArray();
+
             if (!empty($request->get('old_user'))) {
                 $this->old_user_id = $request->get('old_user');
             } else {
                 $this->old_user_id = \auth()->id();
-                $this->add_sale_modal = true;
             }
         }
 
@@ -519,21 +526,30 @@ class Add extends Component
     {
         if (empty($this->user_email) || empty($this->user_password)) {
             $this->addError('login', 'Please enter your credentials to proceed.');
-            return;
         }
 
-        if (Auth::attempt(['email' => $this->user_email, 'password' => $this->user_password])) {
-            return $this->redirect('?old_user='.$this->old_user_id);
-        } else {
+        // auth::once only authenticates user for single request so in case we close the modal after validation it goes back to old login
+        if (!Auth::once(['email' => $this->user_email, 'password' => $this->user_password])) {
             $this->addError('login', 'The provided credentials do not match our records.');
         }
+
     }
+
+
+    public function closeSaleModal()
+    {
+        $this->reset('user_password');
+        $this->add_sale_modal = false;
+    }
+
 
 
     public function reloginUser()
     {
-        \auth()->loginUsingId($this->old_user_id);
-        return redirect()->to('pharmacy/sales/add');
+        if (!\auth()->loginUsingId($this->old_user_id)) {
+            return new \Exception('An Unknown Error Occurred.');
+        }
+
     }
 
 
@@ -627,11 +643,25 @@ class Add extends Component
                 $this->success = 'Sale has been added to pending list.';
                 DB::commit();
                 $this->pending_and_complete = false;
-                if (env('USER_CONFIRMATION', false)){
-                    $this->reloginUser();
-                }
                 return;
             }
+
+
+            //Here should be the conditions
+            if (env('USER_CONFIRMATION', false)) {
+                $this->add_sale_modal = true;
+                $this->confirmUser();
+                if($this->getErrorBag()->has('login')){
+                    throw new \Exception();
+                }
+
+                if (auth()->user()->can('add-pending-sale')){
+                    $this->addError('login', 'User does not have permission for a complete sale.');
+                    throw new \Exception();
+                }
+
+            }
+
 
             if (empty($this->credit)) {
                 if (empty($this->received) && $this->admission == false) {
@@ -914,7 +944,8 @@ class Add extends Component
 
             DB::commit();
             $this->emit('printInvoice', $sale_id, $this->admission_id, $this->procedure_id);
-            if (env('USER_CONFIRMATION', false)){
+            if (env('USER_CONFIRMATION', false)) {
+                $this->add_sale_modal = false;
                 $this->reloginUser();
             }
         } catch (\Exception $e) {
@@ -958,13 +989,6 @@ class Add extends Component
         $this->patient_mr = 'MR' . str_pad($last_patient->id + 1, 6, '0', STR_PAD_LEFT);
         $this->doctors = Employee::where('is_doctor', 't')->where('status', 't')->get()->toArray();
         $this->add_modal = true;
-    }
-
-
-    public function closeSaleModal()
-    {
-        $this->reset('user_password');
-        $this->add_sale_modal = false;
     }
 
 
