@@ -4,6 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
 
+use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\DB;
@@ -24,10 +25,15 @@ class Pending extends Component
 
     public function mount()
     {
-        $this->from = date('Y-m-d', strtotime('-1 month'));
-        $this->to = date('Y-m-d');
+        $this->from =  date('d M Y', strtotime('-1 month'));
+        $this->to = date('d M Y');
     }
 
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
+    }
 
     public function render()
     {
@@ -39,9 +45,9 @@ class Pending extends Component
 
 
         $history = $history->when(!empty($this->from), function ($q) {
-            return $q->whereDate('s.sale_at', '>=', $this->from);
+            return $q->whereDate('s.sale_at', '>=', $this->formatDate($this->from));
         })->when(!empty($this->to), function ($q) {
-            return $q->whereDate('s.sale_at', '<=', $this->to);
+            return $q->whereDate('s.sale_at', '<=', $this->formatDate($this->to));
         })->when(!empty($this->status), function ($q) {
             if ($this->status == 'e-pre') {
                 return $q->whereNotNull('s.opd_id');
