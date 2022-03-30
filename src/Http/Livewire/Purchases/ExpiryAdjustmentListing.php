@@ -5,6 +5,7 @@ namespace Devzone\Pharmacy\Http\Livewire\Purchases;
 
 
 
+use Carbon\Carbon;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\ExpiryAdjustmentLog;
 use App\Models\User;
@@ -28,6 +29,12 @@ class ExpiryAdjustmentListing extends Component
     {
         $this->all_users = User::all();
     }
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
+    }
+
 
     public function render()
     {
@@ -42,10 +49,10 @@ class ExpiryAdjustmentListing extends Component
                 return $q->where('eal.created_by', $this->added_by);
             })
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('eal.created_at', '>=',$this->from);
+                return $q->whereDate('eal.created_at', '>=', $this->formatDate($this->from));
             })
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('eal.created_at', '<=',$this->to);
+                return $q->whereDate('eal.created_at', '<=', $this->formatDate($this->to));
             })
             ->select('pro.name as product', 'eal.old_expiry', 'pi.po_id', 'eal.new_expiry', 'eal.remarks', 'u.name as added_by', 'eal.created_at')
             ->paginate(50);

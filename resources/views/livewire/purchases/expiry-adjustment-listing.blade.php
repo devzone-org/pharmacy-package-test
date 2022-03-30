@@ -24,13 +24,13 @@
 
                     <div class="col-span-2">
                         <label for="from_date" class="block text-sm font-medium text-gray-700">Records From</label>
-                        <input type="date" wire:model.defer="from" name="from_date" id="from_date"
+                        <input type="text" wire:model.lazy="from" name="from_date" id="from"
                                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                     </div>
 
                     <div class="col-span-2">
                         <label for="to_date" class="block text-sm font-medium text-gray-700">Records To</label>
-                        <input type="date" wire:model.defer="to" name="to_date" id="to_date"
+                        <input type="text" wire:model.lazy="to" name="to_date" id="to"
                                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                     </div>
                     <div class="col-span-3">
@@ -165,3 +165,21 @@
         })
     });
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+<script>
+    let from_date = new Pikaday({
+        field: document.getElementById('from'),
+        format: "DD MMM YYYY"
+    });
+
+    let to_date = new Pikaday({
+        field: document.getElementById('to'),
+        format: "DD MMM YYYY"
+    });
+
+    from_date.setDate(new Date('{{ $from }}'));
+    to_date.setDate(new Date('{{ $to }}'));
+</script>
+

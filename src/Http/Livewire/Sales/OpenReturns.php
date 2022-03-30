@@ -35,6 +35,11 @@ class OpenReturns extends Component
 
     }
 
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
+    }
 
 
     public function render()
@@ -45,10 +50,10 @@ class OpenReturns extends Component
                 return $q->where('or.voucher', $this->voucher);
             })
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('or.created_at', '>=',$this->from);
+                return $q->whereDate('or.created_at', '>=',$this->formatDate($this->from));
             })
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('or.created_at', '<=',$this->to);
+                return $q->whereDate('or.created_at', '<=',$this->formatDate($this->to));
             })
             ->select('or.*', 'u.name as added_by')
             ->paginate(30);

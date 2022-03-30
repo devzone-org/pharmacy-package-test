@@ -98,6 +98,7 @@
                             </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
+
                             @foreach($history as $h)
                                 <tr>
                                     <td class="px-3 py-3   text-sm font-medium text-gray-500">
