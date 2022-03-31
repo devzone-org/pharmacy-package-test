@@ -3,6 +3,7 @@
 
 namespace Devzone\Pharmacy\Http\Livewire\Reports;
 
+use Carbon\Carbon;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -22,11 +23,17 @@ class SaleHourlyGraph extends Component
 
     public function mount()
     {
-        $this->from = date('Y-m-d', strtotime('-7 days'));
-        $this->to = date('Y-m-d');
+        $this->from = date('d M Y', strtotime('-7 days'));
+        $this->to = date('d M Y');
         $this->range = 'seven_days';
         $this->search();
     }
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
+    }
+
 
     public function search()
     {
@@ -37,10 +44,10 @@ class SaleHourlyGraph extends Component
         }
         $this->report = Sale::from('sales as s')
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('s.sale_at', '<=', $this->to);
+                return $q->whereDate('s.sale_at', '<=', $this->formatDate($this->to));
             })
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('s.sale_at', '>=', $this->from);
+                return $q->whereDate('s.sale_at', '>=', $this->formatDate($this->from));
             })
             ->select(
                 DB::raw('hour(s.sale_at) as hour'),
@@ -78,23 +85,23 @@ class SaleHourlyGraph extends Component
 
         } elseif ($val == 'seven_days') {
             $this->date_range = false;
-            $this->from = date('Y-m-d', strtotime('-7 days'));
-            $this->to = date('Y-m-d');
+            $this->from = date('d M Y', strtotime('-7 days'));
+            $this->to = date('d M Y');
             $this->search();
         } elseif ($val == 'thirty_days') {
             $this->date_range = false;
-            $this->from = date('Y-m-d', strtotime('-30 days'));
-            $this->to = date('Y-m-d');
+            $this->from = date('d M Y', strtotime('-30 days'));
+            $this->to = date('d M Y');
             $this->search();
         } elseif ($val == 'yesterday') {
             $this->date_range = false;
-            $this->from = date('Y-m-d', strtotime('-1 days'));
-            $this->to = date('Y-m-d', strtotime('-1 days'));
+            $this->from = date('d M Y', strtotime('-1 days'));
+            $this->to = date('d M Y', strtotime('-1 days'));
             $this->search();
         } elseif ($val == 'today') {
             $this->date_range = false;
-            $this->from = date('Y-m-d');
-            $this->to = date('Y-m-d');
+            $this->from = date('d M Y');
+            $this->to = date('d M Y');
             $this->search();
         }
     }

@@ -23,13 +23,13 @@
 
                 <div class="col-span-2">
                     <label for="first-name" class="block text-sm font-medium text-gray-700">From</label>
-                    <input type="text" wire:model.lazy="from" id="from" name="first-name" autocomplete="given-name"
+                    <input type="text" wire:model.lazy="from" id="from" name="first-name" autocomplete="given-name" readonly
                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                 </div>
 
                 <div class="col-span-2">
                     <label for="first-name" class="block text-sm font-medium text-gray-700">To</label>
-                    <input type="text" wire:model.defer="to" id="to" autocomplete="given-name"
+                    <input type="text" wire:model.defer="to" id="to" autocomplete="given-name" readonly
                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                 </div>
                 <div class="col-span-3">

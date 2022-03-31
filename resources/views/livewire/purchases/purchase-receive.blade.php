@@ -5,17 +5,17 @@
                class="p-3 bg-gray-200 border-2 rounded-md  border-gray-400 cursor-pointer hover:bg-gray-300 ">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                     <path
-                        fill-rule="evenodd"
-                        d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                        clip-rule="evenodd"></path>
+                            fill-rule="evenodd"
+                            d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                            clip-rule="evenodd"></path>
                 </svg>
             </a>
             <span class="ml-4">Purchase Orders</span>
         </h3>
     </div>
     <form wire:submit.prevent="create">
-        <div class="shadow sm:rounded-md sm:overflow-hidden" >
-            <div class="bg-white py-6 px-4 space-y-6 sm:p-6" >
+        <div class="shadow sm:rounded-md sm:overflow-hidden">
+            <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
                 <div>
                     <h3 class="text-lg leading-6 font-medium text-gray-900">Receive Purchase Order</h3>
                 </div>
@@ -71,7 +71,7 @@
 
                     <div class="col-span-6 sm:col-span-2">
                         <label for="date" class="block text-sm font-medium text-gray-700">Delivery Date</label>
-                        <input wire:model.lazy="delivery_date" type="date" autocomplete="off"
+                        <input wire:model.lazy="delivery_date" readonly type="text" autocomplete="off"
                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                id="date">
                     </div>
@@ -188,17 +188,17 @@
                             </svg>
                         </td>
                         <td class="p-0  border text-sm text-gray-500">
-                            <input type="date"  onclick="this.select()"
-                                   class="p-0 focus:ring-0 block w-full text-center  text-sm border-0 "
+                            <input type="text" onclick="this.select()"
+                                   class="p-0 focus:ring-0 block w-full text-center  text-sm border-0 datepicker" readonly
                                    wire:model.lazy="order_list.{{$key}}.expiry">
                         </td>
                         <td class="p-0  border text-sm text-gray-500">
-                            <input type="number"  onclick="this.select()"
+                            <input type="number" onclick="this.select()"
                                    class="p-0 focus:ring-0 block w-full text-center  text-sm border-0 "
                                    wire:model.lazy="order_list.{{$key}}.qty">
                         </td>
                         <td class="p-0  border text-sm text-gray-500">
-                            <input type="number"   onclick="this.select()"
+                            <input type="number" onclick="this.select()"
                                    class="p-0 focus:ring-0 block w-full text-center text-sm border-0 "
                                    wire:model.lazy="order_list.{{$key}}.bonus">
                         </td>
@@ -208,7 +208,7 @@
                         </td>
 
                         <td class="px-3   bg-gray-50 border text-sm  text-center text-gray-500">
-                           {{$closing}}
+                            {{$closing}}
                         </td>
                         <td class="p-0 border  text-sm text-gray-500">
                             <input type="number" step="0.01" onclick="this.select()"
@@ -218,7 +218,7 @@
                         </td>
 
                         <td class="p-0 border  text-sm text-gray-500">
-                            <input   type="number" step="0.01" step="0.01" onclick="this.select()"
+                            <input type="number" step="0.01" step="0.01" onclick="this.select()"
                                    class=" p-0 focus:ring-0 block w-full text-center text-sm border-0 "
                                    wire:model.lazy="order_list.{{$key}}.disc">
                         </td>
@@ -280,7 +280,8 @@
                     </th>
                     <th scope="col" class="px-3 py-3  border  text-center text-md font-medium text-gray-500   ">
 
-                    </th>  <th scope="col" class="px-3 py-3  border  text-center text-md font-medium text-gray-500   ">
+                    </th>
+                    <th scope="col" class="px-3 py-3  border  text-center text-md font-medium text-gray-500   ">
 
                     </th>
                     <th scope="col" class="px-3 py-3 border  text-center text-md font-medium text-gray-500   ">
@@ -291,9 +292,11 @@
                     </th>
                     <th scope="col" class="px-3 py-3  border text-center text-md font-medium text-gray-500    ">
                         {{ number_format(collect($order_list)->sum('total_cost'),2) }}
-                    </th> <th scope="col" class="px-3 py-3  border text-center text-md font-medium text-gray-500    ">
+                    </th>
+                    <th scope="col" class="px-3 py-3  border text-center text-md font-medium text-gray-500    ">
                         {{ number_format(collect($order_list)->sum('total_retail_price'),2) }}
-                    </th> <th scope="col" class="px-3 py-3  border text-center text-md font-medium text-gray-500    ">
+                    </th>
+                    <th scope="col" class="px-3 py-3  border text-center text-md font-medium text-gray-500    ">
                         {{ number_format(collect($order_list)->sum('profit'),2) }}
                     </th>
                     <th scope="col" class="relative px-3 py-3">
@@ -305,7 +308,8 @@
                 </tr>
 
                 <tr>
-                    <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Total Cost</th>
+                    <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Total Cost
+                    </th>
                     <th colspan="3" class="px-3 py-3    text-left text-lg font-medium text-gray-900   ">
                         {{ number_format(collect($order_list)->sum('total_cost'),2) }}
                     </th>
@@ -314,11 +318,13 @@
                 </tr>
 
                 <tr>
-                    <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Recoverable Advance Tax u/s 236(H)(%)</th>
+                    <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Recoverable
+                        Advance Tax u/s 236(H)(%)
+                    </th>
                     <th colspan="3" class="px-3 py-3    text-left text-lg font-medium text-gray-900 ">
 
                         <input name="" wire:model="advance_tax" type="number" step="0.01" max="100" min="0"
-                        class="block w-full   border border-gray-300 rounded-md shadow-sm py-1 px-1 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500  text-lg">
+                               class="block w-full   border border-gray-300 rounded-md shadow-sm py-1 px-1 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500  text-lg">
                         </input>
                     </th>
                     <th colspan="4" class="px-3 py-3    text-left text-lg font-medium text-gray-900 "></th>
@@ -326,7 +332,9 @@
                 </tr>
 
                 <tr>
-                    <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Taxable Amount</th>
+                    <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Taxable
+                        Amount
+                    </th>
                     <th colspan="3" class="px-3 py-3    text-left text-lg font-medium text-gray-900   ">
                         {{ number_format($advance_tax_amount,2) }}
                     </th>
@@ -334,7 +342,8 @@
 
                 </tr>
                 <tr>
-                    <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Gross Cost</th>
+                    <th colspan="9" class="px-3 py-3     text-right text-lg font-medium text-gray-900   ">Gross Cost
+                    </th>
                     <th colspan="3" class="px-3 py-3    text-left text-lg font-medium text-gray-900   ">
                         {{ number_format(collect($order_list)->sum('total_cost') + $advance_tax_amount,2) }}
                     </th>
@@ -464,8 +473,8 @@
                     @endif
                 @endif
             </div>
-            </div>
         </div>
+    </div>
 
     <div x-data="{ open: @entangle('more_options_modal') }" x-cloak x-show="open"
          class="fixed z-40 inset-0 overflow-y-auto">
@@ -495,12 +504,12 @@
                     <div class="grid grid-cols-6 gap-6">
 
 
-{{--                        <div class="col-span-6 ">--}}
-{{--                            <label for="expiry1" class="block text-sm font-medium text-gray-700">Expiry Date</label>--}}
-{{--                            <input   wire:model.lazy="" type="date"--}}
-{{--                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"--}}
-{{--                                   id="expiry1">--}}
-{{--                        </div>--}}
+                        {{--                        <div class="col-span-6 ">--}}
+                        {{--                            <label for="expiry1" class="block text-sm font-medium text-gray-700">Expiry Date</label>--}}
+                        {{--                            <input   wire:model.lazy="" type="date"--}}
+                        {{--                                   class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"--}}
+                        {{--                                   id="expiry1">--}}
+                        {{--                        </div>--}}
 
 
                         <div class="col-span-6 ">
@@ -518,7 +527,7 @@
             </div>
         </div>
     </div>
-@include('pharmacy::include.searchable')
+    @include('pharmacy::include.searchable')
 </div>
 
 
@@ -538,3 +547,35 @@
         })
     });
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+<script>
+
+    let from_date = new Pikaday({
+        field: document.getElementById('date'),
+        format: "DD MMM YYYY"
+    });
+
+    from_date.setDate(new Date('{{ $delivery_date }}'));
+
+
+
+    var eleGroup = document.querySelectorAll('.datepicker');
+
+    eleGroup.forEach(function (items, index) {
+        // items.onfocus = function () {
+            new Pikaday({
+                field: items,
+                format: "DD MMM YYYY"
+            });
+
+    })
+
+</script>
+
+
+
+
+

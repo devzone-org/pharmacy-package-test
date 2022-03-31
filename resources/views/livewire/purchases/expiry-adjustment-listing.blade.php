@@ -23,14 +23,14 @@
                     </div>
 
                     <div class="col-span-2">
-                        <label for="from_date" class="block text-sm font-medium text-gray-700">Records From</label>
-                        <input type="text" wire:model.lazy="from" name="from_date" id="from"
+                        <label for="from" class="block text-sm font-medium text-gray-700">Records From</label>
+                        <input type="text" wire:model.lazy="from" name="from" id="from" readonly
                                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                     </div>
 
                     <div class="col-span-2">
-                        <label for="to_date" class="block text-sm font-medium text-gray-700">Records To</label>
-                        <input type="text" wire:model.lazy="to" name="to_date" id="to"
+                        <label for="to" class="block text-sm font-medium text-gray-700">Records To</label>
+                        <input type="text" wire:model.lazy="to" name="to" id="to" readonly
                                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                     </div>
                     <div class="col-span-3">
@@ -179,7 +179,7 @@
         format: "DD MMM YYYY"
     });
 
-    from_date.setDate(new Date('{{ $from }}'));
-    to_date.setDate(new Date('{{ $to }}'));
+    {{--from_date.setDate(new Date('{{ $from }}'));--}}
+    {{--to_date.setDate(new Date('{{ $to }}'));--}}
 </script>
 

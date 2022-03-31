@@ -4,6 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Reports;
 
 
+use Carbon\Carbon;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Sale\SaleRefund;
 use Illuminate\Support\Facades\DB;
@@ -31,12 +32,19 @@ class SaleTransaction extends Component
             ->select('u.id', 'u.name')
             ->get()
             ->toArray();
-        $this->from = date('Y-m-d', strtotime('-7 days'));
-        $this->to = date('Y-m-d');
+        $this->from = date('d M Y', strtotime('-7 days'));
+        $this->to = date('d M Y');
         $this->range = 'seven_days';
         $this->doctors = Employee::where('is_doctor', 't')->where('status', 't')->get()->toArray();
         $this->search();
     }
+
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
+    }
+
 
     public function render()
     {
@@ -62,10 +70,10 @@ class SaleTransaction extends Component
 
             })
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('s.sale_at', '<=', $this->to);
+                return $q->whereDate('s.sale_at', '<=', $this->formatDate($this->to));
             })
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('s.sale_at', '>=', $this->from);
+                return $q->whereDate('s.sale_at', '>=',$this->formatDate($this->from));
             })
             ->select('s.sale_at', 'e.name as doctor', 's.is_credit', 's.is_paid', 's.id', 'p.name as patient_name', DB::raw('sum(sd.qty*sd.supply_price) as cos'),
                 DB::raw('sum(sd.total) as total'), DB::raw('sum(sd.total_after_disc) as total_after_disc'),
@@ -80,10 +88,10 @@ class SaleTransaction extends Component
                 return $q->where('s.sale_by', $this->salesman_id);
             })
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('sr.updated_at', '<=', $this->to);
+                return $q->whereDate('sr.updated_at', '<=', $this->formatDate($this->to));
             })
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('sr.updated_at', '>=', $this->from);
+                return $q->whereDate('sr.updated_at', '>=', $this->formatDate($this->from));
             })
             ->select('sd.sale_id', DB::raw('sum((sd.total_after_disc/sd.qty)*sr.refund_qty) as return_total'),
                 DB::raw('sum(sd.supply_price*sr.refund_qty) as return_cos')
@@ -112,23 +120,23 @@ class SaleTransaction extends Component
 
         } elseif ($val == 'seven_days') {
             $this->date_range = false;
-            $this->from = date('Y-m-d', strtotime('-7 days'));
-            $this->to = date('Y-m-d');
+            $this->from = date('d M Y', strtotime('-7 days'));
+            $this->to = date('d M Y');
             $this->search();
         } elseif ($val == 'thirty_days') {
             $this->date_range = false;
-            $this->from = date('Y-m-d', strtotime('-30 days'));
-            $this->to = date('Y-m-d');
+            $this->from = date('d M Y', strtotime('-30 days'));
+            $this->to = date('d M Y');
             $this->search();
         } elseif ($val == 'yesterday') {
             $this->date_range = false;
-            $this->from = date('Y-m-d', strtotime('-1 days'));
-            $this->to = date('Y-m-d', strtotime('-1 days'));
+            $this->from = date('d M Y', strtotime('-1 days'));
+            $this->to = date('d M Y', strtotime('-1 days'));
             $this->search();
         } elseif ($val == 'today') {
             $this->date_range = false;
-            $this->from = date('Y-m-d');
-            $this->to = date('Y-m-d');
+            $this->from = date('d M Y');
+            $this->to = date('d M Y');
             $this->search();
         }
     }

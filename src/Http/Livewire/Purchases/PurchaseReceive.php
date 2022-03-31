@@ -62,7 +62,7 @@ class PurchaseReceive extends Component
 
     public function mount($purchase_id)
     {
-        $this->delivery_date = date('Y-m-d');
+        $this->delivery_date = date('d M Y');
 
 
         $this->purchase_id = $purchase_id;
@@ -126,6 +126,12 @@ class PurchaseReceive extends Component
     public function render()
     {
         return view('pharmacy::livewire.purchases.purchase-receive');
+    }
+
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
     }
 
     public function moreOptions($key)
@@ -259,7 +265,6 @@ class PurchaseReceive extends Component
         }
     }
 
-
     public function create()
     {
 
@@ -281,7 +286,7 @@ class PurchaseReceive extends Component
             Purchase::where('id', $this->purchase_id)->whereNotNull('approved_at')->where('status', 'awaiting-delivery')->update([
                 'supplier_id' => $this->supplier_id,
                 'supplier_invoice' => $this->supplier_invoice,
-                'delivery_date' => $this->delivery_date,
+                'delivery_date' => $this->formatDate($this->delivery_date),
                 'status' => 'receiving',
                 'grn_no' => $this->grn_no,
                 'advance_tax' => $this->advance_tax,
@@ -299,7 +304,7 @@ class PurchaseReceive extends Component
                     'retail_price' => $o['retail_price'] / $o['packing'],
                     'total_cost' => $o['after_disc_cost'] * $o['qty'],
                     'batch_no' => $o['batch_no'] ?? null,
-                    'expiry' => $o['expiry'] ?? null,
+                    'expiry' => $this->formatDate($o['expiry']) ?? null,
                 ]);
 
                 Product::find($o['id'])->update([
@@ -356,11 +361,11 @@ class PurchaseReceive extends Component
                 }
                 $vno = Voucher::instance()->voucher()->get();
                 GeneralJournal::instance()->account($inventory['id'])->debit($amount)->voucherNo($vno)
-                    ->date($this->delivery_date)->approve()->description($description)->execute();
+                    ->date($this->formatDate($this->delivery_date))->approve()->description($description)->execute();
                 GeneralJournal::instance()->account($tax['id'])->debit($this->advance_tax_amount)->voucherNo($vno)
-                    ->date($this->delivery_date)->approve()->description($description)->execute();
+                    ->date($this->formatDate($this->delivery_date))->approve()->description($description)->execute();
                 GeneralJournal::instance()->account($supplier['account_id'])->credit($amount + $this->advance_tax_amount)->voucherNo($vno)
-                    ->date($this->delivery_date)->approve()->description($description)->execute();
+                    ->date($this->formatDate($this->delivery_date))->approve()->description($description)->execute();
 
 
                 $id = Purchase::where('status', 'receiving')->where('id', $this->purchase_id)->update([

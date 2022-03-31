@@ -13,19 +13,17 @@
                         <option value="custom_range">Custom Range</option>
                     </select>
                 </div>
-                @if($date_range)
-                    <div class="col-span-8 sm:col-span-2">
+                    <div class="{{$date_range ? 'block ' : 'hidden '}} col-span-8 sm:col-span-2">
                         <label for="from" class="block text-sm font-medium text-gray-700">Sale From</label>
-                        <input type="date" wire:model.defer="from" autocomplete="off"
+                        <input type="text" wire:model.defer="from" id="from" autocomplete="off" readonly
                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
 
-                    <div class="col-span-8 sm:col-span-2">
+                    <div class="{{$date_range ? 'block ' : 'hidden '}} col-span-8 sm:col-span-2">
                         <label for="to" class="block text-sm font-medium text-gray-700">Sale To</label>
-                        <input type="date" wire:model.defer="to" autocomplete="off"
+                        <input type="text" wire:model.defer="to" id="to" autocomplete="off" readonly
                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
-                @endif
                 <div class="col-span-6 sm:col-span-2">
                     <button type="button" wire:click="search" wire:loading.attr="disabled"
                             class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -131,3 +129,24 @@
     })
 
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+<script>
+    let from_date = new Pikaday({
+        field: document.getElementById('from'),
+        format: "DD MMM YYYY"
+    });
+
+    let to_date = new Pikaday({
+        field: document.getElementById('to'),
+        format: "DD MMM YYYY"
+    });
+
+    from_date.setDate(new Date('{{ $from }}'));
+    to_date.setDate(new Date('{{ $to }}'));
+</script>
+
+
+
+

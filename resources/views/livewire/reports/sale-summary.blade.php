@@ -13,19 +13,18 @@
                         <option value="custom_range">Custom Range</option>
                     </select>
                 </div>
-                @if($date_range)
-                    <div class="col-span-8 sm:col-span-2">
-                        <label for="from" class="block text-sm font-medium text-gray-700">Sale From</label>
-                        <input type="date" wire:model.defer="from" autocomplete="off"
-                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    </div>
 
-                    <div class="col-span-8 sm:col-span-2">
-                        <label for="to" class="block text-sm font-medium text-gray-700">Sale To</label>
-                        <input type="date" wire:model.defer="to" autocomplete="off"
-                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    </div>
-                @endif
+                <div class="{{$date_range ? 'block ' : 'hidden '}} col-span-8 sm:col-span-2">
+                    <label for="from" class="block text-sm font-medium text-gray-700">Sale From</label>
+                    <input type="text" wire:model.defer="from" id="from" autocomplete="off" readonly
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+
+                <div class="{{$date_range ? 'block ' : 'hidden '}} col-span-8 sm:col-span-2">
+                    <label for="to" class="block text-sm font-medium text-gray-700">Sale To</label>
+                    <input type="text" wire:model.defer="to" id="to" autocomplete="off" readonly
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
                 <div class="col-span-8 sm:col-span-2">
                     <button type="button" wire:click="search" wire:loading.attr="disabled"
                             class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -60,46 +59,59 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Sr #
                                 </th>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Sale Date
                                 </th>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Sales (PKR)
                                 </th>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Discount (PKR)
                                 </th>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Sales Return (PKR)
                                 </th>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Net Sales (PKR)
                                 </th>
 
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     COS (PKR)
                                 </th>
 
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Gross Profit (PKR)
                                 </th>
 
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Gross Margin
                                 </th>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     # of Sales
                                 </th>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Unique Customers
                                 </th>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Avg Sales Value (PKR)
                                 </th>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Avg Items per sa le
                                 </th>
                             </tr>
@@ -120,16 +132,19 @@
                                         <td title="Discount (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             ({{number_format($r['total']-$r['total_after_disc'],2)}})
                                         </td>
-                                        <td title="Sales Return (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Sales Return (PKR)"
+                                            class="px-3 py-3 text-center  text-sm text-gray-500">
                                             ({{number_format($r['sale_return'],2)}})
                                         </td>
-                                        <td title="Net Sales (PKR)" class="px-3 py-3  text-center text-sm text-gray-500">
+                                        <td title="Net Sales (PKR)"
+                                            class="px-3 py-3  text-center text-sm text-gray-500">
                                             {{number_format($r['total_after_disc']-$r['sale_return'],2)}}
                                         </td>
                                         <td title="COS (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['cos'],2)}}
                                         </td>
-                                        <td title="Gross Profit (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Gross Profit (PKR)"
+                                            class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['total_after_disc']-$r['sale_return']-$r['cos'],2)}}
                                         </td>
 
@@ -144,13 +159,16 @@
                                         <td title="# of Sales" class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{$r['no_of_sale']}}
                                         </td>
-                                        <td title="Unique Customers" class="px-3 py-3  text-center text-sm text-gray-500">
+                                        <td title="Unique Customers"
+                                            class="px-3 py-3  text-center text-sm text-gray-500">
                                             {{$r['unique_customers']}}
                                         </td>
-                                        <td title="Avg Sales Value (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Avg Sales Value (PKR)"
+                                            class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['total_after_disc']/$r['no_of_sale'],2)}}
                                         </td>
-                                        <td title="Avg Items per sale" class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        <td title="Avg Items per sale"
+                                            class="px-3 py-3 text-center  text-sm text-gray-500">
                                             {{number_format($r['no_of_sale']/$r['no_of_items'],2)}}
                                         </td>
                                     </tr>
@@ -164,7 +182,8 @@
                                         {{number_format(collect($report)->sum('total'),2)}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        ({{number_format(collect($report)->sum('total')-collect($report)->sum('total_after_disc'),2)}})
+                                        ({{number_format(collect($report)->sum('total')-collect($report)->sum('total_after_disc'),2)}}
+                                        )
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         ({{number_format(collect($report)->sum('sale_return'),2)}})
@@ -213,3 +232,25 @@
 
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+<script>
+    let from_date = new Pikaday({
+        field: document.getElementById('from'),
+        format: "DD MMM YYYY"
+    });
+
+    let to_date = new Pikaday({
+        field: document.getElementById('to'),
+        format: "DD MMM YYYY"
+    });
+
+    from_date.setDate(new Date('{{ $from }}'));
+    to_date.setDate(new Date('{{ $to }}'));
+</script>
+
+
+
+

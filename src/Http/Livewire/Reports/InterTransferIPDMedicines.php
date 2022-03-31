@@ -4,6 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Reports;
 
 
+use Carbon\Carbon;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -18,8 +19,8 @@ class InterTransferIPDMedicines extends Component
 
     public function mount()
     {
-        $this->from = date('Y-m-d', strtotime('-7 days'));
-        $this->to = date('Y-m-d');
+        $this->from = date('d M Y', strtotime('-7 days'));
+        $this->to = date('d M Y');
         $this->range = 'seven_days';
         $this->search();
     }
@@ -28,6 +29,14 @@ class InterTransferIPDMedicines extends Component
     {
         return view('pharmacy::livewire.reports.inter-transfer-IPD-medicines');
     }
+
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
+    }
+
+
 
     public function search()
     {
@@ -47,10 +56,10 @@ class InterTransferIPDMedicines extends Component
             ->whereNotNull('s.admission_id')
             ->whereNotNull('s.procedure_id')
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('s.sale_at', '<=', $this->to);
+                return $q->whereDate('s.sale_at', '<=', $this->formatDate($this->to));
             })
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('s.sale_at', '>=', $this->from);
+                return $q->whereDate('s.sale_at', '>=', $this->formatDate($this->from));
             })
             ->select(
                 's.sale_at','a.admission_no','p.name as patient_name','emp.name as doctor_name','pro.name as procedure_name','u.name as issued_by',
@@ -72,23 +81,23 @@ class InterTransferIPDMedicines extends Component
 
         } elseif ($val == 'seven_days') {
             $this->date_range = false;
-            $this->from = date('Y-m-d', strtotime('-7 days'));
-            $this->to = date('Y-m-d');
+            $this->from = date('d M Y', strtotime('-7 days'));
+            $this->to = date('d M Y');
             $this->search();
         } elseif ($val == 'thirty_days') {
             $this->date_range = false;
-            $this->from = date('Y-m-d', strtotime('-30 days'));
-            $this->to = date('Y-m-d');
+            $this->from = date('d M Y', strtotime('-30 days'));
+            $this->to = date('d M Y');
             $this->search();
         } elseif ($val == 'yesterday') {
             $this->date_range = false;
-            $this->from = date('Y-m-d', strtotime('-1 days'));
-            $this->to = date('Y-m-d', strtotime('-1 days'));
+            $this->from = date('d M Y', strtotime('-1 days'));
+            $this->to = date('d M Y', strtotime('-1 days'));
             $this->search();
         } elseif ($val == 'today') {
             $this->date_range = false;
-            $this->from = date('Y-m-d');
-            $this->to = date('Y-m-d');
+            $this->from = date('d M Y');
+            $this->to = date('d M Y');
             $this->search();
         }
     }

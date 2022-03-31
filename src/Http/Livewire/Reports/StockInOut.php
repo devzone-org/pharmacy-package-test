@@ -3,6 +3,7 @@
 
 namespace Devzone\Pharmacy\Http\Livewire\Reports;
 
+use Carbon\Carbon;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\InventoryLedger;
 use Illuminate\Support\Facades\DB;
@@ -29,8 +30,8 @@ class StockInOut extends Component
     public function mount()
     {
         $this->date_range=false;
-        $this->from = date('Y-m-d', strtotime('-7 days'));
-        $this->to = date('Y-m-d');
+        $this->from = date('d M Y', strtotime('-7 days'));
+        $this->to = date('d M Y');
         $this->range = 'seven_days';
         $this->zero_stock = 'f';
         $this->search();
@@ -40,6 +41,12 @@ class StockInOut extends Component
     {
         return view('pharmacy::livewire.reports.stock-in-out');
     }
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
+    }
+
 
     public function search()
     {
@@ -62,15 +69,15 @@ class StockInOut extends Component
                 return $q->where('p.category_id', $this->category_id);
             })
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('il.created_at', '<=', $this->to);
+                return $q->whereDate('il.created_at', '<=', $this->formatDate($this->to));
             })
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('il.created_at', '>=', $this->from);
+                return $q->whereDate('il.created_at', '>=', $this->formatDate($this->from));
             })
             ->select('p.id as product_id', 'p.name as item', 'p.type as product_type', 'm.name as manufacturer', 'c.name as category', 'r.name as rack',
                 'il.increase','il.decrease','il.type')
             ->get();
-        $previous=InventoryLedger::whereDate('created_at','<',$this->from)
+        $previous=InventoryLedger::whereDate('created_at','<', $this->formatDate($this->from))
             ->groupBy('product_id')
             ->when(!empty($this->product_id), function ($q) {
                 return $q->where('product_id', $this->product_id);
@@ -109,23 +116,23 @@ class StockInOut extends Component
             $this->date_range = true;
         } elseif ($val == 'seven_days') {
             $this->date_range = false;
-            $this->from = date('Y-m-d', strtotime('-7 days'));
-            $this->to = date('Y-m-d');
+            $this->from = date('d M Y', strtotime('-7 days'));
+            $this->to = date('d M Y');
             $this->search();
         } elseif ($val == 'thirty_days') {
             $this->date_range = false;
-            $this->from = date('Y-m-d', strtotime('-30 days'));
-            $this->to = date('Y-m-d');
+            $this->from = date('d M Y', strtotime('-30 days'));
+            $this->to = date('d M Y');
             $this->search();
         } elseif ($val == 'yesterday') {
             $this->date_range = false;
-            $this->from = date('Y-m-d', strtotime('-1 days'));
-            $this->to = date('Y-m-d');
+            $this->from = date('d M Y', strtotime('-1 days'));
+            $this->to = date('d M Y');
             $this->search();
         } elseif ($val == 'today') {
             $this->date_range = false;
-            $this->from = date('Y-m-d');
-            $this->to = date('Y-m-d');
+            $this->from = date('d M Y');
+            $this->to = date('d M Y');
             $this->search();
         }
     }
