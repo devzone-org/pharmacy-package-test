@@ -27,7 +27,7 @@
                 <div class="grid grid-cols-6 gap-6">
                     <div class="col-span-6  ">
                         <label for="dateo" class="block text-sm font-medium text-gray-700">Delivery Date</label>
-                        <input wire:model.lazy="delivery_date" type="date" autocomplete="off"
+                        <input wire:model.lazy="delivery_date" type="text" autocomplete="off"
                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                id="dateo">
                     </div>
@@ -59,3 +59,19 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+<script>
+
+    let from_date = new Pikaday({
+        field: document.getElementById('dateo'),
+        format: "DD MMM YYYY"
+    });
+
+    from_date.setDate(new Date('{{ $delivery_date }}'));
+</script>
+
+
+
