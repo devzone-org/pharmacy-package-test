@@ -85,7 +85,7 @@
 
                     <div class="col-span-6 sm:col-span-2">
                         <label for="payment_date" class="block text-sm font-medium text-gray-700">Payment Date</label>
-                        <input wire:model.defer="payment_date" type="date" autocomplete="off"
+                        <input wire:model.lazy="payment_date" type="text" autocomplete="off" readonly
                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                id="payment_date">
                     </div>
@@ -336,4 +336,18 @@
     //         alert('ads');
     //     }
     // });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+<script>
+    let from_date = new Pikaday({
+        field: document.getElementById('payment_date'),
+        format: "DD MMM YYYY"
+    });
+
+
+
+    from_date.setDate(new Date('{{ $payment_date }}'));
 </script>

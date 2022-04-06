@@ -26,13 +26,13 @@
 
                 <div class="col-span-8 sm:col-span-2">
                     <label for="from" class="block text-sm font-medium text-gray-700">Sale From</label>
-                    <input type="date" wire:model.defer="from" id="from" autocomplete="off"
+                    <input type="text" wire:model.lazy="from" id="from" readonly autocomplete="off"
                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 </div>
 
                 <div class="col-span-8 sm:col-span-2">
                     <label for="to" class="block text-sm font-medium text-gray-700">Sale To</label>
-                    <input type="date" wire:model.defer="to" id="to" autocomplete="off"
+                    <input type="text" wire:model.lazy="to" id="to" readonly autocomplete="off"
                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 </div>
                 <div class="col-span-8 sm:col-span-2">
@@ -344,3 +344,21 @@
     </div>
     @include('pharmacy::include.searchable')
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+<script>
+    let from_date = new Pikaday({
+        field: document.getElementById('from'),
+        format: "DD MMM YYYY"
+    });
+
+    let to_date = new Pikaday({
+        field: document.getElementById('to'),
+        format: "DD MMM YYYY"
+    });
+
+    from_date.setDate(new Date('{{ $from }}'));
+    to_date.setDate(new Date('{{ $to }}'));
+</script>

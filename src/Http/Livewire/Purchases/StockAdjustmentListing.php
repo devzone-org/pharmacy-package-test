@@ -4,6 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Purchases;
 
 
+use Carbon\Carbon;
 use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount;
@@ -39,15 +40,22 @@ class StockAdjustmentListing extends Component
                 return $q->where('sa.indicator', $this->indicator);
             })
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('sa.created_at', '>=',$this->from);
+                return $q->whereDate('sa.created_at', '>=', $this->formatDate($this->from));
             })
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('sa.created_at', '<=',$this->to);
+                return $q->whereDate('sa.created_at', '<=',$this->formatDate($this->to));
             })
             ->select('p.name', 'sa.indicator', 'sa.qty', 'sa.remarks', 'u.name as added_by', 'sa.voucher_no', 'sa.created_at')
             ->paginate(30);
         return view('pharmacy::livewire.purchases.stock-adjustment-listing', compact('stock'));
     }
+
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
+    }
+
 
     public function search(){
         $this->resetPage();

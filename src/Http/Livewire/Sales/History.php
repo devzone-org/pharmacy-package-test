@@ -4,6 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
 
+use Carbon\Carbon;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Sale\SaleDetail;
@@ -29,14 +30,21 @@ class History extends Component
 
     public function mount()
     {
-        $this->from = date('Y-m-d', strtotime('-1 month'));
-        $this->to = date('Y-m-d');
+        $this->from =  date('d M Y', strtotime('-1 month'));
+        $this->to = date('d M Y');
     }
 
     public function searchPatient()
     {
         $this->searchableOpenModal('patient_id', 'patient_name', 'patient');
     }
+
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
+    }
+
 
 
     public function render()
@@ -63,9 +71,9 @@ class History extends Component
                 $history = $history->where('s.id', $this->receipt);
             } else {
                 $history = $history->when(!empty($this->from), function ($q) {
-                    return $q->whereDate('s.sale_at', '>=', $this->from);
+                    return $q->whereDate('s.sale_at', '>=', $this->formatDate($this->from));
                 })->when(!empty($this->to), function ($q) {
-                    return $q->whereDate('s.sale_at', '<=', $this->to);
+                    return $q->whereDate('s.sale_at', '<=', $this->formatDate($this->to));
                 })->when(!empty($this->patient_id), function ($q) {
                     return $q->where('s.patient_id', $this->patient_id);
                 })->when(!empty($details), function ($q) use ($details) {

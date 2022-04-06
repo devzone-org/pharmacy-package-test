@@ -2,6 +2,7 @@
 
 namespace Devzone\Pharmacy\Http\Livewire\Payments\Customer;
 
+use Carbon\Carbon;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Customer;
 use Devzone\Pharmacy\Models\Sale\Sale;
@@ -32,6 +33,13 @@ class Add extends Component
     {
         return view('pharmacy::livewire.payments.customer.add');
     }
+
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
+    }
+
 
     public function emitCustomerId()
     {
@@ -76,6 +84,7 @@ class Add extends Component
 
     public function create()
     {
+
         $this->validate([
             'payments' => 'required',
             'customer_id' => 'required',
@@ -96,7 +105,7 @@ class Add extends Component
                 'customer_id' => $this->customer_id,
                 'description'=>$this->description,
                 'receiving_in'=>Auth::user()->account_id,
-                'receiving_date'=>$this->receiving_date,
+                'receiving_date'=>$this->formatDate($this->receiving_date),
                 'added_by'=>Auth::id(),
                 'amount'=> collect($this->payments)->where('selected',true)->sum('on_account') - collect($this->payments)->where('selected',true)->sum('refunded'),
             ])->id;

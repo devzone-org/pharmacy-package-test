@@ -97,7 +97,7 @@
                     <div class="col-span-6 sm:col-span-2">
                         <label for="date" class="block text-sm font-medium text-gray-700">Expected Delivery
                             Date</label>
-                        <input wire:model="expected_date" type="date" autocomplete="off"
+                        <input wire:model.lazy="expected_date" type="text" autocomplete="off"
                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                id="date">
                     </div>
@@ -113,16 +113,14 @@
                             </div>
                             <input type="number" autocomplete="off" wire:model="sale_days" id="sale_days"
                                    class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-{{--                            <select type="text" wire:model="sale_days" id="sale_days"--}}
-{{--                                    class="mt-Z1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">--}}
-{{--                                <option value="10">Last 10</option>--}}
-{{--                                <option value="20">Last 20</option>--}}
-{{--                                <option value="30">Last 30</option>--}}
-{{--                            </select>--}}
+                            {{--                            <select type="text" wire:model="sale_days" id="sale_days"--}}
+                            {{--                                    class="mt-Z1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">--}}
+                            {{--                                <option value="10">Last 10</option>--}}
+                            {{--                                <option value="20">Last 20</option>--}}
+                            {{--                                <option value="30">Last 30</option>--}}
+                            {{--                            </select>--}}
                         </div>
                     @endif
-
-
 
 
                     <div class="col-span-6">
@@ -156,7 +154,7 @@
                         Total Qty
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
-                       Closing Inventory
+                        Closing Inventory
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                         Supplier Cost
@@ -200,7 +198,8 @@
                         </td>
                         <td class="px-3 py-3   text-sm text-gray-500">
                             {{ number_format($m['packing']*$m['qty'],2) }}
-                        </td> <td class="px-3 py-3   text-sm text-gray-500">
+                        </td>
+                        <td class="px-3 py-3   text-sm text-gray-500">
                             {{ number_format($closing,2) }}
                         </td>
                         <td class="px-3 py-3   text-sm text-gray-500">
@@ -251,7 +250,8 @@
                     </th>
                     <th scope="col" colspan="" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
 
-                    </th>  <th scope="col" colspan="" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                    </th>
+                    <th scope="col" colspan="" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
 
                     </th>
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
@@ -414,3 +414,19 @@
         })
     });
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+<script>
+    let from_date = new Pikaday({
+        field: document.getElementById('date'),
+        format: "DD MMM YYYY"
+    });
+    from_date.setDate(new Date('{{ $expected_date }}'));
+</script>
+
+
+
+
+

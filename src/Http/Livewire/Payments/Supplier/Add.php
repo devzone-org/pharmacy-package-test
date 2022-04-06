@@ -2,6 +2,7 @@
 
 namespace Devzone\Pharmacy\Http\Livewire\Payments\Supplier;
 
+use Carbon\Carbon;
 use Devzone\Ams\Helper\Voucher;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Payments\SupplierPayment;
@@ -40,8 +41,15 @@ class Add extends Component
 
     public function mount()
     {
-        $this->payment_date = date('Y-m-d');
+        $this->payment_date = date('d M Y');
     }
+
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
+    }
+
 
 
     public function render()
@@ -65,7 +73,7 @@ class Add extends Component
                     'supplier_id' => $this->supplier_id,
                     'description' => $this->description,
                     'pay_from' => Auth::user()->account_id,
-                    'payment_date' => $this->payment_date,
+                    'payment_date' => $this->formatDate($this->payment_date),
                     'added_by' => Auth::user()->id,
                 ])->id;
 
