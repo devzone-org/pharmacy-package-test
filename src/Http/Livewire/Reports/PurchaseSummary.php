@@ -3,6 +3,7 @@
 
 namespace Devzone\Pharmacy\Http\Livewire\Reports;
 
+use Carbon\Carbon;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\Sale\Sale;
@@ -26,8 +27,8 @@ class PurchaseSummary extends Component
 
     public function mount()
     {
-        $this->from = date('Y-m-d', strtotime('-7 days'));
-        $this->to = date('Y-m-d');
+        $this->from = date('d M Y', strtotime('-7 days'));
+        $this->to = date('d M Y');
         $this->range = 'seven_days';
         $this->search();
     }
@@ -36,6 +37,13 @@ class PurchaseSummary extends Component
     {
         return view('pharmacy::livewire.reports.purchase-summary');
     }
+
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
+    }
+
 
     public function search()
     {
@@ -54,10 +62,10 @@ class PurchaseSummary extends Component
                 return $q->where('m.id', $this->manufacture_id);
             })
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('p.created_at', '<=', $this->to);
+                return $q->whereDate('p.created_at', '<=', $this->formatDate($this->to));
             })
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('p.created_at', '>=', $this->from);
+                return $q->whereDate('p.created_at', '>=', $this->formatDate($this->from));
             })
             ->groupBy('po.purchase_id')
             ->orderBy('p.id', 'ASC')
@@ -83,23 +91,23 @@ class PurchaseSummary extends Component
 
         } elseif ($val == 'seven_days') {
             $this->date_range = false;
-            $this->from = date('Y-m-d', strtotime('-7 days'));
-            $this->to = date('Y-m-d');
+            $this->from = date('d M Y', strtotime('-7 days'));
+            $this->to = date('d M Y');
             $this->search();
         } elseif ($val == 'thirty_days') {
             $this->date_range = false;
-            $this->from = date('Y-m-d', strtotime('-30 days'));
-            $this->to = date('Y-m-d');
+            $this->from = date('d M Y', strtotime('-30 days'));
+            $this->to = date('d M Y');
             $this->search();
         } elseif ($val == 'yesterday') {
             $this->date_range = false;
-            $this->from = date('Y-m-d', strtotime('-1 days'));
-            $this->to = date('Y-m-d', strtotime('-1 days'));
+            $this->from = date('d M Y', strtotime('-1 days'));
+            $this->to = date('d M y', strtotime('-1 days'));
             $this->search();
         } elseif ($val == 'today') {
             $this->date_range = false;
-            $this->from = date('Y-m-d');
-            $this->to = date('Y-m-d');
+            $this->from = date('d M Y');
+            $this->to = date('d M Y');
             $this->search();
         }
     }

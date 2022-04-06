@@ -25,10 +25,12 @@ use Devzone\Pharmacy\Models\Sale\SaleDetail;
 use Devzone\Pharmacy\Models\Sale\SaleIssuance;
 use Devzone\Pharmacy\Models\Sale\UserTill;
 use Devzone\Pharmacy\Models\UserLimit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Spatie\Permission\Models\Permission;
 
 class Add extends Component
 {
@@ -68,9 +70,16 @@ class Add extends Component
     public $customer_modal = false;
     public $customers = [];
     public $employees = [];
-
     public $doctors = [];
+    public $sales_men = [];
+
     public $add_modal = false;
+    public $add_sale_modal = false;
+
+    public $old_user_id;
+    public $user_email;
+    public $user_password;
+
     public $patient_mr;
     public $add_patient_name;
     public $father_husband_name;
@@ -103,8 +112,22 @@ class Add extends Component
         'add_patient_name' => 'patient name'
     ];
 
-    public function mount($admission_id = null, $procedure_id = null, $doctor_id = null)
+    public function mount($admission_id = null, $procedure_id = null, $doctor_id = null, Request $request)
     {
+
+        if (env('USER_CONFIRMATION', false)) {
+            $this->sales_men = Permission::from('permissions')
+                ->where('permissions.name', '12.add-sale')
+                ->join('model_has_permissions as mhp', 'mhp.permission_id', '=', 'permissions.id')
+                ->join('users', 'users.id', '=', 'mhp.model_id')
+                ->select('permissions.id as p_id', 'users.*')->get()->toArray();
+
+            if (!empty($request->get('old_user'))) {
+                $this->old_user_id = $request->get('old_user');
+            } else {
+                $this->old_user_id = \auth()->id();
+            }
+        }
 
         if (auth()->user()->can('add-pending-sale')) {
             $this->pending_sale = true;
@@ -498,6 +521,38 @@ class Add extends Component
         }
     }
 
+
+    public function confirmUser()
+    {
+        if (empty($this->user_email) || empty($this->user_password)) {
+            $this->addError('login', 'Please enter your credentials to proceed.');
+        }
+
+        // auth::once only authenticates user for single request so in case we close the modal after validation it goes back to old login
+        if (!Auth::once(['email' => $this->user_email, 'password' => $this->user_password])) {
+            $this->addError('login', 'The provided credentials do not match our records.');
+        }
+
+    }
+
+
+    public function closeSaleModal()
+    {
+        $this->reset('user_password');
+        $this->add_sale_modal = false;
+    }
+
+
+
+    public function reloginUser()
+    {
+        if (!\auth()->loginUsingId($this->old_user_id)) {
+            return new \Exception('An Unknown Error Occurred.');
+        }
+
+    }
+
+
     public function pendingSaleComplete()
     {
         $this->pending_and_complete = true;
@@ -590,6 +645,23 @@ class Add extends Component
                 $this->pending_and_complete = false;
                 return;
             }
+
+
+            //Here should be the conditions
+            if (env('USER_CONFIRMATION', false)) {
+                $this->add_sale_modal = true;
+                $this->confirmUser();
+                if($this->getErrorBag()->has('login')){
+                    throw new \Exception();
+                }
+
+                if (auth()->user()->can('add-pending-sale')){
+                    $this->addError('login', 'User does not have permission for a complete sale.');
+                    throw new \Exception();
+                }
+
+            }
+
 
             if (empty($this->credit)) {
                 if (empty($this->received) && $this->admission == false) {
@@ -872,6 +944,10 @@ class Add extends Component
 
             DB::commit();
             $this->emit('printInvoice', $sale_id, $this->admission_id, $this->procedure_id);
+            if (env('USER_CONFIRMATION', false)) {
+                $this->add_sale_modal = false;
+                $this->reloginUser();
+            }
         } catch (\Exception $e) {
             $this->error = $e->getMessage();
             DB::rollBack();
@@ -914,6 +990,7 @@ class Add extends Component
         $this->doctors = Employee::where('is_doctor', 't')->where('status', 't')->get()->toArray();
         $this->add_modal = true;
     }
+
 
     public function hasContact()
     {

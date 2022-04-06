@@ -51,12 +51,18 @@ class PurchaseAdd extends Component
     public function mount()
     {
         
-        $this->expected_date = date('Y-m-d');
+        $this->expected_date = date('d M Y');
     }
 
     public function render()
     {
         return view('pharmacy::livewire.purchases.purchase-add');
+    }
+
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
     }
 
     public function emitSupplierId()
@@ -204,7 +210,7 @@ class PurchaseAdd extends Component
                 'supplier_id' => $this->supplier_id,
                 'supplier_invoice' => $this->supplier_invoice,
                 'delivery_date' => $this->delivery_date,
-                'expected_date' => $this->expected_date,
+                'expected_date' => $this->formatDate($this->expected_date),
                 'created_by' => Auth::user()->id,
                 'status' => 'approval-awaiting'
             ])->id;

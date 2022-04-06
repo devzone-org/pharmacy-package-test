@@ -11,19 +11,19 @@
                 {{--                    </div>--}}
                 <div class="col-span-2">
                     <label for="voucher" class="block text-sm font-medium text-gray-700">Voucher #</label>
-                    <input type="text" wire:model.defer="voucher" name="voucher" autocomplete="off"
+                    <input type="text" wire:model.lazy="voucher" name="voucher" autocomplete="off"
                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                 </div>
 
                 <div class="col-span-2">
                     <label for="first-name" class="block text-sm font-medium text-gray-700">From</label>
-                    <input type="date" wire:model.defer="from" name="first-name" autocomplete="given-name"
+                    <input type="text" wire:model.lazy="from" readonly name="first-name" id="from" autocomplete="given-name"
                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                 </div>
 
                 <div class="col-span-2">
                     <label for="first-name" class="block text-sm font-medium text-gray-700">To</label>
-                    <input type="date" wire:model.defer="to" autocomplete="given-name"
+                    <input type="text" wire:model.lazy="to" readonly id="to" autocomplete="given-name"
                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                 </div>
                 <div class="col-span-2 flex justify-center items-end">
@@ -173,4 +173,22 @@
             }, 200);
         })
     });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+<script>
+    let from_date = new Pikaday({
+        field: document.getElementById('from'),
+        format: "DD MMM YYYY"
+    });
+
+    let to_date = new Pikaday({
+        field: document.getElementById('to'),
+        format: "DD MMM YYYY"
+    });
+
+    from_date.setDate(new Date('{{ $from }}'));
+    to_date.setDate(new Date('{{ $to }}'));
 </script>

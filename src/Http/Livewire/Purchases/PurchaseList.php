@@ -4,6 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Purchases;
 
 
+use Carbon\Carbon;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Payments\SupplierPayment;
 use Devzone\Pharmacy\Models\Payments\SupplierPaymentDetail;
@@ -40,10 +41,10 @@ class PurchaseList extends Component
             ->join('users as c', 'c.id', '=', 'p.created_by')
             ->leftJoin('users as a', 'a.id', '=', 'p.approved_by')
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('p.created_at','>=', date('Y-m-d',strtotime($this->from)));
+                return $q->whereDate('p.created_at','>=', $this->formatDate($this->from));
             })
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('p.created_at','<=', date('Y-m-d',strtotime($this->to)));
+                return $q->whereDate('p.created_at','<=', $this->formatDate($this->to));
             })
             ->when(!empty($this->supplier_id_s), function ($q) {
                 return $q->where('p.supplier_id', $this->supplier_id_s);
@@ -72,10 +73,10 @@ class PurchaseList extends Component
         $purchase_receives=Purchase::from('purchases as p')
             ->join('purchase_receives as pr', 'pr.purchase_id', '=', 'p.id')
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('p.created_at','>=', date('Y-m-d',strtotime($this->from)));
+                return $q->whereDate('p.created_at','>=', $this->formatDate($this->from));
             })
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('p.created_at','<=', date('Y-m-d',strtotime($this->to)));
+                return $q->whereDate('p.created_at','<=', $this->formatDate($this->to));
             })
             ->when(!empty($this->supplier_id_s), function ($q) {
                 return $q->where('p.supplier_id', $this->supplier_id_s);
@@ -101,10 +102,10 @@ class PurchaseList extends Component
             ->leftJoin('users as u','u.id','=','sp.added_by')
             ->leftJoin('users as us','us.id','=','sp.approved_by')
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('p.created_at','>=', date('Y-m-d',strtotime($this->from)));
+                return $q->whereDate('p.created_at','>=', $this->formatDate($this->from));
             })
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('p.created_at','<=', date('Y-m-d',strtotime($this->to)));
+                return $q->whereDate('p.created_at','<=', $this->formatDate($this->to));
             })
             ->when(!empty($this->supplier_id_s), function ($q) {
                 return $q->where('sp.supplier_id', $this->supplier_id_s);
@@ -126,15 +127,22 @@ class PurchaseList extends Component
         return view('pharmacy::livewire.purchases.purchase-list', ['purchase' => $purchase,'purchase_receives'=>$purchase_receives,'payments'=>$payments]);
     }
 
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
+    }
+
+
     private function stats()
     {
         $this->po_unapproved = Purchase::from('purchases as p')
             ->leftJoin('purchase_orders as po', 'po.purchase_id', '=', 'p.id')
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('p.created_at','>=', date('Y-m-d',strtotime($this->from)));
+                return $q->whereDate('p.created_at','>=', $this->formatDate($this->from));
             })
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('p.created_at','<=', date('Y-m-d',strtotime($this->to)));
+                return $q->whereDate('p.created_at','<=',$this->formatDate($this->to));
             })
             ->when(!empty($this->supplier_id_s), function ($q) {
                 return $q->where('p.supplier_id', $this->supplier_id_s);
@@ -149,10 +157,10 @@ class PurchaseList extends Component
         $this->po_approved = Purchase::from('purchases as p')
             ->leftJoin('purchase_orders as po', 'po.purchase_id', '=', 'p.id')
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('p.created_at','>=', date('Y-m-d',strtotime($this->from)));
+                return $q->whereDate('p.created_at','>=', $this->formatDate($this->from));
             })
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('p.created_at','<=', date('Y-m-d',strtotime($this->to)));
+                return $q->whereDate('p.created_at','<=', $this->formatDate($this->to));
             })
             ->when(!empty($this->supplier_id_s), function ($q) {
                 return $q->where('p.supplier_id', $this->supplier_id_s);
@@ -166,10 +174,10 @@ class PurchaseList extends Component
         $this->stock_receiving_in_process = Purchase::from('purchases as p')
             ->leftJoin('purchase_receives as pr', 'pr.purchase_id', '=', 'p.id')
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('p.created_at','>=', date('Y-m-d',strtotime($this->from)));
+                return $q->whereDate('p.created_at','>=', $this->formatDate($this->from));
             })
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('p.created_at','<=', date('Y-m-d',strtotime($this->to)));
+                return $q->whereDate('p.created_at','<=', $this->formatDate($this->to));
             })
             ->when(!empty($this->supplier_id_s), function ($q) {
                 return $q->where('p.supplier_id', $this->supplier_id_s);
@@ -183,10 +191,10 @@ class PurchaseList extends Component
         $this->unpaid_invoices = Purchase::from('purchases as p')
             ->leftJoin('purchase_receives as pr', 'pr.purchase_id', '=', 'p.id')
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('p.created_at','>=', date('Y-m-d',strtotime($this->from)));
+                return $q->whereDate('p.created_at','>=', $this->formatDate($this->from));
             })
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('p.created_at','<=', date('Y-m-d',strtotime($this->to)));
+                return $q->whereDate('p.created_at','<=', $this->formatDate($this->to));
             })
             ->when(!empty($this->supplier_id_s), function ($q) {
                 return $q->where('p.supplier_id', $this->supplier_id_s);
@@ -201,10 +209,10 @@ class PurchaseList extends Component
         $this->order_completed = Purchase::from('purchases as p')
             ->leftJoin('purchase_receives as pr', 'pr.purchase_id', '=', 'p.id')
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('p.created_at','>=', date('Y-m-d',strtotime($this->from)));
+                return $q->whereDate('p.created_at','>=', $this->formatDate($this->from));
             })
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('p.created_at','<=', date('Y-m-d',strtotime($this->to)));
+                return $q->whereDate('p.created_at','<=', $this->formatDate($this->to));
             })
             ->when(!empty($this->supplier_id_s), function ($q) {
                 return $q->where('p.supplier_id', $this->supplier_id_s);
