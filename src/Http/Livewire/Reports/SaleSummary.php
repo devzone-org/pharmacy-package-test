@@ -44,10 +44,10 @@ class SaleSummary extends Component
         $this->report = Sale::from('sales as s')
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('s.sale_at', '<=', $this->to);
+                return $q->whereDate('s.sale_at', '<=', $this->formatDate($this->to));
             })
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('s.sale_at', '>=', $this->from);
+                return $q->whereDate('s.sale_at', '>=', $this->formatDate($this->from));
             })
             ->select(
                 DB::raw('DATE(s.sale_at) as date'),
@@ -75,6 +75,7 @@ class SaleSummary extends Component
                 DB::raw('sum(sd.supply_price*sr.refund_qty) as return_cos')
             )
             ->groupBy('sr.sale_detail_id')->get();
+
         foreach ($this->report as $key=>$rep){
             if ($sale_return->isNotEmpty()){
                 $this->report[$key]['sale_return']=$sale_return->where('date',$rep['date'])->sum('return_total');
