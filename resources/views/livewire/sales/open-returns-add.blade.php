@@ -150,9 +150,9 @@
                             </td>
 
                             <td class="px-3 py-3   text-sm text-gray-500">
-                                <input type="date"
-                                       class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                       wire:model="returns.{{$key}}.expiry">
+                                <input type="text" readonly
+                                       class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm datepicker"
+                                       wire:model.lazy="returns.{{$key}}.expiry">
                             </td>
                             <td class="px-3 py-3 text-center text-sm text-gray-500">
                                 {{ number_format($m['retail_price'],2) }}
@@ -246,7 +246,8 @@
                     <th scope="col" colspan="1" class="px-3 py-3 text-right text-xl text-gray-500    ">
                         Deduction (%)
                     </th>
-                    <th scope="col" colspan="1" class="px-3 py-3 {{$is_view?'text-center': 'text-left'}} font-medium text-gray-500    ">
+                    <th scope="col" colspan="1"
+                        class="px-3 py-3 {{$is_view?'text-center': 'text-left'}} font-medium text-gray-500    ">
                         @if(!$is_view)
                             <input type="number" onclick="this.select()"
                                    class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
@@ -425,4 +426,30 @@
             }, 200);
         })
     });
+
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+
+<script>
+    var eleGroup;
+    setInterval(() => {
+        eleGroup = document.querySelectorAll('.datepicker');
+
+        eleGroup.forEach(function (items, index) {
+            items.onfocus = function () {
+
+                new Pikaday({
+                    field: items,
+                    format: "DD MMM YYYY"
+                });
+            }
+        })
+
+    }, 1000)
+
+
+</script>
+
+

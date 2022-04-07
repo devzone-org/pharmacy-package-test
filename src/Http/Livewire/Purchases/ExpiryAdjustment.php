@@ -4,6 +4,7 @@
 namespace Devzone\Pharmacy\Http\Livewire\Purchases;
 
 
+use Carbon\Carbon;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\ExpiryAdjustmentLog;
 use Devzone\Pharmacy\Models\ProductInventory;
@@ -36,6 +37,12 @@ class ExpiryAdjustment extends Component
     public function render()
     {
         return view('pharmacy::livewire.purchases.expiry-adjustment');
+    }
+
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
     }
 
     public function removeItem($key)
@@ -105,13 +112,13 @@ class ExpiryAdjustment extends Component
                     $log = ExpiryAdjustmentLog::create([
                         'product_inventory_id' => $a['id'],
                         'old_expiry' => $a['expiry'],
-                        'new_expiry' => $a['new_expiry'],
+                        'new_expiry' => $this->formatDate($a['new_expiry']),
                         'created_by' => auth()->id(),
                         'remarks' => $this->remarks
                     ]);
 
                     $inventory = $inventory->update([
-                        'expiry' => $a['new_expiry']
+                        'expiry' => $this->formatDate($a['new_expiry'])
                     ]);
 
                 }

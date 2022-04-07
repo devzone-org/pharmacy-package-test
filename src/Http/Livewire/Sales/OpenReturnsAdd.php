@@ -71,9 +71,17 @@ class OpenReturnsAdd extends Component
         $this->date = date('Y-m-d');
     }
 
+
+
     public function render()
     {
         return view('pharmacy::livewire.sales.open-returns-add');
+    }
+
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
     }
 
 
@@ -195,7 +203,7 @@ class OpenReturnsAdd extends Component
                     'qty' => $pro['qty'],
                     'retail_price' => $pro['retail_price'],
                     'supply_price' => 0.00,
-                    'expiry' => $pro['expiry'],
+                    'expiry' => $this->formatDate($pro['expiry']),
                     'type' => 'open-return'
                 ]);
 
@@ -212,7 +220,7 @@ class OpenReturnsAdd extends Component
                 OpenReturnDetail::create([
                     'open_return_id' => $or->id,
                     'product_id' => $pro['id'],
-                    'expiry' => $pro['expiry'],
+                    'expiry' => $this->formatDate($pro['expiry']),
                     'qty' => $pro['qty'],
                     'retail_price' => $pro['retail_price'],
                     'total' => $pro['total_cost'],

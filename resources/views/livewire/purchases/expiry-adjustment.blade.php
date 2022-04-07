@@ -81,9 +81,9 @@
                             </td>
 
                             <td class=" px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <input type="date" wire:model.lazy="adjustments.{{ $key }}.new_expiry" name="new_expiry"
-                                       id="new_expiry"
-                                       class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                <input type="text" wire:model.lazy="adjustments.{{ $key }}.new_expiry" name="new_expiry"
+                                       id="new_expiry" readonly
+                                       class="mt-1 datepicker focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                             </td>
 
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -261,3 +261,30 @@
         })
     });
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+<script>
+
+    var eleGroup;
+    setInterval(() => {
+        eleGroup = document.querySelectorAll('.datepicker');
+
+        eleGroup.forEach(function (items, index) {
+            items.onfocus = function () {
+
+                new Pikaday({
+                    field: items,
+                    format: "DD MMM YYYY"
+                });
+            }
+        })
+
+    }, 1000)
+
+
+</script>
+
+
+
+
