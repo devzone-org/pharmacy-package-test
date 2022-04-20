@@ -122,6 +122,16 @@
                         </div>
                     @endif
 
+                    <div class="col-span-6 sm:col-span-2">
+                        <label for="date" class="block text-sm font-medium text-gray-700"> Loose Purchase
+                            </label>
+                        <select wire:model.lazy="loose_purchase" type="text" autocomplete="off"
+                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value="f">No </option>
+                            <option value="t">Yes </option>
+                        </select>
+                    </div>
+
 
                     <div class="col-span-6">
                         <p class="text-indigo-600 font-bold cursor-pointer inline-block"
@@ -197,7 +207,11 @@
                             {{ $m['packing'] }}
                         </td>
                         <td class="px-3 py-3   text-sm text-gray-500">
-                            {{ number_format($m['packing']*$m['qty'],2) }}
+                            @if($loose_purchase == 't')
+                                {{number_format($m['qty'],2)}}
+                            @else
+                                {{ number_format($m['packing']*$m['qty'],2) }}
+                            @endif
                         </td>
                         <td class="px-3 py-3   text-sm text-gray-500">
                             {{ number_format($closing,2) }}

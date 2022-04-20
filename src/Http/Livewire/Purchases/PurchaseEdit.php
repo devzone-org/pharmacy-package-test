@@ -32,6 +32,7 @@ class PurchaseEdit extends Component
     public $sale_days = '10';
 
     public $success;
+    public $loose_purchase='f';
 
     protected $rules = [
         'supplier_id' => 'required|integer',
@@ -49,6 +50,8 @@ class PurchaseEdit extends Component
     public function mount($purchase_id)
     {
         $this->purchase_id = $purchase_id;
+
+        $this->loose_purchase = Purchase::where('id',$this->purchase_id)->pluck('is_loose')->first();
 
         $purchase = Purchase::from('purchases as p')
             ->join('suppliers as s', 's.id', '=', 'p.supplier_id')
@@ -79,13 +82,16 @@ class PurchaseEdit extends Component
             ->where('po.purchase_id', $this->purchase_id)
             ->select('po.id as purchase_order_id', 'p.id', 'p.packing', 'po.qty', 'po.cost_of_price', 'po.retail_price', 'po.total_cost', 'p.name', 'p.salt')
             ->get();
-
         $arrays = [];
         foreach ($details->toArray() as $d) {
-            $d['qty'] = $d['qty'] / $d['packing'];
-            $d['cost_of_price'] = $d['packing'] * $d['cost_of_price'];
-            $d['retail_price'] = $d['packing'] * $d['retail_price'];
-            $arrays[] = $d;
+            if ($this->loose_purchase == 't'){
+                $arrays[] = $d;
+            }else {
+                $d['qty'] = $d['qty'] / $d['packing'];
+                $d['cost_of_price'] = $d['packing'] * $d['cost_of_price'];
+                $d['retail_price'] = $d['packing'] * $d['retail_price'];
+                $arrays[] = $d;
+            }
         }
 
         $this->order_list = $arrays;
@@ -209,15 +215,28 @@ class PurchaseEdit extends Component
         $data = $this->product_data[$this->highlight_index] ?? null;
         if (!empty($data)) {
             $existing = collect($this->order_list)->where('id', $data['id'])->all();
+            $cop=null;
+            $r_price=null;
+            $total_cost=null;
+            if ($this->loose_purchase == 't'){
+                $cop = round($data['cost_of_price'] / $data['packing'],2);
+                $r_price = round($data['retail_price'] / $data['packing'],2);
+                $total_cost = $cop;
+            }else{
+                $cop = $data['cost_of_price'];
+                $r_price = $data['retail_price'];
+                $total_cost = $cop;
+
+            }
             if (empty($existing)) {
                 $this->order_list[] = [
                     'id' => $data['id'],
                     'name' => $data['name'],
                     'qty' => 1,
-                    'cost_of_price' => $data['cost_of_price'],
-                    'retail_price' => $data['retail_price'],
+                    'cost_of_price' => $cop,
+                    'retail_price' => $r_price,
                     'salt' => $data['salt'],
-                    'total_cost' => $data['cost_of_price'],
+                    'total_cost' => $total_cost,
                     'packing' => $data['packing']
                 ];
             } else {
@@ -253,12 +272,26 @@ class PurchaseEdit extends Component
             }
 
             foreach ($this->order_list as $o) {
+
+                $qty = null;
+                $cop = null;
+                $r_price=null;
+                if ($this->loose_purchase == 't') {
+                    $qty = $o['qty'];
+                    $cop = $o['cost_of_price'];
+                    $r_price =$o['retail_price'];
+                } else {
+                    $qty = $o['qty'] * $o['packing'];
+                    $cop = $o['cost_of_price'] / $o['packing'];
+                    $r_price =$o['retail_price'] / $o['packing'];
+                }
+
                 if (!empty($o['purchase_order_id'])) {
                     PurchaseOrder::find($o['purchase_order_id'])->update([
-                        'qty' => $o['qty'] * $o['packing'],
-                        'cost_of_price' => round($o['cost_of_price'] / $o['packing'],2),
-                        'retail_price' => round($o['retail_price'] / $o['packing'],2),
-                        'total_cost' => round($o['cost_of_price'] * $o['qty'],2),
+                        'qty' => $qty,
+                        'cost_of_price' => $cop,
+                        'retail_price' =>$r_price,
+                        'total_cost' => $o['cost_of_price'] * $o['qty'],
                     ]);
                 } else {
                     $check = PurchaseOrder::where('purchase_id', $this->purchase_id)->where('product_id', $o['id'])->exists();
@@ -268,18 +301,19 @@ class PurchaseEdit extends Component
                     PurchaseOrder::create([
                         'purchase_id' => $this->purchase_id,
                         'product_id' => $o['id'],
-                        'qty' => $o['qty'] * $o['packing'],
-                        'cost_of_price' => round($o['cost_of_price'] / $o['packing'],2),
-                        'retail_price' => round($o['retail_price'] / $o['packing'],2),
-                        'total_cost' => round($o['cost_of_price'] * $o['qty'],2),
+                        'qty' => $qty,
+                        'cost_of_price' => $cop,
+                        'retail_price' =>$r_price,
+                        'total_cost' => $o['cost_of_price'] * $o['qty'] ,
                     ]);
                 }
-                Product::find($o['id'])->update([
-
-                    'cost_of_price' => $o['cost_of_price'],
-                    'retail_price' => $o['retail_price'],
-                    'supplier_id' => $this->supplier_id
-                ]);
+                if ($this->loose_purchase == 'f') {
+                    Product::find($o['id'])->update([
+                        'cost_of_price' => $o['cost_of_price'],
+                        'retail_price' => $o['retail_price'],
+                        'supplier_id' => $this->supplier_id
+                    ]);
+                }
             }
             DB::commit();
             $this->success = 'Purchase order has been updated.';
