@@ -41,6 +41,7 @@ class PurchaseReceive extends Component
     public $deleted = [];
     public $success;
     public $current_date;
+    public $loose_purchase = 'f';
 
     protected $rules = [
         'supplier_id' => 'required|integer',
@@ -64,6 +65,7 @@ class PurchaseReceive extends Component
     {
         $this->delivery_date = date('d M Y');
 
+        $this->loose_purchase = Purchase::where('id',$purchase_id)->pluck('is_loose')->first();
 
         $this->purchase_id = $purchase_id;
         if (\Devzone\Pharmacy\Models\PurchaseReceive::where('purchase_id', $purchase_id)->exists()) {
@@ -101,23 +103,40 @@ class PurchaseReceive extends Component
             ->select('po.id as purchase_order_id', 'p.id', 'po.qty', 'po.cost_of_price', 'po.retail_price', 'po.total_cost', 'p.name', 'p.salt', 'p.packing')
             ->get();
 
-
         foreach ($details as $data) {
+            $qty = null;
+            $cop = null;
+            $r_price =null;
+            $total_qty = null;
+            if ($this->loose_purchase == 't'){
+
+                $qty = $data['qty'];
+                $cop =  round($data['cost_of_price'],2);
+                $r_price =  round($data['retail_price'],2);
+                $total_qty =  $data['qty'];
+
+            }else{
+                $qty = $data['qty'] / $data['packing'];
+                $cop =  round($data['cost_of_price'] * $data['packing'] ,2);
+                $r_price =  round($data['retail_price'] * $data['packing'], 2);
+                $total_qty =  $data['qty'] / $data['packing'];
+
+            }
             $this->order_list[] = [
                 'id' => $data['id'],
                 'name' => $data['name'],
-                'qty' => $data['qty'] / $data['packing'],
+                'qty' => $qty,
                 'bonus' => 0,
                 'disc' => 0,
-                'cost_of_price' => round($data['cost_of_price'] * $data['packing'] ,2),
-                'after_disc_cost' => round($data['cost_of_price'] * $data['packing'],2),
-                'retail_price' => round($data['retail_price'] * $data['packing'], 2),
+                'cost_of_price' => $cop,
+                'after_disc_cost' => $cop,
+                'retail_price' => $r_price,
                 'total_retail_price' => round($data['retail_price'] * $data['qty'] ,2) ,
                 'profit' =>round(($data['retail_price'] * $data['qty']) - ($data['cost_of_price'] * $data['qty']), 2 ) ,
                 'salt' => $data['salt'],
                 'total_cost' => round($data['cost_of_price'] * $data['qty'], 2),
                 'packing' => $data['packing'],
-                'total_qty' => $data['qty'] / $data['packing'],
+                'total_qty' => $total_qty,
             ];
         }
     }
@@ -166,6 +185,10 @@ class PurchaseReceive extends Component
             if ($array[2] == 'qty') {
                 $this->order_list[$array[1]]['total_cost'] = round($this->order_list[$array[1]]['qty'] * $this->order_list[$array[1]]['after_disc_cost'], 2);
                 $this->order_list[$array[1]]['total_qty'] = round(($this->order_list[$array[1]]['bonus'] + $this->order_list[$array[1]]['qty']), 2);
+                $this->order_list[$array[1]]['total_retail_price'] = round($this->order_list[$array[1]]['qty'] * $this->order_list[$array[1]]['retail_price'], 2);
+
+                $this->order_list[$array[1]]['profit'] = round(($this->order_list[$array[1]]['retail_price'] * $this->order_list[$array[1]]['qty']) - ($this->order_list[$array[1]]['cost_of_price'] * $this->order_list[$array[1]]['qty']) , 2);
+
             }
 
             if ($array[2] == 'bonus') {
@@ -186,6 +209,18 @@ class PurchaseReceive extends Component
                 $discount_value = $cost_of_price * $disc / 100;
                 $this->order_list[$array[1]]['after_disc_cost'] = round($cost_of_price - $discount_value, 2);
                 $this->order_list[$array[1]]['total_cost'] = round($this->order_list[$array[1]]['qty'] * $this->order_list[$array[1]]['after_disc_cost'], 2);
+                $this->order_list[$array[1]]['profit'] = round(($this->order_list[$array[1]]['retail_price'] * $this->order_list[$array[1]]['qty']) - ($this->order_list[$array[1]]['cost_of_price'] * $this->order_list[$array[1]]['qty']) , 2);
+
+            }
+
+            if ($array[2] == 'retail_price'){
+
+             $retail_price =  $this->order_list[$array[1]]['total_retail_price'] ;
+                if (empty($retail_price) || !is_numeric($retail_price)){
+                    $retail_price = 0;
+                }
+                $this->order_list[$array[1]]['total_retail_price'] = round($this->order_list[$array[1]]['qty'] * $this->order_list[$array[1]]['retail_price'], 2);
+                $this->order_list[$array[1]]['profit'] = round(($this->order_list[$array[1]]['retail_price'] * $this->order_list[$array[1]]['qty']) - ($this->order_list[$array[1]]['cost_of_price'] * $this->order_list[$array[1]]['qty']) , 2);
 
             }
         }
@@ -239,19 +274,33 @@ class PurchaseReceive extends Component
         $data = $this->product_data[$this->highlight_index] ?? null;
         if (!empty($data)) {
             $existing = collect($this->order_list)->where('id', $data['id'])->all();
+
+            $cop=null;
+            $r_price=null;
+            $total_cost=null;
+            if ($this->loose_purchase == 't'){
+                $cop = round($data['cost_of_price'] / $data['packing'],2);
+                $r_price = round($data['retail_price'] / $data['packing'],2);
+                $total_cost = $cop;
+            }else{
+                $cop = $data['cost_of_price'];
+                $r_price = $data['retail_price'];
+                $total_cost = $cop;
+
+            }
             if (empty($existing)) {
                 $this->order_list[] = [
                     'id' => $data['id'],
                     'name' => $data['name'],
                     'qty' => 1,
-                    'cost_of_price' => $data['cost_of_price'],
-                    'retail_price' => $data['retail_price'],
+                    'cost_of_price' => $cop,
+                    'retail_price' => $r_price,
                     'salt' => $data['salt'],
-                    'total_cost' => $data['cost_of_price'],
-                    'total_retail_price' => $data['retail_price'],
-                    'profit' =>round($data['retail_price'] - $data['cost_of_price'], 2 ) ,
+                    'total_cost' => $cop,
+                    'total_retail_price' => $r_price,
+                    'profit' =>round($r_price - $cop, 2 ) ,
                     'packing' => $data['packing'],
-                    'after_disc_cost' => $data['cost_of_price'],
+                    'after_disc_cost' => $cop,
                     'disc' => 0,
                     'bonus' => 0,
                     'total_qty' => 1
@@ -290,27 +339,46 @@ class PurchaseReceive extends Component
                 'status' => 'receiving',
                 'grn_no' => $this->grn_no,
                 'advance_tax' => $this->advance_tax,
-                'receipt_no' => $purchase_receipt_no
+                'receipt_no' => $purchase_receipt_no,
+                'is_loose' => $this->loose_purchase
             ]);
+
             foreach ($this->order_list as $o) {
+                $qty = null;
+                $cop = null;
+                $r_price=null;
+                $bonus =null;
+                if ($this->loose_purchase == 't') {
+                    $qty = $o['qty'];
+                    $cop = $o['cost_of_price'];
+                    $r_price =$o['retail_price'];
+                    $bonus = $o['bonus'];
+                } else {
+                    $qty = $o['qty'] * $o['packing'];
+                    $cop = $o['cost_of_price'] / $o['packing'];
+                    $r_price =$o['retail_price'] / $o['packing'];
+                    $bonus = $o['bonus'] * $o['packing'];
+                }
                 \Devzone\Pharmacy\Models\PurchaseReceive::create([
                     'purchase_id' => $this->purchase_id,
                     'product_id' => $o['id'],
-                    'qty' => $o['qty'] * $o['packing'],
-                    'bonus' => $o['bonus'] * $o['packing'] ?? 0,
+                    'qty' => $qty,
+                    'bonus' => $bonus ?? 0,
                     'discount' => $o['disc'] ?? 0,
-                    'cost_of_price' => $o['cost_of_price'] / $o['packing'],
-                    'after_disc_cost' => $o['after_disc_cost'] / $o['packing'],
-                    'retail_price' => $o['retail_price'] / $o['packing'],
-                    'total_cost' => $o['after_disc_cost'] * $o['qty'],
+                    'cost_of_price' => $cop,
+                    'after_disc_cost' => $cop,
+                    'retail_price' => $r_price,
+                    'total_cost' => $cop * $o['qty'],
                     'batch_no' => $o['batch_no'] ?? null,
                     'expiry' => $this->formatDate($o['expiry']) ?? null,
                 ]);
 
-                Product::find($o['id'])->update([
-                    'cost_of_price' => $o['cost_of_price'],
-                    'retail_price' => $o['retail_price'],
-                ]);
+                if ($this->loose_purchase == 'f') {
+                    Product::find($o['id'])->update([
+                        'cost_of_price' => $o['cost_of_price'],
+                        'retail_price' => $o['retail_price'],
+                    ]);
+                }
             }
 
             $is_auto_approve = true;
