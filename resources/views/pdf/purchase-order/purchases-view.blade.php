@@ -122,7 +122,12 @@ ini_set('display_errors', true);
                     {{ $m->salt }}
                 </td>
                 <td>
-                    {{$m->qty/$m->packing}}
+                    @if($loose_purchase == 't')
+
+                        {{$m->qty}}
+                    @else
+                        {{$m->qty/$m->packing}}
+                    @endif
                 </td>
                 <td>
                     {{$m->packing}}
@@ -149,7 +154,14 @@ ini_set('display_errors', true);
                 Total
             </th>
             <th>
-                {{ number_format($details->sum('quantity'),2) }}
+                @if($loose_purchase == 't')
+
+                    {{ number_format($details->sum('qty'),2) }}
+                @else
+
+                    {{ number_format($details->sum('quantity'),2) }}
+                @endif
+
             </th>
             <th>
                 {{ number_format($details->sum('packing'),2) }}

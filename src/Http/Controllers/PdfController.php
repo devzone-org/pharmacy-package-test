@@ -18,6 +18,8 @@ class PdfController
 
         $purchase_id = $request->purchase_id ;
 
+        $loose_purchase = Purchase::where('id',$purchase_id)->pluck('is_loose')->first();
+
         $purchase = Purchase::from('purchases as p')
             ->join('suppliers as s', 's.id', '=', 'p.supplier_id')
             ->join('users as c', 'c.id', '=', 'p.created_by')
@@ -65,7 +67,7 @@ class PdfController
 
 
 
-        $pdf = PDF::loadView('pharmacy::pdf.purchase-order.purchases-view', compact('purchase_id','purchase', 'purchase_receive',  'supplier_payment_details', 'details','code','logo'));
+        $pdf = PDF::loadView('pharmacy::pdf.purchase-order.purchases-view', compact('purchase_id','purchase', 'purchase_receive',  'supplier_payment_details', 'details','code','logo','loose_purchase'));
 
         return $pdf->download('PO-view.pdf');
 

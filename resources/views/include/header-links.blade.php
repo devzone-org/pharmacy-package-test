@@ -147,6 +147,19 @@
                             </p>
                         </div>
                     </a>
+
+                    <a href="{{ url('pharmacy/purchases/loose-purchase/add') }}"
+                       class="-m-3 p-3 flex items-center rounded-lg hover:bg-gray-100 {{ Request::segment(2)=='purchases' && Request::segment(3) == 'loose-purchase' ? 'bg-gray-100' : ''}} ">
+                        <svg class="flex-shrink-0 h-6 w-6 text-indigo-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z"></path></svg>
+                        <div class="ml-4">
+                            <p class="text-base font-medium text-gray-900">
+                              Loose Purchase Orders
+                            </p>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Make loose purchase orders.
+                            </p>
+                        </div>
+                    </a>
                     <a href="{{ url('pharmacy/purchases/payments') }}"
                        class="-m-3 p-3 flex items-center rounded-lg hover:bg-gray-100 {{ Request::segment(2)=='purchases' && (Request::segment(3) == 'payments')  ? 'bg-gray-100' : ''}} ">
                         <svg class="flex-shrink-0 h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
