@@ -30,12 +30,13 @@ class PurchaseCompare extends Component
     public $grn_no;
     public $delivery_date;
     public $supplier_invoice;
+    public $loose_purchase = 'f';
 
     public function mount($purchase_id)
     {
         $this->purchase_id = $purchase_id;
-
         $purchase = Purchase::find($purchase_id);
+        $this->loose_purchase = Purchase::where('id',$purchase_id)->pluck('is_loose')->first();
         $this->grn_no = $purchase->grn_no;
         $this->delivery_date = $purchase->delivery_date;
         $this->supplier_invoice = $purchase->supplier_invoice;
@@ -95,6 +96,7 @@ class PurchaseCompare extends Component
         }
 
         foreach ($receive->toArray() as $o) {
+
             $overall[] = [
                 'type' => 'receive',
                 'product_id' => $o['product_id'],
