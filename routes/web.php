@@ -78,11 +78,6 @@ Route::group(['middleware' => 'permission:12.purchase-order-create'], function (
         return view('pharmacy::purchases.purchase-add');
     });
 
-    // If you change the URl of loose purchase then change Segment from mount of purchase add too.
-    Route::get('purchases/loose-purchase/add', function () {
-        return view('pharmacy::purchases.purchase-add');
-    });
-
     Route::get('purchases/edit/{id}', function ($id) {
         return view('pharmacy::purchases.purchase-edit', compact('id'));
     });

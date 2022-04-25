@@ -52,10 +52,10 @@ class PurchaseAdd extends Component
 
     public function mount()
     {
-        if (\Illuminate\Support\Facades\Request::segment(3) == 'loose-purchase'){
-            $this->loose_purchase = 't';
-        }
+        if(\request()->loose_purchase == 't'){
 
+            $this->loose_purchase ='t';
+        };
         $this->expected_date = date('d M Y');
     }
 
