@@ -52,9 +52,9 @@ class PurchaseAdd extends Component
     public function mount()
     {
         if(\request()->loose_purchase == 't'){
-
             $this->loose_purchase ='t';
-        };
+        }
+
         $this->expected_date = date('d M Y');
     }
 
