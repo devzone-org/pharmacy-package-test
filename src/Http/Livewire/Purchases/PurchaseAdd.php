@@ -8,7 +8,6 @@ use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Product;
 use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\PurchaseOrder;
-use http\Env\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
