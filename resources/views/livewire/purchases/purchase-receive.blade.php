@@ -202,9 +202,9 @@
                                       d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
                             </svg>
                         </td>
-                        <td class="p-0  border text-sm text-gray-500">
-                            <input type="text" onclick="this.select()"
-                                   class="p-0 focus:ring-0 block w-full text-center  text-sm border-0 datepicker" readonly
+                        <td class="p-0  border text-sm text-gray-500" x-data="{ mask: '00-00-0000' }" x-init="IMask($refs.expiry, { mask })">
+                            <input type="text" onclick="this.select()" x-ref="expiry" placeholder="dd/mm/yyyy"
+                                   class="p-0 focus:ring-0 block w-full text-center  text-sm border-0 "
                                    wire:model.lazy="order_list.{{$key}}.expiry">
                         </td>
                         <td class="p-0  border text-sm text-gray-500">
@@ -567,6 +567,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.1/dist/alpine.min.js" defer></script>
+<script src="https://unpkg.com/imask"></script>
+
 <script>
 
     let from_date = new Pikaday({
@@ -576,18 +579,16 @@
 
     from_date.setDate(new Date('{{ $delivery_date }}'));
 
-
-
-    var eleGroup = document.querySelectorAll('.datepicker');
-
-    eleGroup.forEach(function (items, index) {
-        // items.onfocus = function () {
-            new Pikaday({
-                field: items,
-                format: "DD MMM YYYY"
-            });
-
-    })
+    // var eleGroup = document.querySelectorAll('.datepicker');
+    //
+    // eleGroup.forEach(function (items, index) {
+    //     // items.onfocus = function () {
+    //         new Pikaday({
+    //             field: items,
+    //             format: "DD MMM YYYY"
+    //         });
+    //
+    // })
 
 </script>
 
