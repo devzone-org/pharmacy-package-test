@@ -77,6 +77,7 @@ Route::group(['middleware' => 'permission:12.purchase-order-create'], function (
     Route::get('purchases/add', function () {
         return view('pharmacy::purchases.purchase-add');
     });
+
     Route::get('purchases/edit/{id}', function ($id) {
         return view('pharmacy::purchases.purchase-edit', compact('id'));
     });
