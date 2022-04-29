@@ -203,7 +203,7 @@
                             </svg>
                         </td>
                         <td class="p-0  border text-sm text-gray-500" x-data="{ mask: '00-00-0000' }" x-init="IMask($refs.expiry, { mask })">
-                            <input type="text" onclick="this.select()" x-ref="expiry" placeholder="dd/mm/yyyy"
+                            <input type="text" onclick="this.select()" x-ref="expiry" placeholder="dd-mm-yyyy"
                                    class="p-0 focus:ring-0 block w-full text-center  text-sm border-0 "
                                    wire:model.lazy="order_list.{{$key}}.expiry">
                         </td>

@@ -52,13 +52,17 @@ class PurchaseReceive extends Component
         'order_list.*.disc' => 'nullable|numeric',
         'order_list.*.cost_of_price' => 'required|numeric',
         'order_list.*.retail_price' => 'required|numeric',
-        'order_list.*.expiry' => 'required',
+        'order_list.*.expiry' => 'required|date_format:d-m-Y',
         'advance_tax' => 'numeric|lte:100|gte:0'
     ];
 
     protected $validationAttributes = [
         'supplier_id' => 'supplier',
         'order_list.*.expiry' => 'Expiry Date'
+    ];
+
+    protected $messages = [
+        'order_list.*.expiry.date_format' => 'The expiry date is invalid.',
     ];
 
     public function mount($purchase_id)
