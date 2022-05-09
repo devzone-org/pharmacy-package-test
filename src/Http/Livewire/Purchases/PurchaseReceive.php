@@ -113,7 +113,6 @@ class PurchaseReceive extends Component
             $r_price = null;
             $total_qty = null;
             if ($this->loose_purchase == 't') {
-
                 $qty = $data['qty'];
                 $cop = round($data['cost_of_price'], 2);
                 $r_price = round($data['retail_price'], 2);
@@ -379,7 +378,7 @@ class PurchaseReceive extends Component
                     'cost_of_price' => $cop,
                     'after_disc_cost' => $cop,
                     'retail_price' => $r_price,
-                    'total_cost' => $cop * $o['qty'],
+                    'total_cost' => $cop * $qty,
                     'batch_no' => $o['batch_no'] ?? null,
                     'expiry' => $this->formatExpiryDate($o['expiry']) ?? null,
                 ]);
@@ -468,6 +467,7 @@ class PurchaseReceive extends Component
                     InventoryLedger::create([
                         'product_id' => $r->product_id,
                         'order_id' => $this->purchase_id,
+                        'sale_id' =>  $purchase_receipt_no,
                         'increase' => $r->qty,
                         'type' => 'purchase',
                         'description' => $description
@@ -486,6 +486,7 @@ class PurchaseReceive extends Component
                         InventoryLedger::create([
                             'product_id' => $r->product_id,
                             'order_id' => $this->purchase_id,
+                            'sale_id' =>  $purchase_receipt_no,
                             'increase' => $r->bonus,
                             'type' => 'purchase-bonus',
                             'description' => '[BONUS] ' . $description

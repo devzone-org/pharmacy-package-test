@@ -205,6 +205,7 @@ class PurchaseCompare extends Component
                 InventoryLedger::create([
                     'product_id' => $r->product_id,
                     'order_id' => $this->purchase_id,
+                    'sale_id' => $this->purchase->receipt_no,
                     'increase' => $r->qty,
                     'type' => 'purchase',
                     'description' => $description
@@ -223,6 +224,7 @@ class PurchaseCompare extends Component
                     InventoryLedger::create([
                         'product_id' => $r->product_id,
                         'order_id' => $this->purchase_id,
+                        'sale_id' => $this->purchase->receipt_no,
                         'increase' => $r->bonus,
                         'type' => 'purchase-bonus',
                         'description' => "[BONUS] " . $description

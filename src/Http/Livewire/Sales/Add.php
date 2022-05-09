@@ -785,6 +785,7 @@ class Add extends Component
                             InventoryLedger::create([
                                 'product_id' => $product_inv->product_id,
                                 'order_id' => $product_inv->po_id,
+                                'sale_id' => $sale_id,
                                 'decrease' => $sale_qty,
                                 'type' => 'sale',
                                 'description' => "Sale on dated " . date('d M, Y H:i:s') .
@@ -798,6 +799,7 @@ class Add extends Component
                             InventoryLedger::create([
                                 'product_id' => $product_inv->product_id,
                                 'order_id' => $product_inv->po_id,
+                                'sale_id' => $sale_id,
                                 'decrease' => $product_inv->qty,
                                 'type' => 'sale',
                                 'description' => "Sale on dated " . date('d M, Y H:i:s') .
