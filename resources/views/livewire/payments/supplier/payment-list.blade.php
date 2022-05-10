@@ -233,7 +233,11 @@
                                 $amts=abs($total);
                         @endphp
 
+                        @if($total>0)
+                            ({{ number_format($amts,2) }})
+                        @else
                             {{ number_format($amts,2) }}
+                        @endif
 
                     </td>
 
