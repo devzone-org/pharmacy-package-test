@@ -453,7 +453,7 @@
                         </svg>
                         <div class="ml-4">
                             <p class="text-base font-medium text-gray-900">
-                                Sale/Purcahse Narcotic Drugs
+                                Sale/Purchase Narcotic Drugs
                             </p>
                         </div>
                     </a>

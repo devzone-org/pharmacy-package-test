@@ -170,7 +170,7 @@ trait Searchable
                     return $q->where('p.name', 'LIKE', '%' . $value . '%');
                 })
                 ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
-                ->select('p.id', 'p.name', 'p.salt as generic', 'c.name as category',
+                ->select('p.id', 'p.name', 'p.salt as generic', 'c.name as category', 'p.control_medicine',
                     DB::raw("CONCAT(COALESCE(r.name,''),' ',COALESCE(r.tier,'')) AS rack")
                 )->get();
             if ($search->isNotEmpty()) {

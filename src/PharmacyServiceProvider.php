@@ -49,6 +49,7 @@ use Devzone\Pharmacy\Http\Livewire\Reports\PurchaseSummary;
 use Devzone\Pharmacy\Http\Livewire\Reports\SaleDoctorwise;
 use Devzone\Pharmacy\Http\Livewire\Reports\SaleHourlyGraph;
 use Devzone\Pharmacy\Http\Livewire\Reports\SaleProductwise;
+use Devzone\Pharmacy\Http\Livewire\Reports\SalePurchaseNarcoticDrugs;
 use Devzone\Pharmacy\Http\Livewire\Reports\SaleReturnTransaction;
 use Devzone\Pharmacy\Http\Livewire\Reports\SaleSummary;
 use Devzone\Pharmacy\Http\Livewire\Reports\SaleTransaction;
@@ -162,6 +163,7 @@ class PharmacyServiceProvider extends ServiceProvider
         Livewire::component('report.stock-in-out',StockInOut::class);
         Livewire::component('report.inter-transfer-IPD-medicines',InterTransferIPDMedicines::class);
         Livewire::component('report.inventory-ledger',\Devzone\Pharmacy\Http\Livewire\Reports\InventoryLedger::class);
+        Livewire::component('report.sale-purchase-narcotic-drugs',SalePurchaseNarcoticDrugs::class);
         Livewire::component('report.customer-receivables',\Devzone\Pharmacy\Http\Livewire\Reports\CustomerReceivables::class);
         Livewire::component('master-data.medicine',Medicine::class);
         Livewire::component('sales.admission-pharmacy',\Devzone\Pharmacy\Http\Livewire\Sales\AdmissionPharmacy::class);
