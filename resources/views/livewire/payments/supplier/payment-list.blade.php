@@ -194,8 +194,24 @@
                              ->join('supplier_refunds as sr','sr.id','=','sprd.refund_id')
                  ->where('sprd.supplier_payment_id',$m->id)
                  ->sum('total_amount');
-                $total = $m->total_cost - $total_return;
+                  $total = 0;
 
+
+                $sum = \Devzone\Pharmacy\Models\Payments\SupplierPaymentDetail::from('supplier_payment_details as spd')
+                ->join('purchase_receives as pr','pr.purchase_id','spd.order_id')
+                ->join('purchases as p','p.id','=','spd.order_id')
+                ->where('spd.supplier_payment_id', $m->id)
+                ->select('p.advance_tax','pr.total_cost')
+                ->get()->toArray();
+
+                foreach ($sum as $s){
+                    if (empty($s['advance_tax'])){
+                        $total= $total+$s['total_cost'];
+                    }else{
+                        $total =$total + $s['total_cost'] + ($s['total_cost'] * $s['advance_tax']/100);
+                    }
+                }
+                $total = $total - $total_return;
                 @endphp
                 <tr class="">
                     <td class="px-3 py-3   text-sm font-medium text-gray-500">
@@ -214,34 +230,22 @@
                     </td>
                     <td class="px-3 py-3   text-sm text-gray-500">
                         @php
-                            $tax = 0;
-                            if(!empty($m->advance_tax)){
-                                $tax = $total * ($m->advance_tax/100);
-                            }
-                            if($total>0){
-                                $amts=$total + $tax;
-                            }else{
-                                $amts=abs($total + $tax);
-                            }
+                                $amts=abs($total);
                         @endphp
 
-                        @if($total>0)
-                            ({{ number_format($amts,2) }})
-                        @else
                             {{ number_format($amts,2) }}
-                        @endif
 
                     </td>
 
                     <td class="px-3 py-3   text-sm text-gray-500">
                         @if(empty($m->approved_by))
                             <span
-                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
                               In process
                             </span>
                         @else
                             <span
-                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
 
 
                             @if($total>0)
@@ -280,7 +284,7 @@
                                     <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                          fill="currentColor" aria-hidden="true">
                                         <path
-                                            d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
+                                                d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
                                     </svg>
                                 </button>
                             </div>
@@ -355,7 +359,9 @@
 
                 <div class="p-4">
                     <div class="text-justify">
-                        A payment of Amount <strong> PKR {{number_format($amt,2)}} </strong> will be deducted from <strong>{{$paid_from}}</strong> against supplier <strong> {{$approval_supplier_name}} </strong> on dated <strong>{{date('d M,Y',strtotime($payment_date))}}</strong>.
+                        A payment of Amount <strong> PKR {{number_format($amt,2)}} </strong> will be deducted from
+                        <strong>{{$paid_from}}</strong> against supplier <strong> {{$approval_supplier_name}} </strong>
+                        on dated <strong>{{date('d M,Y',strtotime($payment_date))}}</strong>.
                         Are you sure you want to proceed?
                     </div>
                     @error('payment_date')
