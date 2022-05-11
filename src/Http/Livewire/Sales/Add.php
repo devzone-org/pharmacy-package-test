@@ -800,7 +800,7 @@ class Add extends Component
                                 'product_id' => $product_inv->product_id,
                                 'order_id' => $product_inv->po_id,
                                 'sale_id' => $sale_id,
-                                'decrease' => $product_inv->qty,
+                                'decrease' => $dec,
                                 'type' => 'sale',
                                 'description' => "Sale on dated " . date('d M, Y H:i:s') .
                                     " against receipt #" . $sale_id

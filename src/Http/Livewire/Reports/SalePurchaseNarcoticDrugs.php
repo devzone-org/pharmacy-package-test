@@ -35,6 +35,7 @@ class SalePurchaseNarcoticDrugs extends Component
                 ->join('products as p', 'p.id', '=', 'il.product_id')
                 ->leftJoin('sales as s', 's.id', '=', 'il.sale_id')
                 ->leftJoin('purchases as po', 'po.id', '=', 'il.order_id')
+                ->leftJoin('purchase_receives as pr','pr.purchase_id','=','il.order_id')
                 ->leftJoin('patients as pat', 'pat.id', '=', 's.patient_id')
                 ->leftJoin('employees as em', 'em.id', '=', 's.referred_by')
                 ->leftJoin('manufactures as m', 'm.id', '=', 'p.manufacture_id')
@@ -47,6 +48,7 @@ class SalePurchaseNarcoticDrugs extends Component
                 ->when(!empty($this->from), function ($q) {
                     return $q->whereDate('il.created_at', '>=', $this->formatDate($this->from));
                 })
+                ->groupBy('il.id')
                 ->select('il.type', 'p.name as product', 'il.created_at', 'em.name as doctor', 'em.is_doctor', 'pat.name as patient', 'il.increase', 'il.decrease', 'm.name as manufacture')
                 ->orderBy('created_at', 'desc')
                 ->get()->toArray();
