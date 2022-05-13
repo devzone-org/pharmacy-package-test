@@ -78,12 +78,20 @@ class View extends Component
             ->where('p.supplier_id', $this->supplier_id)
             ->whereIn('p.id', $this->selected_orders)
             ->select(
-                'p.id', 'p.supplier_invoice', 'p.grn_no', 'p.delivery_date', DB::raw('sum(total_cost) as total_cost')
+                'p.advance_tax','p.id', 'p.supplier_invoice', 'p.grn_no', 'p.delivery_date', DB::raw('sum(total_cost) as total_cost')
             )->orderBy('p.delivery_date')->groupBy('pr.purchase_id')->get();
         if ($result->isEmpty()) {
             $this->purchase_orders = [];
         } else {
-            $this->purchase_orders = $result->toArray();
+            foreach ($result->toArray() as $r) {
+                $tax_amount=0;
+                if(!empty($r['advance_tax'])){
+                    $tax_amount = $r['total_cost'] * ($r['advance_tax'] / 100);
+                }
+                $r['tax_amount'] = $tax_amount;
+                $this->purchase_orders[] = $r;
+            }
+//            $this->purchase_orders = $result->toArray();
         }
 
         $returns = SupplierRefund::from('supplier_refunds as sr')

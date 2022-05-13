@@ -43,9 +43,6 @@ class PaymentList extends Component
         $payments = SupplierPayment::from('supplier_payments as sp')
             ->join('suppliers as s', 's.id', 'sp.supplier_id')
             ->join('chart_of_accounts as coa', 'coa.id', '=', 'sp.pay_from')
-            ->join('supplier_payment_details as spd', 'spd.supplier_payment_id', '=', 'sp.id')
-            ->join('purchase_receives as pr', 'pr.purchase_id', '=', 'spd.order_id')
-            ->join('purchases as p', 'p.id', '=', 'spd.order_id')
             ->join('users as c', 'c.id', '=', 'sp.added_by')
             ->leftJoin('users as a', 'a.id', '=', 'sp.approved_by')
             ->when(!empty($this->supplier_id_s), function ($q) {
@@ -62,12 +59,14 @@ class PaymentList extends Component
                 }
 
             })
-            ->select('p.advance_tax', 's.name as supplier_name', 'sp.id', 'sp.description', 'coa.name as account_name', 'sp.payment_date',
-                DB::raw('sum(pr.total_cost) as total_cost'), 'sp.created_at', 'c.name as created_by',
-                'a.name as approved_by', 'sp.approved_at', 'spd.order_id')
+            ->select('s.name as supplier_name', 'sp.id', 'sp.description', 'coa.name as account_name', 'sp.payment_date',
+               'sp.created_at', 'c.name as created_by',
+                'a.name as approved_by', 'sp.approved_at')
             ->groupBy('sp.id')
             ->orderBy('sp.id', 'desc')
             ->paginate(20);
+
+
         return view('pharmacy::livewire.payments.supplier.payment-list', ['payments' => $payments]);
     }
 

@@ -379,7 +379,7 @@ class PurchaseReceive extends Component
                     'cost_of_price' => $cop,
                     'after_disc_cost' => $cop,
                     'retail_price' => $r_price,
-                    'total_cost' => $cop * $o['qty'],
+                    'total_cost' => $cop * $qty,
                     'batch_no' => $o['batch_no'] ?? null,
                     'expiry' => $this->formatExpiryDate($o['expiry']) ?? null,
                 ]);
