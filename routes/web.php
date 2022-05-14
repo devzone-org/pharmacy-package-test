@@ -249,7 +249,8 @@ Route::get('report/inventory-ledger', function () {
 
 Route::get('report/sale-purchase-narcotic-drugs', function () {
     return view('pharmacy::reports.sale-purchase-narcotic-drugs');
-});
+})->middleware('permission:12.narcotics-drugs');
+
 Route::get('report/customer-receivables', function () {
     return view('pharmacy::reports.customer-receivables');
 })->middleware('permission:12.inventory-ledger'); //New permission required.
