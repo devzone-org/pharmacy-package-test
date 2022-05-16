@@ -113,7 +113,6 @@ class PurchaseReceive extends Component
             $r_price = null;
             $total_qty = null;
             if ($this->loose_purchase == 't') {
-
                 $qty = $data['qty'];
                 $cop = round($data['cost_of_price'], 2);
                 $r_price = round($data['retail_price'], 2);

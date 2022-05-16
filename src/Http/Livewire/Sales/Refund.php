@@ -544,10 +544,11 @@ class Refund extends Component
                                 InventoryLedger::create([
                                     'product_id' => $product_inv->product_id,
                                     'order_id' => $product_inv->po_id,
+                                    'sale_id' => $newSale->id,
                                     'decrease' => $sale_qty,
                                     'type' => 'sale',
                                     'description' => "Sale on dated " . date('d M, Y H:i:s') .
-                                        " against receipt #" . $this->sale_id
+                                        " against receipt #" . $newSale->id
                                 ]);
                                 $sale_qty = 0;
 
@@ -558,10 +559,11 @@ class Refund extends Component
                                 InventoryLedger::create([
                                     'product_id' => $product_inv->product_id,
                                     'order_id' => $product_inv->po_id,
+                                    'sale_id' => $newSale->id,
                                     'decrease' => $dec,
                                     'type' => 'sale',
                                     'description' => "Sale on dated " . date('d M, Y H:i:s') .
-                                        " against receipt #" . $this->sale_id
+                                        " against receipt #" . $newSale->id
                                 ]);
                                 $sale_qty = $sale_qty - $dec;
                             }

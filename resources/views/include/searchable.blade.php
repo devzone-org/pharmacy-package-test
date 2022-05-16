@@ -118,10 +118,10 @@
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($searchable_data as $key=> $a)
-                                    <tr class="hover:bg-indigo-600 hover:text-white cursor-pointer  {{ $highlight_index === $key ? 'bg-indigo-600 text-white' : ' text-gray-500' }}"
+                                    <tr class="hover:bg-indigo-600 hover:text-white cursor-point er  {{ $highlight_index === $key ? 'bg-indigo-600 text-white' : ' text-gray-500' }}"
                                         wire:click="searchableSelection('{{ $key }}')">
                                         @foreach($searchable_column[$searchable_type] as $c)
-                                            <td class="px-2 py-2 whitespace-nowrap text-sm ">
+                                            <td class="px-2 py-2 whitespace-nowrap text-sm @if($searchable_type == 'product')@if($a['control_medicine'] == 't') text-red-500 @endif @endif">
                                                 @if($searchable_type=='item')
                                                     @if($c=='retail_price')
                                                         {{ empty($a[$c]) ? $a['product_price'] : $a[$c] }}
