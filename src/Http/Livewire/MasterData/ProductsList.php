@@ -6,6 +6,7 @@ use Devzone\Pharmacy\Http\Traits\WithSorting;
 use Devzone\Pharmacy\Models\Product;
 use Livewire\Component;
 use Livewire\WithPagination;
+use DB;
 
 class ProductsList extends Component
 {
@@ -23,7 +24,7 @@ class ProductsList extends Component
             ->leftJoin('categories as c', 'c.id', '=', 'p.category_id')
             ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
             ->leftJoin('product_inventories as pi','pi.product_id','=','p.id')
-            ->select('p.*', 'm.name as m_name', 'c.name as c_name', 'r.name as r_name', 'r.tier','pi.qty')
+            ->select('p.*', 'm.name as m_name', 'c.name as c_name', 'r.name as r_name', 'r.tier',DB::raw('sum(pi.qty) as qty'))
             ->when(!empty($this->name),function($q){
                 return $q->where('p.name','LIKE','%'.$this->name.'%');
             })
@@ -33,6 +34,7 @@ class ProductsList extends Component
             ->when(!empty($this->sortBy),function($q){
                 $q->orderBy($this->sortBy,$this->sortDirection);
             })
+            ->groupBy('p.id')
             ->paginate(20);
 
         return view('pharmacy::livewire.master-data.products-list', ['products' => $products]);
