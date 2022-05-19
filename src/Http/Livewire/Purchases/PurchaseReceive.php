@@ -352,6 +352,7 @@ class PurchaseReceive extends Component
                 'is_loose' => $this->loose_purchase
             ]);
 
+
             foreach ($this->order_list as $o) {
                 $qty = null;
                 $cop = null;
@@ -360,11 +361,13 @@ class PurchaseReceive extends Component
                 if ($this->loose_purchase == 't') {
                     $qty = $o['qty'];
                     $cop = $o['cost_of_price'];
+                    $dcop = $o['after_disc_cost'];
                     $r_price = $o['retail_price'];
                     $bonus = $o['bonus'];
                 } else {
                     $qty = $o['qty'] * $o['packing'];
                     $cop = $o['cost_of_price'] / $o['packing'];
+                    $dcop = $o['after_disc_cost'] / $o['packing'];
                     $r_price = $o['retail_price'] / $o['packing'];
                     $bonus = $o['bonus'] * $o['packing'];
                 }
@@ -376,9 +379,9 @@ class PurchaseReceive extends Component
                     'bonus' => $bonus ?? 0,
                     'discount' => $o['disc'] ?? 0,
                     'cost_of_price' => $cop,
-                    'after_disc_cost' => $cop,
+                    'after_disc_cost' => $dcop,
                     'retail_price' => $r_price,
-                    'total_cost' => $cop * $qty,
+                    'total_cost' => $dcop * $qty,
                     'batch_no' => $o['batch_no'] ?? null,
                     'expiry' => $this->formatExpiryDate($o['expiry']) ?? null,
                 ]);
