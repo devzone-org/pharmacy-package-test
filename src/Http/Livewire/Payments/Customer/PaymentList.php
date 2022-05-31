@@ -2,17 +2,14 @@
 
 namespace Devzone\Pharmacy\Http\Livewire\Payments\Customer;
 
-use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Ams\Helper\GeneralJournal;
-use Devzone\Pharmacy\Models\Customer;
-use Devzone\Pharmacy\Models\Payments\CustomerPayment;
 use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount;
+use Devzone\Pharmacy\Http\Traits\Searchable;
+use Devzone\Pharmacy\Models\Customer;
+use Devzone\Pharmacy\Models\Payments\CustomerPayment;
 use Devzone\Pharmacy\Models\Payments\CustomerPaymentDetail;
-use Devzone\Pharmacy\Models\Payments\SupplierPayment;
-use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\Sale\Sale;
-use http\Env;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -123,7 +120,8 @@ class PaymentList extends Component
 
             $return_amount = $refund_entries->sum('total_refunded');
             $diff = $amount - $return_amount;
-            if ($diff != $customer_payment['amount']) {
+
+            if (round($diff, 2) != round($customer_payment['amount'], 2)) {
                 throw new \Exception('Receive amount mismatch.');
             }
             $vno = Voucher::instance()->voucher()->get();
