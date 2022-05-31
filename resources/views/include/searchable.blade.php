@@ -72,8 +72,26 @@
                                 @foreach($searchable_data as $key=> $a)
                                     <tr class="hover:bg-indigo-600 hover:text-white" :class="{'bg-indigo-600 text-white' : h_light=={{$key}}, 'text-gray-500' : h_light!={{$key}}}"
                                         >
-                                        @foreach($searchable_column[$searchable_type] as $c)
-                                            <td class="px-2 whitespace-nowrap text-sm">
+                                        @foreach($searchable_column[$searchable_type] as $key1 => $c)
+                                            @php
+                                                $classes = '';
+        if ($key1 == 0){
+            $classes = 40;
+         }elseif ($key1 == 1){
+            $classes = 5;
+         }elseif ($key1 == 2){
+            $classes = 5;
+         }elseif ($key1 == 3){
+            $classes = 20;
+         }elseif ($key1 == 4){
+            $classes = 5;
+         }elseif ($key1 == 5){
+            $classes = 5;
+         }elseif ($key1 == 6){
+            $classes = 5;
+         }
+                                            @endphp
+                                            <td class="px-2 whitespace-nowrap text-sm" style="width: {{$classes}}%; white-space: initial">
 
                                                     @if($c=='retail_price')
                                                         {{ empty($a[$c]) ? $a['product_price'] : $a[$c] }}
@@ -84,7 +102,7 @@
                                                     @if($c == 'item' && !empty($a['salt']))
 
                                                     <br>
-                                                    <button type="button" class="text-xs text-blue-500 hover:text-white focus:ring-indigo-500 focus:border-indigo-500" wire:click="itemSalt('{{$a['salt']}}')" >
+                                                    <button type="button" class="text-left text-xs text-blue-500 hover:text-white focus:ring-indigo-500 focus:border-indigo-500" wire:click="itemSalt('{{$a['salt']}}')" >
                                                             ({{$a['salt']}})
                                                     </button>
                                                     @endif
@@ -93,7 +111,7 @@
 
                                             </td>
                                         @endforeach
-                                        <td class="px-2 py-1 whitespace-nowrap text-sm ">
+                                        <td class="px-2 py-1 whitespace-nowrap text-sm " style="width: 15%">
                                             <input type="number" min="0" @keyup.tab="h_light={{$key}}"  wire:model.defer="product_qty" wire:keydown.enter="searchableSelection('{{$key}}')"
                                                    class="px-2 py-1 relative text-black focus:ring-gray-200 focus:border-indigo-500 w-full text-sm border-gray-300 rounded"
                                                    autocomplete="off">
