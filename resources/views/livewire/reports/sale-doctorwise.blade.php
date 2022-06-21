@@ -7,8 +7,8 @@
                     <select wire:model.defer="doctor"
                             class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                         <option value="">All</option>
-                        @foreach($doctors as $doctor)
-                            <option value="{{$doctor['id']}}">{{$doctor['name']}}</option>
+                        @foreach($doctors as $docto)
+                            <option value="{{$docto['id']}}">{{$docto['name']}}</option>
                         @endforeach
                     </select>
                 </div>
@@ -17,8 +17,8 @@
                     <select wire:model.defer="department"
                             class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                         <option value="">All</option>
-                        @foreach($departments as $department)
-                            <option value="{{$department['id']}}">{{$department['name']}}</option>
+                        @foreach($departments as $departmen)
+                            <option value="{{$departmen['id']}}">{{$departmen['name']}}</option>
                         @endforeach
                     </select>
                 </div>
@@ -33,17 +33,17 @@
                         <option value="custom_range">Custom Range</option>
                     </select>
                 </div>
-                    <div class=" {{$date_range ? 'block ' : 'hidden '}} col-span-8 sm:col-span-2">
-                        <label for="from" class="block text-sm font-medium text-gray-700">Sale From</label>
-                        <input type="text" wire:model.lazy="from" id="from" autocomplete="off" readonly
-                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    </div>
+                <div class=" {{$date_range ? 'block ' : 'hidden '}} col-span-8 sm:col-span-2">
+                    <label for="from" class="block text-sm font-medium text-gray-700">Sale From</label>
+                    <input type="text" wire:model.lazy="from" id="from" autocomplete="off" readonly
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
 
-                    <div class=" {{$date_range ? 'block ' : 'hidden '}} col-span-8 sm:col-span-2">
-                        <label for="to" class="block text-sm font-medium text-gray-700">Sale To</label>
-                        <input type="text" wire:model.lazy="to" id="to" autocomplete="off" readonly
-                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    </div>
+                <div class=" {{$date_range ? 'block ' : 'hidden '}} col-span-8 sm:col-span-2">
+                    <label for="to" class="block text-sm font-medium text-gray-700">Sale To</label>
+                    <input type="text" wire:model.lazy="to" id="to" autocomplete="off" readonly
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
                 <div class="col-span-8 sm:col-span-2">
                     <button type="button" wire:click="search" wire:loading.attr="disabled"
                             class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -54,6 +54,14 @@
                             Search
                         </div>
                     </button>
+                    @if(!empty($report))
+
+                        <a href="{{'sale-doctorwise/export'}}?doctor_id={{$doctor}}&department={{$department}}&from={{$from}}&to={{$to}}"
+                           target="_blank"
+                           class="ml-3 disabled:opacity-30 bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none ">
+                            Export.csv
+                        </a>
+                    @endif
                 </div>
             </div>
         </div>
@@ -79,44 +87,55 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Sr #
                                 </th>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Doctor
                                 </th>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Department
                                 </th>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Sales (PKR)
                                 </th>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Discount (PKR)
                                 </th>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Sales Return (PKR)
                                 </th>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Net Sales (PKR)<br>
                                     (A)
                                 </th>
 
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     COS (PKR)<br>
                                     (B)
                                 </th>
 
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Gross Profit (PKR)
                                     <br>(A-B)
                                 </th>
 
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Gross Margin (%)<br>
                                     (A-B)/A
                                 </th>
-                                <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                <th scope="col"
+                                    class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     # of Sales
                                 </th>
                             </tr>

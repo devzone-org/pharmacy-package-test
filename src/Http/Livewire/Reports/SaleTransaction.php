@@ -15,7 +15,7 @@ class SaleTransaction extends Component
 {
     public $salemen = [];
     public $doctors = [];
-    public $doctor_id = [];
+    public $doctor_id ;
     public $salesman_id;
     public $range;
     public $from;
