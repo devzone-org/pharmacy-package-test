@@ -24,16 +24,24 @@ class StockNearExpiry extends Component
     public $supplier_id;
     public $supplier_name;
     public $type;
+    public $expiry_date;
     public $report = [];
 
     public function mount()
     {
+        $this->expiry_date = date('d M Y', strtotime('+3 months'));
         $this->search();
     }
 
     public function render()
     {
         return view('pharmacy::livewire.reports.stock-near-expiry');
+    }
+
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
     }
 
     public function search()
@@ -50,6 +58,9 @@ class StockNearExpiry extends Component
             ->leftJoin('manufactures as m', 'm.id', '=', 'p.manufacture_id')
             ->leftJoin('categories as c', 'c.id', '=', 'p.category_id')
             ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
+            ->when(!empty($this->expiry_date), function ($q){
+                return $q->where('pi.expiry', '<=' , $this->formatDate($this->expiry_date));
+            })
             ->when(!empty($this->product_id), function ($q) {
                 return $q->where('p.id', $this->product_id);
             })
