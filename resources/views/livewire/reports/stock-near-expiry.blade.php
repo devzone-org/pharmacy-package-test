@@ -66,7 +66,7 @@
                         Reset
                     </button>
                     @if(!empty($report))
-                        <a href="{{'stock-near-expiry/export'}}?product_id={{$product_id}}&supplier_id={{$supplier_id}}&manufacture_id={{$manufacture_id}}&rack_id={{$rack_id}}&category_id={{$category_id}}&type={{$type}}" target="_blank"
+                        <a href="{{'stock-near-expiry/export'}}?product_id={{$product_id}}&supplier_id={{$supplier_id}}&manufacture_id={{$manufacture_id}}&rack_id={{$rack_id}}&category_id={{$category_id}}&type={{$type}}&expiry_date={{$expiry_date}}" target="_blank"
                            class="ml-3 disabled:opacity-30 bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none ">
                             Export.csv
                         </a>

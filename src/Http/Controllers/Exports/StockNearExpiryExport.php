@@ -17,6 +17,7 @@ class StockNearExpiryExport
     protected $rack_id;
     protected $category_id;
     protected $type;
+    protected $expiry_date;
 
 
     public function __construct()
@@ -28,6 +29,7 @@ class StockNearExpiryExport
         $this->category_id = $request->category_id;
         $this->supplier_id = $request->supplier_id;
         $this->type = $request->type;
+        $this->expiry_date = $request->expiry_date;
 
     }
 
@@ -51,6 +53,9 @@ class StockNearExpiryExport
             ->leftJoin('manufactures as m', 'm.id', '=', 'p.manufacture_id')
             ->leftJoin('categories as c', 'c.id', '=', 'p.category_id')
             ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
+            ->when(!empty($this->expiry_date), function ($q){
+                return $q->where('pi.expiry', '<=' , $this->formatDate($this->expiry_date));
+            })
             ->when(!empty($this->product_id), function ($q) {
                 return $q->where('p.id', $this->product_id);
             })
