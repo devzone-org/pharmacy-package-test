@@ -70,6 +70,12 @@
                             class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
                         Reset
                     </button>
+                    @if(!empty($report))
+                        <a href="{{'stock-near-expiry/export'}}?product_id={{$product_id}}&supplier_id={{$supplier_id}}&manufacture_id={{$manufacture_id}}&rack_id={{$rack_id}}&category_id={{$category_id}}&type={{$type}}&expiry_date={{$expiry_date}}" target="_blank"
+                           class="ml-3 disabled:opacity-30 bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none ">
+                            Export.csv
+                        </a>
+                    @endif
                 </div>
             </div>
         </div>

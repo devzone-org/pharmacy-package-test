@@ -42,7 +42,14 @@
                             Search
                         </div>
                     </button>
+                    @if(!empty($report))
+                        <a href="{{'sale-purchase-narcotic-drugs/export'}}?product_id={{$product_id}}&from={{$from}}&to={{$to}}" target="_blank"
+                           class="ml-3 disabled:opacity-30 bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none ">
+                            Export.csv
+                        </a>
+                    @endif
                 </div>
+
             </div>
         </div>
     </div>

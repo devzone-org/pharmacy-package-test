@@ -8,6 +8,14 @@
                         <div class="bg-white py-6 px-4 sm:p-6 ">
                             <h3 class="text-lg leading-6  text-center font-medium text-gray-900">{{ env('APP_NAME') }}</h3>
                             <p class="text-md leading-6  text-center  text-gray-900">Pharmacy Stock Reorder Level Report</p>
+                            @if(!empty($report))
+                                <p class="flex justify-end">
+                                <a href="{{'stock-reorder-level/export'}}" target="_blank"
+                                   class="ml-3 disabled:opacity-30 bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none ">
+                                    Export.csv
+                                </a>
+                                </p>
+                            @endif
                         </div>
                         <table class="min-w-full  divide-y divide-gray-200">
                             <thead class="bg-gray-50">

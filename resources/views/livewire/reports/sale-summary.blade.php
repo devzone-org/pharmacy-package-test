@@ -35,6 +35,13 @@
                             Search
                         </div>
                     </button>
+                    @if(!empty($report))
+
+                    <a href="{{'sale-summary/export'}}?from={{$from}}&to={{$to}}" target="_blank"
+                       class="ml-3 disabled:opacity-30 bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none ">
+                        Export.csv
+                    </a>
+                        @endif
                 </div>
             </div>
         </div>
@@ -112,7 +119,7 @@
                                 </th>
                                 <th scope="col"
                                     class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
-                                    Avg Items per sa le
+                                    Avg Items per sale
                                 </th>
                             </tr>
                             </thead>
