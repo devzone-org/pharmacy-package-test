@@ -67,7 +67,7 @@ class SalesProductWiseExport
         foreach ($report as $r) {
             $loop = $loop + 1;
             $total_after_dis = $r['total_after_refund'] == 0 ? 1 : $r['total_after_refund'];
-            $data = [
+            $data[] = [
                 $loop,
                 $r['product_name'],
                 number_format($r['qty']),

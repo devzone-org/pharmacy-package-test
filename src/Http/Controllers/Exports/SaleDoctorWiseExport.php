@@ -4,7 +4,6 @@ namespace Devzone\Pharmacy\Http\Controllers\Exports;
 
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Illuminate\Support\Facades\DB;
-
 use League\Csv\Writer;
 use SplTempFileObject;
 
@@ -81,7 +80,7 @@ class SaleDoctorWiseExport
                 $gross_margin = number_format((($r['total_after_refund'] - $r['cos']) / round($r['total_after_refund'], 2)) * 100, 2);
             }
             $loop= $loop + 1;
-            $data = [
+            $data[] = [
                 'sr_no' => $loop,
                 'doctor' => !empty($r['doctor_name']) ? $r['doctor_name'] : 'Walk in',
                 'department' => !empty($r['department_name']) ? $r['department_name'] : '-' ,
@@ -115,7 +114,8 @@ class SaleDoctorWiseExport
 
         $csv = Writer::createFromFileObject(new SplTempFileObject());
 
-        $csv->insertOne(['Sr#' , 'Doctor', 'Sales (PKR)', 'Department', 'Sales (PKR)', 'Discount (PKR)', 'Sales Return (PKR) ', 'Net Sales (PKR)(A)', 'COS (PKR)(B)', 'Gross Profit (PKR)(A-B)', 'Gross Margin (%)(A-B)/A', '# of Sales']);
+
+        $csv->insertOne(['Sr#','Doctor','Department','Sales (PKR)','Discount (PKR)','Sales Return (PKR)','Net Sales (PKR)(A)', 'COS (PKR)(B)', 'Gross Profit (PKR)(A-B)', 'Gross Margin (%)(A-B)/A', '# of Sales']);
 
         $csv->insertAll($data);
 

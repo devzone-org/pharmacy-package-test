@@ -119,7 +119,7 @@
                                 </th>
                                 <th scope="col"
                                     class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
-                                    Avg Items per sa le
+                                    Avg Items per sale
                                 </th>
                             </tr>
                             </thead>

@@ -249,9 +249,15 @@ Route::get('report/stock-reorder-level', function () {
     return view('pharmacy::reports.stock-reorder-level');
 })->middleware('permission:12.stock-reorder-level-report');
 
+Route::get('report/stock-reorder-level/export', [\Devzone\Pharmacy\Http\Controllers\Exports\StockReorderLevelExport::class, 'download'])->middleware('permission:12.stock-reorder-level-report');
+
+
 Route::get('report/stock-near-expiry', function () {
     return view('pharmacy::reports.stock-near-expiry');
 })->middleware('permission:12.stock-near-expiry-report');
+
+Route::get('report/stock-near-expiry/export', [\Devzone\Pharmacy\Http\Controllers\Exports\StockNearExpiryExport::class, 'download'])->middleware('permission:12.stock-near-expiry-report');
+
 
 Route::get('report/stock-in-out', function () {
     return view('pharmacy::reports.Stock-in-out');
@@ -264,17 +270,28 @@ Route::get('report/inter-transfer-IPD-medicines', function () {
     return view('pharmacy::reports.inter-transfer-IPD-medicines');
 })->middleware('permission:12.inter-transfer-medicine-report');
 
+Route::get('report/inter-transfer-IPD-medicines/export', [\Devzone\Pharmacy\Http\Controllers\Exports\InterTransferIpdExport::class, 'download'])->middleware('permission:12.inter-transfer-medicine-report');
+
+
 Route::get('report/inventory-ledger', function () {
     return view('pharmacy::reports.inventory-ledger');
 })->middleware('permission:12.inventory-ledger');
+
+Route::get('report/inventory-ledger/export', [\Devzone\Pharmacy\Http\Controllers\Exports\InventoryLedgerExport::class, 'download'])->middleware('permission:12.inventory-ledger');
+
 
 Route::get('report/sale-purchase-narcotic-drugs', function () {
     return view('pharmacy::reports.sale-purchase-narcotic-drugs');
 })->middleware('permission:12.narcotics-drugs');
 
+Route::get('report/sale-purchase-narcotic-drugs/export', [\Devzone\Pharmacy\Http\Controllers\Exports\SalePurchaseNarcoticsExport::class, 'download'])->middleware('permission:12.narcotics-drugs');
+
 Route::get('report/customer-receivables', function () {
     return view('pharmacy::reports.customer-receivables');
 })->middleware('permission:12.customer-receivables'); //New permission required.
+
+Route::get('report/customer-receivables/export', [\Devzone\Pharmacy\Http\Controllers\Exports\CustomerReceivablesExport::class, 'download'])->middleware('permission:12.customer-receivables');
+
 
 Route::get('print/sale/{id}', [PrintController::class, 'print']);
 

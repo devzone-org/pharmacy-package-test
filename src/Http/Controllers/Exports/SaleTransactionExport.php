@@ -98,7 +98,7 @@ class SaleTransactionExport
             $loop = $loop + 1;
             $data[] = [
                 'sr_no' => $loop,
-                'status' => $rep['is_paid'] == 't' ? 'Paid' : 'UnPaid',
+                'status' => ($rep['is_credit'] == 't' ? 'On Credit': 'On Cash').'-'.($rep['is_paid'] == 't' ? 'Paid' : 'UnPaid') ,
                 'sale_date' => $rep['sale_at'],
                 'invoice_no' => $rep['id'],
                 'doctor' => $rep['doctor'] ?? 'Walk In',
