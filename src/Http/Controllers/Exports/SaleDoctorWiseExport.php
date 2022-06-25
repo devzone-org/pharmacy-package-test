@@ -85,7 +85,7 @@ class SaleDoctorWiseExport
                 'doctor' => !empty($r['doctor_name']) ? $r['doctor_name'] : 'Walk in',
                 'department' => !empty($r['department_name']) ? $r['department_name'] : '-' ,
                 'sales' => number_format($r['total'], 2),
-                'discount' => number_format($r['total'] - $r['total_after_disc'], 2),
+                'discount' => '(' . number_format($r['total'] - $r['total_after_disc'], 2) . ')',
                 'sales_return' => number_format($r['total_refund'], 2),
                 'net_sales' => number_format($r['total_after_refund'], 2) ,
                 'cos' => number_format($r['cos'], 2),

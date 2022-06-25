@@ -76,7 +76,6 @@ class StockMovementExport
             })
             ->select('product_id',DB::raw('sum(decrease) as decrease'),DB::raw('sum(increase) as increase'))
             ->get();
-
         foreach ($products->groupBy('product_id') as $key => $product_grouped) {
             $product=$product_grouped->first();
             $report[$key]['id'] = $product->product_id;
@@ -94,6 +93,7 @@ class StockMovementExport
             $closing=($report[$key]['opening_stock']-($report[$key]['sales']+$report[$key]['purchase_return']))+$report[$key]['sale_return']+$report[$key]['purchases']+($report[$key]['adjustment']);
             $report[$key]['closing_stock']=$closing;
         }
+
         $data = [];
         $loop = 0;
         foreach ($report as $r){

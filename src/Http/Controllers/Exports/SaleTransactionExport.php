@@ -99,22 +99,45 @@ class SaleTransactionExport
             $data[] = [
                 'sr_no' => $loop,
                 'status' => ($rep['is_credit'] == 't' ? 'On Credit': 'On Cash').'-'.($rep['is_paid'] == 't' ? 'Paid' : 'UnPaid') ,
-                'sale_date' => $rep['sale_at'],
+                'sale_date' => date('d M, Y h:i:s', strtotime($rep['sale_at'])),
                 'invoice_no' => $rep['id'],
                 'doctor' => $rep['doctor'] ?? 'Walk In',
                 'patient_name' => $rep['patient_name'] ?? '',
                 'sale' => number_format($rep['total'], 2),
-                'discount' => number_format($rep['total'] - $rep['total_after_disc'], 2),
-                'sale_return' => number_format($rep['sale_return'], 2),
+                'discount' => '(' . number_format($rep['total'] - $rep['total_after_disc'], 2) . ')',
+                'sale_return' => '(' . number_format($rep['sale_return'], 2) . ')',
                 'net_sale' => number_format($rep['total_after_disc'] - $rep['sale_return'], 2),
                 'cash' => number_format($rep['total_after_disc'] - $rep['sale_return'], 2),
                 'credit' => number_format($rep['total_after_disc'] - $rep['sale_return'], 2),
                 'cos' => number_format($rep['cos'], 2),
                 'gross_profit' => number_format($rep['total_after_disc'] - $rep['sale_return'] - $rep['cos'], 2),
-                'gross_margin' => number_format((($rep['total_after_disc'] - $rep['sale_return'] - $rep['cos']) / $total_after_disc) * 100, 2),
-                'sold_by' => number_format((($rep['total_after_disc'] - $rep['sale_return'] - $rep['cos']) / $total_after_disc) * 100, 2),
+                'gross_margin' => number_format((($rep['total_after_disc'] - $rep['sale_return'] - $rep['cos']) / $total_after_disc) * 100, 2) . ' %',
+                'sold_by' => $rep['sale_by']
             ];
         }
+
+        $grand_total_after_disc=collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return');
+        $grand_total_after_disc= empty($grand_total_after_disc) ? 1 :$grand_total_after_disc;
+
+        $data[]=[
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            number_format(collect($report)->sum('total'),2),
+            '(' . number_format(collect($report)->sum('total') - collect($report)->sum('total_after_disc'),2) . ')',
+            '(' . number_format(collect($report)->sum('sale_return'),2) . ')',
+            number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return'),2),
+            number_format(collect($report)->where('is_credit','f')->sum('total_after_disc')-collect($report)->where('is_credit','f')->sum('sale_return'),2),
+            number_format(collect($report)->where('is_credit','t')->sum('total_after_disc')-collect($report)->where('is_credit','t')->sum('sale_return'),2),
+            number_format(collect($report)->sum('cos'),2),
+            number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos'),2),
+            number_format(((collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos'))/$grand_total_after_disc)*100,2) . '%'
+
+
+        ];
 
 
         $csv = Writer::createFromFileObject(new SplTempFileObject());

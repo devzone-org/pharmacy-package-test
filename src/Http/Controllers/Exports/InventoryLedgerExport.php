@@ -72,10 +72,10 @@ class InventoryLedgerExport
             }else{
                 $closing = $closing-$r['decrease'];
             }
-
+//dd( date('d M Y h:i:s', strtotime($r['created_at'])));
             $data[] = [
                 $loop,
-                date('d M Y h:i A', strtotime($r['created_at'])),
+                date('d M, Y h:i:s', strtotime($r['created_at'])),
                 $r['description'],
                 $r['decrease'],
                 $r['increase'],

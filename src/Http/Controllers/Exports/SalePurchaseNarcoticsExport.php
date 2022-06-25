@@ -58,7 +58,7 @@ class SalePurchaseNarcoticsExport
             $data[]=[
                 $loop,
                 ucwords($r['type']),
-                date('d M Y h:i A',strtotime($r['created_at'])),
+                date('d M, Y h:i A',strtotime($r['created_at'])),
                 !empty($r['doctor']) ? $r['doctor'] : '-',
                 !empty($r['patient']) ? $r['patient']: '-',
                 $r['decrease'],

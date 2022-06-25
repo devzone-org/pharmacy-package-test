@@ -81,8 +81,8 @@ class InterTransferIpdExport
                 number_format($r['cos']-$r['refunded_cos'],2),
                 number_format(($r['total_after_disc']-$r['refunded_retail'])-($r['cos']-$r['refunded_cos']),2),
                 number_format(((($r['total_after_disc']-$r['refunded_retail'])-($r['cos']-$r['refunded_cos']))/($r['total_after_disc']-$r['refunded_retail']))*100,2) . ' %',
-                $r['issued_by'] .date('d M Y h:i A',strtotime($r['sale_at'])),
-
+                $r['issued_by'] . ' ' . date('d M Y h:i A',strtotime($r['sale_at'])),
+                ''
             ];
 
         }
