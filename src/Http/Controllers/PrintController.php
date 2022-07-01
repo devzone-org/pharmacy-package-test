@@ -252,9 +252,10 @@ class PrintController extends Controller
         $printer->feed();
         $printer->text($print['address_2']);
         $printer->feed(2);
-
-        $printer->text($print['license_no']);
-        $printer->feed(2);
+        if (!empty(env('RECEIPT_LICENSE_NO'))) {
+            $printer->text($print['license_no']);
+            $printer->feed(2);
+        }
         $printer->text($print['invoice_no']);
         $printer->feed();
         $printer->text($print['reprint']);
