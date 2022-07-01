@@ -37,17 +37,29 @@
                     </select>
                 </div>
 
-                    <div class="{{$date_range ? 'block ' : 'hidden '}} col-span-8 sm:col-span-2">
-                        <label for="from" class="block text-sm font-medium text-gray-700">Sale From</label>
-                        <input type="text" wire:model.lazy="from" autocomplete="off" id="from" readonly
-                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    </div>
+                <div class="{{$date_range ? 'block ' : 'hidden '}} col-span-8 sm:col-span-2">
+                    <label for="from" class="block text-sm font-medium text-gray-700">Sale From</label>
+                    <input type="text" wire:model.lazy="from" autocomplete="off" id="from" readonly
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
 
-                    <div class="{{$date_range ? 'block ' : 'hidden '}} col-span-8 sm:col-span-2">
-                        <label for="to" class="block text-sm font-medium text-gray-700">Sale To</label>
-                        <input type="text" wire:model.lazy="to" autocomplete="off" id="to" readonly
-                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    </div>
+                <div class="{{$date_range ? 'block ' : 'hidden '}} col-span-8 sm:col-span-2">
+                    <label for="to" class="block text-sm font-medium text-gray-700">Sale To</label>
+                    <input type="text" wire:model.lazy="to" autocomplete="off" id="to" readonly
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+
+                <div class="{{$date_range ? 'block ' : 'hidden '}} col-span-8 sm:col-span-2">
+                    <label for="" class="block text-sm font-medium text-gray-700">Sale From Time</label>
+                    <input type="time" wire:model.lazy="time_from" autocomplete="off" id=""
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+
+                <div class="{{$date_range ? 'block ' : 'hidden '}} col-span-8 sm:col-span-2">
+                    <label for="" class="block text-sm font-medium text-gray-700">Sale To Time</label>
+                    <input type="time" wire:model.lazy="time_to" autocomplete="off" id=""
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
 
 
                 <div class="col-span-8 sm:col-span-2">
@@ -66,10 +78,11 @@
                         Reset
                     </button>
                     @if(!empty($report))
-                    <a href="{{'sale-transaction/export'}}?salesman_id={{$salesman_id}}&doctor_id={{$doctor_id}}&from={{$from}}&to={{$to}}" target="_blank"
-                       class="ml-3 disabled:opacity-30 bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none ">
-                        Export.csv
-                    </a>
+                        <a href="{{'sale-transaction/export'}}?salesman_id={{$salesman_id}}&doctor_id={{$doctor_id}}&from={{$from}}&to={{$to}}"
+                           target="_blank"
+                           class="ml-3 disabled:opacity-30 bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none ">
+                            Export.csv
+                        </a>
                     @endif
                 </div>
             </div>
