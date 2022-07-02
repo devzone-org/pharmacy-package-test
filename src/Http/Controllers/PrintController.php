@@ -300,7 +300,6 @@ class PrintController extends Controller
 
         $printer->close();
 
-        return $print;
     }
 
     private function onlinePrint($request, $id)
@@ -495,5 +494,6 @@ class PrintController extends Controller
         $print['change_returned'] = str_pad("Credit", 45, " ", STR_PAD_LEFT) .
             str_pad($credit, 19, " ", STR_PAD_LEFT);
 
+        return $print;
     }
 }
