@@ -14,7 +14,7 @@
 </div>
 </body>
 <script type='text/javascript'>
-    setTimeout('self.close()',2500);
+   self.close()
 </script>
 </html>
 
