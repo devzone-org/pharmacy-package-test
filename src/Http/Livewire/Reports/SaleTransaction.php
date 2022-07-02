@@ -19,6 +19,8 @@ class SaleTransaction extends Component
     public $salesman_id;
     public $range;
     public $from;
+    public $time_from;
+    public $time_to;
     public $to;
     public $report = [];
     public $date_range = false;
@@ -75,6 +77,12 @@ class SaleTransaction extends Component
             ->when(!empty($this->from), function ($q) {
                 return $q->whereDate('s.sale_at', '>=',$this->formatDate($this->from));
             })
+            ->when(!empty($this->time_to), function ($q) {
+                return $q->whereTime('s.sale_at', '<=', date('H:i:s', strtotime($this->time_to)));
+            })
+            ->when(!empty($this->time_from), function ($q) {
+                return $q->whereTime('s.sale_at', '>=', date('H:i:s', strtotime($this->time_from)));
+            })
             ->select('s.sale_at', 'e.name as doctor', 's.is_credit', 's.is_paid', 's.id', 'p.name as patient_name', DB::raw('sum(sd.qty*sd.supply_price) as cos'),
                 DB::raw('sum(sd.total) as total'), DB::raw('sum(sd.total_after_disc) as total_after_disc'),
                 'u.name as sale_by')
@@ -92,6 +100,12 @@ class SaleTransaction extends Component
             })
             ->when(!empty($this->from), function ($q) {
                 return $q->whereDate('sr.updated_at', '>=', $this->formatDate($this->from));
+            })
+            ->when(!empty($this->time_to), function ($q) {
+                return $q->whereTime('sr.updated_at', '<=', date('H:i:s', strtotime($this->time_to)));
+            })
+            ->when(!empty($this->time_from), function ($q) {
+                return $q->whereTime('sr.updated_at', '>=', date('H:i:s', strtotime($this->time_from)));
             })
             ->select('sd.sale_id', DB::raw('sum((sd.total_after_disc/sd.qty)*sr.refund_qty) as return_total'),
                 DB::raw('sum(sd.supply_price*sr.refund_qty) as return_cos')

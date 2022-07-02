@@ -106,7 +106,7 @@
 
                         .text("{{ $print['reprint']  }}")
                         .style([escpos.FontStyle.Normal])
-                        .feed()
+                        .feed(2)
                         .align()
                         .text("{{$print['patient_name'] }}")
                         .text("{{ $print['father_husband_name'] }}")

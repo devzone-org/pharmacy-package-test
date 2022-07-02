@@ -54,6 +54,12 @@ class SaleReturnTransactionExport
             ->when(!empty($this->from), function ($q) {
                 return $q->whereDate('srd.created_at', '>=', $this->formatDate($this->from));
             })
+            ->when(!empty($this->time_to), function ($q) {
+                return $q->whereTime('s.sale_at', '<=', date('H:i:s', strtotime($this->time_to)));
+            })
+            ->when(!empty($this->time_from), function ($q) {
+                return $q->whereTime('s.sale_at', '>=', date('H:i:s', strtotime($this->time_from)));
+            })
             ->orderBy('srd.created_at', 'desc')
             ->get()->toArray();
 

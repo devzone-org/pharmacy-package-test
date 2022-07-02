@@ -35,6 +35,17 @@
                         <input type="text" wire:model.lazy="to" id="to" autocomplete="off" readonly
                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
+                <div class="{{$date_range ? 'block ' : 'hidden '}} col-span-8 sm:col-span-2">
+                    <label for="" class="block text-sm font-medium text-gray-700">Sale From Time</label>
+                    <input type="time" wire:model.lazy="time_from" autocomplete="off" id=""
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+
+                <div class="{{$date_range ? 'block ' : 'hidden '}} col-span-8 sm:col-span-2">
+                    <label for="" class="block text-sm font-medium text-gray-700">Sale To Time</label>
+                    <input type="time" wire:model.lazy="time_to" autocomplete="off" id=""
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
                 <div class="col-span-8 sm:col-span-2">
                     <button type="button" wire:click="search" wire:loading.attr="disabled"
                             class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
