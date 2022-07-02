@@ -32,9 +32,8 @@ class PrintController extends Controller
 
         if (config('app.env') == 'local') {
 
-            $print = $this->localPrint($request, $id);
-            return view('pharmacy::print', compact('id', 'print'));
-
+            $this->localPrint($request, $id);
+            return view('pharmacy::print-close');
 
         } else {
             $print = $this->onlinePrint($request, $id);
@@ -496,6 +495,5 @@ class PrintController extends Controller
         $print['change_returned'] = str_pad("Credit", 45, " ", STR_PAD_LEFT) .
             str_pad($credit, 19, " ", STR_PAD_LEFT);
 
-        return $print;
     }
 }
