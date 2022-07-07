@@ -89,8 +89,9 @@ class PurchaseAdd extends Component
             ->where('p.supplier_id', $this->supplier_id)
             ->where('sd.created_at', '>=', $date)
             ->groupBy('sd.product_id')
-            ->select('p.id', 'p.name', 'p.cost_of_price', 'p.retail_price', 'p.salt', 'p.packing')
+            ->select('p.id', 'p.name', 'p.cost_of_price', 'p.retail_price', 'p.salt', 'p.packing',DB::raw('sum(sd.qty) as sum'))
             ->get();
+
 //        dd(date('Y-m-01', strtotime($this->sale_days)));
         if ($search->isNotEmpty()) {
             $data = $search->toArray();
@@ -106,7 +107,7 @@ class PurchaseAdd extends Component
                     $this->order_list[] = [
                         'id' => $d['id'],
                         'name' => $d['name'],
-                        'qty' => 1,
+                        'qty' => ceil($d['sum'] / $d['packing']),
                         'cost_of_price' => $d['cost_of_price'],
                         'retail_price' => $d['retail_price'],
                         'salt' => $d['salt'],

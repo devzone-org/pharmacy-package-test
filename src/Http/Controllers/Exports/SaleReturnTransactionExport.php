@@ -66,8 +66,8 @@ class SaleReturnTransactionExport
         $data = [];
         $loop = 0;
         foreach ($report as $r) {
-            $loop = $loop + 1;
-            $data[] = [
+                $loop = $loop + 1;
+                $data[] = [
                 'sr_no' => $loop,
                 'status' => 'Sales Return',
                 'return_date' => date('d M, Y h:i A', strtotime($r['return_date'])),

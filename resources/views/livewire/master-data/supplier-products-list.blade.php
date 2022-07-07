@@ -159,7 +159,7 @@
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($all_products as $key=> $m)
-                                        <tr class="{{ !empty($m->type) ? 'bg-red-50':'' }}" wire:key="{{$loop->index}}">
+                                        <tr class="{{ !empty($m->type) ? 'bg-red-50':'' }}">
                                             <td class="px-3 py-3   text-sm font-medium text-gray-500">
                                                 {{ $loop->iteration }}
                                             </td>

@@ -32,7 +32,7 @@ class SupplierProductsList extends Component
 //->leftJoin('categories as c', 'c.id', '=', 'p.category_id')
 //->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
 //->select('p.*', 'm.name as m_name', 'sup.name as sup_name', 'c.name as c_name', 'r.name as r_name', 'r.tier')
-    
+
     public function search(){
         $this->all_products = Product::from('products as p')
             ->select('p.id','p.name', 'p.salt', 'p.packing', 'p.cost_of_price', 'p.retail_price', 'p.manufacture_id', 'p.supplier_id', 'p.category_id', 'p.narcotics', 'p.status')
@@ -62,7 +62,7 @@ class SupplierProductsList extends Component
 
     public function resetSearch()
     {
-        $this->reset(['name','salt', 'supplier_id', 'manufacturer_id']);
+        $this->reset(['name','salt', 'supplier_id', 'manufacturer_id','category_id','show_data']);
     }
 
     public function verifyProduct($key)
