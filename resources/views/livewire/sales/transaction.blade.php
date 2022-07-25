@@ -254,7 +254,6 @@
                                     $total_refund = 0;
                                 @endphp
                                 @foreach($refunds as $key => $s)
-
                                     <tr class="">
                                         <td class="px-2 py-2  text-center  border-r text-md font-medium text-gray-900">
                                             {{ $loop->iteration }}
@@ -303,6 +302,7 @@
                                         <th scope="col"
                                             class="w-7 px-2   border-r py-2 text-right text-xs font-medium text-gray-500  tracking-wider">
                                         </th>
+{{--                                        @dd($refunds)--}}
                                         <th scope="col"
                                             class="w-7 px-2   border-r py-2 text-center text-md font-medium text-gray-500  tracking-wider">
                                             {{ number_format(collect($refunds)->sum('total'),2) }}
@@ -378,7 +378,6 @@
                                                  ->where('sr.refunded_id',$sale_id)
                                                  ->select(\Illuminate\Support\Facades\DB::raw('sum(sr.refund_qty * sd.retail_price_after_disc) as refund'))
                                      ->first();
-
                                      $refunded = $total_refund['refund'];
                                     @endphp
 

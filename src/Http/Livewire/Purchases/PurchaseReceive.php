@@ -372,6 +372,7 @@ class PurchaseReceive extends Component
                     $bonus = $o['bonus'] * $o['packing'];
                 }
 
+//                dd($o);
                 \Devzone\Pharmacy\Models\PurchaseReceive::create([
                     'purchase_id' => $this->purchase_id,
                     'product_id' => $o['id'],

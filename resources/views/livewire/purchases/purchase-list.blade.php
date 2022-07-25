@@ -255,7 +255,7 @@
 
                     </td>
                     @php
-                        if($m->status == 'received'){
+                        if($m->status == 'receiving' || $m->status == 'received'){
                              $received=$purchase_receives->where('id',$m->id)->first()->cost_after_receiving;
                              $tax=($m->advance_tax/100)*$received;
                              $received_after_tax=$tax+$received;
