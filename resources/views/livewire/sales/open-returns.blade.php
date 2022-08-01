@@ -50,7 +50,7 @@
     </div>
 
 
-    <div class="shadow sm:rounded-md sm:overflow-hidden">
+    <div class="shadow sm:rounded-md">
         <div class="bg-white py-6 flex   justify-between items-center  px-4  sm:p-6">
             <div>
                 <h3 class="text-lg leading-6 font-medium text-gray-900">Open Returns</h3>
@@ -69,31 +69,31 @@
             <thead class="bg-gray-50">
             <tr>
                 <th scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    class="sticky top-0 z-10 px-3 py-3 text-left text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8">
                     #
                 </th>
                 <th scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    class="sticky top-0 z-10 px-3 py-3 text-left text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8">
                     Voucher #
                 </th>
                 <th scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    class="sticky top-0 z-10 px-3 py-3 text-left text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8">
                     Remarks
                 </th>
                 <th scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    class="sticky top-0 z-10 px-3 py-3 text-left text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8">
                     Total
                 </th>
                 <th scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    class="sticky top-0 z-10 px-3 py-3 text-left text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8">
                     Total <br> (After Deduction)
                 </th>
                 <th scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    class="sticky top-0 z-10 px-3 py-3 text-left text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8">
                     Added By
                 </th>
                 <th scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    class="sticky top-0 z-10 px-3 py-3 text-left text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8">
 
                 </th>
 
@@ -127,7 +127,7 @@
                         {{ date('d M, Y h:i A',strtotime($r->created_at)) }}
                     </td>
 
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td class="px-6 py-4whitespace-nowrap text-sm text-gray-500">
                         <a class="text-green-600 cursor-pointer" target="_blank"
                            href="{{ url('pharmacy/sales/open-returns/add') }}/{{$r->id}}">
                             <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20"
@@ -143,6 +143,21 @@
 
                 </tr>
             @endforeach
+            <tr>
+                <td colspan="3" class="px-6 py-4 whitespace-nowrap text-sm text-center font-medium text-gray-900">
+                    Grand Total
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {{ number_format($total->sum('total'),2)  }}
+                </td>
+
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {{number_format($total->sum('total_after_deduction'),2) }}
+                </td>
+                <td colspan="2" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                </td>
+
+            </tr>
             </tbody>
         </table>
 

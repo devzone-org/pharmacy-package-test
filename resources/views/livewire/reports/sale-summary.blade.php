@@ -145,14 +145,14 @@
                                         </td>
                                         <td title="Net Sales (PKR)"
                                             class="px-3 py-3  text-center text-sm text-gray-500">
-                                            {{number_format($r['total_after_disc']-$r['sale_return'],2)}}
+                                            {{($r['total_after_disc']-$r['sale_return'] > 0) ? number_format($r['total_after_disc']-$r['sale_return'],2) : '(' .number_format(abs($r['total_after_disc']-$r['sale_return']),2) .')'}}
                                         </td>
                                         <td title="COS (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{number_format($r['cos'],2)}}
+                                            {{($r['cos'] > 0) ? number_format($r['cos'],2) : '(' . number_format(abs($r['cos']),2) . ')'}}
                                         </td>
                                         <td title="Gross Profit (PKR)"
                                             class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{number_format($r['total_after_disc']-$r['sale_return']-$r['cos'],2)}}
+                                            {{($r['total_after_disc']-$r['sale_return']-$r['cos'] > 0) ? number_format($r['total_after_disc']-$r['sale_return']-$r['cos'],2) : '(' . number_format(abs($r['total_after_disc']-$r['sale_return']-$r['cos']),2) . ')' }}
                                         </td>
 
                                         @php
@@ -172,11 +172,11 @@
                                         </td>
                                         <td title="Avg Sales Value (PKR)"
                                             class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{number_format($r['total_after_disc']/$r['no_of_sale'],2)}}
+                                            {{!empty($r['no_of_sale']) ? number_format($r['total_after_disc']/$r['no_of_sale'],2): '0'}}
                                         </td>
                                         <td title="Avg Items per sale"
                                             class="px-3 py-3 text-center  text-sm text-gray-500">
-                                            {{number_format($r['no_of_sale']/$r['no_of_items'],2)}}
+                                            {{ !empty($r['no_of_items']) ? number_format($r['no_of_sale']/$r['no_of_items'],2) : '0'}}
                                         </td>
                                     </tr>
                                 @endforeach
@@ -196,14 +196,14 @@
                                         ({{number_format(collect($report)->sum('sale_return'),2)}})
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return'),2)}}
+                                        {{(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return') > 0) ? number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return'),2) : '(' . number_format(abs(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')),2) . ')' }}
                                     </th>
 
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('cos'),2)}}
+                                        {{(collect($report)->sum('cos') > 0) ? number_format(collect($report)->sum('cos'),2) : '(' . number_format(abs(collect($report)->sum('cos')),2) . ')'}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos'),2)}}
+                                        {{(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos') > 0) ? number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos'),2) : '(' . number_format(abs(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos')),2) . ')'}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                         @php
@@ -220,10 +220,10 @@
                                         {{number_format(collect($report)->sum('unique_customers'))}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('total_after_disc')/collect($report)->sum('no_of_sale'),2)}}
+                                        {{!empty(collect($report)->sum('no_of_sale')) ? number_format(collect($report)->sum('total_after_disc')/collect($report)->sum('no_of_sale'),2) : '0'}}
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                        {{number_format(collect($report)->sum('no_of_sale')/collect($report)->sum('no_of_items'),2)}}
+                                        {{!empty(collect($report)->sum('no_of_items')) ? number_format(collect($report)->sum('no_of_sale')/collect($report)->sum('no_of_items'),2) : '0'}}
                                     </th>
                                 </tr>
                             </tbody>
