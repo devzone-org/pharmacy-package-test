@@ -2,10 +2,11 @@
 
 namespace Devzone\Pharmacy\Http\Controllers\Exports;
 
+use Devzone\Pharmacy\Models\Sale\OpenReturn;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Illuminate\Support\Facades\DB;
-use SplTempFileObject;
 use League\Csv\Writer;
+use SplTempFileObject;
 
 
 class SaleSummaryExport
@@ -13,6 +14,8 @@ class SaleSummaryExport
 
     protected $from;
     protected $to;
+    public $time_from = '00:00';
+    public $time_to = '23:59';
 
     public function __construct()
     {
@@ -22,23 +25,16 @@ class SaleSummaryExport
         $this->to = $request->to;
     }
 
-    private function formatDate($date)
+    public function download()
     {
-
-        return \Carbon\Carbon::createFromFormat('d M Y', $date)
-            ->format('Y-m-d');
-
-    }
-
-    public function download(){
 
         $report = Sale::from('sales as s')
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('s.sale_at', '<=', $this->formatDate($this->to));
+                return $q->where('s.sale_at', '<=', $this->formatDate($this->to) . ' ' . $this->time_to . ':59');
             })
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('s.sale_at', '>=', $this->formatDate($this->from));
+                return $q->where('s.sale_at', '>=', $this->formatDate($this->from) . ' ' . $this->time_from . ':00');
             })
             ->select(
                 DB::raw('DATE(s.sale_at) as date'),
@@ -67,26 +63,34 @@ class SaleSummaryExport
 //            )
 //            ->groupBy('sr.sale_detail_id')->get();
 //
-        $sale_return =  Sale::from('sales as s')
-            ->join('sale_refund_details as sfd','sfd.refunded_id','=','s.id')
-            ->join('sale_details as sd','sd.id','=','sfd.sale_detail_id')
+        $sale_return = Sale::from('sales as s')
+            ->join('sale_refund_details as sfd', 'sfd.refunded_id', '=', 's.id')
+            ->join('sale_details as sd', 'sd.id', '=', 'sfd.sale_detail_id')
             ->when(!empty($this->to), function ($q) {
-                return $q->whereDate('s.sale_at', '<=', $this->formatDate($this->to));
+                return $q->where('s.sale_at', '<=', $this->formatDate($this->to) . ' ' . $this->time_to . ':59');
             })
             ->when(!empty($this->from), function ($q) {
-                return $q->whereDate('s.sale_at', '>=', $this->formatDate($this->from));
+                return $q->where('s.sale_at', '>=', $this->formatDate($this->from) . ' ' . $this->time_from . ':00');
             })
             ->where('s.refunded_id', '>', 0)
-            ->select(DB::raw('DATE(s.sale_at) as date'),DB::raw('sum(sd.retail_price_after_disc*sfd.refund_qty) as return_total'),DB::raw('sum(sd.supply_price*sfd.refund_qty) as return_cos'))
+            ->select(DB::raw('DATE(s.sale_at) as date'), DB::raw('sum(sd.retail_price_after_disc*sfd.refund_qty) as return_total'), DB::raw('sum(sd.supply_price*sfd.refund_qty) as return_cos'))
             ->groupBy('sfd.sale_detail_id')->get();
-
-        foreach ($report as $key=>$rep){
-            if ($sale_return->isNotEmpty()){
-                $report[$key]['sale_return']=$sale_return->where('date',$rep['date'])->sum('return_total');
-                $report[$key]['cos']=$report[$key]['cos']-$sale_return->where('date',$rep['date'])->sum('return_cos');
-            }
-            else{
-                $report[$key]['sale_return']=0;
+        $open = OpenReturn::when(!empty($this->to), function ($q) {
+            return $q->where('created_at', '<=', $this->formatDate($this->to) . ' ' . $this->time_to . ':59');
+        })
+            ->when(!empty($this->from), function ($q) {
+                return $q->where('created_at', '>=', $this->formatDate($this->from) . ' ' . $this->time_from . ':00');
+            })->select(DB::raw('DATE(created_at) as date'), DB::raw('sum(total_after_deduction) as op_return'), DB::raw('sum(cost_of_price) as op_cos'))
+            ->groupBy('date')
+            ->get();
+        foreach ($report as $key => $rep) {
+            $report[$key]['open_return'] = $open->where('date', $rep['date'])->sum('op_return');
+            $report[$key]['open_return_cos'] = $open->where('date', $rep['date'])->sum('op_cos');
+            if ($sale_return->isNotEmpty()) {
+                $report[$key]['sale_return'] = $sale_return->where('date', $rep['date'])->sum('return_total');
+                $report[$key]['cos'] = $report[$key]['cos'] - $sale_return->where('date', $rep['date'])->sum('return_cos');
+            } else {
+                $report[$key]['sale_return'] = 0;
             }
         }
 
@@ -94,58 +98,63 @@ class SaleSummaryExport
         $loop = 0;
         foreach ($report as $r) {
             $loop = $loop + 1;
-            $total_after_disc=$r['total_after_disc']-$r['sale_return'];
-            $total_after_disc=empty($total_after_disc) ? 1 :$total_after_disc;
+            $total_after_disc = $r['total_after_disc'] - $r['sale_return'] - $r['open_return'];
+            $total_after_disc = empty($total_after_disc) ? 1 : $total_after_disc;
             $data[] = [
                 'sr_no' => $loop,
-                'sale_date' => date('D d M Y',strtotime($r['date'])),
-                'sales' => number_format($r['total'],2),
-                'discount' => '('. number_format($r['total']-$r['total_after_disc'],2) .')',
-                'sales_return' => '('. number_format($r['sale_return'],2) .')',
-                'net_sales' => number_format($r['total_after_disc']-$r['sale_return'],2),
-                'cos' => number_format($r['cos'],2),
-                'gross_profit' => number_format($r['total_after_disc']-$r['sale_return']-$r['cos'],2),
-                'gross_margin' => number_format((($r['total_after_disc']-$r['sale_return']-$r['cos'])/$total_after_disc)*100,2) .'%',
+                'sale_date' => date('D d M Y', strtotime($r['date'])),
+                'sales' => number_format($r['total'], 2),
+                'discount' => '(' . number_format($r['total'] - $r['total_after_disc'], 2) . ')',
+                'sales_return' => '(' . number_format($r['sale_return'] + $r['open_return'], 2) . ')',
+                'net_sales' => number_format($r['total_after_disc'] - $r['sale_return'] - $r['open_return'], 2),
+                'cos' => number_format($r['cos'] - $r['open_return_cos'], 2),
+                'gross_profit' => number_format(($r['total_after_disc'] - $r['sale_return'] - $r['open_return']) - ($r['cos'] - $r['open_return_cos']), 2),
+                'gross_margin' => number_format(((($r['total_after_disc'] - $r['sale_return'] - $r['open_return'] - ($r['cos'] - $r['open_return_cos'] )) / $total_after_disc) * 100), 2) . '%',
                 'no_of_sales' => $r['no_of_sale'],
                 'unique_customers' => $r['unique_customers'],
-                'avg_sales_value' => number_format($r['total_after_disc']/$r['no_of_sale'],2),
-                'avg_items_per_sale' => number_format($r['no_of_sale']/$r['no_of_items'],2),
+                'avg_sales_value' => number_format($r['total_after_disc'] / $r['no_of_sale'], 2),
+                'avg_items_per_sale' => number_format($r['no_of_sale'] / $r['no_of_items'], 2),
             ];
 
         }
-        $grand_total_after_disc= collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return');
-        $grand_total_after_disc=empty($grand_total_after_disc) ? 1: $grand_total_after_disc;
-        $gross_margin=((collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos'))/$grand_total_after_disc)*100;
+        $grand_total_after_disc = collect($report)->sum('total_after_disc') - collect($report)->sum('sale_return') - collect($report)->sum('open_return');
+        $grand_total_after_disc = empty($grand_total_after_disc) ? 1 : $grand_total_after_disc;
+        $gross_margin = (($grand_total_after_disc - (collect($report)->sum('cos') - collect($report)->sum('open_return_cos'))) / $grand_total_after_disc) * 100;
 
-        $data[] =[
+        $data[] = [
             'sr_no' => '',
             'sale_date' => '',
-            'total_sales' => number_format(collect($report)->sum('total'),2),
-            'total_discount' => '(' . number_format(collect($report)->sum('total')-collect($report)->sum('total_after_disc'),2) . ')',
-            'total_sales_return' => '(' . number_format(collect($report)->sum('sale_return'),2) . ')',
-            'total_net_sales' => number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return'),2),
-            'total_cos' => number_format(collect($report)->sum('cos'),2),
-            'total_gross_profit' => number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos'),2),
-            'total_gross_margin' => number_format($gross_margin,2) .'%',
+            'total_sales' => number_format(collect($report)->sum('total'), 2),
+            'total_discount' => '(' . number_format(collect($report)->sum('total') - collect($report)->sum('total_after_disc'), 2) . ')',
+            'total_sales_return' => '(' . number_format(collect($report)->sum('sale_return') + collect($report)->sum('open_return'), 2) . ')',
+            'total_net_sales' => number_format(collect($report)->sum('total_after_disc') - collect($report)->sum('sale_return') - collect($report)->sum('open_return'), 2),
+            'total_cos' => number_format(collect($report)->sum('cos') - collect($report)->sum('open_return_cos'), 2),
+            'total_gross_profit' => number_format($grand_total_after_disc - (collect($report)->sum('cos') - collect($report)->sum('open_return_cos')), 2),
+            'total_gross_margin' => number_format($gross_margin, 2) . '%',
             'total_no_of_sales' => number_format(collect($report)->sum('no_of_sale')),
-            'total_unique_customers' =>number_format(collect($report)->sum('unique_customers')),
-            'total_avg_sales_value' => number_format(collect($report)->sum('total_after_disc')/collect($report)->sum('no_of_sale'),2),
-            'total_avg_items_per_sale' => number_format(collect($report)->sum('no_of_sale')/collect($report)->sum('no_of_items'),2),
+            'total_unique_customers' => number_format(collect($report)->sum('unique_customers')),
+            'total_avg_sales_value' => number_format(collect($report)->sum('total_after_disc') / collect($report)->sum('no_of_sale'), 2),
+            'total_avg_items_per_sale' => number_format(collect($report)->sum('no_of_sale') / collect($report)->sum('no_of_items'), 2),
 
         ];
         $csv = Writer::createFromFileObject(new SplTempFileObject());
 
-        $csv->insertOne(['Sr#', 'Sales Date', 'Sales (PKR)', 'Discount (PKR)','Sales Return (PKR)', 'Net Sales (PKR)', 'COS (PKR) ', 'Gross Profit (PKR)', 'Gross Margin', '# of Sales', 'Unique Customers', 'Avg Sales Value (PKR)','Avg Items per sale']);
+        $csv->insertOne(['Sr#', 'Sales Date', 'Sales (PKR)', 'Discount (PKR)', 'Sales Return (PKR)', 'Net Sales (PKR)', 'COS (PKR) ', 'Gross Profit (PKR)', 'Gross Margin', '# of Sales', 'Unique Customers', 'Avg Sales Value (PKR)', 'Avg Items per sale']);
 
         $csv->insertAll($data);
 
         $csv->output('Sale Summary Report ' . '.csv');
 
 
-
     }
 
+    private function formatDate($date)
+    {
 
+        return \Carbon\Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
+
+    }
 
 
 }

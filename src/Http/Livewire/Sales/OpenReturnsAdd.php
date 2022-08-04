@@ -5,17 +5,15 @@ namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
 
 use Carbon\Carbon;
-use Devzone\Pharmacy\Http\Traits\Searchable;
-use Devzone\Pharmacy\Models\InventoryLedger;
-use Devzone\Pharmacy\Models\Product;
-use Devzone\Pharmacy\Models\ProductInventory;
-use Devzone\Pharmacy\Models\Purchase;
-use Devzone\Pharmacy\Models\PurchaseOrder;
 use Devzone\Ams\Helper\ChartOfAccount;
 use Devzone\Ams\Helper\GeneralJournal;
 use Devzone\Ams\Helper\Voucher;
 use Devzone\Ams\Models\ChartOfAccount as COA;
 use Devzone\Ams\Models\Ledger;
+use Devzone\Pharmacy\Http\Traits\Searchable;
+use Devzone\Pharmacy\Models\InventoryLedger;
+use Devzone\Pharmacy\Models\Product;
+use Devzone\Pharmacy\Models\ProductInventory;
 use Devzone\Pharmacy\Models\Sale\OpenReturn;
 use Devzone\Pharmacy\Models\Sale\OpenReturnDetail;
 use Illuminate\Support\Facades\Auth;
@@ -56,7 +54,7 @@ class OpenReturnsAdd extends Component
     public function mount($id = null)
     {
         $data = OpenReturn::find($id);
-        if (!empty($data)){
+        if (!empty($data)) {
             $this->open_return_data = OpenReturn::from('open_returns as or')
                 ->where('or.id', $id)
                 ->join('open_return_details as ord', 'ord.open_return_id', '=', 'or.id')
@@ -64,7 +62,7 @@ class OpenReturnsAdd extends Component
                 ->join('users as u', 'u.id', '=', 'or.added_by')
                 ->select('p.name', 'p.salt', 'ord.*', 'or.remarks', 'or.total as grand_total', 'or.total_after_deduction as grand_total_after_deduction', 'u.name as added_by')
                 ->get()->toArray();
-            if (!empty($this->open_return_data)){
+            if (!empty($this->open_return_data)) {
                 $this->is_view = true;
             }
         }
@@ -72,18 +70,10 @@ class OpenReturnsAdd extends Component
     }
 
 
-
     public function render()
     {
         return view('pharmacy::livewire.sales.open-returns-add');
     }
-
-    private function formatDate($date)
-    {
-        return Carbon::createFromFormat('d M Y', $date)
-            ->format('Y-m-d');
-    }
-
 
     public function openProductModal()
     {
@@ -124,7 +114,6 @@ class OpenReturnsAdd extends Component
         }
     }
 
-
     public function updatedSearchProducts($value)
     {
         if (strlen($value) > 1) {
@@ -161,7 +150,8 @@ class OpenReturnsAdd extends Component
                     'id' => $data['id'],
                     'name' => $data['name'],
                     'qty' => 1,
-                    'cost_of_price' => $data['cost_of_price'],
+                    'cost_of_price' => $data['cost_of_price'] / $data['packing'],
+                    'total_supply_price' => $data['cost_of_price'] / $data['packing'],
                     'retail_price' => $data['retail_price'] / $data['packing'],
                     'salt' => $data['salt'],
                     'total_cost' => $data['retail_price'] / $data['packing'],
@@ -172,6 +162,7 @@ class OpenReturnsAdd extends Component
                 $qty = $this->returns[$key]['qty'];
                 $this->returns[$key]['qty'] = $qty + 1;
                 $this->returns[$key]['total_cost'] = $this->returns[$key]['qty'] * $this->returns[$key]['retail_price'];
+                $this->returns[$key]['total_supply_price'] = $this->returns[$key]['qty'] * $this->returns[$key]['cost_of_price'];
             }
         }
     }
@@ -180,8 +171,8 @@ class OpenReturnsAdd extends Component
     {
         $this->validate();
         $total = collect($this->returns)->sum('total_cost');
-        $this->total_after_deduction = $total - ($total*$this->deduction/100);
-
+        $this->total_after_deduction = $total - ($total * $this->deduction / 100);
+        $total_supply_price = collect($this->returns)->sum('total_supply_price');
 
         try {
             $vno = Voucher::instance()->voucher()->get();
@@ -191,25 +182,26 @@ class OpenReturnsAdd extends Component
             $or = OpenReturn::create([
                 'remarks' => $this->remarks,
                 'total' => $total,
+                'cost_of_price' => $total_supply_price,
                 'total_after_deduction' => $this->total_after_deduction,
                 'added_by' => \auth()->id(),
                 'voucher' => $vno,
             ]);
 
 
-            foreach ($this->returns as $k => $pro){
+            foreach ($this->returns as $k => $pro) {
                 $inv = ProductInventory::create([
                     'product_id' => $pro['id'],
                     'qty' => $pro['qty'],
                     'retail_price' => $pro['retail_price'],
-                    'supply_price' => 0.00,
+                    'supply_price' => $pro['cost_of_price'],
                     'expiry' => $this->formatDate($pro['expiry']),
                     'type' => 'open-return'
                 ]);
 
 
-                $des = "Open Return of PKR " . number_format($pro['total_cost'],2) . "/- on date " . date('d M, Y H:i:s') .
-                    " with " . $this->deduction . "% deduction and total of PKR " . number_format($this->total_after_deduction,2) . "/-.";
+                $des = "Open Return of PKR " . number_format($pro['total_cost'], 2) . "/- on date " . date('d M, Y H:i:s') .
+                    " with " . $this->deduction . "% deduction and total of PKR " . number_format($this->total_after_deduction, 2) . "/-.";
                 InventoryLedger::create([
                     'product_id' => $pro['id'],
                     'increase' => $pro['qty'],
@@ -225,13 +217,13 @@ class OpenReturnsAdd extends Component
                     'retail_price' => $pro['retail_price'],
                     'total' => $pro['total_cost'],
                     'deduction' => $this->deduction,
-                    'total_after_deduction' => $pro['total_cost'] - ($pro['total_cost'] * $this->deduction/100),
+                    'total_after_deduction' => $pro['total_cost'] - ($pro['total_cost'] * $this->deduction / 100),
                 ]);
             }
 
 
-            $description = "Open Return of PKR " . number_format($total,2) . "/- issued against ID# " . $or->id . " with " . $this->deduction .
-                "% deduction and total of PKR " . number_format($this->total_after_deduction,2) . "/- on date ". date('d M, Y H:i:s')." by ". Auth::user()->name.".";
+            $description = "Open Return of PKR " . number_format($total, 2) . "/- issued against ID# " . $or->id . " with " . $this->deduction .
+                "% deduction and total of PKR " . number_format($this->total_after_deduction, 2) . "/- on date " . date('d M, Y H:i:s') . " by " . Auth::user()->name . ".";
 
             // Account entries.
             GeneralJournal::instance()->account(Auth::user()->account_id)->credit($this->total_after_deduction)->voucherNo($vno)
@@ -258,5 +250,11 @@ class OpenReturnsAdd extends Component
             $this->addError('error', $e->getMessage());
             DB::rollBack();
         }
+    }
+
+    private function formatDate($date)
+    {
+        return Carbon::createFromFormat('d M Y', $date)
+            ->format('Y-m-d');
     }
 }

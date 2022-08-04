@@ -56,6 +56,7 @@ class OpenReturns extends Component
                 return $q->whereDate('or.created_at', '<=',$this->formatDate($this->to));
             })
             ->select('or.*', 'u.name as added_by')
+            ->orderBy('or.id','desc')
             ->paginate(30);
         return view('pharmacy::livewire.sales.open-returns', ['returns' => $returns]);
     }
