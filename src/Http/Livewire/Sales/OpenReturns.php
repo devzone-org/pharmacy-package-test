@@ -55,9 +55,26 @@ class OpenReturns extends Component
             ->when(!empty($this->to), function ($q) {
                 return $q->whereDate('or.created_at', '<=',$this->formatDate($this->to));
             })
+            ->orderBy('or.id','desc')
             ->select('or.*', 'u.name as added_by')
-            ->paginate(30);
-        return view('pharmacy::livewire.sales.open-returns', ['returns' => $returns]);
+            ->paginate(50);
+
+        $total = OpenReturn::from('open_returns as or')
+            ->join('users as u', 'u.id', '=', 'or.added_by')
+            ->when(!empty($this->voucher), function ($q) {
+                return $q->where('or.voucher', $this->voucher);
+            })
+            ->when(!empty($this->from), function ($q) {
+                return $q->whereDate('or.created_at', '>=',$this->formatDate($this->from));
+            })
+            ->when(!empty($this->to), function ($q) {
+                return $q->whereDate('or.created_at', '<=',$this->formatDate($this->to));
+            })
+            ->orderBy('or.id','desc')
+            ->select('or.*', 'u.name as added_by')
+            ->get();
+
+        return view('pharmacy::livewire.sales.open-returns', ['returns' => $returns, 'total' => $total]);
     }
 
     public function search(){

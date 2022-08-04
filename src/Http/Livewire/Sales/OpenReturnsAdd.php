@@ -202,7 +202,7 @@ class OpenReturnsAdd extends Component
                     'product_id' => $pro['id'],
                     'qty' => $pro['qty'],
                     'retail_price' => $pro['retail_price'],
-                    'supply_price' => 0.00,
+                    'supply_price' => $pro['cost_of_price']/$pro['packing'],
                     'expiry' => $this->formatDate($pro['expiry']),
                     'type' => 'open-return'
                 ]);
