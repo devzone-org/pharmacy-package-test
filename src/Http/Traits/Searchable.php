@@ -49,7 +49,6 @@ trait Searchable
     public function searchableOpenModal($id, $name, $type)
     {
         $this->searchableReset();
-
         $this->searchable_id = $id;
         $this->searchable_name = $name;
         $this->searchable_type = $type;
@@ -110,7 +109,6 @@ trait Searchable
 
     public function updatedSearchableQuery($value)
     {
-
         if (strlen($value) > 1) {
             $this->searchQuery($value);
         } else {

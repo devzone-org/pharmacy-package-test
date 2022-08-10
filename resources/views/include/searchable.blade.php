@@ -46,7 +46,6 @@
                     @endif
                 </div>
             </div>
-
             <div class="h-96  overflow-scroll">
                 @if($searchable_loading==false)
                     @if(!empty($searchable_data))
@@ -112,6 +111,7 @@
                                             {{ ucwords($c) }}
                                         </th>
                                     @endforeach
+
 
 
                                 </tr>
