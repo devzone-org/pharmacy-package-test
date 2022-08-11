@@ -321,7 +321,7 @@ class Add extends Component
                 $key = array_keys($check)[0];
                 if ($check[$key]['s_qty'] < $check[$key]['qty']) {
                     $qty = $this->sales[$key]['s_qty'];
-                    $this->sales[$key]['s_qty'] = $qty + 1;
+                    $this->sales[$key]['s_qty'] = $qty + $qty;
                     $this->sales[$key]['total'] = $this->sales[$key]['retail_price'] * $this->sales[$key]['s_qty'];
                     $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'];
                 }

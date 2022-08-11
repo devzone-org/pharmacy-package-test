@@ -18,6 +18,7 @@ class PurchaseAdd extends Component
     use Searchable;
 
     public $supplier_id;
+    public $product_qty;
     public $loose_purchase ='f';
     public $supplier_name;
     public $delivery_date;
@@ -127,6 +128,7 @@ class PurchaseAdd extends Component
 
     public function openProductModal()
     {
+        $this->product_qty = null;
         $this->products_modal = true;
         $this->emit('focusProductInput');
     }
@@ -203,7 +205,7 @@ class PurchaseAdd extends Component
                 $this->order_list[] = [
                     'id' => $data['id'],
                     'name' => $data['name'],
-                    'qty' => 1,
+                    'qty' => $this->product_qty ?? 1,
                     'cost_of_price' => $cop,
                     'retail_price' =>$r_price,
                     'salt' => $data['salt'],
@@ -213,9 +215,10 @@ class PurchaseAdd extends Component
             } else {
                 $key = array_keys($existing)[0];
                 $qty = $this->order_list[$key]['qty'];
-                $this->order_list[$key]['qty'] = $qty + 1;
+                $this->order_list[$key]['qty'] = $qty + $this->product_qty;
                 $this->order_list[$key]['total_cost'] = $this->order_list[$key]['qty'] * $this->order_list[$key]['cost_of_price'];
             }
+            $this->products_modal =false;
         }
     }
 
