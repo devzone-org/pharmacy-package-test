@@ -46,7 +46,7 @@ class StockNearExpiryExport
             ->join('product_inventories as pi', function ($q) {
                 return $q->on('pi.product_id', '=', 'p.id')
                     ->where('pi.qty', '>', '0')
-                    ->where('pi.expiry', '<=', date('Y-m-d', strtotime('+3 months')));
+                    ->where('pi.expiry', '<=', $this->formatDate($this->expiry_date));
             })
             ->join('purchases as pur', 'pur.id', '=', 'pi.po_id')
             ->join('suppliers as s', 's.id', '=', 'pur.supplier_id')
