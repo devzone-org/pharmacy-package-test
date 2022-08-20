@@ -229,6 +229,12 @@ Route::get('report/sale-manufacturewise', function () {
 
 Route::get('report/sale-manufacturewise/export', [\Devzone\Pharmacy\Http\Controllers\Exports\SaleManufactureWiseExport::class, 'download'])->middleware('permission:12.sales-manufacture-wise');
 
+Route::get('report/product-details', function () {
+    return view('pharmacy::reports.product-details');
+})->middleware('permission:12.product-details');
+
+Route::get('report/product-details/export', [\Devzone\Pharmacy\Http\Controllers\Exports\ProductDetailsExport::class, 'download'])->middleware('permission:12.product-details');
+
 
 
 Route::get('report/sale-hourly-graph', function () {
