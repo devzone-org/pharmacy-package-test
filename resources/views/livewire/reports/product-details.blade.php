@@ -41,7 +41,7 @@
 
                         <div class="bg-white py-6 px-4 sm:p-6 ">
                             <h3 class="text-lg leading-6  text-center font-medium text-gray-900">{{ env('APP_NAME') }}</h3>
-                            <p class="text-md leading-6  text-center  text-gray-900">Pharmacy Product Details Report
+                            <p class="text-md leading-6  text-center  text-gray-900">Pharmacy Product Wise Purchase Order
                                 Report</p>
                         </div>
 
