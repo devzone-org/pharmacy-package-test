@@ -124,7 +124,7 @@ class PaymentList extends Component
             $pay_from = ChartOfAccount::findOrFail($supplier_payment->pay_from);
             $supplier = Supplier::findOrFail($supplier_payment->supplier_id);
 
-            $advance_tax = Purchase::whereIn('id', $orders)->first()->advance_tax;
+            $advance_tax = optional(Purchase::whereIn('id', $orders)->first())->advance_tax;
 
             $amount = PurchaseReceive::whereIn('purchase_id', $orders)->sum('total_cost');
             $return_amount = SupplierRefund::whereIn('id', $returns)->sum('total_amount');
