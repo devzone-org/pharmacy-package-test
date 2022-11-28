@@ -34,6 +34,9 @@
     <body class="bg-gray-200">
         <div x-data="{menu:false,dropdown:false,activeIndex:-1}">
             @include('pharmacy::include.header')
+            @if(!empty(env('PAYMENT_DUE_MODAL')))
+                @include('include.payment-due-modal')
+            @endif
             <main>
                 @yield('content')
             </main>

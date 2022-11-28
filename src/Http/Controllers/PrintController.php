@@ -234,7 +234,8 @@ class PrintController extends Controller
         $print['change_returned'] = str_pad("Credit", 45, " ", STR_PAD_LEFT) .
             str_pad($credit, 19, " ", STR_PAD_LEFT);
 
-        $connector = new WindowsPrintConnector(config('app.printer_model'));
+//        $connector = new WindowsPrintConnector(config('app.printer_model'));
+        $connector = new WindowsPrintConnector('POS-80C1');
         $printer = new Printer($connector);
 
 

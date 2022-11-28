@@ -765,7 +765,7 @@ class Add extends Component
                     ->where('qty', '>', 0)->orderBy('id', 'asc')->get();
 
                 if ($inv->sum('qty') < $s['s_qty']) {
-                    throw new \Exception('System does not have much inventory for the item ' . $s['item']);
+                    throw new \Exception('System does not have much inventory for the item ' . $s['name']);
                 }
 
                 $sale_qty = $s['s_qty'];

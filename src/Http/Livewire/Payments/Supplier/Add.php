@@ -19,18 +19,18 @@ class Add extends Component
 {
     use Searchable;
 
-    public $supplier_id;
-    public $supplier_name;
-    public $pay_from_name;
-    public $closing_balance;
-    public $pay_from;
-    public $payment_date;
-    public $description;
-    public $success;
-    public $purchase_orders = [];
-    public $selected_orders = [];
-    public $selected_returns = [];
-    public $returns = [];
+        public $supplier_id;
+        public $supplier_name;
+        public $pay_from_name;
+        public $closing_balance;
+        public $pay_from;
+        public $payment_date;
+        public $description;
+        public $success;
+        public $purchase_orders = [];
+        public $selected_orders = [];
+        public $selected_returns = [];
+        public $returns = [];
     protected $listeners = ['emitSupplierId'];
 
     protected $rules = [
