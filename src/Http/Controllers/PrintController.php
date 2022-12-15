@@ -32,8 +32,10 @@ class PrintController extends Controller
 
         if (config('app.env') == 'local') {
 
-            $this->localPrint($request, $id);
-            return view('pharmacy::print-close');
+//            $this->localPrint($request, $id);
+            $print = $this->localPrint($request, $id);
+//            return view('pharmacy::print-close');
+            return view('pharmacy::print-sale', compact('print'));
 
         } else {
             $print = $this->onlinePrint($request, $id);
@@ -129,7 +131,9 @@ class PrintController extends Controller
         $print['sale_by'] = str_pad("Sale By : " . $this->sale_by . ' @ ' . date('d M Y h:i A', strtotime($this->sale_at)), 64, " ");
 
 
-        $print['heading'] = str_pad("#", 3, " ") . str_pad("Item", 25, " ") . str_pad("Qty", 8, " ", STR_PAD_LEFT) . str_pad("Unit", 12, " ", STR_PAD_LEFT) . str_pad("Total", 16, " ", STR_PAD_LEFT);
+//        $print['heading'] = str_pad("#", 3, " ") . str_pad("Item", 25, " ") . str_pad("Qty", 8, " ", STR_PAD_LEFT) . str_pad("Unit", 12, " ", STR_PAD_LEFT) . str_pad("Total", 16, " ", STR_PAD_LEFT);
+        $print['heading'] = "<p>" . "<span style='display:inline-block; width: 5%;'>" . '#' . "</span>" . "<span style='display:inline-block; width: 40%; text-align: left'>" . 'Item' . "</span>" . "<span style='display:inline-block; width: 15%; text-align: center '>" . 'Qty' . "</span>" . " <span style='display:inline-block;width: 15%; text-align: center'>" . 'Unit' . "</span>" . " <span style='display:inline-block;width: 20%; text-align: right'>" . 'Total' . "</span></p>";
+
         $inner = "";
         foreach ($this->sales as $key => $s) {
             $product = preg_replace("/[^A-Za-z0-9\s]/", "", $s['product_name']);
@@ -139,7 +143,10 @@ class PrintController extends Controller
             $qty = str_pad($s['qty'], 8, " ", STR_PAD_LEFT);
             $retail = str_pad($s['retail_price'], 12, " ", STR_PAD_LEFT);
             $total = str_pad($s['total'], 16, " ", STR_PAD_LEFT);
-            $inner .= $sr . $item . $qty . $retail . $total;
+//            $inner .= $sr . $item . $qty . $retail . $total;
+
+            $inner .= "<p>" . "</span>" . "<span style='display:inline-block; width: 5%; text-align: center'>" . $sr . "</span>" . "<span style='display:inline-block; width: 40%; white-space: nowrap;  text-overflow: ellipsis !important; overflow: hidden;'>" . $item . "</span>" . "<span style='display:inline-block; width: 15%; text-align: center'>" . $qty . "</span>" . "<span style='display:inline-block; width: 18%; text-align: center'>" . $retail . "</span>" . " <span style='display:inline-block;width: 18%; text-align: right'>" . $total . "</span></p>";
+
         }
 
         foreach ($this->refunds as $key => $s) {
@@ -151,6 +158,9 @@ class PrintController extends Controller
             $retail = str_pad('-' . $s['retail_price'], 12, " ", STR_PAD_LEFT);
             $total = str_pad('-' . $s['refund_qty'] * $s['retail_price'], 16, " ", STR_PAD_LEFT);
             $inner .= $sr . $item . $qty . $retail . $total;
+
+            $inner .= "<p>" . "</span>" . "<span style='display:inline-block; width: 5%; text-align: center'>" . $sr . "</span>" . "<span style='display:inline-block; width: 40%; white-space: nowrap;  text-overflow: ellipsis !important; overflow: hidden;'>" . $item . "</span>" . "<span style='display:inline-block; width: 15%; text-align: center'>" . $qty . "</span>" . "<span style='display:inline-block; width: 18%; text-align: center'>" . $retail . "</span>" . " <span style='display:inline-block;width: 18%; text-align: right'>" . $total . "</span></p>";
+
         }
         //Round off
         $val = 0;
@@ -210,6 +220,12 @@ class PrintController extends Controller
         $cash_refund_text = "Cash";
 
 
+        $print['sub_total'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Sale Sub Total' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($this->first['sub_total'], 2) . "</span>";
+        $print['discount'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Discount (PKR)' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($this->first['sub_total'] - $this->first['gross_total'], 2) . "</span>";
+        $print['gross_total'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Sale after Discount' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($this->first['gross_total'] + $val, 2) . "</span>";
+        $print['refund'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Sale Returns' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . $add_bracket . "</span>";
+        $print['net_total'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Net Sales' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($net_sales, 2) . "</span>";
+
         if ($after_roundoff > 0) {
             $cash_refund_text = "(Refund)";
             $cash_refund = '(' . number_format(abs($after_roundoff), 2) . ')';
@@ -234,6 +250,7 @@ class PrintController extends Controller
         $print['change_returned'] = str_pad("Credit", 45, " ", STR_PAD_LEFT) .
             str_pad($credit, 19, " ", STR_PAD_LEFT);
 
+        return $print;
         $connector = new WindowsPrintConnector(config('app.printer_model'));
 //        $connector = new WindowsPrintConnector('POS-80C1');
         $printer = new Printer($connector);
