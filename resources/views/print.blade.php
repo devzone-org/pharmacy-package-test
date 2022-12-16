@@ -147,7 +147,7 @@
                     // Set Printer info
                     //     var myPrinter = new JSPM.InstalledPrinter('devzone-printer');
                     // cpj.clientPrinter =myPrinter;// new JSPM.DefaultPrinter();
-                    cpj.clientPrinter = new JSPM.InstalledPrinter('POS-80C1');
+                    cpj.clientPrinter = new JSPM.InstalledPrinter('devzone-printer');
                     // Set the ESC/POS commands
                     cpj.binaryPrinterCommands = escposCommands;
 
