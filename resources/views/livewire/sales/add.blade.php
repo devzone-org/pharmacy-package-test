@@ -939,12 +939,12 @@
             }, 100);
         });
     });
-    Livewire.on('printInvoice', (saleId, admissionId, procedureId) => {
-        window.open('{{ url('pharmacy/print/sale')}}' + '/' + saleId, 'receipt-print', 'height=150,width=400');
-        if (admissionId != null && procedureId != null) {
-            window.location = '{{url('pharmacy/sales/view')}}' + '/' + saleId + '?admission_id=' + admissionId + '&procedure_id=' + procedureId;
-        }
-    });
+        Livewire.on('printInvoice', (saleId, admissionId, procedureId) => {
+            window.open('{{ url('pharmacy/print/sale')}}' + '/' + saleId, 'receipt-print', 'height=150,width=400');
+            if (admissionId != null && procedureId != null) {
+                window.location = '{{url('pharmacy/sales/view')}}' + '/' + saleId + '?admission_id=' + admissionId + '&procedure_id=' + procedureId;
+            }
+        });
 
     document.addEventListener("keydown", event => {
         if (event.keyCode == 112) {

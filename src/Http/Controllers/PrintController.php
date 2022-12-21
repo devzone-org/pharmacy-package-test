@@ -30,8 +30,7 @@ class PrintController extends Controller
     public function print(Request $request, $id)
     {
 
-        if (config('app.env') == 'local') {
-
+        if (!empty(env('PRINT_LOCAL'))) {
 //            $this->localPrint($request, $id);
             $print = $this->localPrint($request, $id);
 //            return view('pharmacy::print-close');
