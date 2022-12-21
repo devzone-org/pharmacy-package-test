@@ -223,7 +223,7 @@ class PrintController extends Controller
         $print['discount'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Discount (PKR)' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($this->first['sub_total'] - $this->first['gross_total'], 2) . "</span>";
         $print['gross_total'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Sale after Discount' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($this->first['gross_total'] + $val, 2) . "</span>";
         $print['refund'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Sale Returns' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . $add_bracket . "</span>";
-        $print['net_total'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Net Sales' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($net_sales, 2) . "</span>";
+        $print['net_total'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Net Sales' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . $net_sales . "</span>";
 
         if ($after_roundoff > 0) {
             $cash_refund_text = "(Refund)";
