@@ -59,7 +59,7 @@
 
     </style>
 </head>
-<body onload="">
+<body onload="window.print()">
 <div class="center">
     <h2 style="text-align: center">{{$print['app_name']}}</h2>
     <h5 style="text-align: center">{{$print['address_1']}}</h5>
@@ -69,42 +69,6 @@
     @endif
     <h5 style="text-align: center">{{$print['invoice_no']}}</h5>
     <h5 style="text-align: center">{{$print['reprint']}}</h5>
-    {{--    <table>--}}
-    {{--        <tr>--}}
-    {{--            <td>{{$print['admission_no']}}</td>--}}
-    {{--        </tr>--}}
-    {{--        <tr>--}}
-    {{--            <td>{{$print['patient_name']}}</td>--}}
-    {{--        </tr>--}}
-    {{--        <tr>--}}
-    {{--            <td>{{$print['mr_no']}}</td>--}}
-    {{--        </tr>--}}
-    {{--        <tr>--}}
-    {{--            <td>{{$print['installment_no']}}</td>--}}
-    {{--        </tr>--}}
-    {{--        <tr>--}}
-    {{--            <td>{{$print['received_amount']}}</td>--}}
-    {{--        </tr>--}}
-    {{--        <th>--}}
-    {{--            {{$print['amount']}}--}}
-    {{--        </th>--}}
-    {{--        <tr>--}}
-    {{--            <td>{{$print['paid_by']}}</td>--}}
-    {{--        </tr>--}}
-    {{--        <tr>--}}
-    {{--            <td>{{$print['received_by']}}</td>--}}
-    {{--        </tr>--}}
-    {{--        <tr>--}}
-    {{--            <td>{{$print['received_at']}}</td>--}}
-    {{--        </tr>--}}
-    {{--        <tr>--}}
-    {{--            <td>{{$print['printed_by']}}</td>--}}
-    {{--        </tr>--}}
-    {{--        <tr>--}}
-    {{--            <td>{{$print['printed_at']}}</td>--}}
-    {{--        </tr>--}}
-    {{--    </table>--}}
-
 
     <p>{{$print['patient_name']}}</p>
 
@@ -134,8 +98,5 @@
     <p style="margin: 7px;"> {{$print['developer']}}  {{$print['developer_phone']}}</p>
 </div>
 </body>
-{{--<script type='text/javascript'>--}}
-{{--    self.close()--}}
-{{--</script>--}}
 </html>
 
