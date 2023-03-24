@@ -743,7 +743,7 @@ class Add extends Component
                 'referred_by' => $this->referred_by_id,
                 'sale_by' => !empty($this->pending_sale_id) ? $this->sales[0]['sale_by'] : Auth::id(),
                 'sale_at' => date('Y-m-d H:i:s'),
-                'remarks' => $this->remarks,
+                'remarks' => trim($this->remarks, ' '),
                 'receive_amount' => $this->received,
                 'payable_amount' => !empty($this->credit) ? 0 : $this->payable,
                 'rounded_inc' => $this->rounded > 0 ? abs($this->rounded) : null,
