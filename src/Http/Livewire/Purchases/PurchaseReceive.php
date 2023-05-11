@@ -328,7 +328,7 @@ class PurchaseReceive extends Component
     {
 
         $this->validate();
-        $lock = Cache::lock('purchase.receive.' . $this->purchase_id, 60);
+        $lock = Cache::lock('purchase.receive.' . $this->purchase_id, 30);
         try {
             if ($lock->get()) {
                 DB::beginTransaction();
