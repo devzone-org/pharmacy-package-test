@@ -17,6 +17,7 @@ use Devzone\Pharmacy\Models\PurchaseOrder;
 use Devzone\Pharmacy\Models\Supplier;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -327,182 +328,186 @@ class PurchaseReceive extends Component
     {
 
         $this->validate();
+        $lock = Cache::lock('purchase.receive.' . $this->purchase_id, 60);
         try {
-            DB::beginTransaction();
-            $po = Purchase::find($this->purchase_id);
+            if ($lock->get()) {
+                DB::beginTransaction();
+                $po = Purchase::find($this->purchase_id);
 
-            if (empty($po['approved_at'])) {
-                throw new Exception('Purchase order is not approved.');
-            }
-
-            if ($po['status'] == 'Void') {
-                throw new Exception('Purchase order already voided.');
-            }
-
-
-            $purchase_receipt_no = Voucher::instance()->advances()->get();
-            Purchase::where('id', $this->purchase_id)->whereNotNull('approved_at')->where('status', 'awaiting-delivery')->update([
-                'supplier_id' => $this->supplier_id,
-                'supplier_invoice' => $this->supplier_invoice,
-                'delivery_date' => $this->formatDate($this->delivery_date),
-                'status' => 'receiving',
-                'grn_no' => $this->grn_no,
-                'advance_tax' => $this->advance_tax,
-                'receipt_no' => $purchase_receipt_no,
-                'is_loose' => $this->loose_purchase
-            ]);
-
-
-            foreach ($this->order_list as $o) {
-                $qty = null;
-                $cop = null;
-                $r_price = null;
-                $bonus = null;
-                if ($this->loose_purchase == 't') {
-                    $qty = $o['qty'];
-                    $cop = $o['cost_of_price'];
-                    $dcop = $o['after_disc_cost'];
-                    $r_price = $o['retail_price'];
-                    $bonus = $o['bonus'];
-                } else {
-                    $qty = $o['qty'] * $o['packing'];
-                    $cop = $o['cost_of_price'] / $o['packing'];
-                    $dcop = $o['after_disc_cost'] / $o['packing'];
-                    $r_price = $o['retail_price'] / $o['packing'];
-                    $bonus = $o['bonus'] * $o['packing'];
+                if (empty($po['approved_at'])) {
+                    throw new Exception('Purchase order is not approved.');
                 }
+
+                if ($po['status'] == 'Void') {
+                    throw new Exception('Purchase order already voided.');
+                }
+
+
+                $purchase_receipt_no = Voucher::instance()->advances()->get();
+                Purchase::where('id', $this->purchase_id)->whereNotNull('approved_at')->where('status', 'awaiting-delivery')->update([
+                    'supplier_id' => $this->supplier_id,
+                    'supplier_invoice' => $this->supplier_invoice,
+                    'delivery_date' => $this->formatDate($this->delivery_date),
+                    'status' => 'receiving',
+                    'grn_no' => $this->grn_no,
+                    'advance_tax' => $this->advance_tax,
+                    'receipt_no' => $purchase_receipt_no,
+                    'is_loose' => $this->loose_purchase
+                ]);
+
+
+                foreach ($this->order_list as $o) {
+                    $qty = null;
+                    $cop = null;
+                    $r_price = null;
+                    $bonus = null;
+                    if ($this->loose_purchase == 't') {
+                        $qty = $o['qty'];
+                        $cop = $o['cost_of_price'];
+                        $dcop = $o['after_disc_cost'];
+                        $r_price = $o['retail_price'];
+                        $bonus = $o['bonus'];
+                    } else {
+                        $qty = $o['qty'] * $o['packing'];
+                        $cop = $o['cost_of_price'] / $o['packing'];
+                        $dcop = $o['after_disc_cost'] / $o['packing'];
+                        $r_price = $o['retail_price'] / $o['packing'];
+                        $bonus = $o['bonus'] * $o['packing'];
+                    }
 
 //                dd($o);
-                \Devzone\Pharmacy\Models\PurchaseReceive::create([
-                    'purchase_id' => $this->purchase_id,
-                    'product_id' => $o['id'],
-                    'qty' => $qty,
-                    'bonus' => $bonus ?? 0,
-                    'discount' => $o['disc'] ?? 0,
-                    'cost_of_price' => $cop,
-                    'after_disc_cost' => $dcop,
-                    'retail_price' => $r_price,
-                    'total_cost' => $dcop * $qty,
-                    'batch_no' => $o['batch_no'] ?? null,
-                    'expiry' => $this->formatExpiryDate($o['expiry']) ?? null,
-                ]);
-
-                if ($this->loose_purchase == 'f') {
-                    Product::find($o['id'])->update([
-                        'cost_of_price' => $o['cost_of_price'],
-                        'retail_price' => $o['retail_price'],
+                    \Devzone\Pharmacy\Models\PurchaseReceive::create([
+                        'purchase_id' => $this->purchase_id,
+                        'product_id' => $o['id'],
+                        'qty' => $qty,
+                        'bonus' => $bonus ?? 0,
+                        'discount' => $o['disc'] ?? 0,
+                        'cost_of_price' => $cop,
+                        'after_disc_cost' => $dcop,
+                        'retail_price' => $r_price,
+                        'total_cost' => $dcop * $qty,
+                        'batch_no' => $o['batch_no'] ?? null,
+                        'expiry' => $this->formatExpiryDate($o['expiry']) ?? null,
                     ]);
-                }
-            }
 
-            $is_auto_approve = true;
-            $purchase_order = PurchaseOrder::where('purchase_id', $this->purchase_id)->get();
-            foreach ($purchase_order as $p) {
-                $auto_approve = \Devzone\Pharmacy\Models\PurchaseReceive::where('purchase_id', $this->purchase_id)
-                    ->where('product_id', $p->product_id)
-                    ->where('qty', $p->qty)
-                    ->where('cost_of_price', $p->cost_of_price)
-                    ->where('retail_price', $p->retail_price)
-                    ->where('total_cost', $p->total_cost)
-                    ->exists();
-
-                if ($auto_approve == false) {
-                    $is_auto_approve = false;
-                }
-            }
-
-            if ($is_auto_approve) {
-                $receive = \Devzone\Pharmacy\Models\PurchaseReceive::from('purchase_receives as po')
-                    ->join('products as p', 'p.id', '=', 'po.product_id')
-                    ->where('po.purchase_id', $this->purchase_id)
-                    ->select('po.*', 'p.name', 'p.salt', 'p.packing')
-                    ->get();
-
-                if (Purchase::where('status', 'received')->where('id', $this->purchase_id)->exists()) {
-                    throw new \Exception("Already receive order.");
-                }
-                if (empty($this->delivery_date)) {
-                    throw new \Exception("Delivery date not updated.");
+                    if ($this->loose_purchase == 'f') {
+                        Product::find($o['id'])->update([
+                            'cost_of_price' => $o['cost_of_price'],
+                            'retail_price' => $o['retail_price'],
+                        ]);
+                    }
                 }
 
-                $inventory = ChartOfAccount::where('reference', 'pharmacy-inventory-5')->first();
-                if (empty($inventory)) {
-                    throw new \Exception('Inventory account not found in chart of accounts.');
-                }
-                $get_purchase = Purchase::where('id', $this->purchase_id)->first();
-                $supplier = Supplier::find($this->supplier_id);
-                $amount = $receive->sum('total_cost');
-                $grn_no = empty($get_purchase->grn_no) ? '-' : $get_purchase->grn_no;
-                $description = "RECEIVED INVENTORY amounting total PKR " . number_format($amount, 2) . "/- + Recoverable Advance Tax u/s 236(h)(" . $get_purchase->advance_tax . "%) amount PKR " .
-                    number_format($this->advance_tax_amount, 2) . "/- = Net Payable to supplier '" . $supplier['name'] . "' PKR " . number_format($amount + $this->advance_tax_amount, 2) .
-                    "/- against PO # " . $this->purchase_id . " & invoice # INV-" . $purchase_receipt_no . " & GRN # " . $grn_no . " received by " . Auth::user()->name . " on dated " . date('d M, Y h:i A');
+                $is_auto_approve = true;
+                $purchase_order = PurchaseOrder::where('purchase_id', $this->purchase_id)->get();
+                foreach ($purchase_order as $p) {
+                    $auto_approve = \Devzone\Pharmacy\Models\PurchaseReceive::where('purchase_id', $this->purchase_id)
+                        ->where('product_id', $p->product_id)
+                        ->where('qty', $p->qty)
+                        ->where('cost_of_price', $p->cost_of_price)
+                        ->where('retail_price', $p->retail_price)
+                        ->where('total_cost', $p->total_cost)
+                        ->exists();
 
-                $tax = ChartOfAccount::where('reference', 'advance-tax-236')->first();
-                if (empty($tax)) {
-                    throw new \Exception('Advance tax account not found in chart of accounts.');
+                    if ($auto_approve == false) {
+                        $is_auto_approve = false;
+                    }
                 }
-                $vno = Voucher::instance()->voucher()->get();
-                GeneralJournal::instance()->account($inventory['id'])->debit($amount)->voucherNo($vno)
-                    ->date($this->formatDate($this->delivery_date))->approve()->description($description)->execute();
-                GeneralJournal::instance()->account($tax['id'])->debit($this->advance_tax_amount)->voucherNo($vno)
-                    ->date($this->formatDate($this->delivery_date))->approve()->description($description)->execute();
-                GeneralJournal::instance()->account($supplier['account_id'])->credit($amount + $this->advance_tax_amount)->voucherNo($vno)
-                    ->date($this->formatDate($this->delivery_date))->approve()->description($description)->execute();
+
+                if ($is_auto_approve) {
+                    $receive = \Devzone\Pharmacy\Models\PurchaseReceive::from('purchase_receives as po')
+                        ->join('products as p', 'p.id', '=', 'po.product_id')
+                        ->where('po.purchase_id', $this->purchase_id)
+                        ->select('po.*', 'p.name', 'p.salt', 'p.packing')
+                        ->get();
+
+                    if (Purchase::where('status', 'received')->where('id', $this->purchase_id)->exists()) {
+                        throw new \Exception("Already receive order.");
+                    }
+                    if (empty($this->delivery_date)) {
+                        throw new \Exception("Delivery date not updated.");
+                    }
+
+                    $inventory = ChartOfAccount::where('reference', 'pharmacy-inventory-5')->first();
+                    if (empty($inventory)) {
+                        throw new \Exception('Inventory account not found in chart of accounts.');
+                    }
+                    $get_purchase = Purchase::where('id', $this->purchase_id)->first();
+                    $supplier = Supplier::find($this->supplier_id);
+                    $amount = $receive->sum('total_cost');
+                    $grn_no = empty($get_purchase->grn_no) ? '-' : $get_purchase->grn_no;
+                    $description = "RECEIVED INVENTORY amounting total PKR " . number_format($amount, 2) . "/- + Recoverable Advance Tax u/s 236(h)(" . $get_purchase->advance_tax . "%) amount PKR " .
+                        number_format($this->advance_tax_amount, 2) . "/- = Net Payable to supplier '" . $supplier['name'] . "' PKR " . number_format($amount + $this->advance_tax_amount, 2) .
+                        "/- against PO # " . $this->purchase_id . " & invoice # INV-" . $purchase_receipt_no . " & GRN # " . $grn_no . " received by " . Auth::user()->name . " on dated " . date('d M, Y h:i A');
+
+                    $tax = ChartOfAccount::where('reference', 'advance-tax-236')->first();
+                    if (empty($tax)) {
+                        throw new \Exception('Advance tax account not found in chart of accounts.');
+                    }
+                    $vno = Voucher::instance()->voucher()->get();
+                    GeneralJournal::instance()->account($inventory['id'])->debit($amount)->voucherNo($vno)
+                        ->date($this->formatDate($this->delivery_date))->approve()->description($description)->execute();
+                    GeneralJournal::instance()->account($tax['id'])->debit($this->advance_tax_amount)->voucherNo($vno)
+                        ->date($this->formatDate($this->delivery_date))->approve()->description($description)->execute();
+                    GeneralJournal::instance()->account($supplier['account_id'])->credit($amount + $this->advance_tax_amount)->voucherNo($vno)
+                        ->date($this->formatDate($this->delivery_date))->approve()->description($description)->execute();
 
 
-                $id = Purchase::where('status', 'receiving')->where('id', $this->purchase_id)->update([
-                    'is_paid' => 'f',
-                    'status' => 'received'
-                ]);
-                if (empty($id)) {
-                    throw new Exception('Something went wrong please try again.');
-                }
-                foreach ($receive as $r) {
-                    ProductInventory::create([
-                        'product_id' => $r->product_id,
-                        'qty' => $r->qty,
-                        'retail_price' => $r->retail_price,
-                        'supply_price' => $r->after_disc_cost,
-                        'expiry' => !empty($r->expiry) ? $r->expiry : null,
-                        'batch_no' => !empty($r->batch_no) ? $r->batch_no : null,
-                        'po_id' => $this->purchase_id,
-                        'type' => 'regular'
+                    $id = Purchase::where('status', 'receiving')->where('id', $this->purchase_id)->update([
+                        'is_paid' => 'f',
+                        'status' => 'received'
                     ]);
-                    InventoryLedger::create([
-                        'product_id' => $r->product_id,
-                        'order_id' => $this->purchase_id,
-                        'increase' => $r->qty,
-                        'type' => 'purchase',
-                        'description' => $description
-                    ]);
-                    if ($r->bonus > 0) {
+                    if (empty($id)) {
+                        throw new Exception('Something went wrong please try again.');
+                    }
+                    foreach ($receive as $r) {
                         ProductInventory::create([
                             'product_id' => $r->product_id,
-                            'qty' => $r->bonus,
+                            'qty' => $r->qty,
                             'retail_price' => $r->retail_price,
-                            'supply_price' => 0,
-                            'po_id' => $this->purchase_id,
-                            'type' => 'bonus',
+                            'supply_price' => $r->after_disc_cost,
                             'expiry' => !empty($r->expiry) ? $r->expiry : null,
                             'batch_no' => !empty($r->batch_no) ? $r->batch_no : null,
+                            'po_id' => $this->purchase_id,
+                            'type' => 'regular'
                         ]);
                         InventoryLedger::create([
                             'product_id' => $r->product_id,
                             'order_id' => $this->purchase_id,
-                            'increase' => $r->bonus,
-                            'type' => 'purchase-bonus',
-                            'description' => '[BONUS] ' . $description
+                            'increase' => $r->qty,
+                            'type' => 'purchase',
+                            'description' => $description
                         ]);
+                        if ($r->bonus > 0) {
+                            ProductInventory::create([
+                                'product_id' => $r->product_id,
+                                'qty' => $r->bonus,
+                                'retail_price' => $r->retail_price,
+                                'supply_price' => 0,
+                                'po_id' => $this->purchase_id,
+                                'type' => 'bonus',
+                                'expiry' => !empty($r->expiry) ? $r->expiry : null,
+                                'batch_no' => !empty($r->batch_no) ? $r->batch_no : null,
+                            ]);
+                            InventoryLedger::create([
+                                'product_id' => $r->product_id,
+                                'order_id' => $this->purchase_id,
+                                'increase' => $r->bonus,
+                                'type' => 'purchase-bonus',
+                                'description' => '[BONUS] ' . $description
+                            ]);
+                        }
                     }
                 }
+
+                DB::commit();
+                return redirect()->to('pharmacy/purchases/compare/' . $this->purchase_id);
             }
-
-            DB::commit();
-            return redirect()->to('pharmacy/purchases/compare/' . $this->purchase_id);
-
+            optional($lock)->release();
         } catch (\Exception $e) {
             $this->addError('supplier_name', $e->getMessage());
             DB::rollBack();
+            optional($lock)->release();
         }
     }
 }

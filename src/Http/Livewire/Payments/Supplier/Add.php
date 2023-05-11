@@ -12,6 +12,7 @@ use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\Refunds\SupplierRefund;
 use Devzone\Pharmacy\Models\Supplier;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -19,18 +20,18 @@ class Add extends Component
 {
     use Searchable;
 
-        public $supplier_id;
-        public $supplier_name;
-        public $pay_from_name;
-        public $closing_balance;
-        public $pay_from;
-        public $payment_date;
-        public $description;
-        public $success;
-        public $purchase_orders = [];
-        public $selected_orders = [];
-        public $selected_returns = [];
-        public $returns = [];
+    public $supplier_id;
+    public $supplier_name;
+    public $pay_from_name;
+    public $closing_balance;
+    public $pay_from;
+    public $payment_date;
+    public $description;
+    public $success;
+    public $purchase_orders = [];
+    public $selected_orders = [];
+    public $selected_returns = [];
+    public $returns = [];
     protected $listeners = ['emitSupplierId'];
 
     protected $rules = [
@@ -51,7 +52,6 @@ class Add extends Component
     }
 
 
-
     public function render()
     {
 
@@ -61,41 +61,46 @@ class Add extends Component
     public function create()
     {
         $this->validate();
+        $lock = Cache::lock('supplier.payments.add', 30);
         if (!empty($this->selected_orders) || !empty($this->selected_returns)) {
             try {
+                if ($lock->get()) {
 
-                DB::beginTransaction();
-                if (empty(Auth::user()->account_id)) {
-                    throw new \Exception('Cash in Hand - ' . Auth::user()->name . ' account not found.');
-                }
+                    DB::beginTransaction();
+                    if (empty(Auth::user()->account_id)) {
+                        throw new \Exception('Cash in Hand - ' . Auth::user()->name . ' account not found.');
+                    }
 //                $supplier_receipt_no=Voucher::instance()->advances()->get();
-                $id = SupplierPayment::create([
-                    'supplier_id' => $this->supplier_id,
-                    'description' => $this->description,
-                    'pay_from' => Auth::user()->account_id,
-                    'payment_date' => $this->formatDate($this->payment_date),
-                    'added_by' => Auth::user()->id,
-                ])->id;
+                    $id = SupplierPayment::create([
+                        'supplier_id' => $this->supplier_id,
+                        'description' => $this->description,
+                        'pay_from' => Auth::user()->account_id,
+                        'payment_date' => $this->formatDate($this->payment_date),
+                        'added_by' => Auth::user()->id,
+                    ])->id;
 
-                foreach ($this->selected_orders as $o) {
-                    SupplierPaymentDetail::create([
-                        'supplier_payment_id' => $id,
-                        'order_id' => $o
-                    ]);
-                }
-                foreach ($this->selected_returns as $o) {
-                    SupplierPaymentRefundDetail::create([
-                        'supplier_payment_id' => $id,
-                        'refund_id' => $o
-                    ]);
-                }
-                DB::commit();
-                $this->success = 'Record has been added and need for approval.';
-                $this->reset(['supplier_id', 'selected_returns', 'supplier_name', 'purchase_orders', 'selected_orders', 'returns', 'description', 'pay_from', 'pay_from_name']);
+                    foreach ($this->selected_orders as $o) {
+                        SupplierPaymentDetail::create([
+                            'supplier_payment_id' => $id,
+                            'order_id' => $o
+                        ]);
+                    }
+                    foreach ($this->selected_returns as $o) {
+                        SupplierPaymentRefundDetail::create([
+                            'supplier_payment_id' => $id,
+                            'refund_id' => $o
+                        ]);
+                    }
+                    DB::commit();
+                    $this->success = 'Record has been added and need for approval.';
+                    $this->reset(['supplier_id', 'selected_returns', 'supplier_name', 'purchase_orders', 'selected_orders', 'returns', 'description', 'pay_from', 'pay_from_name']);
 
+                }
+                optional($lock)->release();
             } catch (\Exception $e) {
                 $this->addError('purchase_orders', $e->getMessage());
                 DB::rollBack();
+                optional($lock)->release();
             }
         } else {
             $this->addError('purchase_orders', 'You have to select at least one order.');
@@ -125,8 +130,8 @@ class Add extends Component
         } else {
 
             foreach ($result->toArray() as $r) {
-                $tax_amount=0;
-                if(!empty($r['advance_tax'])){
+                $tax_amount = 0;
+                if (!empty($r['advance_tax'])) {
                     $tax_amount = $r['total_cost'] * ($r['advance_tax'] / 100);
                 }
                 $r['tax_amount'] = $tax_amount;

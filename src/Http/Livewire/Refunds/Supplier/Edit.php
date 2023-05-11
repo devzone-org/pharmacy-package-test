@@ -10,6 +10,7 @@ use Devzone\Pharmacy\Models\ProductInventory;
 use Devzone\Pharmacy\Models\Refunds\SupplierRefund;
 use Devzone\Pharmacy\Models\Refunds\SupplierRefundDetail;
 use Devzone\Pharmacy\Models\Supplier;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -60,23 +61,25 @@ class Edit extends Component
             if (!empty($return)) {
                 $this->purchase_orders[$key]['return'] = $return['qty'];
                 $this->purchase_orders[$key]['id'] = $return['id'];
-                $this->purchase_orders[$key]['total_return'] = $return['qty'] *  $po['supply_price'];
+                $this->purchase_orders[$key]['total_return'] = $return['qty'] * $po['supply_price'];
             }
         }
 
 
     }
+
     public function updated($name, $value)
     {
         $array = explode(".", $name);
         if ($array[0] == 'purchase_orders') {
-            if(empty($value)){
+            if (empty($value)) {
                 $this->purchase_orders[$array[1]]['return'] = 0;
             }
             $this->purchase_orders[$array[1]]['total_return'] = round($this->purchase_orders[$array[1]]['return'] * $this->purchase_orders[$array[1]]['supply_price'], 2);
 
         }
     }
+
     public function emitSupplierId()
     {
         $supplier = Supplier::from('suppliers as s')
@@ -112,50 +115,52 @@ class Edit extends Component
     public function create()
     {
         $return = (collect($this->purchase_orders)->where('return', '>', 0))->toArray();
-
+        $lock = Cache::lock('supplier.refund.edit.' . $this->primary_id, 30);
         $this->validate();
         try {
-            DB::beginTransaction();
-            if (empty($return)) {
-                throw new \Exception('No product found for refund.');
-            }
-            if (SupplierRefund::whereNotNull('approved_by')->where('id', $this->primary_id)->exists()) {
-                throw new \Exception('You cannot edit this record because record already has been approved.');
-            }
-
-            $total_amount = 0;
-            foreach ($return as $o) {
-                $total_amount = $total_amount + ($o['supply_price'] * $o['return']);
-            }
-
-
-            SupplierRefund::where('id', $this->primary_id)->update([
-                'supplier_id' => $this->supplier_id,
-                'description' => $this->description,
-                'total_amount' => $total_amount
-            ]);
-            SupplierRefundDetail::where('supplier_refund_id', $this->primary_id)->delete();
-            foreach ($return as $o) {
-                $check = ProductInventory::find($o['product_inventory_id']);
-                if($o['return']>$check['qty']){
-                    throw new \Exception('You cannot refund more than available qty.');
+            if ($lock->get()) {
+                DB::beginTransaction();
+                if (empty($return)) {
+                    throw new \Exception('No product found for refund.');
                 }
-                SupplierRefundDetail::create([
-                    'supplier_refund_id' => $this->primary_id,
-                    'product_id' => $o['product_id'],
-                    'po_id' => $o['po_id'],
-                    'qty' => $o['return'],
-                    'supply_price' => $o['supply_price'],
-                    'product_inventory_id' => $o['product_inventory_id']
+                if (SupplierRefund::whereNotNull('approved_by')->where('id', $this->primary_id)->exists()) {
+                    throw new \Exception('You cannot edit this record because record already has been approved.');
+                }
+
+                $total_amount = 0;
+                foreach ($return as $o) {
+                    $total_amount = $total_amount + ($o['supply_price'] * $o['return']);
+                }
+
+
+                SupplierRefund::where('id', $this->primary_id)->update([
+                    'supplier_id' => $this->supplier_id,
+                    'description' => $this->description,
+                    'total_amount' => $total_amount
                 ]);
+                SupplierRefundDetail::where('supplier_refund_id', $this->primary_id)->delete();
+                foreach ($return as $o) {
+                    $check = ProductInventory::find($o['product_inventory_id']);
+                    if ($o['return'] > $check['qty']) {
+                        throw new \Exception('You cannot refund more than available qty.');
+                    }
+                    SupplierRefundDetail::create([
+                        'supplier_refund_id' => $this->primary_id,
+                        'product_id' => $o['product_id'],
+                        'po_id' => $o['po_id'],
+                        'qty' => $o['return'],
+                        'supply_price' => $o['supply_price'],
+                        'product_inventory_id' => $o['product_inventory_id']
+                    ]);
+                }
+                DB::commit();
+                $this->success = 'Record has been edited.';
             }
-            DB::commit();
-            $this->success = 'Record has been edited.';
-
-
+            optional($lock)->release();
         } catch (\Exception $e) {
             $this->addError('purchase_orders', $e->getMessage());
             DB::rollBack();
+            optional($lock)->release();
         }
 
     }

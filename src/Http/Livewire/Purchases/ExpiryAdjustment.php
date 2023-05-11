@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\ExpiryAdjustmentLog;
 use Devzone\Pharmacy\Models\ProductInventory;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -92,46 +93,51 @@ class ExpiryAdjustment extends Component
 
     public function confirm()
     {
+        $lock = Cache::lock('expiry.adjustment.add', 30);
         try {
-            DB::beginTransaction();
-            $description = "";
-            $this->error = "";
+            if ($lock->get()) {
+                DB::beginTransaction();
+                $description = "";
+                $this->error = "";
 
-            if (empty($this->remarks)) {
-                $this->error = "Remarks are required.";
-                throw new \Exception();
-            }
-
-            foreach ($this->adjustments as $a) {
-
-                $inventory = ProductInventory::find($a['id']);
-
-                if (empty($inventory)) {
-                    throw new \Exception($a['item'] . ' inventory record for PO# ' . $a['po_id'] . ' not found.');
-                } else {
-                    $log = ExpiryAdjustmentLog::create([
-                        'product_inventory_id' => $a['id'],
-                        'old_expiry' => $a['expiry'],
-                        'new_expiry' => $this->formatDate($a['new_expiry']),
-                        'created_by' => auth()->id(),
-                        'remarks' => $this->remarks
-                    ]);
-
-                    $inventory = $inventory->update([
-                        'expiry' => $this->formatDate($a['new_expiry'])
-                    ]);
-
+                if (empty($this->remarks)) {
+                    $this->error = "Remarks are required.";
+                    throw new \Exception();
                 }
+
+                foreach ($this->adjustments as $a) {
+
+                    $inventory = ProductInventory::find($a['id']);
+
+                    if (empty($inventory)) {
+                        throw new \Exception($a['item'] . ' inventory record for PO# ' . $a['po_id'] . ' not found.');
+                    } else {
+                        $log = ExpiryAdjustmentLog::create([
+                            'product_inventory_id' => $a['id'],
+                            'old_expiry' => $a['expiry'],
+                            'new_expiry' => $this->formatDate($a['new_expiry']),
+                            'created_by' => auth()->id(),
+                            'remarks' => $this->remarks
+                        ]);
+
+                        $inventory = $inventory->update([
+                            'expiry' => $this->formatDate($a['new_expiry'])
+                        ]);
+
+                    }
+                }
+
+
+                $this->reset(['adjustments', 'error', 'show_model', 'remarks']);
+                DB::commit();
             }
-
-
-            $this->reset(['adjustments', 'error', 'show_model', 'remarks']);
-            DB::commit();
+            optional($lock)->release();
         } catch (\Exception $e) {
             DB::rollBack();
             if (!empty($e->getMessage())) {
                 $this->addError('exception', $e->getMessage());
             }
+            optional($lock)->release();
         }
     }
 }

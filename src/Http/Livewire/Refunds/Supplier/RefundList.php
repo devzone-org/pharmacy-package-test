@@ -12,6 +12,7 @@ use Devzone\Pharmacy\Models\Refunds\SupplierRefund;
 use Devzone\Pharmacy\Models\Refunds\SupplierRefundDetail;
 use Devzone\Pharmacy\Models\Supplier;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -55,7 +56,7 @@ class RefundList extends Component
 
             })
             ->select('s.name as supplier_name', 'sr.id', 'sr.description',
-                'sr.created_at', 'c.name as created_by','sr.is_receive',
+                'sr.created_at', 'c.name as created_by', 'sr.is_receive',
                 'a.name as approved_by', 'sr.approved_at', 'sr.total_amount as total_cost')
             ->groupBy('srd.supplier_refund_id')
             ->orderBy('sr.id', 'desc')
@@ -64,70 +65,72 @@ class RefundList extends Component
     }
 
 
-
-
     public function confirm($id)
     {
         //TODO this is refund case pending
+        $lock = Cache::lock('supplier.refund.' . $id, 30);
         try {
-            DB::beginTransaction();
-            $supplier_refund = SupplierRefund::findOrFail($id);
+            if ($lock->get()) {
+                DB::beginTransaction();
+                $supplier_refund = SupplierRefund::findOrFail($id);
 
-            if (!empty($supplier_refund->approved_at)) {
-                throw new \Exception('Payment already refunded.');
-            }
-            if(!auth()->user()->can('12.approve-supplier-returns')){
-                throw new \Exception(env('PERMISSION_ERROR','Access Denied'));
-            }
-            $supplier = Supplier::find($supplier_refund['supplier_id']);
+                if (!empty($supplier_refund->approved_at)) {
+                    throw new \Exception('Payment already refunded.');
+                }
+                if (!auth()->user()->can('12.approve-supplier-returns')) {
+                    throw new \Exception(env('PERMISSION_ERROR', 'Access Denied'));
+                }
+                $supplier = Supplier::find($supplier_refund['supplier_id']);
 
-            $refund_details = SupplierRefundDetail::from('supplier_refund_details as srd')
-                ->join('product_inventories as pi', 'pi.id', '=', 'srd.product_inventory_id')
-                ->where('supplier_refund_id',$id)
-                ->select('pi.id', 'srd.qty as return','srd.po_id', 'pi.qty', 'pi.supply_price')
-                ->get();
-            $orders = array_unique($refund_details->pluck('po_id')->toArray());
-            foreach ($refund_details as $rd) {
-                if ($rd->return > $rd->qty) {
-                    throw new \Exception('Unable to refund because system does not have much inventory.');
+                $refund_details = SupplierRefundDetail::from('supplier_refund_details as srd')
+                    ->join('product_inventories as pi', 'pi.id', '=', 'srd.product_inventory_id')
+                    ->where('supplier_refund_id', $id)
+                    ->select('pi.id', 'srd.qty as return', 'srd.po_id', 'pi.qty', 'pi.supply_price')
+                    ->get();
+                $orders = array_unique($refund_details->pluck('po_id')->toArray());
+                foreach ($refund_details as $rd) {
+                    if ($rd->return > $rd->qty) {
+                        throw new \Exception('Unable to refund because system does not have much inventory.');
+                    }
+
+                    $product_inv = ProductInventory::find($rd->id);
+                    $product_inv->decrement('qty', $rd->return);
+                    InventoryLedger::create([
+                        'product_id' => $product_inv->product_id,
+                        'order_id' => $product_inv->po_id,
+                        'decrease' => $rd->return,
+                        'type' => 'purchase-refund',
+                        'description' => "Refunded on dated " . date('d M, Y H:i:s') .
+                            " against PO # " . $product_inv->po_id . " to supplier " . $supplier['name']
+                    ]);
                 }
 
-                $product_inv = ProductInventory::find($rd->id);
-                $product_inv->decrement('qty',$rd->return);
-                InventoryLedger::create([
-                    'product_id' => $product_inv->product_id,
-                    'order_id' => $product_inv->po_id,
-                    'decrease' => $rd->return,
-                    'type'=>'purchase-refund',
-                    'description' => "Refunded on dated " . date('d M, Y H:i:s') .
-                " against PO # " . $product_inv->po_id. " to supplier " . $supplier['name']
+                $supplier_refund_receipt_no = Voucher::instance()->advances()->get();
+                $description = "Amounting total PKR " . number_format($supplier_refund->total_amount, 2) . "/- refunded on dated " . date('d M, Y') .
+                    " against PO # " . implode(', ', $orders) . " & invoice # inv-" . $supplier_refund_receipt_no . " to supplier " . $supplier['name'] . " by " . Auth::user()->name . " " . $supplier_refund->description;
+
+                $inventory = ChartOfAccount::where('reference', 'pharmacy-inventory-5')->first();
+                $vno = Voucher::instance()->voucher()->get();
+                GeneralJournal::instance()->account($supplier['account_id'])->debit($supplier_refund->total_amount)->voucherNo($vno)
+                    ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                GeneralJournal::instance()->account($inventory['id'])->credit($supplier_refund->total_amount)->voucherNo($vno)
+                    ->date(date('Y-m-d'))->approve()->description($description)->execute();
+
+
+                $supplier_refund->update([
+                    'approved_by' => Auth::user()->id,
+                    'approved_at' => date('Y-m-d H:i:s'),
+                    'receipt_no' => $supplier_refund_receipt_no,
                 ]);
+
+                DB::commit();
+                $this->confirm_dialog = false;
             }
-
-            $supplier_refund_receipt_no=Voucher::instance()->advances()->get();
-            $description = "Amounting total PKR " . number_format($supplier_refund->total_amount, 2) . "/- refunded on dated " . date('d M, Y') .
-                " against PO # " . implode(', ', $orders) . " & invoice # inv-".$supplier_refund_receipt_no." to supplier " . $supplier['name'] . " by " . Auth::user()->name . " " . $supplier_refund->description;
-
-            $inventory = ChartOfAccount::where('reference', 'pharmacy-inventory-5')->first();
-            $vno = Voucher::instance()->voucher()->get();
-            GeneralJournal::instance()->account($supplier['account_id'])->debit($supplier_refund->total_amount)->voucherNo($vno)
-                ->date(date('Y-m-d'))->approve()->description($description)->execute();
-            GeneralJournal::instance()->account($inventory['id'])->credit($supplier_refund->total_amount)->voucherNo($vno)
-                ->date(date('Y-m-d'))->approve()->description($description)->execute();
-
-
-            $supplier_refund->update([
-                'approved_by' => Auth::user()->id,
-                'approved_at' => date('Y-m-d H:i:s'),
-                'receipt_no'=>$supplier_refund_receipt_no,
-            ]);
-
-            DB::commit();
-            $this->confirm_dialog = false;
-
+            optional($lock)->release();
         } catch (\Exception $exception) {
             DB::rollBack();
             $this->addError('status', $exception->getMessage());
+            optional($lock)->release();
         }
     }
 
