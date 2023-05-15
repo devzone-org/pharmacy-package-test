@@ -9,6 +9,7 @@ use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Payments\CustomerPayment;
 use Devzone\Pharmacy\Models\Payments\CustomerPaymentDetail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -96,32 +97,36 @@ class Add extends Component
             $this->addError('error', 'Please select atleast one receipt');
             return;
         }
+        $lock=Cache::lock('customer.payment.add',30);
         try {
-            DB::beginTransaction();
-            if (empty(Auth::user()->account_id)) {
-                throw new \Exception('Cash in Hand - ' . Auth::user()->name . ' account not found.');
+            if ($lock->get()) {
+                DB::beginTransaction();
+                if (empty(Auth::user()->account_id)) {
+                    throw new \Exception('Cash in Hand - ' . Auth::user()->name . ' account not found.');
+                }
+                $id = CustomerPayment::create([
+                    'customer_id' => $this->customer_id,
+                    'description' => $this->description,
+                    'receiving_in' => Auth::user()->account_id,
+                    'receiving_date' => $this->formatDate($this->receiving_date),
+                    'added_by' => Auth::id(),
+                    'amount' => collect($this->payments)->where('selected', true)->sum('on_account') - collect($this->payments)->where('selected', true)->sum('refunded'),
+                ])->id;
+                foreach (collect($this->payments)->where('selected', true) as $p) {
+                    CustomerPaymentDetail::create([
+                        'customer_payment_id' => $id,
+                        'sale_id' => $p['id']
+                    ]);
+                }
+                DB::commit();
+                $this->success = 'Record has been added and waiting for approval.';
+                $this->reset(['customer_id', 'customer_name', 'payments', 'receiving_date', 'description', 'closing_balance']);
             }
-            $id=CustomerPayment::create([
-                'customer_id' => $this->customer_id,
-                'description'=>$this->description,
-                'receiving_in'=>Auth::user()->account_id,
-                'receiving_date'=>$this->formatDate($this->receiving_date),
-                'added_by'=>Auth::id(),
-                'amount'=> collect($this->payments)->where('selected',true)->sum('on_account') - collect($this->payments)->where('selected',true)->sum('refunded'),
-            ])->id;
-            foreach (collect($this->payments)->where('selected',true) as $p){
-                CustomerPaymentDetail::create([
-                    'customer_payment_id'=>$id,
-                    'sale_id'=>$p['id']
-                ]);
-            }
-            DB::commit();
-            $this->success = 'Record has been added and waiting for approval.';
-            $this->reset(['customer_id', 'customer_name', 'payments', 'receiving_date','description','closing_balance']);
-
+            optional($lock)->release();
         } catch (\Exception $e) {
             $this->addError('Exception', $e->getMessage());
             DB::rollBack();
+            optional($lock)->release();
         }
     }
 }

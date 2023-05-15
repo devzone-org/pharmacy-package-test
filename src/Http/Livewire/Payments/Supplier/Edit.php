@@ -11,6 +11,7 @@ use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\Refunds\SupplierRefund;
 use Devzone\Pharmacy\Models\Supplier;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -56,10 +57,10 @@ class Edit extends Component
         $this->emitSupplierId();
         $this->selected_orders = ($payment_details->pluck('order_id')->toArray());
         $this->selected_returns = ($refund->pluck('refund_id')->toArray());
-        foreach ($this->selected_returns as $key => $a){
+        foreach ($this->selected_returns as $key => $a) {
             $this->selected_returns[$key] = (string)$a;
         }
-        foreach ($this->selected_orders as $key => $a){
+        foreach ($this->selected_orders as $key => $a) {
             $this->selected_orders[$key] = (string)$a;
         }
     }
@@ -107,37 +108,41 @@ class Edit extends Component
     public function create()
     {
         $this->validate();
+        $lock = Cache::lock('supplier.payment.edit.' . $this->payment_id, 30);
         if (!empty($this->selected_orders) || !empty($this->selected_returns)) {
             try {
-                DB::beginTransaction();
-                if (SupplierPayment::whereNotNull('approved_by')->where('id', $this->payment_id)->exists()) {
-                    throw new \Exception('This payment is already approved so unable to edit.');
-                }
-                SupplierPayment::find($this->payment_id)->update([
-                    'supplier_id' => $this->supplier_id,
-                    'description' => $this->description,
-                    'payment_date' => $this->payment_date,
-                ]);
-                SupplierPaymentDetail::where('supplier_payment_id',$this->payment_id)->delete();
-                SupplierPaymentRefundDetail::where('supplier_payment_id',$this->payment_id)->delete();
-                foreach ($this->selected_orders as $o) {
-                    SupplierPaymentDetail::create([
-                        'supplier_payment_id' => $this->payment_id,
-                        'order_id' => $o
+                if ($lock->get()) {
+                    DB::beginTransaction();
+                    if (SupplierPayment::whereNotNull('approved_by')->where('id', $this->payment_id)->exists()) {
+                        throw new \Exception('This payment is already approved so unable to edit.');
+                    }
+                    SupplierPayment::find($this->payment_id)->update([
+                        'supplier_id' => $this->supplier_id,
+                        'description' => $this->description,
+                        'payment_date' => $this->payment_date,
                     ]);
+                    SupplierPaymentDetail::where('supplier_payment_id', $this->payment_id)->delete();
+                    SupplierPaymentRefundDetail::where('supplier_payment_id', $this->payment_id)->delete();
+                    foreach ($this->selected_orders as $o) {
+                        SupplierPaymentDetail::create([
+                            'supplier_payment_id' => $this->payment_id,
+                            'order_id' => $o
+                        ]);
+                    }
+                    foreach ($this->selected_returns as $o) {
+                        SupplierPaymentRefundDetail::create([
+                            'supplier_payment_id' => $this->payment_id,
+                            'refund_id' => $o
+                        ]);
+                    }
+                    DB::commit();
+                    $this->success = 'Record has been updated.';
                 }
-                foreach ($this->selected_returns as $o) {
-                    SupplierPaymentRefundDetail::create([
-                        'supplier_payment_id' => $this->payment_id,
-                        'refund_id' => $o
-                    ]);
-                }
-                DB::commit();
-                $this->success = 'Record has been updated.';
-
+                optional($lock)->release();
             } catch (\Exception $e) {
                 $this->addError('purchase_orders', $e->getMessage());
                 DB::rollBack();
+                optional($lock)->release();
             }
         } else {
             $this->addError('purchase_orders', 'You have to select at least one order.');

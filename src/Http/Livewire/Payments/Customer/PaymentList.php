@@ -11,6 +11,7 @@ use Devzone\Pharmacy\Models\Payments\CustomerPayment;
 use Devzone\Pharmacy\Models\Payments\CustomerPaymentDetail;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -88,70 +89,74 @@ class PaymentList extends Component
 
     public function markAsApprovedConfirm()
     {
+        $lock=Cache::lock('customer.payment.approve.'.$this->primary_id,30);
         try {
-            $id = $this->primary_id;
-            DB::beginTransaction();
-            if (!auth()->user()->can('12.approve-customer-payments')) {
-                throw new \Exception(env('PERMISSION_ERROR', 'Access Denied'));
+            if ($lock->get()) {
+                $id = $this->primary_id;
+                DB::beginTransaction();
+                if (!auth()->user()->can('12.approve-customer-payments')) {
+                    throw new \Exception(env('PERMISSION_ERROR', 'Access Denied'));
+                }
+                $customer_payment = CustomerPayment::findOrFail($id);
+
+                if (!empty($customer_payment->approved_at)) {
+                    throw new \Exception('Payment already approved.');
+                }
+                $sales = CustomerPaymentDetail::where('customer_payment_id', $id)->get()->pluck('sale_id')->toArray();
+                if (Sale::whereIn('id', $sales)->where('is_paid', 't')->exists()) {
+                    throw new \Exception('Sale Receipt that you select already mark as paid.');
+                }
+
+                $customer_payment_receipt_no = Voucher::instance()->advances()->get();
+                $receiving_in = ChartOfAccount::findOrFail($customer_payment->receiving_in);
+                $customer = Customer::findOrFail($customer_payment->customer_id);
+
+
+                $amount = Sale::whereIn('id', $sales)->sum('gross_total');
+
+                $refund_entries = \Devzone\Pharmacy\Models\Sale\SaleRefund::from('sale_refunds as sr')
+                    ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
+                    ->whereIn('sr.sale_id', $sales)
+                    ->groupBy('sr.sale_id')
+                    ->select(\Illuminate\Support\Facades\DB::raw('sum(sr.refund_qty * sd.retail_price_after_disc) as total_refunded'))
+                    ->get();
+
+                $return_amount = $refund_entries->sum('total_refunded');
+                $diff = $amount - $return_amount;
+
+                if (round($diff, 2) != round($customer_payment['amount'], 2)) {
+                    throw new \Exception('Receive amount mismatch.');
+                }
+                $vno = Voucher::instance()->voucher()->get();
+
+
+                $description = "Received: Amounting total PKR " . number_format(abs($diff), 2) .
+                    "/- from customer '" . $customer['name'] . "' against sale # " . implode(', ', $sales) . " & invoice # inv-" . $customer_payment_receipt_no .
+                    ". Received '" . $receiving_in['name'] . "' by user " . Auth::user()->name . " on dated " . date('d M, Y h:i A');
+
+                GeneralJournal::instance()->account($customer->account_id)->credit($diff)->voucherNo($vno)
+                    ->date(date('Y-m-d'))->approve()->reference('customer-payments')->description($description)->execute();
+
+                GeneralJournal::instance()->account($customer_payment->receiving_in)->debit($diff)->voucherNo($vno)
+                    ->date(date('Y-m-d'))->reference('customer-payments')->approve()->description($description)->execute();
+
+                Sale::whereIn('id', $sales)->update([
+                    'is_paid' => 't'
+                ]);
+                $customer_payment->update([
+                    'approved_by' => Auth::user()->id,
+                    'approved_at' => date('Y-m-d H:i:s'),
+                    'receiving_date' => $this->receiving_date,
+                    'receipt_no' => $customer_payment_receipt_no,
+                ]);
+
+                DB::commit();
             }
-            $customer_payment = CustomerPayment::findOrFail($id);
-
-            if (!empty($customer_payment->approved_at)) {
-                throw new \Exception('Payment already approved.');
-            }
-            $sales = CustomerPaymentDetail::where('customer_payment_id', $id)->get()->pluck('sale_id')->toArray();
-            if (Sale::whereIn('id', $sales)->where('is_paid', 't')->exists()) {
-                throw new \Exception('Sale Receipt that you select already mark as paid.');
-            }
-
-            $customer_payment_receipt_no = Voucher::instance()->advances()->get();
-            $receiving_in = ChartOfAccount::findOrFail($customer_payment->receiving_in);
-            $customer = Customer::findOrFail($customer_payment->customer_id);
-
-
-            $amount = Sale::whereIn('id', $sales)->sum('gross_total');
-
-            $refund_entries = \Devzone\Pharmacy\Models\Sale\SaleRefund::from('sale_refunds as sr')
-                ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
-                ->whereIn('sr.sale_id', $sales)
-                ->groupBy('sr.sale_id')
-                ->select(\Illuminate\Support\Facades\DB::raw('sum(sr.refund_qty * sd.retail_price_after_disc) as total_refunded'))
-                ->get();
-
-            $return_amount = $refund_entries->sum('total_refunded');
-            $diff = $amount - $return_amount;
-
-            if (round($diff, 2) != round($customer_payment['amount'], 2)) {
-                throw new \Exception('Receive amount mismatch.');
-            }
-            $vno = Voucher::instance()->voucher()->get();
-
-
-            $description = "Received: Amounting total PKR " . number_format(abs($diff), 2) .
-                "/- from customer '" . $customer['name'] . "' against sale # " . implode(', ', $sales) . " & invoice # inv-" . $customer_payment_receipt_no .
-                ". Received '" . $receiving_in['name'] . "' by user " . Auth::user()->name . " on dated " . date('d M, Y h:i A');
-
-            GeneralJournal::instance()->account($customer->account_id)->credit($diff)->voucherNo($vno)
-                ->date(date('Y-m-d'))->approve()->reference('customer-payments')->description($description)->execute();
-
-            GeneralJournal::instance()->account($customer_payment->receiving_in)->debit($diff)->voucherNo($vno)
-                ->date(date('Y-m-d'))->reference('customer-payments')->approve()->description($description)->execute();
-
-            Sale::whereIn('id', $sales)->update([
-                'is_paid' => 't'
-            ]);
-            $customer_payment->update([
-                'approved_by' => Auth::user()->id,
-                'approved_at' => date('Y-m-d H:i:s'),
-                'receiving_date' => $this->receiving_date,
-                'receipt_no' => $customer_payment_receipt_no,
-            ]);
-
-            DB::commit();
-
+            optional($lock)->release();
         } catch (\Exception $exception) {
             DB::rollBack();
             $this->addError('status', $exception->getMessage());
+            optional($lock)->release();
         }
     }
 

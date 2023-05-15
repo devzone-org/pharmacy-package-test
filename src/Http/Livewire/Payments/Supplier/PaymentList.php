@@ -14,6 +14,7 @@ use Devzone\Pharmacy\Models\PurchaseReceive;
 use Devzone\Pharmacy\Models\Refunds\SupplierRefund;
 use Devzone\Pharmacy\Models\Supplier;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -60,7 +61,7 @@ class PaymentList extends Component
 
             })
             ->select('s.name as supplier_name', 'sp.id', 'sp.description', 'coa.name as account_name', 'sp.payment_date',
-               'sp.created_at', 'c.name as created_by',
+                'sp.created_at', 'c.name as created_by',
                 'a.name as approved_by', 'sp.approved_at')
             ->groupBy('sp.id')
             ->orderBy('sp.id', 'desc')
@@ -96,94 +97,96 @@ class PaymentList extends Component
 
     public function markAsApprovedConfirm()
     {
+        $lock = Cache::lock('supplier.payments.approve.' . $this->primary_id, 30);
         try {
-            $id = $this->primary_id;
-            DB::beginTransaction();
-            $supplier_payment = SupplierPayment::findOrFail($id);
-            if (!auth()->user()->can('12.approve-supplier-payments')) {
-                throw new \Exception(env('PERMISSION_ERROR', 'Access Denied'));
+            if ($lock->get()) {
+                $id = $this->primary_id;
+                DB::beginTransaction();
+                $supplier_payment = SupplierPayment::findOrFail($id);
+                if (!auth()->user()->can('12.approve-supplier-payments')) {
+                    throw new \Exception(env('PERMISSION_ERROR', 'Access Denied'));
+                }
+                if (!empty($supplier_payment->approved_at)) {
+                    throw new \Exception('Payment already approved.');
+                }
+                $tax = ChartOfAccount::where('reference', 'advance-tax-236')->first();
+                if (empty($tax)) {
+                    throw new \Exception('Advance tax account not found in chart of accounts.');
+                }
+                $orders = SupplierPaymentDetail::where('supplier_payment_id', $id)->get()->pluck('order_id')->toArray();
+                if (Purchase::whereIn('id', $orders)->where('is_paid', 't')->exists()) {
+                    throw new \Exception('Purchase order that you select already mark as paid.');
+                }
+
+                $returns = SupplierPaymentRefundDetail::where('supplier_payment_id', $id)->get()->pluck('refund_id')->toArray();
+                if (SupplierRefund::whereIn('id', $returns)->where('is_receive', 't')->exists()) {
+                    throw new \Exception('Un adjusted returns that you select already mark as settled.');
+                }
+
+                $supplier_payment_receipt_no = Voucher::instance()->advances()->get();
+                $pay_from = ChartOfAccount::findOrFail($supplier_payment->pay_from);
+                $supplier = Supplier::findOrFail($supplier_payment->supplier_id);
+
+                $advance_tax = optional(Purchase::whereIn('id', $orders)->first())->advance_tax;
+
+                $amount = PurchaseReceive::whereIn('purchase_id', $orders)->sum('total_cost');
+                $return_amount = SupplierRefund::whereIn('id', $returns)->sum('total_amount');
+                $diff = $amount - $return_amount;
+                $tax_amount = 0;
+                if (!empty($advance_tax)) {
+                    $tax_amount = $diff * (abs($advance_tax) / 100);
+                }
+                $diff = $diff + $tax_amount;
+
+
+                $vno = Voucher::instance()->voucher()->get();
+                $bank = GeneralJournal::instance()->account($pay_from['id']);
+                if ($diff > 0) {
+                    $bank = $bank->credit($diff);
+                    $des = "paid";
+                } else {
+                    $bank = $bank->debit(abs($diff));
+                    $des = "received";
+                }
+
+                $description = "PAYMENT Amounting total PKR " . number_format(abs($diff), 2) .
+                    "/- to supplier '" . $supplier['name'] . "' against PO # " . implode(', ', $orders) . " & invoice # inv-" . $supplier_payment_receipt_no .
+                    ". Payment from '" . $pay_from['name'] . "' by user " . Auth::user()->name . " on dated " . date('d M, Y h:i A');
+
+                $bank->voucherNo($vno)->date($this->payment_date)->reference('supplier-payment')
+                    ->approve()->description($description)->execute();
+
+                $sp = GeneralJournal::instance()->account($supplier['account_id']);
+                if ($diff > 0) {
+                    $sp = $sp->debit($diff);
+                } else {
+                    $sp = $sp->credit(abs($diff));
+                }
+                $sp->voucherNo($vno)->date($this->payment_date)->approve()->reference('supplier-payment')
+                    ->description($description)->execute();
+
+                Purchase::whereIn('id', $orders)->update([
+                    'is_paid' => 't'
+                ]);
+                SupplierRefund::whereIn('id', $returns)->update([
+                    'is_receive' => 't'
+                ]);
+
+                $supplier_payment->update([
+                    'approved_by' => Auth::user()->id,
+                    'approved_at' => date('Y-m-d H:i:s'),
+                    'payment_date' => $this->payment_date,
+                    'receipt_no' => $supplier_payment_receipt_no,
+                ]);
+
+                DB::commit();
             }
-            if (!empty($supplier_payment->approved_at)) {
-                throw new \Exception('Payment already approved.');
-            }
-            $tax = ChartOfAccount::where('reference', 'advance-tax-236')->first();
-            if (empty($tax)) {
-                throw new \Exception('Advance tax account not found in chart of accounts.');
-            }
-            $orders = SupplierPaymentDetail::where('supplier_payment_id', $id)->get()->pluck('order_id')->toArray();
-            if (Purchase::whereIn('id', $orders)->where('is_paid', 't')->exists()) {
-                throw new \Exception('Purchase order that you select already mark as paid.');
-            }
-
-            $returns = SupplierPaymentRefundDetail::where('supplier_payment_id', $id)->get()->pluck('refund_id')->toArray();
-            if (SupplierRefund::whereIn('id', $returns)->where('is_receive', 't')->exists()) {
-                throw new \Exception('Un adjusted returns that you select already mark as settled.');
-            }
-
-            $supplier_payment_receipt_no = Voucher::instance()->advances()->get();
-            $pay_from = ChartOfAccount::findOrFail($supplier_payment->pay_from);
-            $supplier = Supplier::findOrFail($supplier_payment->supplier_id);
-
-            $advance_tax = optional(Purchase::whereIn('id', $orders)->first())->advance_tax;
-
-            $amount = PurchaseReceive::whereIn('purchase_id', $orders)->sum('total_cost');
-            $return_amount = SupplierRefund::whereIn('id', $returns)->sum('total_amount');
-            $diff = $amount - $return_amount;
-            $tax_amount = 0;
-            if (!empty($advance_tax)) {
-                $tax_amount = $diff * (abs($advance_tax) / 100);
-            }
-            $diff = $diff + $tax_amount;
-
-
-            $vno = Voucher::instance()->voucher()->get();
-            $bank = GeneralJournal::instance()->account($pay_from['id']);
-            if ($diff > 0) {
-                $bank = $bank->credit($diff);
-                $des = "paid";
-            } else {
-                $bank = $bank->debit(abs($diff));
-                $des = "received";
-            }
-
-            $description = "PAYMENT Amounting total PKR " . number_format(abs($diff), 2) .
-                "/- to supplier '" . $supplier['name'] . "' against PO # " . implode(', ', $orders) . " & invoice # inv-" . $supplier_payment_receipt_no .
-                ". Payment from '" . $pay_from['name'] . "' by user " . Auth::user()->name . " on dated " . date('d M, Y h:i A');
-
-            $bank->voucherNo($vno)->date($this->payment_date)->reference('supplier-payment')
-                ->approve()->description($description)->execute();
-
-            $sp = GeneralJournal::instance()->account($supplier['account_id']);
-            if ($diff > 0) {
-                $sp = $sp->debit($diff);
-            } else {
-                $sp = $sp->credit(abs($diff));
-            }
-            $sp->voucherNo($vno)->date($this->payment_date)->approve()->reference('supplier-payment')
-                ->description($description)->execute();
-
-            Purchase::whereIn('id', $orders)->update([
-                'is_paid' => 't'
-            ]);
-            SupplierRefund::whereIn('id', $returns)->update([
-                'is_receive' => 't'
-            ]);
-
-            $supplier_payment->update([
-                'approved_by' => Auth::user()->id,
-                'approved_at' => date('Y-m-d H:i:s'),
-                'payment_date' => $this->payment_date,
-                'receipt_no' => $supplier_payment_receipt_no,
-            ]);
-
-            DB::commit();
-
+            optional($lock)->release();
         } catch (\Exception $exception) {
             DB::rollBack();
             $this->addError('status', $exception->getMessage());
+            optional($lock)->release();
         }
-
-
     }
 
 

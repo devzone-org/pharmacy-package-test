@@ -10,6 +10,7 @@ use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\PurchaseOrder;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -19,7 +20,7 @@ class PurchaseAdd extends Component
 
     public $supplier_id;
     public $product_qty;
-    public $loose_purchase ='f';
+    public $loose_purchase = 'f';
     public $supplier_name;
     public $delivery_date;
     public $expected_date;
@@ -52,8 +53,8 @@ class PurchaseAdd extends Component
 
     public function mount()
     {
-        if(\request()->loose_purchase == 't'){
-            $this->loose_purchase ='t';
+        if (\request()->loose_purchase == 't') {
+            $this->loose_purchase = 't';
         }
 
         $this->expected_date = date('d M Y');
@@ -188,14 +189,14 @@ class PurchaseAdd extends Component
         $data = $this->product_data[$this->highlight_index] ?? null;
         if (!empty($data)) {
             $existing = collect($this->order_list)->where('id', $data['id'])->all();
-            $cop=null;
-            $r_price=null;
-            $total_cost=null;
-            if ($this->loose_purchase == 't'){
-                $cop = round($data['cost_of_price'] / $data['packing'],2);
-                $r_price = round($data['retail_price'] / $data['packing'],2);
+            $cop = null;
+            $r_price = null;
+            $total_cost = null;
+            if ($this->loose_purchase == 't') {
+                $cop = round($data['cost_of_price'] / $data['packing'], 2);
+                $r_price = round($data['retail_price'] / $data['packing'], 2);
                 $total_cost = $cop;
-            }else{
+            } else {
                 $cop = $data['cost_of_price'];
                 $r_price = $data['retail_price'];
                 $total_cost = $cop;
@@ -207,9 +208,9 @@ class PurchaseAdd extends Component
                     'name' => $data['name'],
                     'qty' => $this->product_qty ?? 1,
                     'cost_of_price' => $cop,
-                    'retail_price' =>$r_price,
+                    'retail_price' => $r_price,
                     'salt' => $data['salt'],
-                    'total_cost' =>$total_cost,
+                    'total_cost' => $total_cost,
                     'packing' => $data['packing']
                 ];
             } else {
@@ -218,67 +219,72 @@ class PurchaseAdd extends Component
                 $this->order_list[$key]['qty'] = $qty + $this->product_qty;
                 $this->order_list[$key]['total_cost'] = $this->order_list[$key]['qty'] * $this->order_list[$key]['cost_of_price'];
             }
-            $this->products_modal =false;
+            $this->products_modal = false;
         }
     }
 
     public function create()
     {
         $this->validate();
+        $lock = Cache::lock('sale.add', 30);
         try {
-            DB::beginTransaction();
-            $purchase_id = Purchase::create([
-                'supplier_id' => $this->supplier_id,
-                'supplier_invoice' => $this->supplier_invoice,
-                'delivery_date' => $this->delivery_date,
-                'expected_date' => $this->formatDate($this->expected_date),
-                'created_by' => Auth::user()->id,
-                'status' => 'approval-awaiting',
-                'is_loose' => $this->loose_purchase
-            ])->id;
+            if ($lock->get()) {
+                DB::beginTransaction();
+                $purchase_id = Purchase::create([
+                    'supplier_id' => $this->supplier_id,
+                    'supplier_invoice' => $this->supplier_invoice,
+                    'delivery_date' => $this->delivery_date,
+                    'expected_date' => $this->formatDate($this->expected_date),
+                    'created_by' => Auth::user()->id,
+                    'status' => 'approval-awaiting',
+                    'is_loose' => $this->loose_purchase
+                ])->id;
 
 
-            foreach ($this->order_list as $o) {
-                $qty = null;
-                $cop = null;
-                $r_price=null;
-                if ($this->loose_purchase == 't') {
-                    $qty = $o['qty'];
-                    $cop = $o['cost_of_price'];
-                    $r_price =$o['retail_price'];
-                } else {
-                    $qty = $o['qty'] * $o['packing'];
-                    $cop = $o['cost_of_price'] / $o['packing'];
-                    $r_price =$o['retail_price'] / $o['packing'];
-                }
-                $check = PurchaseOrder::where('purchase_id', $purchase_id)->where('product_id', $o['id'])->get()->first();
-                if (!empty($check)) {
-                    throw new \Exception('An Unknown Error Occurred!');
-                }
-                PurchaseOrder::create([
-                    'purchase_id' => $purchase_id,
-                    'product_id' => $o['id'],
-                    'qty' => $qty,
-                    'cost_of_price' => $cop,
-                    'retail_price' =>$r_price,
-                    'total_cost' => $o['cost_of_price'] * $o['qty'],
-                ]);
-
-                if ($this->loose_purchase == 'f') {
-                    Product::find($o['id'])->update([
-                        'salt' => $o['salt'] ?? null,
-                        'cost_of_price' => $o['cost_of_price'],
-                        'retail_price' => $o['retail_price'],
-                        'supplier_id' => $this->supplier_id
+                foreach ($this->order_list as $o) {
+                    $qty = null;
+                    $cop = null;
+                    $r_price = null;
+                    if ($this->loose_purchase == 't') {
+                        $qty = $o['qty'];
+                        $cop = $o['cost_of_price'];
+                        $r_price = $o['retail_price'];
+                    } else {
+                        $qty = $o['qty'] * $o['packing'];
+                        $cop = $o['cost_of_price'] / $o['packing'];
+                        $r_price = $o['retail_price'] / $o['packing'];
+                    }
+                    $check = PurchaseOrder::where('purchase_id', $purchase_id)->where('product_id', $o['id'])->get()->first();
+                    if (!empty($check)) {
+                        throw new \Exception('An Unknown Error Occurred!');
+                    }
+                    PurchaseOrder::create([
+                        'purchase_id' => $purchase_id,
+                        'product_id' => $o['id'],
+                        'qty' => $qty,
+                        'cost_of_price' => $cop,
+                        'retail_price' => $r_price,
+                        'total_cost' => $o['cost_of_price'] * $o['qty'],
                     ]);
+
+                    if ($this->loose_purchase == 'f') {
+                        Product::find($o['id'])->update([
+                            'salt' => $o['salt'] ?? null,
+                            'cost_of_price' => $o['cost_of_price'],
+                            'retail_price' => $o['retail_price'],
+                            'supplier_id' => $this->supplier_id
+                        ]);
+                    }
                 }
+                DB::commit();
+                $this->success = 'Purchase order has been created and awaiting for approval.';
+                $this->reset(['order_list', 'expected_date', 'supplier_id', 'supplier_name', 'supplier_invoice', 'delivery_date']);
             }
-            DB::commit();
-            $this->success = 'Purchase order has been created and awaiting for approval.';
-            $this->reset(['order_list', 'expected_date', 'supplier_id', 'supplier_name', 'supplier_invoice', 'delivery_date']);
+            optional($lock)->release();
         } catch (\Exception $e) {
             $this->addError('supplier_name', $e->getMessage());
             DB::rollBack();
+            optional($lock)->release();
         }
     }
 }

@@ -17,6 +17,7 @@ use Devzone\Pharmacy\Models\ProductInventory;
 use Devzone\Pharmacy\Models\Sale\OpenReturn;
 use Devzone\Pharmacy\Models\Sale\OpenReturnDetail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -173,82 +174,86 @@ class OpenReturnsAdd extends Component
         $total = collect($this->returns)->sum('total_cost');
         $this->total_after_deduction = $total - ($total * $this->deduction / 100);
         $total_supply_price = collect($this->returns)->sum('total_supply_price');
-
+        $lock = Cache::lock('product.returns', 30);
         try {
-            $vno = Voucher::instance()->voucher()->get();
-            $accounts = COA::whereIn('reference', ['pharmacy-inventory-5', 'income-return-pharmacy-5', 'cost-of-sales-pharmacy-5'])->get();
-            DB::beginTransaction();
+            if ($lock->get()) {
+                $vno = Voucher::instance()->voucher()->get();
+                $accounts = COA::whereIn('reference', ['pharmacy-inventory-5', 'income-return-pharmacy-5', 'cost-of-sales-pharmacy-5'])->get();
+                DB::beginTransaction();
 
-            $or = OpenReturn::create([
-                'remarks' => $this->remarks,
-                'total' => $total,
-                'cost_of_price' => $total_supply_price,
-                'total_after_deduction' => $this->total_after_deduction,
-                'added_by' => \auth()->id(),
-                'voucher' => $vno,
-            ]);
-
-
-            foreach ($this->returns as $k => $pro) {
-                $inv = ProductInventory::create([
-                    'product_id' => $pro['id'],
-                    'qty' => $pro['qty'],
-                    'retail_price' => $pro['retail_price'],
-                    'supply_price' => $pro['cost_of_price'],
-                    'expiry' => $this->formatDate($pro['expiry']),
-                    'type' => 'open-return'
+                $or = OpenReturn::create([
+                    'remarks' => $this->remarks,
+                    'total' => $total,
+                    'cost_of_price' => $total_supply_price,
+                    'total_after_deduction' => $this->total_after_deduction,
+                    'added_by' => \auth()->id(),
+                    'voucher' => $vno,
                 ]);
 
 
-                $des = "Open Return of PKR " . number_format($pro['total_cost'], 2) . "/- on date " . date('d M, Y H:i:s') .
-                    " with " . $this->deduction . "% deduction and total of PKR " . number_format($this->total_after_deduction, 2) . "/-.";
-                InventoryLedger::create([
-                    'product_id' => $pro['id'],
-                    'increase' => $pro['qty'],
-                    'type' => 'open-return',
-                    'description' => $des
-                ]);
+                foreach ($this->returns as $k => $pro) {
+                    $inv = ProductInventory::create([
+                        'product_id' => $pro['id'],
+                        'qty' => $pro['qty'],
+                        'retail_price' => $pro['retail_price'],
+                        'supply_price' => $pro['cost_of_price'],
+                        'expiry' => $this->formatDate($pro['expiry']),
+                        'type' => 'open-return'
+                    ]);
 
-                OpenReturnDetail::create([
-                    'open_return_id' => $or->id,
-                    'product_id' => $pro['id'],
-                    'expiry' => $this->formatDate($pro['expiry']),
-                    'qty' => $pro['qty'],
-                    'retail_price' => $pro['retail_price'],
-                    'total' => $pro['total_cost'],
-                    'deduction' => $this->deduction,
-                    'total_after_deduction' => $pro['total_cost'] - ($pro['total_cost'] * $this->deduction / 100),
-                ]);
+
+                    $des = "Open Return of PKR " . number_format($pro['total_cost'], 2) . "/- on date " . date('d M, Y H:i:s') .
+                        " with " . $this->deduction . "% deduction and total of PKR " . number_format($this->total_after_deduction, 2) . "/-.";
+                    InventoryLedger::create([
+                        'product_id' => $pro['id'],
+                        'increase' => $pro['qty'],
+                        'type' => 'open-return',
+                        'description' => $des
+                    ]);
+
+                    OpenReturnDetail::create([
+                        'open_return_id' => $or->id,
+                        'product_id' => $pro['id'],
+                        'expiry' => $this->formatDate($pro['expiry']),
+                        'qty' => $pro['qty'],
+                        'retail_price' => $pro['retail_price'],
+                        'total' => $pro['total_cost'],
+                        'deduction' => $this->deduction,
+                        'total_after_deduction' => $pro['total_cost'] - ($pro['total_cost'] * $this->deduction / 100),
+                    ]);
+                }
+
+
+                $description = "Open Return of PKR " . number_format($total, 2) . "/- issued against ID# " . $or->id . " with " . $this->deduction .
+                    "% deduction and total of PKR " . number_format($this->total_after_deduction, 2) . "/- on date " . date('d M, Y H:i:s') . " by " . Auth::user()->name . ".";
+
+                // Account entries.
+                GeneralJournal::instance()->account(Auth::user()->account_id)->credit($this->total_after_deduction)->voucherNo($vno)
+                    ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                foreach ($accounts as $a) {
+                    if ($a->reference == 'pharmacy-inventory-5') {
+                        GeneralJournal::instance()->account($a->id)->debit($total)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                    }
+                    if ($a->reference == 'income-return-pharmacy-5') {
+                        GeneralJournal::instance()->account($a->id)->debit($this->total_after_deduction)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                    }
+                    if ($a->reference == 'cost-of-sales-pharmacy-5') {
+                        GeneralJournal::instance()->account($a->id)->credit($total)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                    }
+                }
+
+                DB::commit();
+                $this->success = 'Product inventory updated successfully.';
+                $this->reset(['returns', 'date', 'deduction', 'total_after_deduction', 'remarks']);
             }
-
-
-            $description = "Open Return of PKR " . number_format($total, 2) . "/- issued against ID# " . $or->id . " with " . $this->deduction .
-                "% deduction and total of PKR " . number_format($this->total_after_deduction, 2) . "/- on date " . date('d M, Y H:i:s') . " by " . Auth::user()->name . ".";
-
-            // Account entries.
-            GeneralJournal::instance()->account(Auth::user()->account_id)->credit($this->total_after_deduction)->voucherNo($vno)
-                ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
-            foreach ($accounts as $a) {
-                if ($a->reference == 'pharmacy-inventory-5') {
-                    GeneralJournal::instance()->account($a->id)->debit($total)->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
-                }
-                if ($a->reference == 'income-return-pharmacy-5') {
-                    GeneralJournal::instance()->account($a->id)->debit($this->total_after_deduction)->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
-                }
-                if ($a->reference == 'cost-of-sales-pharmacy-5') {
-                    GeneralJournal::instance()->account($a->id)->credit($total)->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
-                }
-            }
-
-            DB::commit();
-            $this->success = 'Product inventory updated successfully.';
-            $this->reset(['returns', 'date', 'deduction', 'total_after_deduction', 'remarks']);
+            optional($lock)->release();
         } catch (\Exception $e) {
             $this->addError('error', $e->getMessage());
             DB::rollBack();
+            optional($lock)->release();
         }
     }
 

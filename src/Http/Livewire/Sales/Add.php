@@ -28,6 +28,7 @@ use Devzone\Pharmacy\Models\UserLimit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Spatie\Permission\Models\Permission;
@@ -543,7 +544,6 @@ class Add extends Component
     }
 
 
-
     public function reloginUser()
     {
         if (!\auth()->loginUsingId($this->old_user_id)) {
@@ -561,398 +561,403 @@ class Add extends Component
 
     public function saleComplete()
     {
+        $lock = Cache::lock('sale.complete', 30);
         try {
-            if (!$this->admission) {
-                if ($this->control_med_check && empty($this->patient_id)) {
-                    throw new \Exception('Patient information is required.');
-                }
-            }
-            $total_discount_give = 0;
-            DB::beginTransaction();
-            if (empty($this->sales)) {
-                throw new \Exception('Unable to complete because invoice is empty.');
-            }
-            $this->reset(['success']);
-
-            foreach ($this->sales as $key => $s) {
-                if ($s['discountable'] == 't') {
-                    $disc = 0;
-                    if (!empty($s['max_discount'])) {
-                        if ($this->sales[$key]['disc'] >= $s['max_discount']) {
-                            $disc = $s['max_discount'];
-                        } else {
-                            $disc = $this->sales[$key]['disc'];
-                        }
+            if ($lock->get()) {
+                if (!$this->admission) {
+                    if ($this->control_med_check && empty($this->patient_id)) {
+                        throw new \Exception('Patient information is required.');
                     }
+                }
+                $total_discount_give = 0;
+                DB::beginTransaction();
+                if (empty($this->sales)) {
+                    throw new \Exception('Unable to complete because invoice is empty.');
+                }
+                $this->reset(['success']);
 
-                    $discount = round(($disc / 100) * $this->sales[$key]['total'], 2);
-                    $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'] - $discount;
-                    $this->sales[$key]['disc'] = $disc;
-                    $packing = 1;
-                    if (!empty($s['packing'])) {
-                        $packing = $s['packing'];
+                foreach ($this->sales as $key => $s) {
+                    if ($s['discountable'] == 't') {
+                        $disc = 0;
+                        if (!empty($s['max_discount'])) {
+                            if ($this->sales[$key]['disc'] >= $s['max_discount']) {
+                                $disc = $s['max_discount'];
+                            } else {
+                                $disc = $this->sales[$key]['disc'];
+                            }
+                        }
+
+                        $discount = round(($disc / 100) * $this->sales[$key]['total'], 2);
+                        $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'] - $discount;
+                        $this->sales[$key]['disc'] = $disc;
+                        $packing = 1;
+                        if (!empty($s['packing'])) {
+                            $packing = $s['packing'];
+                        }
+                        $after_discount_retail = ($this->sales[$key]['total_after_disc']) / $s['s_qty'];
+                        if (round($after_discount_retail, 2) < round($s['product_supply_price'] / $packing, 2)) {
+                            $avail_pe = round($s['product_supply_price'] / $s['product_price'], 4);
+                            $avail_per = round((1 - $avail_pe) * 100, 4);
+
+                            throw new \Exception('Maximum discount possible ' . $avail_per . '% on ' . $s['item']);
+                        }
+
+                        $total_discount_give = $total_discount_give + $discount;
                     }
-                    $after_discount_retail = ($this->sales[$key]['total_after_disc']) / $s['s_qty'];
-                    if (round($after_discount_retail, 2) < round($s['product_supply_price'] / $packing, 2)) {
-                        $avail_pe = round($s['product_supply_price'] / $s['product_price'], 4);
-                        $avail_per = round((1 - $avail_pe) * 100, 4);
-
-                        throw new \Exception('Maximum discount possible ' . $avail_per . '% on ' . $s['item']);
-                    }
-
-                    $total_discount_give = $total_discount_give + $discount;
-                }
-            }
-
-            if (auth()->user()->can('add-pending-sale') || $this->pending_and_complete) {
-
-                $pending_sale_id = PendingSale::create([
-                    'patient_id' => $this->patient_id,
-                    'referred_by' => $this->referred_by_id,
-                    'sale_by' => Auth::id(),
-                    'sale_at' => date('Y-m-d H:i:s'),
-                    'sub_total' => collect($this->sales)->sum('total'),
-                    'gross_total' => collect($this->sales)->sum('total_after_disc'),
-                ])->id;
-
-                foreach ($this->sales as $s) {
-
-                    $total = $s['retail_price'] * $s['s_qty'];
-
-                    $discount = round(($s['disc'] / 100) * $total, 2);
-                    $after_total = $total - $discount;
-
-                    PendingSaleDetail::create([
-                        'sale_id' => $pending_sale_id,
-                        'product_id' => $s['product_id'],
-
-                        'qty' => $s['s_qty'],
-                        'supply_price' => $s['supply_price'],
-                        'retail_price' => $s['retail_price'],
-                        'total' => $total,
-                        'disc' => $s['disc'],
-                        'total_after_disc' => $after_total,
-                        'retail_price_after_disc' => $after_total / $s['s_qty']
-                    ]);
-
                 }
 
+                if (auth()->user()->can('add-pending-sale') || $this->pending_and_complete) {
 
-                $this->resetAll();
-                $this->searchableReset();
-                $this->success = 'Sale has been added to pending list.';
-                DB::commit();
-                $this->pending_and_complete = false;
-                return;
-            }
+                    $pending_sale_id = PendingSale::create([
+                        'patient_id' => $this->patient_id,
+                        'referred_by' => $this->referred_by_id,
+                        'sale_by' => Auth::id(),
+                        'sale_at' => date('Y-m-d H:i:s'),
+                        'sub_total' => collect($this->sales)->sum('total'),
+                        'gross_total' => collect($this->sales)->sum('total_after_disc'),
+                    ])->id;
 
+                    foreach ($this->sales as $s) {
 
-            //Here should be the conditions
-            if (env('USER_CONFIRMATION', false)) {
-                $this->add_sale_modal = true;
-                $this->confirmUser();
-                if($this->getErrorBag()->has('login')){
-                    throw new \Exception();
-                }
-
-                if (auth()->user()->can('add-pending-sale')){
-                    $this->addError('login', 'User does not have permission for a complete sale.');
-                    throw new \Exception();
-                }
-
-            }
-
-
-            if (empty($this->credit)) {
-                if (empty($this->received) && $this->admission == false) {
-                    throw new \Exception('Please enter received amount.');
-                }
-                //Round off code
-                $this->after_round_off = collect($this->sales)->sum('total_after_disc'); //gross-price
-                $min_bill = env('MIMIMUM_ROUNDOFF_BILL', 50);
-
-                if (env('ROUNDOFF_CHECK', false) && $this->after_round_off > $min_bill) {
-                    $v1 = $this->after_round_off;
-                    $v2 = round($v1 / 5) * 5;
-                    $this->rounded = $v2 - $v1;
-                    $this->after_round_off = $v2;
-                }
-//                dump($this->after_round_off, $this->rounded);
-                if ($this->admission == false && $this->received < $this->after_round_off) {
-                    throw new \Exception('Received amount should be greater than PKR ' . $this->after_round_off . "/-");
-                }
-            } else {
-                if (empty($this->customer_id)) {
-                    throw new \Exception('Please select patient to credit sale.');
-                }
-
-                if (!auth()->user()->can('12.add-credit-sale')) {
-                    throw new \Exception('You dont have permission for credit sale');
-                }
-
-                $customer_account = Customer::join('chart_of_accounts as coa', 'coa.id', '=', 'customers.account_id')
-                    ->where('customers.id', $this->customer_id)
-                    ->select('coa.name', 'customers.*')
-                    ->first();
-                $previous_credit = Ledger::where('account_id', $customer_account->account_id)
-                    ->groupBy('account_id')
-                    ->select(DB::raw('sum(debit-credit) as balance'))
-                    ->first();
-                $previous_balance = !empty($previous_credit) ? $previous_credit->balance : 0;
-                if (collect($this->sales)->sum('total_after_disc') + $previous_balance > $customer_account->credit_limit) {
-                    throw new \Exception('Credit limit exceeding: Available balance is PKR ' . number_format($this->customer_previous_credit));
-                }
-                $user_limit = UserLimit::where('user_id', Auth::id())
-                    ->where('date', date('Y-m-d'))
-                    ->first();
-                $balance = !empty($user_limit) ? $user_limit->balance : 0;
-
-                if ((collect($this->sales)->sum('total_after_disc')) + $balance > Auth::user()->credit_limit) {
-                    throw new \Exception('Amount exceeding User credit limit (PKR ' . number_format(Auth::user()->credit_limit) . ')');
-                }
-                $credit_amount = collect($this->sales)->sum('total_after_disc');
-                if (!empty($user_limit)) {
-                    UserLimit::where('id', $user_limit->id)->update([
-                        'balance' => DB::raw('balance +' . $credit_amount)
-                    ]);
-                } else {
-                    UserLimit::create([
-                        'user_id' => Auth::id(),
-                        'date' => date('Y-m-d'),
-                        'balance' => $credit_amount
-                    ]);
-                }
-            }
-
-            if ($this->admission == true) {
-                if (empty($this->handed_over)) {
-                    throw new \Exception('Handed over field is required.');
-                }
-            }
-
-            $sale_receipt_no = Voucher::instance()->advances()->get();
-            $sub_total = collect($this->sales)->sum('total');
-            $total_after_disc = collect($this->sales)->sum('total_after_disc');
-            if (round($sub_total - $total_after_disc, 2) > round($total_discount_give, 2)) {
-                throw new \Exception('Total discount is more than as you given to customer. Please recheck sale.');
-            }
-            //dd(round($sub_total - $total_after_disc, 2), round($total_discount_give, 2));
-
-            $sale_id = Sale::create([
-                'patient_id' => $this->patient_id,
-                'referred_by' => $this->referred_by_id,
-                'sale_by' => !empty($this->pending_sale_id) ? $this->sales[0]['sale_by'] : Auth::id(),
-                'sale_at' => date('Y-m-d H:i:s'),
-                'remarks' => trim($this->remarks, ' '),
-                'receive_amount' => $this->received,
-                'payable_amount' => !empty($this->credit) ? 0 : $this->payable,
-                'rounded_inc' => $this->rounded > 0 ? abs($this->rounded) : null,
-                'rounded_dec' => $this->rounded < 0 ? abs($this->rounded) : null,
-                'sub_total' => collect($this->sales)->sum('total'),
-                'gross_total' => collect($this->sales)->sum('total_after_disc'),
-                'admission_id' => $this->admission_id ?? null,
-                'procedure_id' => $this->procedure_id ?? null,
-                'receipt_no' => $sale_receipt_no,
-                'customer_id' => $this->customer_id ?? null,
-                'is_credit' => !empty($this->credit) ? 't' : 'f',
-                'is_paid' => !empty($this->credit) ? 'f' : 't',
-                'on_account' => !empty($this->credit) ? $total_after_disc : 0,
-            ])->id;
-
-
-            foreach ($this->sales as $s) {
-                $inv = ProductInventory::where('product_id', $s['product_id'])
-                    ->where('qty', '>', 0)->orderBy('id', 'asc')->get();
-
-                if ($inv->sum('qty') < $s['s_qty']) {
-                    throw new \Exception('System does not have much inventory for the item ' . $s['name']);
-                }
-
-                $sale_qty = $s['s_qty'];
-                foreach ($inv as $i) {
-                    if ($sale_qty > 0) {
-                        $dec = 0;
-                        $product_inv = ProductInventory::find($i->id);
-                        if (round($product_inv->supply_price, 2) > round($s['retail_price'], 2)) {
-                            throw new \Exception('You are selling ' . $s['item'] . ' at loss.');
-                        }
-                        if (round($product_inv->retail_price, 2) != round($s['retail_price'], 2)) {
-                            throw new \Exception('The retail price of ' . $s['item'] . ' is not correct.');
-                        }
-                        if ($sale_qty <= $product_inv->qty) {
-                            $dec = $sale_qty;
-                            $product_inv->decrement('qty', $sale_qty);
-                            InventoryLedger::create([
-                                'product_id' => $product_inv->product_id,
-                                'order_id' => $product_inv->po_id,
-                                'sale_id' => $sale_id,
-                                'decrease' => $sale_qty,
-                                'type' => 'sale',
-                                'description' => "Sale on dated " . date('d M, Y H:i:s') .
-                                    " against receipt #" . $sale_id
-                            ]);
-                            $sale_qty = 0;
-                        }
-                        if ($sale_qty > $product_inv->qty) {
-                            $dec = $product_inv->qty;
-                            $product_inv->decrement('qty', $dec);
-                            InventoryLedger::create([
-                                'product_id' => $product_inv->product_id,
-                                'order_id' => $product_inv->po_id,
-                                'sale_id' => $sale_id,
-                                'decrease' => $dec,
-                                'type' => 'sale',
-                                'description' => "Sale on dated " . date('d M, Y H:i:s') .
-                                    " against receipt #" . $sale_id
-                            ]);
-                            $sale_qty = $sale_qty - $dec;
-                        }
-                        $total = $s['retail_price'] * $dec;
+                        $total = $s['retail_price'] * $s['s_qty'];
 
                         $discount = round(($s['disc'] / 100) * $total, 2);
                         $after_total = $total - $discount;
-                        SaleDetail::create([
-                            'sale_id' => $sale_id,
+
+                        PendingSaleDetail::create([
+                            'sale_id' => $pending_sale_id,
                             'product_id' => $s['product_id'],
-                            'product_inventory_id' => $i->id,
-                            'qty' => $dec,
-                            'supply_price' => $product_inv->supply_price,
+
+                            'qty' => $s['s_qty'],
+                            'supply_price' => $s['supply_price'],
                             'retail_price' => $s['retail_price'],
                             'total' => $total,
                             'disc' => $s['disc'],
                             'total_after_disc' => $after_total,
-                            'retail_price_after_disc' => $after_total / $dec
-                        ]);
-                    }
-                }
-            }
-            $accounts = COA::whereIn('reference', ['pharmacy-inventory-5', 'income-pharmacy-5', 'cost-of-sales-pharmacy-5', 'exp-invoice-rounding-off'])->get();
-
-            $amounts = SaleDetail::where('sale_id', $sale_id)->select(DB::raw('SUM(total_after_disc) as sale'), DB::raw('SUM(qty * supply_price) as cost'))->first();
-            $customer_name = $this->patient_name ?? 'walking customer';
-            $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} sold to Patient {$customer_name}. Cash received PKR " .
-                number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name . " at " . date('h:i A');
-
-            $vno = Voucher::instance()->voucher()->get();
-
-            if ($this->admission) {
-                if (class_exists(\App\Models\Hospital\AdmissionJobDetail::class)) {
-                    $admission_details = \App\Models\Hospital\AdmissionJobDetail::from('admission_job_details as ajd')
-                        ->join('admissions as a', 'a.id', '=', 'ajd.admission_id')
-                        ->join('procedures as p', 'p.id', '=', 'ajd.procedure_id')
-                        ->where('ajd.admission_id', $this->admission_id)
-                        ->where('ajd.procedure_id', $this->procedure_id)
-                        ->select('a.admission_no', 'a.checkout_date', 'p.name as procedure_name')
-                        ->first();
-                    if (!empty($admission_details->checkout_date)) {
-                        throw new \Exception('Can not Issue Medicines for Closed Admission');
-                    }
-                }
-                if (class_exists(\App\Models\Hospital\AdmissionPaymentDetail::class)) {
-                    $old_sale = \App\Models\Hospital\AdmissionPaymentDetail::from('admission_payment_details as apd')->where('apd.admission_id', $this->admission_id)
-                        ->where('apd.procedure_id', $this->procedure_id)
-                        ->where('apd.medicines', 't')->first();
-
-                    $price = 0;
-                    if (!empty($old_sale)) {
-                        $price = $old_sale['amount'];
-                    }
-
-                    \App\Models\Hospital\AdmissionPaymentDetail::from('admission_payment_details as apd')->where('apd.admission_id', $this->admission_id)
-                        ->where('apd.procedure_id', $this->procedure_id)
-                        ->where('apd.medicines', 't')
-                        ->update([
-                            'sale_id' => $sale_id,
-                            'amount' => $price + $amounts->sale,
+                            'retail_price_after_disc' => $after_total / $s['s_qty']
                         ]);
 
-                    $ipd_medicine_account = COA::where('reference', 'payable-medicine-5')->first();
+                    }
 
-                    $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) .
-                        " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} issued against admission # " . $admission_details->admission_no . " and procedure " . $admission_details->procedure_name . ". Account " . $ipd_medicine_account->name . " debited with PKR " .
-                        number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name;
-                    GeneralJournal::instance()->account($ipd_medicine_account->id)->debit($amounts['sale'])->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+
+                    $this->resetAll();
+                    $this->searchableReset();
+                    $this->success = 'Sale has been added to pending list.';
+                    DB::commit();
+                    $this->pending_and_complete = false;
+                    return;
                 }
-            }
 
-            if ($this->admission == false) {
-                if (!empty($this->credit)) {
-                    $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} sold to Patient {$customer_name}.  on Account {$customer_account->name} : PKR " .
-                        number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name . " at " . date('h:i A');
-                    GeneralJournal::instance()->account($customer_account->account_id)->debit($amounts['sale'])->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
-                } else {
-//                    Rounding off changes are here!
+
+                //Here should be the conditions
+                if (env('USER_CONFIRMATION', false)) {
+                    $this->add_sale_modal = true;
+                    $this->confirmUser();
+                    if ($this->getErrorBag()->has('login')) {
+                        throw new \Exception();
+                    }
+
+                    if (auth()->user()->can('add-pending-sale')) {
+                        $this->addError('login', 'User does not have permission for a complete sale.');
+                        throw new \Exception();
+                    }
+
+                }
+
+
+                if (empty($this->credit)) {
+                    if (empty($this->received) && $this->admission == false) {
+                        throw new \Exception('Please enter received amount.');
+                    }
+                    //Round off code
+                    $this->after_round_off = collect($this->sales)->sum('total_after_disc'); //gross-price
                     $min_bill = env('MIMIMUM_ROUNDOFF_BILL', 50);
-                    $rounded = 0;
-                    if (env('ROUNDOFF_CHECK', false) && $amounts['sale'] > $min_bill) {
-                        $v1 = $amounts['sale'];
+
+                    if (env('ROUNDOFF_CHECK', false) && $this->after_round_off > $min_bill) {
+                        $v1 = $this->after_round_off;
                         $v2 = round($v1 / 5) * 5;
-                        $rounded = $v2 - $v1;
-                        $round_acc_id = $accounts->where('reference', 'exp-invoice-rounding-off')->first();
-                        if (empty($round_acc_id)) {
-                            throw new \Exception('Invoice Round Off Account not found!');
-                        }
-                        $round_acc_id = $round_acc_id->id;
+                        $this->rounded = $v2 - $v1;
+                        $this->after_round_off = $v2;
+                    }
+//                dump($this->after_round_off, $this->rounded);
+                    if ($this->admission == false && $this->received < $this->after_round_off) {
+                        throw new \Exception('Received amount should be greater than PKR ' . $this->after_round_off . "/-");
+                    }
+                } else {
+                    if (empty($this->customer_id)) {
+                        throw new \Exception('Please select patient to credit sale.');
+                    }
 
-                        if ($rounded < 0) {
+                    if (!auth()->user()->can('12.add-credit-sale')) {
+                        throw new \Exception('You dont have permission for credit sale');
+                    }
 
-                            GeneralJournal::instance()->account($round_acc_id)->debit(abs($rounded))->voucherNo($vno)
-                                ->date(date('Y-m-d'))->approve()->reference('exp-invoice-rounding-off')->description($description)->execute();
+                    $customer_account = Customer::join('chart_of_accounts as coa', 'coa.id', '=', 'customers.account_id')
+                        ->where('customers.id', $this->customer_id)
+                        ->select('coa.name', 'customers.*')
+                        ->first();
+                    $previous_credit = Ledger::where('account_id', $customer_account->account_id)
+                        ->groupBy('account_id')
+                        ->select(DB::raw('sum(debit-credit) as balance'))
+                        ->first();
+                    $previous_balance = !empty($previous_credit) ? $previous_credit->balance : 0;
+                    if (collect($this->sales)->sum('total_after_disc') + $previous_balance > $customer_account->credit_limit) {
+                        throw new \Exception('Credit limit exceeding: Available balance is PKR ' . number_format($this->customer_previous_credit));
+                    }
+                    $user_limit = UserLimit::where('user_id', Auth::id())
+                        ->where('date', date('Y-m-d'))
+                        ->first();
+                    $balance = !empty($user_limit) ? $user_limit->balance : 0;
 
-                        } elseif ($rounded > 0) {
+                    if ((collect($this->sales)->sum('total_after_disc')) + $balance > Auth::user()->credit_limit) {
+                        throw new \Exception('Amount exceeding User credit limit (PKR ' . number_format(Auth::user()->credit_limit) . ')');
+                    }
+                    $credit_amount = collect($this->sales)->sum('total_after_disc');
+                    if (!empty($user_limit)) {
+                        UserLimit::where('id', $user_limit->id)->update([
+                            'balance' => DB::raw('balance +' . $credit_amount)
+                        ]);
+                    } else {
+                        UserLimit::create([
+                            'user_id' => Auth::id(),
+                            'date' => date('Y-m-d'),
+                            'balance' => $credit_amount
+                        ]);
+                    }
+                }
 
-                            GeneralJournal::instance()->account($round_acc_id)->credit(abs($rounded))->voucherNo($vno)
-                                ->date(date('Y-m-d'))->approve()->reference('exp-invoice-rounding-off')->description($description)->execute();
+                if ($this->admission == true) {
+                    if (empty($this->handed_over)) {
+                        throw new \Exception('Handed over field is required.');
+                    }
+                }
+
+                $sale_receipt_no = Voucher::instance()->advances()->get();
+                $sub_total = collect($this->sales)->sum('total');
+                $total_after_disc = collect($this->sales)->sum('total_after_disc');
+                if (round($sub_total - $total_after_disc, 2) > round($total_discount_give, 2)) {
+                    throw new \Exception('Total discount is more than as you given to customer. Please recheck sale.');
+                }
+                //dd(round($sub_total - $total_after_disc, 2), round($total_discount_give, 2));
+
+                $sale_id = Sale::create([
+                    'patient_id' => $this->patient_id,
+                    'referred_by' => $this->referred_by_id,
+                    'sale_by' => !empty($this->pending_sale_id) ? $this->sales[0]['sale_by'] : Auth::id(),
+                    'sale_at' => date('Y-m-d H:i:s'),
+                    'remarks' => trim($this->remarks, ' '),
+                    'receive_amount' => $this->received,
+                    'payable_amount' => !empty($this->credit) ? 0 : $this->payable,
+                    'rounded_inc' => $this->rounded > 0 ? abs($this->rounded) : null,
+                    'rounded_dec' => $this->rounded < 0 ? abs($this->rounded) : null,
+                    'sub_total' => collect($this->sales)->sum('total'),
+                    'gross_total' => collect($this->sales)->sum('total_after_disc'),
+                    'admission_id' => $this->admission_id ?? null,
+                    'procedure_id' => $this->procedure_id ?? null,
+                    'receipt_no' => $sale_receipt_no,
+                    'customer_id' => $this->customer_id ?? null,
+                    'is_credit' => !empty($this->credit) ? 't' : 'f',
+                    'is_paid' => !empty($this->credit) ? 'f' : 't',
+                    'on_account' => !empty($this->credit) ? $total_after_disc : 0,
+                ])->id;
+
+
+                foreach ($this->sales as $s) {
+                    $inv = ProductInventory::where('product_id', $s['product_id'])
+                        ->where('qty', '>', 0)->orderBy('id', 'asc')->get();
+
+                    if ($inv->sum('qty') < $s['s_qty']) {
+                        throw new \Exception('System does not have much inventory for the item ' . $s['name']);
+                    }
+
+                    $sale_qty = $s['s_qty'];
+                    foreach ($inv as $i) {
+                        if ($sale_qty > 0) {
+                            $dec = 0;
+                            $product_inv = ProductInventory::find($i->id);
+                            if (round($product_inv->supply_price, 2) > round($s['retail_price'], 2)) {
+                                throw new \Exception('You are selling ' . $s['item'] . ' at loss.');
+                            }
+                            if (round($product_inv->retail_price, 2) != round($s['retail_price'], 2)) {
+                                throw new \Exception('The retail price of ' . $s['item'] . ' is not correct.');
+                            }
+                            if ($sale_qty <= $product_inv->qty) {
+                                $dec = $sale_qty;
+                                $product_inv->decrement('qty', $sale_qty);
+                                InventoryLedger::create([
+                                    'product_id' => $product_inv->product_id,
+                                    'order_id' => $product_inv->po_id,
+                                    'sale_id' => $sale_id,
+                                    'decrease' => $sale_qty,
+                                    'type' => 'sale',
+                                    'description' => "Sale on dated " . date('d M, Y H:i:s') .
+                                        " against receipt #" . $sale_id
+                                ]);
+                                $sale_qty = 0;
+                            }
+                            if ($sale_qty > $product_inv->qty) {
+                                $dec = $product_inv->qty;
+                                $product_inv->decrement('qty', $dec);
+                                InventoryLedger::create([
+                                    'product_id' => $product_inv->product_id,
+                                    'order_id' => $product_inv->po_id,
+                                    'sale_id' => $sale_id,
+                                    'decrease' => $dec,
+                                    'type' => 'sale',
+                                    'description' => "Sale on dated " . date('d M, Y H:i:s') .
+                                        " against receipt #" . $sale_id
+                                ]);
+                                $sale_qty = $sale_qty - $dec;
+                            }
+                            $total = $s['retail_price'] * $dec;
+
+                            $discount = round(($s['disc'] / 100) * $total, 2);
+                            $after_total = $total - $discount;
+                            SaleDetail::create([
+                                'sale_id' => $sale_id,
+                                'product_id' => $s['product_id'],
+                                'product_inventory_id' => $i->id,
+                                'qty' => $dec,
+                                'supply_price' => $product_inv->supply_price,
+                                'retail_price' => $s['retail_price'],
+                                'total' => $total,
+                                'disc' => $s['disc'],
+                                'total_after_disc' => $after_total,
+                                'retail_price_after_disc' => $after_total / $dec
+                            ]);
                         }
                     }
+                }
+                $accounts = COA::whereIn('reference', ['pharmacy-inventory-5', 'income-pharmacy-5', 'cost-of-sales-pharmacy-5', 'exp-invoice-rounding-off'])->get();
+
+                $amounts = SaleDetail::where('sale_id', $sale_id)->select(DB::raw('SUM(total_after_disc) as sale'), DB::raw('SUM(qty * supply_price) as cost'))->first();
+                $customer_name = $this->patient_name ?? 'walking customer';
+                $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} sold to Patient {$customer_name}. Cash received PKR " .
+                    number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name . " at " . date('h:i A');
+
+                $vno = Voucher::instance()->voucher()->get();
+
+                if ($this->admission) {
+                    if (class_exists(\App\Models\Hospital\AdmissionJobDetail::class)) {
+                        $admission_details = \App\Models\Hospital\AdmissionJobDetail::from('admission_job_details as ajd')
+                            ->join('admissions as a', 'a.id', '=', 'ajd.admission_id')
+                            ->join('procedures as p', 'p.id', '=', 'ajd.procedure_id')
+                            ->where('ajd.admission_id', $this->admission_id)
+                            ->where('ajd.procedure_id', $this->procedure_id)
+                            ->select('a.admission_no', 'a.checkout_date', 'p.name as procedure_name')
+                            ->first();
+                        if (!empty($admission_details->checkout_date)) {
+                            throw new \Exception('Can not Issue Medicines for Closed Admission');
+                        }
+                    }
+                    if (class_exists(\App\Models\Hospital\AdmissionPaymentDetail::class)) {
+                        $old_sale = \App\Models\Hospital\AdmissionPaymentDetail::from('admission_payment_details as apd')->where('apd.admission_id', $this->admission_id)
+                            ->where('apd.procedure_id', $this->procedure_id)
+                            ->where('apd.medicines', 't')->first();
+
+                        $price = 0;
+                        if (!empty($old_sale)) {
+                            $price = $old_sale['amount'];
+                        }
+
+                        \App\Models\Hospital\AdmissionPaymentDetail::from('admission_payment_details as apd')->where('apd.admission_id', $this->admission_id)
+                            ->where('apd.procedure_id', $this->procedure_id)
+                            ->where('apd.medicines', 't')
+                            ->update([
+                                'sale_id' => $sale_id,
+                                'amount' => $price + $amounts->sale,
+                            ]);
+
+                        $ipd_medicine_account = COA::where('reference', 'payable-medicine-5')->first();
+
+                        $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) .
+                            " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} issued against admission # " . $admission_details->admission_no . " and procedure " . $admission_details->procedure_name . ". Account " . $ipd_medicine_account->name . " debited with PKR " .
+                            number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name;
+                        GeneralJournal::instance()->account($ipd_medicine_account->id)->debit($amounts['sale'])->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                    }
+                }
+
+                if ($this->admission == false) {
+                    if (!empty($this->credit)) {
+                        $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} sold to Patient {$customer_name}.  on Account {$customer_account->name} : PKR " .
+                            number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name . " at " . date('h:i A');
+                        GeneralJournal::instance()->account($customer_account->account_id)->debit($amounts['sale'])->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                    } else {
+//                    Rounding off changes are here!
+                        $min_bill = env('MIMIMUM_ROUNDOFF_BILL', 50);
+                        $rounded = 0;
+                        if (env('ROUNDOFF_CHECK', false) && $amounts['sale'] > $min_bill) {
+                            $v1 = $amounts['sale'];
+                            $v2 = round($v1 / 5) * 5;
+                            $rounded = $v2 - $v1;
+                            $round_acc_id = $accounts->where('reference', 'exp-invoice-rounding-off')->first();
+                            if (empty($round_acc_id)) {
+                                throw new \Exception('Invoice Round Off Account not found!');
+                            }
+                            $round_acc_id = $round_acc_id->id;
+
+                            if ($rounded < 0) {
+
+                                GeneralJournal::instance()->account($round_acc_id)->debit(abs($rounded))->voucherNo($vno)
+                                    ->date(date('Y-m-d'))->approve()->reference('exp-invoice-rounding-off')->description($description)->execute();
+
+                            } elseif ($rounded > 0) {
+
+                                GeneralJournal::instance()->account($round_acc_id)->credit(abs($rounded))->voucherNo($vno)
+                                    ->date(date('Y-m-d'))->approve()->reference('exp-invoice-rounding-off')->description($description)->execute();
+                            }
+                        }
 
 //                    Idr tak...
 
-                    GeneralJournal::instance()->account(Auth::user()->account_id)->debit($amounts['sale'] + $rounded)->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                        GeneralJournal::instance()->account(Auth::user()->account_id)->debit($amounts['sale'] + $rounded)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                    }
+
                 }
 
-            }
+                foreach ($accounts as $a) {
+                    if ($a->reference == 'pharmacy-inventory-5') {
+                        GeneralJournal::instance()->account($a->id)->credit($amounts['cost'])->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                    }
+                    if ($a->reference == 'income-pharmacy-5') {
+                        GeneralJournal::instance()->account($a->id)->credit($amounts['sale'])->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                    }
+                    if ($a->reference == 'cost-of-sales-pharmacy-5') {
+                        GeneralJournal::instance()->account($a->id)->debit($amounts['cost'])->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                    }
+                }
+                if ($this->admission == true) {
+                    SaleIssuance::create([
+                        'sale_id' => $sale_id,
+                        'handed_over_to' => $this->handed_over,
+                    ]);
+                }
+                if (!empty($this->pending_sale_id)) {
+                    PendingSale::where('id', $this->pending_sale_id)->delete();
+                    PendingSaleDetail::where('sale_id', $this->pending_sale_id)->delete();
+                }
+                $this->resetAll();
+                $this->searchableReset();
+                $this->success = 'Sale has been complete with receipt #' . $sale_id;
 
-            foreach ($accounts as $a) {
-                if ($a->reference == 'pharmacy-inventory-5') {
-                    GeneralJournal::instance()->account($a->id)->credit($amounts['cost'])->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
-                }
-                if ($a->reference == 'income-pharmacy-5') {
-                    GeneralJournal::instance()->account($a->id)->credit($amounts['sale'])->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
-                }
-                if ($a->reference == 'cost-of-sales-pharmacy-5') {
-                    GeneralJournal::instance()->account($a->id)->debit($amounts['cost'])->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
+                DB::commit();
+                $this->emit('printInvoice', $sale_id, $this->admission_id, $this->procedure_id);
+                if (env('USER_CONFIRMATION', false)) {
+                    $this->add_sale_modal = false;
+                    $this->reloginUser();
                 }
             }
-            if ($this->admission == true) {
-                SaleIssuance::create([
-                    'sale_id' => $sale_id,
-                    'handed_over_to' => $this->handed_over,
-                ]);
-            }
-            if (!empty($this->pending_sale_id)) {
-                PendingSale::where('id', $this->pending_sale_id)->delete();
-                PendingSaleDetail::where('sale_id', $this->pending_sale_id)->delete();
-            }
-            $this->resetAll();
-            $this->searchableReset();
-            $this->success = 'Sale has been complete with receipt #' . $sale_id;
-
-            DB::commit();
-            $this->emit('printInvoice', $sale_id, $this->admission_id, $this->procedure_id);
-            if (env('USER_CONFIRMATION', false)) {
-                $this->add_sale_modal = false;
-                $this->reloginUser();
-            }
+            optional($lock)->release();
         } catch (\Exception $e) {
             $this->error = $e->getMessage();
             DB::rollBack();
+            optional($lock)->release();
         }
     }
 

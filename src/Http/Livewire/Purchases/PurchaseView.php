@@ -9,6 +9,7 @@ use Devzone\Pharmacy\Models\Payments\SupplierPaymentDetail;
 use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\PurchaseOrder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -51,14 +52,14 @@ class PurchaseView extends Component
                 ->join('products as p', 'p.id', '=', 'pr.product_id')
                 ->where('pr.purchase_id', $this->purchase_id)
                 ->select('pr.*', 'p.name', 'p.salt')
-                ->orderBy('pr.id','asc')
+                ->orderBy('pr.id', 'asc')
                 ->get();
         } else {
             $details = PurchaseOrder::from('purchase_orders as po')
                 ->join('products as p', 'p.id', '=', 'po.product_id')
                 ->where('po.purchase_id', $this->purchase_id)
                 ->select('po.*', 'p.name', 'p.salt')
-                ->orderBy('po.id','asc')
+                ->orderBy('po.id', 'asc')
                 ->get();
         }
         $purchase_receive = \Devzone\Pharmacy\Models\PurchaseReceive::where('purchase_id', $this->purchase_id)
@@ -97,27 +98,32 @@ class PurchaseView extends Component
         $id = $this->purchase_id;
         $purchase = Purchase::find($id);
         $this->validate(['purchase_description' => 'required'], [], ['purchase_description' => 'Description']);
+        $lock = Cache::lock('purchase.void.' . $this->purchase_id, 30);
         DB::beginTransaction();
         try {
-            if ($purchase) {
-                if ($purchase->status == 'awaiting-delivery' && !empty($purchase->approved_at)) {
-                    Purchase::where('id', $id)->where('status', 'awaiting-delivery')->update(['status' => 'Void', 'approved_by' => auth()->id(), 'description' => $this->purchase_description]);
-                    DB::commit();
-                    $this->success = 'Purchase Order Voided Successfully.';
-                    $this->description_check = false;
-                    return view('pharmacy::livewire.purchases.purchase-view', [$this->purchase_id]);
+            if ($lock->get()) {
+                if ($purchase) {
+                    if ($purchase->status == 'awaiting-delivery' && !empty($purchase->approved_at)) {
+                        Purchase::where('id', $id)->where('status', 'awaiting-delivery')->update(['status' => 'Void', 'approved_by' => auth()->id(), 'description' => $this->purchase_description]);
+                        DB::commit();
+                        $this->success = 'Purchase Order Voided Successfully.';
+                        $this->description_check = false;
+                        return view('pharmacy::livewire.purchases.purchase-view', [$this->purchase_id]);
+                    } else {
+                        $this->addError('Error', 'Only Approved Status can be Voided');
+                        $this->description_check = false;
+                        return view('pharmacy::livewire.purchases.purchase-view', [$this->purchase_id]);
+                    }
                 } else {
-                    $this->addError('Error', 'Only Approved Status can be Voided');
+                    $this->addError('Error', 'Record not found.');
                     $this->description_check = false;
                     return view('pharmacy::livewire.purchases.purchase-view', [$this->purchase_id]);
                 }
-            } else {
-                $this->addError('Error', 'Record not found.');
-                $this->description_check = false;
-                return view('pharmacy::livewire.purchases.purchase-view', [$this->purchase_id]);
             }
+            optional($lock)->release();
         } catch (\Exception $ex) {
             DB::rollBack();
+            optional($lock)->release();
             $this->addError('Error', 'Status could not be updated');
             $this->description_check = false;
             return view('pharmacy::livewire.purchases.purchase-view', [$this->purchase_id]);
@@ -150,6 +156,7 @@ class PurchaseView extends Component
     {
         $this->basic_info = true;
     }
+
     private function formatDate($date)
     {
         return Carbon::createFromFormat('d M Y', $date)

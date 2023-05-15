@@ -10,6 +10,7 @@ use Devzone\Pharmacy\Models\Refunds\SupplierRefund;
 use Devzone\Pharmacy\Models\Refunds\SupplierRefundDetail;
 use Devzone\Pharmacy\Models\Supplier;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -52,44 +53,48 @@ class Add extends Component
     {
         $return = (collect($this->purchase_orders)->where('return', '>', 0))->toArray();
         $this->validate();
+        $lock = Cache::lock('supplier.refund.add', 30);
         try {
-            DB::beginTransaction();
-            if (empty($return)) {
-                throw new \Exception('No product found for refund.');
-            }
-
-            $total_amount = 0;
-            foreach ($return as $o) {
-                $total_amount = $total_amount + ($o['supply_price'] * $o['return']);
-            }
-            $id = SupplierRefund::create([
-                'supplier_id' => $this->supplier_id,
-                'description' => $this->description,
-                'created_by' => Auth::user()->id,
-                'total_amount' => $total_amount
-            ])->id;
-
-            foreach ($return as $o) {
-                $check = ProductInventory::find($o['product_inventory_id']);
-                if ($o['return'] > $check['qty']) {
-                    throw new \Exception('You cannot refund more than available qty.');
+            if ($lock->get()) {
+                DB::beginTransaction();
+                if (empty($return)) {
+                    throw new \Exception('No product found for refund.');
                 }
-                SupplierRefundDetail::create([
-                    'supplier_refund_id' => $id,
-                    'product_id' => $o['product_id'],
-                    'po_id' => $o['po_id'],
-                    'supply_price' => $o['supply_price'],
-                    'qty' => $o['return'],
-                    'product_inventory_id' => $o['product_inventory_id']
-                ]);
-            }
-            DB::commit();
-            $this->success = 'Record has been added and need for approval.';
-            $this->reset(['supplier_id','closing_balance', 'supplier_name', 'purchase_orders', 'selected_orders', 'description', 'receiving_account', 'receiving_account_name']);
 
+                $total_amount = 0;
+                foreach ($return as $o) {
+                    $total_amount = $total_amount + ($o['supply_price'] * $o['return']);
+                }
+                $id = SupplierRefund::create([
+                    'supplier_id' => $this->supplier_id,
+                    'description' => $this->description,
+                    'created_by' => Auth::user()->id,
+                    'total_amount' => $total_amount
+                ])->id;
+
+                foreach ($return as $o) {
+                    $check = ProductInventory::find($o['product_inventory_id']);
+                    if ($o['return'] > $check['qty']) {
+                        throw new \Exception('You cannot refund more than available qty.');
+                    }
+                    SupplierRefundDetail::create([
+                        'supplier_refund_id' => $id,
+                        'product_id' => $o['product_id'],
+                        'po_id' => $o['po_id'],
+                        'supply_price' => $o['supply_price'],
+                        'qty' => $o['return'],
+                        'product_inventory_id' => $o['product_inventory_id']
+                    ]);
+                }
+                DB::commit();
+                $this->success = 'Record has been added and need for approval.';
+                $this->reset(['supplier_id', 'closing_balance', 'supplier_name', 'purchase_orders', 'selected_orders', 'description', 'receiving_account', 'receiving_account_name']);
+            }
+            optional($lock)->release();
         } catch (\Exception $e) {
             $this->addError('purchase_orders', $e->getMessage());
             DB::rollBack();
+            optional($lock)->release();
         }
 
     }
@@ -98,7 +103,7 @@ class Add extends Component
     {
         $array = explode(".", $name);
         if ($array[0] == 'purchase_orders') {
-            if(empty($value)){
+            if (empty($value)) {
                 $this->purchase_orders[$array[1]]['return'] = 0;
             }
             $this->purchase_orders[$array[1]]['total_return'] = round($this->purchase_orders[$array[1]]['return'] * $this->purchase_orders[$array[1]]['supply_price'], 2);

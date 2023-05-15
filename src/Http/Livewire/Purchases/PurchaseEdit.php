@@ -9,6 +9,7 @@ use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Product;
 use Devzone\Pharmacy\Models\Purchase;
 use Devzone\Pharmacy\Models\PurchaseOrder;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -32,7 +33,7 @@ class PurchaseEdit extends Component
     public $sale_days = '10';
 
     public $success;
-    public $loose_purchase='f';
+    public $loose_purchase = 'f';
 
     protected $rules = [
         'supplier_id' => 'required|integer',
@@ -51,7 +52,7 @@ class PurchaseEdit extends Component
     {
         $this->purchase_id = $purchase_id;
 
-        $this->loose_purchase = Purchase::where('id',$this->purchase_id)->pluck('is_loose')->first();
+        $this->loose_purchase = Purchase::where('id', $this->purchase_id)->pluck('is_loose')->first();
 
         $purchase = Purchase::from('purchases as p')
             ->join('suppliers as s', 's.id', '=', 'p.supplier_id')
@@ -84,9 +85,9 @@ class PurchaseEdit extends Component
             ->get();
         $arrays = [];
         foreach ($details->toArray() as $d) {
-            if ($this->loose_purchase == 't'){
+            if ($this->loose_purchase == 't') {
                 $arrays[] = $d;
-            }else {
+            } else {
                 $d['qty'] = $d['qty'] / $d['packing'];
                 $d['cost_of_price'] = $d['packing'] * $d['cost_of_price'];
                 $d['retail_price'] = $d['packing'] * $d['retail_price'];
@@ -157,7 +158,7 @@ class PurchaseEdit extends Component
     public function removeProduct($key)
     {
 
-        if (isset($this->order_list[$key])){
+        if (isset($this->order_list[$key])) {
             $data = ($this->order_list[$key]);
             if (isset($data['purchase_order_id']) && !empty($data['purchase_order_id'])) {
                 $this->deleted[] = $data['purchase_order_id'];
@@ -175,7 +176,7 @@ class PurchaseEdit extends Component
                 $this->order_list[$array[1]][$array[2]] = 0;
             }
             if (in_array($array[2], ['qty', 'cost_of_price'])) {
-                $this->order_list[$array[1]]['cost_of_price'] = round($this->order_list[$array[1]]['cost_of_price'],2);
+                $this->order_list[$array[1]]['cost_of_price'] = round($this->order_list[$array[1]]['cost_of_price'], 2);
                 $this->order_list[$array[1]]['total_cost'] = round($this->order_list[$array[1]]['qty'] * $this->order_list[$array[1]]['cost_of_price'], 2);
             }
         }
@@ -215,14 +216,14 @@ class PurchaseEdit extends Component
         $data = $this->product_data[$this->highlight_index] ?? null;
         if (!empty($data)) {
             $existing = collect($this->order_list)->where('id', $data['id'])->all();
-            $cop=null;
-            $r_price=null;
-            $total_cost=null;
-            if ($this->loose_purchase == 't'){
-                $cop = round($data['cost_of_price'] / $data['packing'],2);
-                $r_price = round($data['retail_price'] / $data['packing'],2);
+            $cop = null;
+            $r_price = null;
+            $total_cost = null;
+            if ($this->loose_purchase == 't') {
+                $cop = round($data['cost_of_price'] / $data['packing'], 2);
+                $r_price = round($data['retail_price'] / $data['packing'], 2);
                 $total_cost = $cop;
-            }else{
+            } else {
                 $cop = $data['cost_of_price'];
                 $r_price = $data['retail_price'];
                 $total_cost = $cop;
@@ -254,74 +255,77 @@ class PurchaseEdit extends Component
     public function create()
     {
         $this->validate();
+        $lock = Cache::lock('purchase.edit.' . $this->purchase_id, 30);
         try {
+            if ($lock->get()) {
+                DB::beginTransaction();
+                if (!Purchase::whereNull('approved_by')->where('id', $this->purchase_id)->exists()) {
+                    throw new \Exception('Unable to edit purchase order because this order already has been approved.');
+                }
+                Purchase::where('id', $this->purchase_id)->update([
+                    'supplier_id' => $this->supplier_id,
+                    'supplier_invoice' => $this->supplier_invoice,
+                    'delivery_date' => $this->delivery_date,
 
-            DB::beginTransaction();
-            if (!Purchase::whereNull('approved_by')->where('id', $this->purchase_id)->exists()) {
-                throw new \Exception('Unable to edit purchase order because this order already has been approved.');
-            }
-            Purchase::where('id', $this->purchase_id)->update([
-                'supplier_id' => $this->supplier_id,
-                'supplier_invoice' => $this->supplier_invoice,
-                'delivery_date' => $this->delivery_date,
+                ]);
 
-            ]);
-
-            if (!empty($this->deleted)) {
-                PurchaseOrder::whereIn('id', $this->deleted)->delete();
-            }
-
-            foreach ($this->order_list as $o) {
-
-                $qty = null;
-                $cop = null;
-                $r_price=null;
-                if ($this->loose_purchase == 't') {
-                    $qty = $o['qty'];
-                    $cop = $o['cost_of_price'];
-                    $r_price =$o['retail_price'];
-                } else {
-                    $qty = $o['qty'] * $o['packing'];
-                    $cop = $o['cost_of_price'] / $o['packing'];
-                    $r_price =$o['retail_price'] / $o['packing'];
+                if (!empty($this->deleted)) {
+                    PurchaseOrder::whereIn('id', $this->deleted)->delete();
                 }
 
-                if (!empty($o['purchase_order_id'])) {
-                    PurchaseOrder::find($o['purchase_order_id'])->update([
-                        'qty' => $qty,
-                        'cost_of_price' => $cop,
-                        'retail_price' =>$r_price,
-                        'total_cost' => $o['cost_of_price'] * $o['qty'],
-                    ]);
-                } else {
-                    $check = PurchaseOrder::where('purchase_id', $this->purchase_id)->where('product_id', $o['id'])->exists();
-                    if ($check){
-                        continue;
+                foreach ($this->order_list as $o) {
+
+                    $qty = null;
+                    $cop = null;
+                    $r_price = null;
+                    if ($this->loose_purchase == 't') {
+                        $qty = $o['qty'];
+                        $cop = $o['cost_of_price'];
+                        $r_price = $o['retail_price'];
+                    } else {
+                        $qty = $o['qty'] * $o['packing'];
+                        $cop = $o['cost_of_price'] / $o['packing'];
+                        $r_price = $o['retail_price'] / $o['packing'];
                     }
-                    PurchaseOrder::create([
-                        'purchase_id' => $this->purchase_id,
-                        'product_id' => $o['id'],
-                        'qty' => $qty,
-                        'cost_of_price' => $cop,
-                        'retail_price' =>$r_price,
-                        'total_cost' => $o['cost_of_price'] * $o['qty'] ,
-                    ]);
-                }
-                if ($this->loose_purchase == 'f') {
-                    Product::find($o['id'])->update([
-                        'cost_of_price' => $o['cost_of_price'],
-                        'retail_price' => $o['retail_price'],
-                        'supplier_id' => $this->supplier_id
-                    ]);
-                }
-            }
-            DB::commit();
-            $this->success = 'Purchase order has been updated.';
-            $this->redirect($this->purchase_id);
 
+                    if (!empty($o['purchase_order_id'])) {
+                        PurchaseOrder::find($o['purchase_order_id'])->update([
+                            'qty' => $qty,
+                            'cost_of_price' => $cop,
+                            'retail_price' => $r_price,
+                            'total_cost' => $o['cost_of_price'] * $o['qty'],
+                        ]);
+                    } else {
+                        $check = PurchaseOrder::where('purchase_id', $this->purchase_id)->where('product_id', $o['id'])->exists();
+                        if ($check) {
+                            continue;
+                        }
+                        PurchaseOrder::create([
+                            'purchase_id' => $this->purchase_id,
+                            'product_id' => $o['id'],
+                            'qty' => $qty,
+                            'cost_of_price' => $cop,
+                            'retail_price' => $r_price,
+                            'total_cost' => $o['cost_of_price'] * $o['qty'],
+                        ]);
+                    }
+                    if ($this->loose_purchase == 'f') {
+                        Product::find($o['id'])->update([
+                            'cost_of_price' => $o['cost_of_price'],
+                            'retail_price' => $o['retail_price'],
+                            'supplier_id' => $this->supplier_id
+                        ]);
+                    }
+                }
+                DB::commit();
+                $this->success = 'Purchase order has been updated.';
+                $this->redirect($this->purchase_id);
+            }
+            optional($lock)->release();
         } catch (\Exception $e) {
             $this->addError('supplier_name', $e->getMessage());
             DB::rollBack();
+            optional($lock)->release();
         }
     }
 }
