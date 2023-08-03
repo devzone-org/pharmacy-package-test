@@ -97,7 +97,6 @@ trait Searchable
         if ($this->searchable_emit_only) {
             $this->emitSelf(Str::camel('emit_' . $this->searchable_id));
         } else {
-
             $data = $this->searchable_data[$this->highlight_index] ?? null;
             $this->{$this->searchable_id} = $data['id'];
             $this->{$this->searchable_name} = $data['name'];
@@ -218,7 +217,6 @@ trait Searchable
                 ->leftJoin('product_inventories as pi', 'p.id', '=', 'pi.product_id')
                 ->leftJoin('racks as r', 'r.id', '=', 'p.rack_id')
                 ->leftJoin('manufactures as m', 'm.id', '=', 'p.manufacture_id');
-
             if (env('SCOUT_SEARCH', false)) {
                 $search = $search->whereIn('p.id', $product_ids);
             } else {
@@ -233,6 +231,7 @@ trait Searchable
                 'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'p.discountable', 'p.max_discount', 'r.name as rack', 'r.tier', 'p.control_medicine')
                 ->groupBy('p.id')
                 ->groupBy('pi.retail_price');
+
             if (env('SCOUT_SEARCH', false)) {
                 $search = $search->orderByRaw("FIELD(p.id, $ids_ordered)");
             } else {

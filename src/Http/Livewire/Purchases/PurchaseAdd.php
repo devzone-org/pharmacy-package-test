@@ -151,6 +151,9 @@ class PurchaseAdd extends Component
                 }
 
                 if (in_array($array[2], ['qty', 'cost_of_price'])) {
+                    if (empty($this->order_list[$array[1]]['cost_of_price'])) {
+                        $this->order_list[$array[1]]['cost_of_price'] = 0;
+                    }
                     $this->order_list[$array[1]]['total_cost'] = round($this->order_list[$array[1]]['qty'] * $this->order_list[$array[1]]['cost_of_price'], 2);
                 }
             }
