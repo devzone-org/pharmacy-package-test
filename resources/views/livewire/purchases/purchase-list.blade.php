@@ -10,10 +10,16 @@
                                 <div class="col-span-8 sm:col-span-2">
                                     <label for="name" class="block text-sm font-medium text-gray-700">Supplier
                                         Name</label>
-                                    <input type="text" wire:model.defer="supplier_name" readonly
-                                           wire:click="searchableOpenModal('supplier_id','supplier_name','supplier')"
-                                           name="name" id="name" autocomplete="off"
-                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <select type="text" wire:model.defer="supplier" readonly
+                                            name="name" id="name" autocomplete="off"
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                        <option value=""></option>
+                                        @foreach($suppliers as $s)
+                                            <option value="{{$s['id']}}">{{$s['name']}}</option>
+                                        @endforeach
+
+
+                                    </select>
                                 </div>
 
                                 <div class="col-span-8 sm:col-span-2">
@@ -249,7 +255,7 @@
                             {{ date('d M Y',strtotime($m->delivery_date)) }}
                         @endif
                         @if(!empty($m->expected_date))
-                                <br>
+                            <br>
                             (Exp. {{ date('d M Y',strtotime($m->expected_date)) }})
                         @endif
 

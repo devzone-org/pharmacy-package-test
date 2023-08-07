@@ -23,13 +23,16 @@
                         <div class="flex">
                             <div class="flex-shrink-0">
                                 <!-- Heroicon name: solid/exclamation -->
-                                <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg"
+                                     viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd"
+                                          d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                          clip-rule="evenodd"/>
                                 </svg>
                             </div>
                             <div class="ml-3">
                                 <p class="text-sm text-yellow-700">
-                                   You are making a loose purchase order.
+                                    You are making a loose purchase order.
                                 </p>
                             </div>
                         </div>
@@ -189,70 +192,74 @@
                 </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                @foreach($order_list as $key => $m)
-                    @php
-                        $closing= \Devzone\Pharmacy\Models\ProductInventory::where('product_id',$m['id'])->where('qty','>','0')->sum('qty');
-                    @endphp
-                    <tr>
-                        <td class="px-3 py-3   text-sm font-medium text-gray-500">
-                            {{ $loop->iteration }}
-                        </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
-                            {{ $m['name'] }}
-                        </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
-                            <input type="text" onclick="this.select()"
-                                   class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                   wire:model.defer="order_list.{{$key}}.salt">
-                        </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
-                            <input type="number" onclick="this.select()"
-                                   class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                   wire:model.lazy="order_list.{{$key}}.qty">
-                        </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
-                            {{ $m['packing'] }}
-                        </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
-                            @if($loose_purchase == 't')
-                                {{number_format($m['qty'],2)}}
-                            @else
-                                {{ number_format($m['packing']*$m['qty'],2) }}
-                            @endif
-                        </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
-                            {{ number_format($closing,2) }}
-                        </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
-                            <input type="text" onclick="this.select()"
-                                   class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                   wire:model.lazy="order_list.{{$key}}.cost_of_price">
+                    @foreach($order_list as $key => $m)
+                        @if(!empty($m['id']))
+                        @php
+                            $closing= \Devzone\Pharmacy\Models\ProductInventory::where('product_id',$m['id'])->where('qty','>','0')->sum('qty');
+                        @endphp
+                        <tr>
+                            <td class="px-3 py-3   text-sm font-medium text-gray-500">
+                                {{ $loop->iteration }}
+                            </td>
+                            <td class="px-3 py-3   text-sm text-gray-500">
+                                {{ $m['name'] }}
+                            </td>
+                            <td class="px-3 py-3   text-sm text-gray-500">
+                                <input type="text" onclick="this.select()"  wire:keydown.delete="removeProduct('{{ $key }}')"
+                                       class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                       wire:model.defer="order_list.{{$key}}.salt">
+                            </td>
+                            <td class="px-3 py-3   text-sm text-gray-500">
+                                <input type="number" onclick="this.select()"
+                                       wire:keydown.delete="removeProduct('{{ $key }}')"
+                                       class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                       wire:model.lazy="order_list.{{$key}}.qty">
+                            </td>
+                            <td class="px-3 py-3   text-sm text-gray-500">
+                                {{ $m['packing'] }}
+                            </td>
+                            <td class="px-3 py-3   text-sm text-gray-500">
+                                @if($loose_purchase == 't')
+                                    {{number_format($m['qty'],2)}}
+                                @else
+                                        {{ number_format($m['packing']*$m['qty'],2) }}
+                                @endif
+                            </td>
+                            <td class="px-3 py-3   text-sm text-gray-500">
+                                {{ number_format($closing,2) }}
+                            </td>
+                            <td class="px-3 py-3   text-sm text-gray-500">
+                                <input type="text" onclick="this.select()"  wire:keydown.delete="removeProduct('{{ $key }}')"
+                                       class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                       wire:model.lazy="order_list.{{$key}}.cost_of_price">
 
-                        </td>
-                        <td class="px-3 py-3   text-sm text-gray-500">
-                            <input type="text" onclick="this.select()"
-                                   class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                   wire:model.lazy="order_list.{{$key}}.retail_price">
+                            </td>
+                            <td class="px-3 py-3   text-sm text-gray-500">
+                                <input type="text" onclick="this.select()"  wire:keydown.delete="removeProduct('{{ $key }}')"
+                                       class="block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                       wire:model.lazy="order_list.{{$key}}.retail_price">
 
-                        </td>
-
-
-                        <td class="px-3 py-3   text-sm text-gray-500">
-                            {{ number_format($m['total_cost'],2) }}
-                        </td>
+                            </td>
 
 
-                        <td class="px-3 py-3 w-7   text-right text-sm font-medium">
-                            <svg wire:click="removeProduct('{{ $key }}')" wire:loading.attr="disabled"
-                                 class="w-6 h-6 text-red-600 cursor-pointer hover:text-red-800" fill="currentColor"
-                                 viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd"
-                                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                      clip-rule="evenodd"></path>
-                            </svg>
-                        </td>
-                    </tr>
-                @endforeach
+                            <td class="px-3 py-3   text-sm text-gray-500">
+                                {{ number_format($m['total_cost'],2) }}
+                            </td>
+
+
+                            <td class="px-3 py-3 w-7   text-right text-sm font-medium">
+                                <svg wire:click="removeProduct('{{ $key }}')" wire:loading.attr="disabled"
+                                     class="w-6 h-6 text-red-600 cursor-pointer hover:text-red-800" fill="currentColor"
+                                     viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd"
+                                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                          clip-rule="evenodd"></path>
+                                </svg>
+                            </td>
+                        </tr>
+                        @endif
+                    @endforeach
+
                 <tr class="bg-gray-50 border-b">
                     <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
 
@@ -319,7 +326,7 @@
 
             <!-- This element is to trick the browser into centering the modal contents. -->
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true"></span>
-            <div  x-show="open" x-description="Modal panel, show/hide based on modal state."
+            <div x-show="open" x-description="Modal panel, show/hide based on modal state."
                  x-transition:enter="ease-out duration-300"
                  x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                  x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
@@ -385,7 +392,7 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($product_data as $key=> $a)
                             <tr class="hover:bg-indigo-600 hover:text-white cursor-pointer  {{ $highlight_index === $key ? 'bg-indigo-600 text-white' : ' text-gray-500' }}"
-                                >
+                            >
 
                                 <td class="px-2 py-2 whitespace-nowrap text-sm ">
                                     {{ $loop->iteration }}
@@ -403,7 +410,8 @@
                                     {{ $a['packing'] }}
                                 </td>
                                 <td class="px-2 py-1 whitespace-nowrap text-sm ">
-                                    <input type="number" min="0" wire:model.defer="product_qty" wire:keydown.enter="selectProduct('{{$key}}')"
+                                    <input type="number" min="0" wire:model.defer="product_qty"
+                                           wire:keydown.enter="selectProduct('{{$key}}')"
                                            class="px-2 py-1 relative text-black focus:ring-gray-200 focus:border-indigo-500 w-full text-sm border-gray-300 rounded"
                                            autocomplete="off">
                                 </td>

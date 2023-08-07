@@ -11,6 +11,8 @@ use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\InventoryLedger;
 use Devzone\Pharmacy\Models\Product;
 use Devzone\Pharmacy\Models\ProductInventory;
+use Devzone\Pharmacy\Models\Purchase;
+use Devzone\Pharmacy\Models\PurchaseOrder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -20,11 +22,13 @@ class StockAdjustment extends Component
 {
     use Searchable;
 
+    public $supplier_id;
+    public $supplier_name;
     public $error;
     public $adjustments = [];
     public $show_model = false;
     public $remarks;
-    protected $listeners = ['emitProductId'];
+    protected $listeners = ['emitProductId', 'emitSupplierId'];
 
     public function mount()
     {
@@ -39,6 +43,27 @@ class StockAdjustment extends Component
     public function removeItem($key)
     {
         unset($this->adjustments[$key]);
+    }
+
+    public function emitSupplierId()
+    {
+        $data = $this->searchable_data[$this->highlight_index];
+        $this->supplier_id = $data['id'];
+        $this->supplier_name = $data['name'];
+        $this->searchableReset();
+
+
+        $records = Product::from('products as p')->leftJoin('product_inventories as pi', 'pi.product_id', '=', 'p.id')
+            ->where('p.supplier_id', $this->supplier_id)
+            ->groupBy('p.id')->select('p.id', 'p.name as item', DB::raw('SUM(pi.qty) as qty'), 'pi.expiry', 'p.packing')->get()->toArray();
+
+        $insertColumn = function ($array) {
+            $array['a_qty'] = '1';
+            $array['indicator'] = 'i';
+            return $array;
+        };
+
+        $this->adjustments = array_map($insertColumn, $records);
     }
 
     public function updated($name, $value)
@@ -63,7 +88,6 @@ class StockAdjustment extends Component
     {
         $data = $this->searchable_data[$this->highlight_index];
         $check = collect($this->adjustments)->where('id', $data['id'])->all();
-
         if (empty($check)) {
             $data['a_qty'] = 1;
             $data['indicator'] = 'i';
@@ -73,7 +97,6 @@ class StockAdjustment extends Component
             $qty = $this->adjustments[$key]['a_qty'];
             $this->adjustments[$key]['a_qty'] = $qty + 1;
         }
-
     }
 
     public function proceed()
@@ -83,7 +106,7 @@ class StockAdjustment extends Component
 
     public function confirm()
     {
-        $lock=Cache::lock('stock.adjustment.add',30);
+        $lock = Cache::lock('stock.adjustment.add', 30);
         try {
             if ($lock->get()) {
                 DB::beginTransaction();
@@ -96,7 +119,9 @@ class StockAdjustment extends Component
                 }
                 $vno = Voucher::instance()->voucher()->get();
                 foreach ($this->adjustments as $a) {
-
+                    if (empty($a['id'])) {
+                        continue;
+                    }
                     $inventory = ProductInventory::where('product_id', $a['id'])
                         ->when(!empty($a['expiry']), function ($q) use ($a) {
                             return $q->where('expiry', $a['expiry']);
