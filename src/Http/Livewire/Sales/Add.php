@@ -173,7 +173,7 @@ class Add extends Component
                     ->where('pm.procedure_id', $this->procedure_id)
                     ->where('pi.qty', '>', 0)
                     ->select('p.name as item', 'p.retail_price as product_price', 'p.discountable', 'p.max_discount', 'p.control_medicine', 'pm.qty as required_qty',
-                        'pi.qty as available_qty', 'pi.retail_price', 'pro.name as procedure_name',
+                        'pi.qty as available_qty', 'pi.retail_price', 'pro.name as procedure_name','p.cost_of_price as product_supply_price',
                         'pi.supply_price', 'pi.id', 'p.packing', 'pi.product_id', 'p.type', 'r.name as rack', 'r.tier')
                     ->groupBy('p.id')
                     ->orderBy('pi.qty', 'desc')->get()->toArray();
@@ -213,12 +213,14 @@ class Add extends Component
                         'tier' => $medicine['tier'],
                         'total' => $sale_qty * $medicine['retail_price'],
                         'total_after_disc' => $sale_qty * $medicine['retail_price'],
+                        'control_medicine' => $medicine['control_medicine'],
+                        'discountable' => $medicine['discountable'],
+                        'product_supply_price' => $medicine['product_supply_price'],
                     ];
                 }
             }
 
         }
-
 
         $this->searchable_emit_only = true;
 
