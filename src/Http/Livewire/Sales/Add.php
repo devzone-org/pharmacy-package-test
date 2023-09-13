@@ -840,6 +840,7 @@ class Add extends Component
                 $vno = Voucher::instance()->voucher()->get();
 
                 if ($this->admission) {
+                    $admission_details = null;
                     if (class_exists(\App\Models\Hospital\AdmissionJobDetail::class)) {
                         $admission_details = \App\Models\Hospital\AdmissionJobDetail::from('admission_job_details as ajd')
                             ->join('admissions as a', 'a.id', '=', 'ajd.admission_id')
@@ -847,6 +848,7 @@ class Add extends Component
                             ->where('ajd.admission_id', $this->admission_id)
                             ->where('ajd.procedure_id', $this->procedure_id)
                             ->select('a.admission_no', 'a.checkout_date', 'p.name as procedure_name')
+                            ->get()
                             ->first();
                         if (!empty($admission_details->checkout_date)) {
                             throw new \Exception('Can not Issue Medicines for Closed Admission');
