@@ -1,4 +1,32 @@
 <div>
+    <style>
+        .select2-container--default .select2-selection--single {
+            height: 38px;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            font-weight: 400;
+            padding: 0 5px;
+            margin-top: 5px;
+        }
+
+        .select2-container--default .select2-selection--single:focus {
+            outline: none;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 50px;
+        }
+
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            border: 1px solid #d1d5db;
+            outline: none;
+        }
+
+    </style>
     <div class="mb-5 shadow sm:rounded-md sm:overflow-hidden">
         <!-- This example requires Tailwind CSS v2.0+ -->
         <div class="flex flex-col">
@@ -7,13 +35,12 @@
                     <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
                         <div class="bg-white py-6 px-4 space-y-6 sm:p-6 ">
                             <div class="grid grid-cols-8 gap-6">
-                                <div class="col-span-8 sm:col-span-2">
+                                <div class="col-span-8 sm:col-span-2" wire:ignore>
                                     <label for="name" class="block text-sm font-medium text-gray-700">Supplier
                                         Name</label>
-                                    <input type="text" wire:model.defer="supplier_name" readonly
-                                           wire:click="searchableOpenModal('supplier_id','supplier_name','supplier')"
-                                           name="name" id="name" autocomplete="off"
-                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <select name="name" id="select2_dropdown_supplier" autocomplete="off"
+                                           class="select2_dropdown mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    </select>
                                 </div>
 
                                 <div class="col-span-8 sm:col-span-2">
@@ -47,7 +74,7 @@
                                 </div>
 
                                 <div class="col-span-8 sm:col-span-2">
-                                    <button type="button" wire:click="search" wire:loading.attr="disabled"
+                                    <button type="button" wire:click="search" wire:loading.attr="disabled" id="search"
                                             class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                         <div wire:loading wire:target="search">
                                             Searching ...
@@ -420,7 +447,7 @@
 
     </div>
 
-    @include('pharmacy::include.searchable')
+{{--    @include('pharmacy::include.searchable')--}}
 </div>
 
 <script>
@@ -436,16 +463,55 @@
 
 <script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
 <script>
-    let from_date = new Pikaday({
-        field: document.getElementById('from'),
-        format: "DD MMM YYYY"
-    });
 
-    let to_date = new Pikaday({
-        field: document.getElementById('to'),
-        format: "DD MMM YYYY"
-    });
+    $(document).ready(function () {
 
-    from_date.setDate(new Date('{{ $from }}'));
-    to_date.setDate(new Date('{{ $to }}'));
+        $('#select2_dropdown_supplier').select2({
+            ajax: {
+                url: '/pharmacy/suppliers/search',
+                dataType: 'json',
+                // Additional AJAX parameters go here; see the end of this chapter for the full code of this example
+                data: function (params) {
+                    return {
+                        name: params.term,
+                        dataType: 'json',
+                        _token: '{{csrf_token()}}'
+                    }
+                },
+                processResults: function (data) {
+                    // Transforms the top-level key of the response object from 'items' to 'results'
+                    return {
+                        "results": data
+                    };
+                },
+                minimumInputLength: 2, // Minimum number of characters before triggering the search
+                placeholder: '', // Placeholder text for the input
+                allowClear: true,
+            }
+        })
+
+
+        window.addEventListener('clear', function () {
+            $('#select2_dropdown_supplier').val(null).trigger('change');
+        });
+
+        $('#search').on('click', function () {
+            @this.
+            set('supplier_id_s', $('#select2_dropdown_supplier').select2('data')[0].id);
+        })
+
+
+        let from_date = new Pikaday({
+            field: document.getElementById('from'),
+            format: "DD MMM YYYY"
+        });
+
+        let to_date = new Pikaday({
+            field: document.getElementById('to'),
+            format: "DD MMM YYYY"
+        });
+
+        from_date.setDate(new Date('{{ $from }}'));
+        to_date.setDate(new Date('{{ $to }}'));
+    });
 </script>

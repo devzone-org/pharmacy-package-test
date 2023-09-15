@@ -3,6 +3,7 @@
 namespace Devzone\Pharmacy\Http\Controllers\Exports;
 
 use Devzone\Pharmacy\Models\Product;
+use Illuminate\Http\Request;
 use SplTempFileObject;
 use League\Csv\Writer;
 
@@ -23,9 +24,9 @@ class ProductDetailsExport
         $report = Product::from('products as p')
             ->join('purchase_orders as po', 'po.product_id', '=', 'p.id')
             ->join('purchases as pur', 'pur.id', '=', 'po.purchase_id')
-            ->join('suppliers as s','s.id','=','pur.supplier_id')
-            ->where('p.id',$this->product_id)
-            ->select('p.name as product_name','po.*','s.name as s_name')
+            ->join('suppliers as s', 's.id', '=', 'pur.supplier_id')
+            ->where('p.id', $this->product_id)
+            ->select('p.name as product_name', 'po.*', 's.name as s_name')
             ->groupBy('po.id')
             ->get()
             ->toArray();
@@ -40,10 +41,10 @@ class ProductDetailsExport
                 $r['s_name'],
                 $r['id'],
                 number_format($r['qty']),
-                number_format($r['cost_of_price'],2),
-                number_format($r['retail_price'],2),
+                number_format($r['cost_of_price'], 2),
+                number_format($r['retail_price'], 2),
                 number_format($r['total_cost'], 2),
-                date('d M Y h:i:s',strtotime($r['created_at']))
+                date('d M Y h:i:s', strtotime($r['created_at']))
             ];
         }
 
@@ -62,12 +63,10 @@ class ProductDetailsExport
         ];
 
 
-
-
         $csv = Writer::createFromFileObject(new SplTempFileObject());
 
 
-        $csv->insertOne(['Sr#', 'Product', 'Supplier','PO #','Qty', 'COP (PKR)', 'Retail Price (PKR)', 'Total Cost', 'Date']);
+        $csv->insertOne(['Sr#', 'Product', 'Supplier', 'PO #', 'Qty', 'COP (PKR)', 'Retail Price (PKR)', 'Total Cost', 'Date']);
 
         $csv->insertAll($data);
 
