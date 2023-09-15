@@ -1,4 +1,32 @@
 <div>
+    <style>
+        .select2-container--default .select2-selection--single {
+            height: 38px;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            font-weight: 400;
+            padding: 0 5px;
+            margin-top: 5px;
+        }
+
+        .select2-container--default .select2-selection--single:focus {
+            outline: none;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 50px;
+        }
+
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            border: 1px solid #d1d5db;
+            outline: none;
+        }
+
+    </style>
     <div class="shadow mb-5 overflow-hidden border-b border-gray-200 sm:rounded-lg">
         <div class="bg-white py-6 px-4 space-y-6 sm:p-6 ">
             <div class="grid grid-cols-8 gap-6">
@@ -8,21 +36,28 @@
                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 </div>
 
-                <div class="col-span-8 sm:col-span-2">
+                <div class="col-span-8 sm:col-span-2" wire:ignore>
                     <label class="block text-sm font-medium text-gray-700">Product</label>
-                    <input wire:model="product_name" readonly
-                           wire:click="searchableOpenModal('product_id', 'product_name', 'product')"
-                           type="text"
-                           autocomplete="off"
-                           class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <select id="select2_dropdown_product"
+                            class="select2_dropdown mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value=""></option>
+                    </select>
                 </div>
 
-                <div class="col-span-8 sm:col-span-2">
-                    <label for="receipt" class="block text-sm font-medium text-gray-700">Patient</label>
-                    <input type="text" readonly wire:model.defer="patient_name" wire:click="searchPatient"
-                           autocomplete="off"
-                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <div class="col-span-8 sm:col-span-2" wire:ignore>
+                    <label class="block text-sm font-medium text-gray-700">Patient</label>
+                    <select id="select2_dropdown_patient"
+                            class="select2_dropdown mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value=""></option>
+                    </select>
                 </div>
+
+                {{--                <div class="col-span-8 sm:col-span-2">--}}
+                {{--                    <label for="receipt" class="block text-sm font-medium text-gray-700">Patient</label>--}}
+                {{--                    <input type="text" readonly wire:model.defer="patient_name" wire:click="searchPatient"--}}
+                {{--                           autocomplete="off"--}}
+                {{--                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">--}}
+                {{--                </div>--}}
 
                 <div class="col-span-8 sm:col-span-2">
                     <label for="from" class="block text-sm font-medium text-gray-700">Sale From</label>
@@ -46,7 +81,7 @@
                     </select>
                 </div>
                 <div class="col-span-8 sm:col-span-2">
-                    <button type="button" wire:click="search" wire:loading.attr="disabled"
+                    <button type="button" wire:click="search" wire:loading.attr="disabled" id="search"
                             class="bg-white mt-6 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         <div wire:loading wire:target="search">
                             Searching ...
@@ -292,12 +327,12 @@
                                                 </svg>
                                             </a>
 
-                                                @if(!empty($h->remarks))
+                                            @if(!empty($h->remarks))
 
 
                                                 <span x-data="{ tooltip: false }" x-on:mouseover="tooltip = true"
-                                                  x-on:mouseleave="tooltip = false"
-                                                  class=" mr-1 h-5 w-5 cursor-pointer text-blue-500">
+                                                      x-on:mouseleave="tooltip = false"
+                                                      class=" mr-1 h-5 w-5 cursor-pointer text-blue-500">
 
 
 
@@ -342,23 +377,88 @@
 
 
     </div>
-    @include('pharmacy::include.searchable')
+    {{--    @include('pharmacy::include.searchable')--}}
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
 <script>
-    let from_date = new Pikaday({
-        field: document.getElementById('from'),
-        format: "DD MMM YYYY"
-    });
+    $(document).ready(function () {
+        // $('.select2_dropdown').select2({
+        //     placeholder: ''
+        // });
 
-    let to_date = new Pikaday({
-        field: document.getElementById('to'),
-        format: "DD MMM YYYY"
-    });
 
-    from_date.setDate(new Date('{{ $from }}'));
-    to_date.setDate(new Date('{{ $to }}'));
+        $('#select2_dropdown_product').select2({
+            ajax: {
+                url: '/pharmacy/products/search',
+                dataType: 'json',
+                // Additional AJAX parameters go here; see the end of this chapter for the full code of this example
+                data: function (params) {
+                    return {
+                        name: params.term,
+                        dataType: 'json',
+                        _token: '{{csrf_token()}}'
+                    }
+                },
+                processResults: function (data) {
+                    // Transforms the top-level key of the response object from 'items' to 'results'
+                    return {
+                        "results": data
+                    };
+                },
+                minimumInputLength: 2, // Minimum number of characters before triggering the search
+                placeholder: '', // Placeholder text for the input
+                allowClear: true,
+            }
+        })
+
+        $('#select2_dropdown_patient').select2({
+            ajax: {
+                url: '/pharmacy/patients/search',
+                dataType: 'json',
+                // Additional AJAX parameters go here; see the end of this chapter for the full code of this example
+                data: function (params) {
+                    return {
+                        name: params.term,
+                        dataType: 'json',
+                        _token: '{{csrf_token()}}'
+                    }
+                },
+                processResults: function (data) {
+                    // Transforms the top-level key of the response object from 'items' to 'results'
+                    return {
+                        "results": data
+                    };
+                },
+                minimumInputLength: 2, // Minimum number of characters before triggering the search
+                placeholder: '', // Placeholder text for the input
+                allowClear: true,
+            }
+        })
+
+        window.addEventListener('clear',function (){
+            $('#select2_dropdown_product').val(null).trigger('change');
+            $('#select2_dropdown_patient').val(null).trigger('change');
+        });
+
+        $('#search').on('click',function (){
+          @this.set('product_id',$('#select2_dropdown_product').select2('data')[0].id);
+          @this.set('patient_id',$('#select2_dropdown_patient').select2('data')[0].id);
+        })
+
+        let from_date = new Pikaday({
+            field: document.getElementById('from'),
+            format: "DD MMM YYYY"
+        });
+
+        let to_date = new Pikaday({
+            field: document.getElementById('to'),
+            format: "DD MMM YYYY"
+        });
+
+        from_date.setDate(new Date('{{ $from }}'));
+        to_date.setDate(new Date('{{ $to }}'));
+    });
 </script>

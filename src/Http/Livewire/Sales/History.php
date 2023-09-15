@@ -6,17 +6,21 @@ namespace Devzone\Pharmacy\Http\Livewire\Sales;
 
 use Carbon\Carbon;
 use Devzone\Pharmacy\Http\Traits\Searchable;
+use Devzone\Pharmacy\Models\Product;
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Sale\SaleDetail;
 use Devzone\Pharmacy\Models\Sale\SaleRefundDetail;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Models\Hospital\Patient;
 
 
 class History extends Component
 {
-    use Searchable, WithPagination;
+    use WithPagination;
 
     public $receipt;
     public $from;
@@ -26,12 +30,15 @@ class History extends Component
     public $type;
     public $product_id;
     public $product_name;
+    public $products;
+    public $patients;
 
 
     public function mount()
     {
-        $this->from =  date('d M Y', strtotime('-1 month'));
+        $this->from = date('d M Y', strtotime('-1 month'));
         $this->to = date('d M Y');
+
     }
 
     public function searchPatient()
@@ -44,8 +51,6 @@ class History extends Component
         return Carbon::createFromFormat('d M Y', $date)
             ->format('Y-m-d');
     }
-
-
 
     public function render()
     {
@@ -128,6 +133,7 @@ class History extends Component
     public function resetSearch()
     {
         $this->reset(['receipt', 'type', 'patient_id', 'patient_name', 'product_id', 'product_name']);
+        $this->dispatchBrowserEvent('clear');
         $this->resetPage();
 
     }

@@ -235,6 +235,10 @@ Route::get('report/product-details', function () {
 
 Route::get('report/product-details/export', [\Devzone\Pharmacy\Http\Controllers\Exports\ProductDetailsExport::class, 'download'])->middleware('permission:12.product-details');
 
+Route::get('products/search', [\Devzone\Pharmacy\Http\Controllers\SearchController::class, 'searchProducts']);
+Route::get('patients/search', [\Devzone\Pharmacy\Http\Controllers\SearchController::class, 'searchPatient']);
+Route::get('suppliers/search', [\Devzone\Pharmacy\Http\Controllers\SearchController::class, 'searchSupplier']);
+
 
 
 Route::get('report/sale-hourly-graph', function () {
