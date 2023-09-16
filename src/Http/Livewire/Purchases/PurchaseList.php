@@ -75,9 +75,10 @@ class PurchaseList extends Component
 
         $purchase_receives = \Devzone\Pharmacy\Models\PurchaseReceive::from('purchase_receives as pr')
             ->whereIn('pr.purchase_id',$purchase_ids)
+            ->groupBy('pr.purchase_id')
             ->select('pr.purchase_id as id', DB::raw('SUM(pr.total_cost) as cost_after_receiving'))
-            ->groupBy('id')
             ->get();
+
 
         $payments = SupplierPaymentDetail::from('supplier_payment_details as spd')
 //            ->leftJoin('supplier_payment_details as spd', 'spd.order_id', '=', 'p.id')
