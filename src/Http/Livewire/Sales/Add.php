@@ -238,7 +238,7 @@ class Add extends Component
                 ->join('products as p', 'p.id', 'psd.product_id')
                 ->join('product_inventories as pi', 'p.id', '=', 'pi.product_id')
                 ->where('ps.id', $this->pending_sale_id)
-                ->select('psd.product_id', 'psd.qty as s_qty', 'ps.sale_by', 'pi.supply_price', 'psd.total_after_disc', 'psd.total', 'p.name as item', 'p.packing', 'p.control_medicine', 'p.retail_price as product_price', 'p.cost_of_price as product_supply_price', 'p.discountable', 'p.max_discount', 'p.type', 'psd.retail_price', 'psd.disc', 'ps.patient_id', 'ps.referred_by')
+                ->select('pi.id',DB::raw('SUM(pi.qty) as qty'),'psd.product_id', 'psd.qty as s_qty', 'ps.sale_by', 'pi.supply_price', 'psd.total_after_disc', 'psd.total', 'p.name as item', 'p.packing', 'p.control_medicine', 'p.retail_price as product_price', 'p.cost_of_price as product_supply_price', 'p.discountable', 'p.max_discount', 'p.type', 'psd.retail_price', 'psd.disc', 'ps.patient_id', 'ps.referred_by')
                 ->groupBy('p.id')
                 ->get();
 
