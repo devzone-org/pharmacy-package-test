@@ -372,16 +372,17 @@
                                 @endphp
                                 @if(!empty($first['refunded_id']))
                                     @php
-                                        $total_refund = \Devzone\Pharmacy\Models\Sale\SaleRefund::from('sale_refunds as sr')
-                                                 ->join('sale_details as sd','sd.id','=','sr.sale_detail_id')
-                                                 ->where('sr.sale_id',$first['refunded_id'])
-                                                 ->where('sr.refunded_id',$sale_id)
-                                                 ->select(\Illuminate\Support\Facades\DB::raw('sum(sr.refund_qty * sd.retail_price_after_disc) as refund'))
-                                     ->first();
-                                     $refunded = $total_refund['refund'];
+                                        $total_refund = \Devzone\Pharmacy\Models\Sale\SaleRefundDetail::from('sale_refund_details as sr')
+                                        ->join('sale_details as sd','sd.id','=','sr.sale_detail_id')
+                                        ->where('sr.sale_id',$first['refunded_id'])
+                                        ->where('sr.refunded_id',$sale_id)
+                                        ->select(
+                                        \Illuminate\Support\Facades\DB::raw('sum(sr.refund_qty * sd.retail_price_after_disc) as refund')
+                                        )
+                                        ->first();
+
+                                        $refunded = $total_refund['refund'];
                                     @endphp
-
-
                                 @endif
                                 <tr>
                                     <th colspan="5" class="px-2 py-2 text-right border-r text-md text-gray-900">
