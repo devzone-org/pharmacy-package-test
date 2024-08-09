@@ -563,7 +563,7 @@ class Add extends Component
 
     public function saleComplete()
     {
-        $lock = Cache::lock('sale.complete', 30);
+        $lock = Cache::lock('sale.complete', 60);
         try {
             if ($lock->get()) {
                 if (!$this->admission) {

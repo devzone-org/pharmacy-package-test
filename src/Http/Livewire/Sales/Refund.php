@@ -318,7 +318,7 @@ class Refund extends Component
 
     public function saleComplete()
     {
-        $lock = Cache::lock('sale.refund', 30);
+        $lock = Cache::lock('sale.refund', 60);
         try {
             if ($lock->get()) {
                 $total_discount_give = 0;
