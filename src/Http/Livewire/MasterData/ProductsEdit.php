@@ -155,7 +155,7 @@ class ProductsEdit extends Component
         if ($this->force_update) {
             $this->retail_price_old = $this->retail_price;
             if($this->packing>0){
-                ProductInventory::where('product_id', $pro->id)->update([
+                ProductInventory::where('product_id', $pro->id)->where('qty','>',0)->where('supply_price','<',$this->retail_price)->update([
                     'retail_price' => $this->retail_price / $this->packing
                 ]);
             }
