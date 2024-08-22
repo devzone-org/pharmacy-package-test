@@ -5,6 +5,7 @@ namespace Devzone\Pharmacy\Http\Livewire\MasterData;
 use Devzone\Pharmacy\Http\Traits\Searchable;
 use Devzone\Pharmacy\Models\Product;
 use Devzone\Pharmacy\Models\ProductInventory;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class ProductsEdit extends Component
@@ -94,7 +95,7 @@ class ProductsEdit extends Component
             $this->type = $products['type'];
             $this->control_medicine = $products['control_medicine'];
             $this->narcotics = $products['narcotics'] == 't' ? true : false;
-            $this->temperature=$products['temperature'];
+            $this->temperature = $products['temperature'];
             $this->discount_check = $products['discountable'];
             $this->max_disc = $products['max_discount'];
 
@@ -126,44 +127,55 @@ class ProductsEdit extends Component
     public function create()
     {
         $this->validate();
-        if (Product::where('id', '!=', $this->primary_id)->where('name', $this->name)->exists()) {
-            $this->addError('name', 'This name is already exists.');
-            return false;
-        }
+        try {
 
-        $pro = Product::find($this->primary_id);
-        $pro->update([
-            'name' => $this->name,
-            'salt' => $this->salt,
-            'barcode' => $this->barcode,
-            'packing' => $this->packing,
-            'cost_of_price' => !empty($this->cost_of_price) ? $this->cost_of_price : 0,
-            'retail_price' => !empty($this->retail_price) ? $this->retail_price : 0,
-            'max_discount' => $this->max_disc ?: null,
-            'discountable' => $this->discount_check,
-            'rack_id' => $this->rack_id,
-            'manufacture_id' => $this->manufacture_id,
-            'category_id' => $this->category_id,
-            'reorder_level' => $this->reorder_level,
-            'reorder_qty' => $this->reorder_qty,
-            'narcotics' => !empty($this->narcotics) ? 't' : 'f',
-            'status' => $this->status,
-            'control_medicine' => $this->control_medicine,
-            'type' => $this->type,
-            'temperature'=>$this->temperature??null,
-        ]);
-        if ($this->force_update) {
-            $this->retail_price_old = $this->retail_price;
-            if($this->packing>0){
-                ProductInventory::where('product_id', $pro->id)->update([
-                    'retail_price' => $this->retail_price / $this->packing
-                ]);
+            DB::beginTransaction();
+
+            if (Product::where('id', '!=', $this->primary_id)->where('name', $this->name)->exists()) {
+                $this->addError('name', 'This name is already exists.');
+                return false;
             }
 
-        }
-        $this->success = 'Record has been updated.';
-        $this->reset(['retail_price_notification', 'force_update']);
+            $pro = Product::find($this->primary_id);
+            $pro->update([
+                'name' => $this->name,
+                'salt' => $this->salt,
+                'barcode' => $this->barcode,
+                'packing' => $this->packing,
+                'cost_of_price' => !empty($this->cost_of_price) ? $this->cost_of_price : 0,
+                'retail_price' => !empty($this->retail_price) ? $this->retail_price : 0,
+                'max_discount' => $this->max_disc ?: null,
+                'discountable' => $this->discount_check,
+                'rack_id' => $this->rack_id,
+                'manufacture_id' => $this->manufacture_id,
+                'category_id' => $this->category_id,
+                'reorder_level' => $this->reorder_level,
+                'reorder_qty' => $this->reorder_qty,
+                'narcotics' => !empty($this->narcotics) ? 't' : 'f',
+                'status' => $this->status,
+                'control_medicine' => $this->control_medicine,
+                'type' => $this->type,
+                'temperature' => $this->temperature ?? null,
+            ]);
+            if ($this->force_update) {
+                $this->retail_price_old = $this->retail_price;
+                if ($this->packing > 0) {
+                    if (ProductInventory::where('product_id', $pro->id)->where('qty', '>', 0)->where('supply_price', '<', $this->retail_price)->exists()) {
+                        throw new \Exception("You cannot change the retail price because there are items in the inventory with a supply price that exceeds the given retail price.");
+                    }
+                    ProductInventory::where('product_id', $pro->id)->where('qty', '>', 0)->where('supply_price', '<', $this->retail_price)->update([
+                        'retail_price' => $this->retail_price / $this->packing
+                    ]);
+                }
 
+            }
+            DB::commit();
+            $this->success = 'Record has been updated.';
+            $this->reset(['retail_price_notification', 'force_update']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->addError('error', $e->getMessage());
+        }
     }
 
     public function forceCreate()
