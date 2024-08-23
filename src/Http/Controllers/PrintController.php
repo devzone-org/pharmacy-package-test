@@ -6,6 +6,7 @@ namespace Devzone\Pharmacy\Http\Controllers;
 
 use Devzone\Pharmacy\Models\Sale\Sale;
 use Devzone\Pharmacy\Models\Sale\SaleDetail;
+use Devzone\Pharmacy\Models\Sale\SaleRefundDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Hospital\Patient;
@@ -182,7 +183,7 @@ class PrintController extends Controller
             str_pad(number_format($this->first['gross_total'] + $val, 2), 19, " ", STR_PAD_LEFT);
         $refunded = 0;
         if (!empty($this->first['refunded_id'])) {
-            $total_refund = \Devzone\Pharmacy\Models\Sale\SaleRefund::from('sale_refunds as sr')
+            $total_refund = SaleRefundDetail::from('sale_refund_details as sr')
                 ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
                 ->where('sr.sale_id', $this->first['refunded_id'])
                 ->where('sr.refunded_id', $sale_id)
@@ -450,7 +451,7 @@ class PrintController extends Controller
             str_pad(number_format($this->first['gross_total'] + $val, 2), 19, " ", STR_PAD_LEFT);
         $refunded = 0;
         if (!empty($this->first['refunded_id'])) {
-            $total_refund = \Devzone\Pharmacy\Models\Sale\SaleRefund::from('sale_refunds as sr')
+            $total_refund = SaleRefundDetail::from('sale_refund_details as sr')
                 ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
                 ->where('sr.sale_id', $this->first['refunded_id'])
                 ->where('sr.refunded_id', $sale_id)
