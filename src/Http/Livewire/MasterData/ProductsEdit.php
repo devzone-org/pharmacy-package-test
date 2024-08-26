@@ -160,7 +160,7 @@ class ProductsEdit extends Component
             if ($this->force_update) {
                 $this->retail_price_old = $this->retail_price;
                 if ($this->packing > 0) {
-                    if (ProductInventory::where('product_id', $pro->id)->where('qty', '>', 0)->where('supply_price', '<', $this->retail_price)->exists()) {
+                    if (ProductInventory::where('product_id', $pro->id)->where('qty', '>', 0)->where('supply_price', '>', $this->retail_price)->exists()) {
                         throw new \Exception("You cannot change the retail price because there are items in the inventory with a supply price that exceeds the given retail price.");
                     }
                     ProductInventory::where('product_id', $pro->id)->where('qty', '>', 0)->where('supply_price', '<', $this->retail_price)->update([
