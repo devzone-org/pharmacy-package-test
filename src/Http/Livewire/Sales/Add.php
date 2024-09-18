@@ -997,7 +997,7 @@ class Add extends Component
         $this->searchable_modal = false;
         $this->patient_registration_date = date('Y-m-d');
         $last_patient = Patient::orderBy('id', 'DESC')->first();
-        $this->patient_mr = 'MR' . str_pad($last_patient->id + 1, 6, '0', STR_PAD_LEFT);
+        $this->patient_mr = 'MR' . str_pad((!empty($last_patient) ? $last_patient->id : 0) + 1, 6, '0', STR_PAD_LEFT);
         $this->doctors = Employee::where('is_doctor', 't')->where('status', 't')->get()->toArray();
         $this->add_modal = true;
     }
