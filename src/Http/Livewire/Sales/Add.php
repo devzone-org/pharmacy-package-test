@@ -1039,7 +1039,7 @@ class Add extends Component
         $this->validate($validation);
 
         $last_patient = Patient::orderBy('id', 'DESC')->first();
-        $this->patient_mr = 'MR' . str_pad($last_patient->id + 1, 6, '0', STR_PAD_LEFT);
+        $this->patient_mr = 'MR' . str_pad((!empty($last_patient) ? $last_patient->id : 0) + 1, 6, '0', STR_PAD_LEFT);
         $created_patient = Patient::create([
             'mr_no' => $this->patient_mr ?? null,
             'name' => $this->add_patient_name,
