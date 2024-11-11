@@ -13,7 +13,11 @@ class Medicine extends Component
     {
 
         $hospital = Hospital::first();
-        $this->type = $hospital['transfer_medicine'];
+        if (!empty($hospital)) {
+            $this->type = $hospital['transfer_medicine'];
+        } else {
+            $this->type = null;
+        }
     }
 
     public function render()
