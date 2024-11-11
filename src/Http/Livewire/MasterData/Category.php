@@ -45,7 +45,11 @@ class Category extends Component
 
     public function create()
     {
-        $this->validate();
+        $this->validate([
+            'name' => 'required|string|unique:categories,name',
+            'status' => 'required|in:t,f',
+            'max_disc' => $this->discountable === 't' ? 'required_if:discountable,t|numeric|between:1,100' : 'nullable',
+        ]);
 
         \Devzone\Pharmacy\Models\Category::create([
             'name' => $this->name,
