@@ -53,7 +53,7 @@ class PurchaseReceive extends Component
         'order_list.*.disc' => 'nullable|numeric',
         'order_list.*.cost_of_price' => 'required|numeric',
         'order_list.*.retail_price' => 'required|numeric',
-        'order_list.*.expiry' => 'required|date_format:d-m-Y',
+//        'order_list.*.expiry' => 'required|date_format:d-m-Y',
         'advance_tax' => 'numeric|lte:100|gte:0'
     ];
 
@@ -327,7 +327,12 @@ class PurchaseReceive extends Component
     public function create()
     {
 
-        $this->validate();
+        $this->rules['order_list.*.expiry'] = [
+            strtolower(env('CLIENT_CODE')) === 'chk' ? 'nullable' : 'required',
+            'date_format:d-m-Y',
+        ];
+        $this->validate($this->rules);
+
         $lock = Cache::lock('purchase.receive.' . $this->purchase_id, 30);
         try {
             if ($lock->get()) {
@@ -387,7 +392,7 @@ class PurchaseReceive extends Component
                         'retail_price' => $r_price,
                         'total_cost' => $dcop * $qty,
                         'batch_no' => $o['batch_no'] ?? null,
-                        'expiry' => $this->formatExpiryDate($o['expiry']) ?? null,
+                        'expiry' => !empty($o['expiry']) ? $this->formatExpiryDate($o['expiry']) : null,
                     ]);
 
                     if ($this->loose_purchase == 'f') {

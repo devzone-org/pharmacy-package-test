@@ -961,6 +961,22 @@ class Add extends Component
         } catch (\Exception $e) {
             $this->error = $e->getMessage();
             DB::rollBack();
+            try {
+                // Get the last primary ID from the 'sales' table
+                $last_primary_id = DB::table('sales')->max('id');
+
+                // Define the next auto-increment value dynamically
+                $increment_step = 1; // You can set this dynamically if needed
+
+                // Calculate the next ID value
+                $next_primary_key = $last_primary_id + $increment_step;
+
+                // Set the AUTO_INCREMENT value to the next primary key
+                DB::statement("ALTER TABLE sales AUTO_INCREMENT = {$next_primary_key}");
+            } catch (\Exception $ex) {
+                // Handle any potential errors when setting the AUTO_INCREMENT value
+                $this->error .= ' | Auto-increment reset error: ' . $ex->getMessage();
+            }
             optional($lock)->release();
         }
     }
