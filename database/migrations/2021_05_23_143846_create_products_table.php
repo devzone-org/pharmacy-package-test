@@ -27,7 +27,7 @@ class CreateProductsTable extends Migration
             $table->integer('reorder_level')->nullable();
             $table->integer('reorder_qty')->nullable();
             $table->char('narcotics',1)->default('f');
-            $table->char('type',1)->default('f');
+            $table->char('type',1)->nullable();
             $table->char('control_medicine',1)->default('f');
             $table->char('status',1)->default('f');
             $table->timestamps();
