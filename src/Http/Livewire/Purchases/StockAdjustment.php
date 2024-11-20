@@ -25,6 +25,13 @@ class StockAdjustment extends Component
     public $show_model = false;
     public $remarks;
     protected $listeners = ['emitProductId'];
+    protected $rules = [
+        'adjustments.*.a_qty' => 'required|numeric|gte:0'
+    ];
+
+    protected $validationAttributes = [
+        'adjustments.*.a_qty' => 'Product quantity'
+    ];
 
     public function mount()
     {
@@ -49,7 +56,7 @@ class StockAdjustment extends Component
                 if ($array[2] == 'indicator' && $value == 'd' && $this->adjustments[$array[1]]['qty'] == 0) {
                     $this->adjustments[$array[1]]['indicator'] = 'i';
                 } elseif ($array[2] == 'a_qty') {
-                    if (empty($value)) {
+                    if (empty($value) || $value < 0) {
                         $this->adjustments[$array[1]][$array[2]] = 1;
                     } elseif ($this->adjustments[$array[1]]['indicator'] == 'd' && $this->adjustments[$array[1]]['qty'] < $value) {
                         $this->adjustments[$array[1]][$array[2]] = 1;
@@ -83,6 +90,7 @@ class StockAdjustment extends Component
 
     public function confirm()
     {
+        $this->validate();
         $lock=Cache::lock('stock.adjustment.add',30);
         try {
             if ($lock->get()) {
@@ -98,9 +106,14 @@ class StockAdjustment extends Component
                 foreach ($this->adjustments as $a) {
 
                     $inventory = ProductInventory::where('product_id', $a['id'])
+                        ->where('qty','>',0)
                         ->when(!empty($a['expiry']), function ($q) use ($a) {
                             return $q->where('expiry', $a['expiry']);
                         })->first();
+
+                    if (!empty($inventory) && ($a['indicator'] == 'd') && ($a['qty'] - $a['a_qty'] < 0 )){
+                        throw new \Exception('Quantity cannot be less than zero');
+                    }
 
                     if (empty($inventory)) {
                         $product = Product::find($a['id']);
@@ -115,6 +128,8 @@ class StockAdjustment extends Component
                         ]);
 
                     }
+
+
 
                     $find = ProductInventory::find($inventory['id']);
                     \Devzone\Pharmacy\Models\StockAdjustment::create([

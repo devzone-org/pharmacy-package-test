@@ -254,7 +254,8 @@
                 <div class="px-4 py-3    border-t">
                     <button type="button" wire:click="confirm" wire:loading.attr="disabled"
                             class="bg-red-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                        Confirm and Proceed
+                        <span wire:loading.remove wire:target="confirm">Confirm and Proceed</span>
+                        <span wire:loading wire:target="confirm">Adjusting...</span>
                     </button>
                 </div>
             </div>
