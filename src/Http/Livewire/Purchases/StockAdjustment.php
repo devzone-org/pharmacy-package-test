@@ -69,7 +69,7 @@ class StockAdjustment extends Component
     public function emitProductId()
     {
         $data = $this->searchable_data[$this->highlight_index];
-        $check = collect($this->adjustments)->where('id', $data['id'])->all();
+        $check = collect($this->adjustments)->where('inv_id', $data['inv_id'])->all();
 
         if (empty($check)) {
             $data['a_qty'] = 1;
@@ -105,35 +105,35 @@ class StockAdjustment extends Component
                 $vno = Voucher::instance()->voucher()->get();
                 foreach ($this->adjustments as $a) {
 
-                    $inventory = ProductInventory::where('product_id', $a['id'])
-                        ->where('qty','>',0)
-                        ->when(!empty($a['expiry']), function ($q) use ($a) {
-                            return $q->where('expiry', $a['expiry']);
-                        })->first();
+                    $inventory = ProductInventory::find($a['inv_id']);
 
-                    if (!empty($inventory) && ($a['indicator'] == 'd') && ($a['qty'] - $a['a_qty'] < 0 )){
-                        throw new \Exception('Quantity cannot be less than zero');
-                    }
-
-                    if (empty($inventory)) {
-                        $product = Product::find($a['id']);
-                        if (empty($product)) {
-                            throw new \Exception($a['item'] . ' not found.');
+                    if (!empty($inventory) && ($inventory->qty > 0)){
+                        if (($a['indicator'] == 'd') && ($a['qty'] - $a['a_qty'] < 0 )){
+                            throw new \Exception('Quantity cannot be less than zero');
                         }
-                        $inventory = ProductInventory::create([
-                            'product_id' => $a['id'],
-                            'qty' => 0,
-                            'retail_price' => $product['retail_price'] / $product['packing'],
-                            'supply_price' => $product['cost_of_price'] / $product['packing'],
-                        ]);
-
+                    }else{
+                        throw new \Exception('No inventory found against product ' .$a['item']);
                     }
 
+//                    if (empty($inventory)) {
+//                        $product = Product::find($a['id']);
+//                        if (empty($product)) {
+//                            throw new \Exception($a['item'] . ' not found.');
+//                        }
+//                        $inventory = ProductInventory::create([
+//                            'product_id' => $a['id'],
+//                            'qty' => 0,
+//                            'retail_price' => $product['retail_price'] / $product['packing'],
+//                            'supply_price' => $product['cost_of_price'] / $product['packing'],
+//                        ]);
+//
+//                    }
 
 
-                    $find = ProductInventory::find($inventory['id']);
+
+//                    $find = ProductInventory::find($inventory['id']);
                     \Devzone\Pharmacy\Models\StockAdjustment::create([
-                        'product_id' => $find['product_id'],
+                        'product_id' => $inventory['product_id'],
                         'indicator' => $a['indicator'],
                         'qty' => $a['a_qty'],
                         'current_qty' => $a['qty'] ?? 0,
@@ -143,18 +143,18 @@ class StockAdjustment extends Component
                     ]);
 
                     if ($a['indicator'] == 'i') {
-                        $increase = $increase + ($a['a_qty'] * $find['supply_price']);
-                        $description .= " [Increase - " . $a['item'] . " {$find['supply_price']} X {$a['a_qty']} = PKR" . ($a['a_qty'] * $find['supply_price']) . "/- ]";
-                        $find->increment('qty', $a['a_qty']);
+                        $increase = $increase + ($a['a_qty'] * $inventory['supply_price']);
+                        $description .= " [Increase - " . $a['item'] . " {$inventory['supply_price']} X {$a['a_qty']} = PKR" . ($a['a_qty'] * $inventory['supply_price']) . "/- ]";
+                        $inventory->increment('qty', $a['a_qty']);
                     } else {
-                        $decrease = $decrease + ($a['a_qty'] * $find['supply_price']);
-                        $description .= " [Decrease - " . $a['item'] . " {$find['supply_price']} X {$a['a_qty']} = PKR" . ($a['a_qty'] * $find['supply_price']) . "/- ]";
-                        $find->decrement('qty', $a['a_qty']);
+                        $decrease = $decrease + ($a['a_qty'] * $inventory['supply_price']);
+                        $description .= " [Decrease - " . $a['item'] . " {$inventory['supply_price']} X {$a['a_qty']} = PKR" . ($a['a_qty'] * $inventory['supply_price']) . "/- ]";
+                        $inventory->decrement('qty', $a['a_qty']);
                     }
 
                     InventoryLedger::create([
-                        'product_id' => $find['product_id'],
-                        'order_id' => $find['po_id'],
+                        'product_id' => $inventory['product_id'],
+                        'order_id' => $inventory['po_id'],
                         'increase' => $a['indicator'] == 'i' ? $a['a_qty'] : 0,
                         'decrease' => $a['indicator'] == 'd' ? $a['a_qty'] : 0,
                         'type' => 'adjustment',

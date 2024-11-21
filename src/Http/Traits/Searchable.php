@@ -253,10 +253,12 @@ trait Searchable
                 ->where(function ($q) use ($value) {
                     return $q->orWhere('p.name', 'LIKE', '%' . $value . '%')
                         ->orWhere('p.salt', 'LIKE', '%' . $value . '%');
-                })->select('p.name as item', DB::raw('SUM(qty) as qty'), 'p.id',
+                })->select('p.name as item', DB::raw('SUM(qty) as qty'), 'p.id','pi.id as inv_id',
                     'pi.expiry', 'p.packing')
-//                ->groupBy('p.id')
-                ->groupBy('pi.expiry')->orderBy('qty', 'desc')->orderBy('p.name', 'asc')->get();
+                ->groupBy('pi.po_id')
+                ->groupBy('pi.qty')
+                ->groupBy('pi.expiry')
+                ->orderBy('qty', 'desc')->orderBy('p.name', 'asc')->get();
             if ($search->isNotEmpty()) {
                 $this->searchable_data = $search->toArray();
             } else {
