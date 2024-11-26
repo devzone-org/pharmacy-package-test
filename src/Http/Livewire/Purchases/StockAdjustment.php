@@ -150,7 +150,6 @@ class StockAdjustment extends Component
                         $description .= " [Decrease - " . $a['item'] . " {$inventory['supply_price']} X {$a['a_qty']} = PKR" . ($a['a_qty'] * $inventory['supply_price']) . "/- ]";
                         $inventory->decrement('qty', $a['a_qty']);
                     }
-                    if (!env('STOCK_ADJUSTMENT_IN_LEDGER', true)) {
                         InventoryLedger::create([
                             'product_id' => $inventory['product_id'],
                             'order_id' => $inventory['po_id'],
@@ -159,7 +158,6 @@ class StockAdjustment extends Component
                             'type' => 'adjustment',
                             'description' => $description
                         ]);
-                    }
                 }
 
 
