@@ -123,6 +123,18 @@
             @endif
         </div>
 
+    @if (env('STOCK_ADJUSTMENT_IN_LEDGER', true))
+        <div class="shadow sm:rounded-md sm:overflow-hidden mt-2">
+            <div class="bg-white py-6 flex justify-between items-center px-4 sm:p-6">
+                <div>
+                    <p class="mt-1 text-red-500 font-medium">
+                        Please note: Ledger entries are not recorded for this adjustment.
+                    </p>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div x-data="{ open: @entangle('show_model') }" x-cloak x-show="open"
          class="fixed z-40 inset-0 overflow-y-auto">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">

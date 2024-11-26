@@ -91,7 +91,7 @@ class StockAdjustment extends Component
     public function confirm()
     {
         $this->validate();
-        $lock=Cache::lock('stock.adjustment.add',30);
+        $lock = Cache::lock('stock.adjustment.add', 30);
         try {
             if ($lock->get()) {
                 DB::beginTransaction();
@@ -107,12 +107,12 @@ class StockAdjustment extends Component
 
                     $inventory = ProductInventory::find($a['inv_id']);
 
-                    if (!empty($inventory) && ($inventory->qty > 0)){
-                        if (($a['indicator'] == 'd') && ($a['qty'] - $a['a_qty'] < 0 )){
+                    if (!empty($inventory) && ($inventory->qty > 0)) {
+                        if (($a['indicator'] == 'd') && ($a['qty'] - $a['a_qty'] < 0)) {
                             throw new \Exception('Quantity cannot be less than zero');
                         }
-                    }else{
-                        throw new \Exception('No inventory found against product ' .$a['item']);
+                    } else {
+                        throw new \Exception('No inventory found against product ' . $a['item']);
                     }
 
 //                    if (empty($inventory)) {
@@ -128,7 +128,6 @@ class StockAdjustment extends Component
 //                        ]);
 //
 //                    }
-
 
 
 //                    $find = ProductInventory::find($inventory['id']);
@@ -151,35 +150,38 @@ class StockAdjustment extends Component
                         $description .= " [Decrease - " . $a['item'] . " {$inventory['supply_price']} X {$a['a_qty']} = PKR" . ($a['a_qty'] * $inventory['supply_price']) . "/- ]";
                         $inventory->decrement('qty', $a['a_qty']);
                     }
-
-                    InventoryLedger::create([
-                        'product_id' => $inventory['product_id'],
-                        'order_id' => $inventory['po_id'],
-                        'increase' => $a['indicator'] == 'i' ? $a['a_qty'] : 0,
-                        'decrease' => $a['indicator'] == 'd' ? $a['a_qty'] : 0,
-                        'type' => 'adjustment',
-                        'description' => $description
-                    ]);
+                    if (!env('STOCK_ADJUSTMENT_IN_LEDGER', true)) {
+                        InventoryLedger::create([
+                            'product_id' => $inventory['product_id'],
+                            'order_id' => $inventory['po_id'],
+                            'increase' => $a['indicator'] == 'i' ? $a['a_qty'] : 0,
+                            'decrease' => $a['indicator'] == 'd' ? $a['a_qty'] : 0,
+                            'type' => 'adjustment',
+                            'description' => $description
+                        ]);
+                    }
                 }
 
 
-                $inventory_account = ChartOfAccount::where('reference', 'pharmacy-inventory-5')->first();
-                $cos_account = ChartOfAccount::where('reference', 'cost-of-sales-pharmacy-5')->first();
+                if (!env('STOCK_ADJUSTMENT_IN_LEDGER', true)) {
+                    $inventory_account = ChartOfAccount::where('reference', 'pharmacy-inventory-5')->first();
+                    $cos_account = ChartOfAccount::where('reference', 'cost-of-sales-pharmacy-5')->first();
 
 
-                $description = "Gross decrease inventory PKR" . $decrease . "/- " . "Gross increase inventory PKR" . $increase . "/- " . $description . ". by " . Auth::user()->name . " @ " . date('d M, Y h:i A');
+                    $description = "Gross decrease inventory PKR" . $decrease . "/- " . "Gross increase inventory PKR" . $increase . "/- " . $description . ". by " . Auth::user()->name . " @ " . date('d M, Y h:i A');
 
-                if ($decrease > 0) {
-                    GeneralJournal::instance()->account($inventory_account['id'])->credit($decrease)->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->description($description)->execute();
-                    GeneralJournal::instance()->account($cos_account['id'])->debit($decrease)->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->description($description)->execute();
-                }
-                if ($increase > 0) {
-                    GeneralJournal::instance()->account($cos_account['id'])->credit($increase)->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->description($description)->execute();
-                    GeneralJournal::instance()->account($inventory_account['id'])->debit($increase)->voucherNo($vno)
-                        ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    if ($decrease > 0) {
+                        GeneralJournal::instance()->account($inventory_account['id'])->credit($decrease)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                        GeneralJournal::instance()->account($cos_account['id'])->debit($decrease)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    }
+                    if ($increase > 0) {
+                        GeneralJournal::instance()->account($cos_account['id'])->credit($increase)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                        GeneralJournal::instance()->account($inventory_account['id'])->debit($increase)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->description($description)->execute();
+                    }
                 }
 
                 $this->reset(['adjustments', 'error', 'show_model', 'remarks']);
