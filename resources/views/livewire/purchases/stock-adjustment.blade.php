@@ -123,7 +123,7 @@
             @endif
         </div>
 
-    @if (env('STOCK_ADJUSTMENT_IN_LEDGER', true))
+    @if (!empty(env('STOCK_ADJUSTMENT_IN_LEDGER')))
         <div class="shadow sm:rounded-md sm:overflow-hidden mt-2">
             <div class="bg-white py-6 flex justify-between items-center px-4 sm:p-6">
                 <div>

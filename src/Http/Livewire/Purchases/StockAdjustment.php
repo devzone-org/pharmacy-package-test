@@ -161,7 +161,7 @@ class StockAdjustment extends Component
                 }
 
 
-                if (!env('STOCK_ADJUSTMENT_IN_LEDGER', true)) {
+                if (empty(env('STOCK_ADJUSTMENT_IN_LEDGER'))) {
                     $inventory_account = ChartOfAccount::where('reference', 'pharmacy-inventory-5')->first();
                     $cos_account = ChartOfAccount::where('reference', 'cost-of-sales-pharmacy-5')->first();
 
