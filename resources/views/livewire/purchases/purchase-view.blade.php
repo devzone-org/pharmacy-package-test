@@ -367,6 +367,10 @@
                         Qty
                     </th>
                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500   ">
+                        Bonus
+                    </th>
+
+                    <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500   ">
                         Supplier Cost
                     </th>
                     <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-500    ">
@@ -396,6 +400,9 @@
                             {{ $m->qty }}
                         </td>
                         <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                            {{ $m->bonus }}
+                        </td>
+                        <td class="px-3 py-3 text-center  text-sm text-gray-500">
                             {{ number_format($m->cost_of_price,2) }}
                         </td>
                         <td class="px-3 py-3  text-center text-sm text-gray-500">
@@ -421,6 +428,9 @@
                     </th>
                     <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500">
                         {{ number_format($details->sum('qty'),2) }}
+                    </th>
+                    <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500">
+                        {{ number_format($details->sum('bonus'),2) }}
                     </th>
                     <th scope="col" class="px-3 py-3 text-center text-md font-medium text-gray-500">
                         {{ number_format($details->sum('cost_of_price'),2) }}
