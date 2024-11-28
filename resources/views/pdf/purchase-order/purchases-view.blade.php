@@ -95,13 +95,19 @@ ini_set('display_errors', true);
                 Qty
             </th>
             <th>
-                Pieces in Packing
+                Bonus
+            </th>
+            <th>
+                Pieces
             </th>
             <th>
                 Total Qty
             </th>
             <th>
                 Supplier Cost
+            </th>
+            <th>
+                Discount
             </th>
 
             <th>
@@ -110,6 +116,10 @@ ini_set('display_errors', true);
         </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
+        @php
+            $bonus = 0 ;
+            $qty = 0 ;
+        @endphp
         @foreach($details as $key => $m)
             <tr class="text-center">
                 <td>
@@ -122,21 +132,44 @@ ini_set('display_errors', true);
                     {{ $m->salt }}
                 </td>
                 <td>
+                    @php
+                        if($loose_purchase == 't'){
+                           $qty += $m->qty;
+                           $bonus += $m->bonus;
+                        }
+                        else{
+                             $qty += $m->qty/$m->packing;
+                             $bonus += $m->bonus/$m->packing;
+                        }
+                    @endphp
                     @if($loose_purchase == 't')
-
                         {{$m->qty}}
                     @else
                         {{$m->qty/$m->packing}}
                     @endif
                 </td>
                 <td>
+                    @if($loose_purchase == 't')
+                        {{$m->bonus}}
+                    @else
+                        {{$m->bonus/$m->packing}}
+                    @endif
+                </td>
+                <td>
                     {{$m->packing}}
                 </td>
                 <td>
-                    {{ $m->qty }}
+                    @if($loose_purchase == 't')
+                        {{$m->qty + $m->bonus}}
+                    @else
+                        {{($m->qty) + ($m->bonus)}}
+                    @endif
                 </td>
                 <td>
                     {{ number_format($m->cost_of_price,2) }}
+                </td>
+                <td>
+                    {{ number_format($m->discount,2) }}
                 </td>
                 <td>
                     {{ number_format($m->total_cost,2) }}
@@ -145,33 +178,35 @@ ini_set('display_errors', true);
         @endforeach
         <tr>
             <th>
-
             </th>
             <th>
-
             </th>
             <th>
                 Total
             </th>
             <th>
-                @if($loose_purchase == 't')
-
-                    {{ number_format($details->sum('qty'),2) }}
-                @else
-
-                    {{ number_format($details->sum('quantity'),2) }}
-                @endif
-
+                {{ $qty }}
             </th>
+            <th>
+                {{$bonus}}
+            </th>
+
             <th>
                 {{ number_format($details->sum('packing'),2) }}
             </th>
             <th>
-                {{ number_format($details->sum('qty'),2) }}
+                @if($loose_purchase == 't')
+                    {{ number_format($details->sum('qty') + $details->sum('bonus'), 2) }}
+                @else
+                    {{  number_format($details->sum('qty')  + $details->sum('bonus'),2) }}
+                @endif
             </th>
 
             <th>
                 {{ number_format($details->sum('cost_of_price'),2) }}
+            </th>
+            <th>
+                {{ number_format($details->sum('discount'),2) }}
             </th>
 
             <th>
