@@ -77,6 +77,7 @@ class Add extends Component
                     if ($o['return'] > $check['qty']) {
                         throw new \Exception('You cannot refund more than available qty.');
                     }
+
                     SupplierRefundDetail::create([
                         'supplier_refund_id' => $id,
                         'product_id' => $o['product_id'],

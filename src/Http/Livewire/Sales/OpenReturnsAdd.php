@@ -45,6 +45,14 @@ class OpenReturnsAdd extends Component
         'returns.*.expiry' => 'required|date|after:today',
         'remarks' => 'required|string',
     ];
+    protected $messages= [
+        'returns.*.qty.required' => 'The quantity field is required.',
+        'returns.*.qty.integer' => 'The quantity must be an integer.',
+        'returns.*.qty.gt' => 'The quantity must be greater than zero.',
+        'returns.*.expiry.required' => 'The expiry date is required.',
+        'returns.*.expiry.date' => 'The expiry date must be a valid date.',
+        'returns.*.expiry.after' => 'The expiry date must be a date after today.'
+    ];
 
     protected $validationAttributes = [
         'returns' => 'Products',

@@ -109,6 +109,11 @@ class Add extends Component
 
     protected $listeners = ['openSearch', 'searchReferredBy', 'searchPatient', 'searchCustomer', 'emitCustomerIdCredit', 'emitProductId', 'emitPatientId', 'emitReferredById', 'saleComplete'];
 
+    protected $rules=[
+        'sales.*.qty' => 'required|numeric|gte:0',
+    ];
+
+
     protected $validationAttributes = [
         'add_patient_name' => 'patient name'
     ];
@@ -310,8 +315,8 @@ class Add extends Component
 
                 $data['s_qty'] = $this->product_qty > $data['qty'] ? $data['qty'] : $this->product_qty;
                 $data['disc'] = 0;
-                $data['total'] = $data['retail_price'] * $data['s_qty'];
-                $data['total_after_disc'] = $data['retail_price'] * $data['s_qty'];
+                $data['total'] = abs($data['retail_price'] * $data['s_qty']);
+                $data['total_after_disc'] = abs($data['retail_price'] * $data['s_qty']);
 
                 if ($data['control_medicine'] == 't') {
                     $this->control_med_check = true;
@@ -319,14 +324,22 @@ class Add extends Component
                 } else {
                     $data['control_medicine'] = false;
                 }
+                if ($data['s_qty'] < 0) {
+                    $data['s_qty'] = 1;
+                }
                 $this->sales[] = $data;
             } else {
                 $key = array_keys($check)[0];
                 if ($check[$key]['s_qty'] < $check[$key]['qty']) {
                     $qty = $this->sales[$key]['s_qty'];
+
+                    if ($data['s_qty'] < 0) {
+                        $data['s_qty'] = 1;
+                    }
                     $this->sales[$key]['s_qty'] = $qty + $this->product_qty;
-                    $this->sales[$key]['total'] = $this->sales[$key]['retail_price'] * $this->sales[$key]['s_qty'];
-                    $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'];
+                    $this->sales[$key]['total'] = abs($this->sales[$key]['retail_price'] * $this->sales[$key]['s_qty']);
+                    $this->sales[$key]['total_after_disc'] = abs($this->sales[$key]['total']);
+
                 }
             }
             $this->searchable_query = '';

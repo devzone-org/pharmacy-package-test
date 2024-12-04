@@ -39,10 +39,16 @@ class PurchaseEdit extends Component
         'supplier_id' => 'required|integer',
         'expected_date' => 'required|date',
         'supplier_invoice' => 'nullable|string',
-        'order_list.*.qty' => 'required|integer',
+        'order_list.*.qty' => 'required|integer|gte:0',
         'order_list.*.cost_of_price' => 'required|numeric',
         'order_list.*.retail_price' => 'required|numeric'
     ];
+    protected $messages=[
+        'order_list.*.qty.required' => 'The quantity is required.',
+        'order_list.*.qty.integer' => 'The quantity must be an integer.',
+        'order_list.*.qty.gte' => 'The quantity must be greater than or equal to zero.',
+    ];
+
 
     protected $validationAttributes = [
         'supplier_id' => 'supplier'
