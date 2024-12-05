@@ -334,7 +334,7 @@ class Add extends Component
                 $key = array_keys($check)[0];
                 if ($check[$key]['s_qty'] < $check[$key]['qty']) {
                     $qty = $this->sales[$key]['s_qty'];
-                    if ($qty < 1) {
+                    if ($qty < 0) {
                         $qty = 1;
                     }
                     if ($data['s_qty'] < 0) {
