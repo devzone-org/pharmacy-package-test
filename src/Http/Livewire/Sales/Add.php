@@ -313,9 +313,13 @@ class Add extends Component
                     }
                 }
 
+
                 $data['s_qty'] = $this->product_qty > $data['qty'] ? $data['qty'] : $this->product_qty;
+                if ($data['s_qty'] < 0) {
+                    $data['s_qty'] = 1;
+                }
                 $data['disc'] = 0;
-                $data['total'] = abs($data['retail_price'] * $data['s_qty']);
+                $data['total'] = $data['retail_price'] * $data['s_qty'];
                 $data['total_after_disc'] = abs($data['retail_price'] * $data['s_qty']);
 
                 if ($data['control_medicine'] == 't') {
@@ -324,21 +328,21 @@ class Add extends Component
                 } else {
                     $data['control_medicine'] = false;
                 }
-                if ($data['s_qty'] < 0) {
-                    $data['s_qty'] = 1;
-                }
+
                 $this->sales[] = $data;
             } else {
                 $key = array_keys($check)[0];
                 if ($check[$key]['s_qty'] < $check[$key]['qty']) {
                     $qty = $this->sales[$key]['s_qty'];
-
+                    if ($qty < 1) {
+                        $qty = 1;
+                    }
                     if ($data['s_qty'] < 0) {
                         $data['s_qty'] = 1;
                     }
                     $this->sales[$key]['s_qty'] = $qty + $this->product_qty;
-                    $this->sales[$key]['total'] = abs($this->sales[$key]['retail_price'] * $this->sales[$key]['s_qty']);
-                    $this->sales[$key]['total_after_disc'] = abs($this->sales[$key]['total']);
+                    $this->sales[$key]['total'] = $this->sales[$key]['retail_price'] * $this->sales[$key]['s_qty'];
+                    $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'];
 
                 }
             }
