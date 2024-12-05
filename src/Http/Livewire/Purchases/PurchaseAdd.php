@@ -40,10 +40,21 @@ class PurchaseAdd extends Component
         'expected_date' => 'required|date',
         'supplier_invoice' => 'nullable|string',
         'order_list' => 'required',
-        'order_list.*.qty' => 'required|integer',
+        'order_list.*.qty' => 'required|integer|gte:0',
         'order_list.*.salt' => 'nullable|string',
-        'order_list.*.cost_of_price' => 'required|numeric',
-        'order_list.*.retail_price' => 'required|numeric'
+        'order_list.*.cost_of_price' => 'required|numeric|gte:0',
+        'order_list.*.retail_price' => 'required|numeric|gte:0',
+    ];
+    protected $messages = [
+        'order_list.*.cost_of_price.required' => 'The cost price is required.',
+        'order_list.*.cost_of_price.numeric' => 'The cost price must be a valid number.',
+        'order_list.*.cost_of_price.min' => 'The cost price must be greater than zero.',
+        'order_list.*.retail_price.required' => 'The retail price is required.',
+        'order_list.*.retail_price.numeric' => 'The retail price must be a valid number.',
+        'order_list.*.retail_price.min' => 'The retail price must be greater than zero.',
+        'order_list.*.qty.required' => 'The quantity is required.',
+        'order_list.*.qty.integer' => 'The quantity must be an integer.',
+        'order_list.*.qty.gte' => 'The quantity must be greater than or equal to zero.'
     ];
 
     protected $validationAttributes = [
@@ -104,6 +115,7 @@ class PurchaseAdd extends Component
 
             foreach ($data as $key => $d) {
                 $existing = collect($this->order_list)->where('id', $d['id'])->all();
+
                 if (empty($existing)) {
                     $this->order_list[] = [
                         'id' => $d['id'],
@@ -175,8 +187,8 @@ class PurchaseAdd extends Component
             } else {
                 $this->product_data = [];
             }
-
-        } else {
+        }
+        else {
             $this->product_data = [];
         }
     }
@@ -187,6 +199,7 @@ class PurchaseAdd extends Component
             $this->highlight_index = $key;
         }
         $data = $this->product_data[$this->highlight_index] ?? null;
+
         if (!empty($data)) {
             $existing = collect($this->order_list)->where('id', $data['id'])->all();
             $cop = null;
@@ -206,14 +219,15 @@ class PurchaseAdd extends Component
                 $this->order_list[] = [
                     'id' => $data['id'],
                     'name' => $data['name'],
-                    'qty' => $this->product_qty ?? 1,
+                    'qty' => ($this->product_qty <0) ? 1 :$this->product_qty,
                     'cost_of_price' => $cop,
                     'retail_price' => $r_price,
                     'salt' => $data['salt'],
                     'total_cost' => $total_cost,
                     'packing' => $data['packing']
                 ];
-            } else {
+            }
+            else {
                 $key = array_keys($existing)[0];
                 $qty = $this->order_list[$key]['qty'];
                 $this->order_list[$key]['qty'] = $qty + $this->product_qty;

@@ -32,6 +32,9 @@ class PurchaseCompare extends Component
     public $supplier_invoice;
     public $loose_purchase = 'f';
 
+    protected $rules = [
+        'receive.*.qty' => 'required|integer|gte:0',
+    ];
     public function mount($purchase_id)
     {
         $this->purchase_id = $purchase_id;
