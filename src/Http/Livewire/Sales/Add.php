@@ -320,7 +320,7 @@ class Add extends Component
                 }
                 $data['disc'] = 0;
                 $data['total'] = $data['retail_price'] * $data['s_qty'];
-                $data['total_after_disc'] = abs($data['retail_price'] * $data['s_qty']);
+                $data['total_after_disc'] = $data['retail_price'] * $data['s_qty'];
 
                 if ($data['control_medicine'] == 't') {
                     $this->control_med_check = true;
