@@ -115,6 +115,11 @@ class MonthwiseSalesSummary extends Component
             ->toArray();
         $this->prev = $this->to->copy()->subMonth(1)->endOfMonth();
         $this->prev_2 = $this->to->copy()->subMonth(2)->endOfMonth();
+        $months = [
+            $this->to->format('Ym'),        // Current month
+            $this->prev->format('Ym'),      // Previous month
+            $this->prev_2->format('Ym')     // Two months ago
+        ];
         $stock_closing_prev = Ledger::where('account_id', $pharmacy_account->id)
             ->where('posting_date', '<=', $this->prev)
             ->select(
@@ -132,29 +137,47 @@ class MonthwiseSalesSummary extends Component
             ->first()
             ->toArray();
         for ($i = 0; $i < 3; $i++) {
+            $month = $months[$i];
+            $date = date('F Y', strtotime($month . "01"));
+
+            // Helper function to find the first matching record from an array based on 'month'
+            $get_first_record = function ($array, $month) {
+                $filtered = array_filter($array, function ($item) use ($month) {
+                    return $item['month'] == $month;
+                });
+                return $filtered ? reset($filtered) : null;
+            };
+
+            $sale_record = $get_first_record($sale, $month);
+            $sale_return_record = $get_first_record($sale_return, $month);
+            $purchase_record = $get_first_record($purchase, $month);
+
+            // Assign stock closing balances
             if ($i == 0) {
                 $closing = $stock_closing_as_at['stock_closing'];
-                $date=$this->to;
             } elseif ($i == 1) {
                 $closing = $stock_closing_prev['stock_closing'];
-                $date=$this->prev;
-            } elseif ($i == 2) {
+            } else {
                 $closing = $stock_closing_prev2['stock_closing'];
-                $date=$this->prev_2;
             }
-            $total_sale = isset($sale[$i]) ? $sale[$i]['total_after_disc'] : 0;
-            $total_return =  isset($sale_return[$i]) ? $sale_return[$i]['return_total'] : 0;
-            $sale_cos = isset($sale[$i]) ? $sale[$i]['cos'] : 0;
-            $return_cos = isset($sale_return[$i]) ? $sale_return[$i]['return_cos'] : 0;
+
+
+            $total_sale = $sale_record['total_after_disc'] ?? 0;
+            $total_return = $sale_return_record['return_total'] ?? 0;
+            $sale_cos = $sale_record['cos'] ?? 0;
+            $return_cos = $sale_return_record['return_cos'] ?? 0;
+            $purchase_total = $purchase_record['total'] ?? 0;
+
+
             $this->data[$i] = [
-                'date' => date('F Y',strtotime($date)),
-                'month' => isset($sale[$i]) ? $sale[$i]['month'] : 0,
-                'no_of_sale' => isset($sale[$i]) ? $sale[$i]['no_of_sale'] : 0,
+                'date' => $date,
+                'month' => $month,
+                'no_of_sale' => $sale_record['no_of_sale'] ?? 0,
                 'total_after_refund' => $total_sale - $total_return,
                 'cos' => $sale_cos - $return_cos,
                 'total_refund' => $total_return,
                 'total_profit' => ($total_sale - $total_return) - ($sale_cos - $return_cos),
-                'purchase' => isset($purchase[$i]) ? $purchase[$i]['total'] : 0,
+                'purchase' => $purchase_total,
                 'closing_balance' => $closing,
             ];
         }
