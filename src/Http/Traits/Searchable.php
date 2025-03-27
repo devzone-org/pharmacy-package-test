@@ -282,7 +282,7 @@ trait Searchable
                 return $q->orWhere('name', 'LIKE', '%' . $value . '%')
                     ->orWhere('mr_no', 'LIKE', '%' . $value . '%')
                     ->orWhere('phone', 'LIKE', '%' . $value . '%');
-            })->select('mr_no', 'name', 'phone', 'id', 'customer_id', 'account_id')->get();
+            })->select('mr_no', 'name', 'phone', 'id', 'customer_id', 'account_id')->limit(25)->get();
             if ($search->isNotEmpty()) {
                 $this->searchable_data = $search->toArray();
             } else {
