@@ -113,8 +113,8 @@ class MonthwiseSalesSummary extends Component
             )
             ->first()
             ->toArray();
-        $this->prev = $this->to->copy()->subMonth(1)->endOfMonth();
-        $this->prev_2 = $this->to->copy()->subMonth(2)->endOfMonth();
+        $this->prev = Carbon::now()->subMonth(1)->endOfMonth();
+        $this->prev_2 = Carbon::now()->subMonth(2)->endOfMonth();
         $months = [
             $this->to->format('Ym'),        // Current month
             $this->prev->format('Ym'),      // Previous month
