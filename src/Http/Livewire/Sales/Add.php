@@ -337,6 +337,7 @@ class Add extends Component
                     if ($qty < 0) {
                         $qty = 1;
                     }
+                    $data['s_qty'] = $this->product_qty > $data['qty'] ? $data['qty'] : $this->product_qty;
                     if ($data['s_qty'] < 0) {
                         $data['s_qty'] = 1;
                     }
