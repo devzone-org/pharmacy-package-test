@@ -583,10 +583,9 @@ class Refund extends Component
                                         }
                                     }
 
-                                    $discount = round(($disc / 100) * $this->sales[$key]['total'], 2);
-                                    $this->sales[$key]['total_after_disc'] = $this->sales[$key]['total'] - $discount;
+                                    $discount = round(($disc / 100) * $total, 2);
+                                    $this->sales[$key]['total_after_disc'] = $total - $discount;
                                     $this->sales[$key]['disc'] = $disc;
-                                    $total = $this->sales[$key]['total'];
                                 }
 
                                 $after_total = $total - $discount;
