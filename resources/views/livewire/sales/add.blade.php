@@ -138,6 +138,17 @@
                                 Search Item (F1)
                               </button>
                             </span>
+                            @if(strtolower(env('CLIENT_CODE')) == "xxx")
+                                <span class="ml-3">
+                              <a href="/pharmacy/sales/open-returns"
+                                 target="_blank"
+                                 class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <svg class="flex-shrink-0 h-5 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"></path></svg>
+                                Open Returns
+                              </a>
+                            </span>
+                            @endif
+
 
                             <span>
                                 @if(!$pending_sale && env('PHARMACY_PENDING_SALE',false))
@@ -157,7 +168,8 @@
                                 @endif
                             </span>
 
-                            <span class="ml-3">
+                            @if(strtolower(env('CLIENT_CODE')) != "xxx")
+                                <span class="ml-3">
                               <button type="button" wire:click="saleComplete" wire:loading.attr="disabled"
                                       class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
 
@@ -180,6 +192,7 @@
                                   @endif
                               </button>
                             </span>
+                            @endif
 
                         </div>
 
@@ -533,6 +546,33 @@
 
 
                     </main>
+                    @if(strtolower(env('CLIENT_CODE')) == 'xxx')
+                        <div class="flex justify-end lg:mt-0 lg:ml-4 ">
+                            <span>
+                            <button type="button" wire:click="saleComplete" wire:loading.attr="disabled"
+                                    class="inline-flex items-center mt-3 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+
+                              <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                   xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round"
+                                                                            stroke-linejoin="round"
+                                                                            stroke-width="2"
+                                                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+
+                            @if($admission)
+                                    Transfer Medicine (F2)
+                                @else
+                                    @if($pending_sale)
+                                        Pending Sale
+                                    @else
+                                        Complete Sale
+                                    @endif
+                                      (F2)
+
+                                @endif
+                          </button>
+                        </span>
+                        </div>
+                    @endif
                 </div>
             </main>
         </div>

@@ -687,7 +687,11 @@ class Add extends Component
 
                 if (empty($this->credit)) {
                     if (empty($this->received) && $this->admission == false) {
-                        throw new \Exception('Please enter received amount.');
+                        if(strtolower(env('CLIENT_CODE')) == 'xxx'){
+                            $this->received =  collect($this->sales)->sum('total_after_disc');
+                        }else{
+                            throw new \Exception('Please enter received amount.');
+                        }
                     }
                     //Round off code
                     $this->after_round_off = collect($this->sales)->sum('total_after_disc'); //gross-price
