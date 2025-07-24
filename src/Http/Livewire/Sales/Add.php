@@ -371,7 +371,11 @@ class Add extends Component
 
     public function searchPatient()
     {
-        $this->searchableOpenModal('patient_id', 'patient_name', 'patient');
+        if(filter_var(env('SHOW_ADD_FORM', false), FILTER_VALIDATE_BOOLEAN)){
+            $this->openAddModel();
+        }else{
+            $this->searchableOpenModal('patient_id', 'patient_name', 'patient');
+        }
     }
 
     public function render()
