@@ -138,7 +138,7 @@
                                 Search Item (F1)
                               </button>
                             </span>
-                            @if(strtolower(env('CLIENT_CODE')) == "xxx")
+                            @if(strtolower(env('CLIENT_CODE')) == "smc")
                                 <span class="ml-3">
                               <a href="/pharmacy/sales/open-returns"
                                  target="_blank"
@@ -168,7 +168,7 @@
                                 @endif
                             </span>
 
-                            @if(strtolower(env('CLIENT_CODE')) != "xxx")
+                            @if(strtolower(env('CLIENT_CODE')) != "smc")
                                 <span class="ml-3">
                               <button type="button" wire:click="saleComplete" wire:loading.attr="disabled"
                                       class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -546,7 +546,7 @@
 
 
                     </main>
-                    @if(strtolower(env('CLIENT_CODE')) == 'xxx')
+                    @if(strtolower(env('CLIENT_CODE')) == 'smc')
                         <div class="flex justify-end lg:mt-0 lg:ml-4 ">
                             <span>
                             <button type="button" wire:click="saleComplete" wire:loading.attr="disabled"
