@@ -228,9 +228,6 @@ class Add extends Component
         }
 
         $this->searchable_emit_only = true;
-        if(strtolower(env('CLIENT_CODE')) == "smc"){
-            $this->received = collect($this->sales)->sum('total_after_disc');
-        }
 
         $this->employees = DB::table('employees')->get()->toArray();
         $this->employees = (json_decode(json_encode($this->employees), true));
@@ -350,6 +347,9 @@ class Add extends Component
 
                 }
             }
+            if(strtolower(env('CLIENT_CODE')) == "smc"){
+                $this->received = collect($this->sales)->sum('total_after_disc');
+            }
             $this->searchable_query = '';
             $this->searchable_data = [];
             $this->product_qty = null;
@@ -420,9 +420,6 @@ class Add extends Component
                     $this->sales[$array[1]]['total_after_disc'] = $this->sales[$array[1]]['total'] - $discount;
                 }
             }
-            if(strtolower(env('CLIENT_CODE')) == "smc"){
-                $this->received = collect($this->sales)->sum('total_after_disc');
-            }
         }
 
     }
@@ -451,9 +448,6 @@ class Add extends Component
                     $this->sales[$key]['disc'] = $disc;
                 }
             }
-        }
-        if(strtolower(env('CLIENT_CODE')) == "smc"){
-            $this->received = collect($this->sales)->sum('total_after_disc');
         }
 
     }
@@ -696,7 +690,11 @@ class Add extends Component
 
                 if (empty($this->credit)) {
                     if (empty($this->received) && $this->admission == false) {
-                        throw new \Exception('Please enter received amount.');
+                        if(strtolower(env('CLIENT_CODE')) == 'smc'){
+                            $this->received =  collect($this->sales)->sum('total_after_disc');
+                        }else{
+                            throw new \Exception('Please enter received amount.');
+                        }
                     }
                     //Round off code
                     $this->after_round_off = collect($this->sales)->sum('total_after_disc'); //gross-price
