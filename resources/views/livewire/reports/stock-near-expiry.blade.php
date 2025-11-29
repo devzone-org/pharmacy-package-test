@@ -145,64 +145,69 @@
                             </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($report as $r)
-                                <tr>
-                                    <td class="px-3 py-3   text-sm font-medium text-gray-500">
-                                        {{$loop->iteration}}
+                            @foreach($products as $r)
+                                <tr>                                    <td class="px-3 py-3 text-sm font-medium text-gray-500 text-center">
+                                        {{ $loop->iteration + ($products->currentPage() - 1) * $products->perPage() }}
                                     </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{$r['item']}}
+                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
+                                        {{ $r->name }}
                                     </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{$r['po_id']}}
+                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
+                                        {{ $r->po_id }}
                                     </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{!empty($r['manufacturer'])  ? $r['manufacturer'] : '-'}}
+                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
+                                        {{ $r->manufacturer ?? '-' }}
                                     </td>
-                                    <td class="px-3 py-3  text-center text-sm text-gray-500">
-                                        {{!empty($r['category']) ? $r['category'] : '-'}}
+                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
+                                        {{ $r->category ?? '-' }}
                                     </td>
-                                    <td class="px-3 py-3  text-center text-sm text-gray-500">
-                                        {{!empty($r['rack']) ? $r['rack'] : '-'}}
+                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
+                                        {{ $r->rack ?? '-' }}
                                     </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{$r['supplier']}}
+                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
+                                        {{ $r->supplier_name }}
                                     </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        @if($r['type']=='s') Sound alike @elseif($r['type']=='l') Look alike @else - @endif
-                                    </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{$r['stock_in_hand']}}
-                                    </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{!empty($r['expiry']) ? date('d M Y',strtotime($r['expiry'])) : 'Not Defined'}}
-                                    </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        @if($r['expired'])
-                                            <span class="text-red-600"> Already Expired</span>
+                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
+                                        @if($r->type=='s')
+                                            Sound alike
+                                        @elseif($r->type=='l')
+                                            Look alike
                                         @else
-                                            {{$r['expiring_in']}}
+                                            -
                                         @endif
                                     </td>
-                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
-                                        {{!empty($r['last_sold']) ? date('d M Y',strtotime($r['last_sold'])) : '-'}}
+                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
+                                        {{ $r->qty }}
+                                    </td>
+                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
+                                        {{ $r->expiry ? date('d M Y', strtotime($r->expiry)) : 'Not Defined' }}
+                                    </td>
+                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
+                                        {!! $r->expired
+                                            ? '<span class="text-red-600">Already Expired</span>'
+                                            : $r->expiring_in !!}
+                                    </td>
+                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
+                                        {{ $r->last_sold ? date('d M Y', strtotime($r->last_sold)) : '-' }}
                                     </td>
                                 </tr>
                             @endforeach
+
                             <tr class="bg-gray-50">
-                                <th scope="col" colspan="8"
-                                    class="px-3 py-3 text-left text-sm font-medium text-gray-900">
+                                <th colspan="8"></th>
+                                <th class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                    {{ number_format($products->sum('qty')) }}
                                 </th>
-                                <th scope="col"
-                                    class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                    {{number_format(collect($report)->sum('stock_in_hand'))}}
-                                </th>
-                                <th scope="col" colspan="3"
-                                    class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                </th>
+                                <th colspan="3"></th>
                             </tr>
                             </tbody>
+
                         </table>
+                        @if($products->hasPages())
+                            <div class="bg-white border-t px-3 py-2">
+                                {{ $products->links() }}
+                            </div>
+                        @endif
                     </div>
                 </div>
 
