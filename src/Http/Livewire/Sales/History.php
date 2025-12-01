@@ -111,7 +111,7 @@ class History extends Component
                 's.payable_amount',
                 's.rounded_inc',
                 's.rounded_dec',
-
+                's.charges',
                 's.is_credit',
                 's.is_paid',
                 's.on_account',

@@ -38,7 +38,7 @@ class Transaction extends Component
                 ->join('users as u', 'u.id', '=', 's.sale_by')
                 ->where('s.id', $sale_id)
                 ->select('sd.*', 'p.name as product_name', 's.patient_id', 'e.name as referred_by',
-                    'u.name as sale_by', 's.sale_at', 's.is_credit', 's.rounded_inc', 's.rounded_dec')
+                    'u.name as sale_by', 's.sale_at','s.charges', 's.is_credit', 's.rounded_inc', 's.rounded_dec')
                 ->get();
             $this->sales = $sale->toArray();
 

@@ -142,6 +142,13 @@
                                     class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Discount (PKR)
                                 </th>
+                                @if(strtolower(env('CLIENT_CODE'))=='smc')
+                                    <th scope="col"
+                                        class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
+                                        Nursery Charges (PKR)
+                                    </th>
+                                @endif
+
                                 <th scope="col"
                                     class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
                                     Sale Return (PKR)
@@ -236,31 +243,57 @@
                                     <td title="Discount (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
                                         ({{ number_format($h['total'] - $h['total_after_disc'],2) }})
                                     </td>
+                                    @if(strtolower(env('CLIENT_CODE'))=='smc')
+                                    <td title="Charges (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        {{ number_format($h['charges'],2) }}
+                                    </td>
+                                    @endif
                                     <td title="Sale Return (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
                                         ({{ number_format($h['sale_return'],2) }})
                                     </td>
                                     <td title=" Net Sale (PKR)" class="px-3 py-3  text-center text-sm text-gray-500">
-                                        {{ number_format($h['total_after_disc']-$h['sale_return'],2) }}
+                                        @php
+                                            $charges_amt = strtolower(env('CLIENT_CODE'))=='smc' ? $h['charges'] : 0;
+                                        @endphp
+                                        {{ number_format($h['total_after_disc'] + $charges_amt - $h['sale_return'],2) }}
                                     </td>
                                     <td title="Cash (PKR)" class="px-3 py-3  text-center text-sm text-gray-500">
-                                        {{ number_format($h['total_after_disc']-$h['sale_return'],2) }}
+                                        @if($h['is_credit'] == 'f')
+                                            @php
+                                                $charges_amt = strtolower(env('CLIENT_CODE'))=='smc' ? $h['charges'] : 0;
+                                            @endphp
+                                            {{ number_format($h['total_after_disc'] + $charges_amt - $h['sale_return'],2) }}
+                                        @else
+                                            0.00
+                                        @endif
                                     </td>
                                     <td title="Credit (PKR)" class="px-3 py-3  text-center text-sm text-gray-500">
-                                        {{ number_format($h['total_after_disc']-$h['sale_return'],2) }}
+                                        @if($h['is_credit'] == 't')
+                                            @php
+                                                $charges_amt = strtolower(env('CLIENT_CODE'))=='smc' ? $h['charges'] : 0;
+                                            @endphp
+                                            {{ number_format($h['total_after_disc'] + $charges_amt - $h['sale_return'],2) }}
+                                        @else
+                                            0.00
+                                        @endif
                                     </td>
                                     <td title="COS (PKR)" class="px-3 py-3 text-center  text-sm text-gray-500">
                                         {{ number_format($h['cos'],2) }}
                                     </td>
                                     <td title="Gross Profit (PKR)" class="px-3 py-3  text-center text-sm text-gray-500">
-                                        {{number_format($h['total_after_disc']-$h['sale_return']-$h['cos'],2)}}
+                                        @php
+                                            $charges_amt = strtolower(env('CLIENT_CODE'))=='smc' ? $h['charges'] : 0;
+                                        @endphp
+                                        {{number_format($h['total_after_disc'] + $charges_amt - $h['sale_return'] - $h['cos'],2)}}
                                     </td>
                                     <td title="Gross Margin (%)" class="px-3 py-3  text-center text-sm text-gray-500">
                                         @php
-                                            $total_after_disc=$h['total_after_disc']-$h['sale_return'];
-                                            $total_after_disc=empty($total_after_disc) ? 1 : $total_after_disc
+                                            $charges_amt = strtolower(env('CLIENT_CODE'))=='smc' ? $h['charges'] : 0;
+                                            $total_after_disc = $h['total_after_disc'] + $charges_amt - $h['sale_return'];
+                                            $total_after_disc = empty($total_after_disc) ? 1 : $total_after_disc
                                         @endphp
 
-                                        {{number_format((($h['total_after_disc']-$h['sale_return']-$h['cos'])/$total_after_disc)*100,2)}}
+                                        {{number_format((($h['total_after_disc'] + $charges_amt - $h['sale_return'] - $h['cos'])/$total_after_disc)*100,2)}}
                                         %
                                     </td>
                                     <td title="Sold By" class="px-3 py-3 text-center  text-sm text-gray-500">
@@ -281,24 +314,39 @@
                                     ({{ number_format(collect($report)->sum('total') - collect($report)->sum('total_after_disc'),2) }}
                                     )
                                 </th>
+                                @if(strtolower(env('CLIENT_CODE'))=='smc')
+                                <th title="Charges (PKR)" scope="col"
+                                    class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                    {{ number_format(collect($report)->sum('charges'),2) }}
+                                </th>
+                                @endif
                                 <th title="Sale Return (PKR)" scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900">
                                     ({{number_format(collect($report)->sum('sale_return'),2)}})
                                 </th>
                                 <th title="Net Sale (PKR)" scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                    {{ number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return'),2) }}
+                                    @php
+                                        $charges_total = strtolower(env('CLIENT_CODE'))=='smc' ? collect($report)->sum('charges') : 0;
+                                    @endphp
+                                    {{ number_format(collect($report)->sum('total_after_disc') + $charges_total - collect($report)->sum('sale_return'),2) }}
                                 </th>
 
                                 <th title="Cash (PKR)" scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                    {{ number_format(collect($report)->where('is_credit','f')->sum('total_after_disc')-collect($report)->where('is_credit','f')->sum('sale_return'),2) }}
+                                    @php
+                                        $charges_total = strtolower(env('CLIENT_CODE'))=='smc' ? collect($report)->where('is_credit','f')->sum('charges') : 0;
+                                    @endphp
+                                    {{ number_format(collect($report)->where('is_credit','f')->sum('total_after_disc') + $charges_total - collect($report)->where('is_credit','f')->sum('sale_return'),2) }}
 
                                 </th>
 
                                 <th title="Credit (PKR)" scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                    {{ number_format(collect($report)->where('is_credit','t')->sum('total_after_disc')-collect($report)->where('is_credit','t')->sum('sale_return'),2) }}
+                                    @php
+                                        $charges_total = strtolower(env('CLIENT_CODE'))=='smc' ? collect($report)->where('is_credit','t')->sum('charges') : 0;
+                                    @endphp
+                                    {{ number_format(collect($report)->where('is_credit','t')->sum('total_after_disc') + $charges_total - collect($report)->where('is_credit','t')->sum('sale_return'),2) }}
 
                                 </th>
                                 <th scope="col" title="COS (PKR)"
@@ -308,15 +356,19 @@
 
                                 <th title="Gross Profit (PKR)" scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                    {{number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos'),2)}}
+                                    @php
+                                        $charges_total = strtolower(env('CLIENT_CODE'))=='smc' ? collect($report)->sum('charges') : 0;
+                                    @endphp
+                                    {{number_format(collect($report)->sum('total_after_disc') + $charges_total - collect($report)->sum('sale_return') - collect($report)->sum('cos'),2)}}
                                 </th>
                                 @php
-                                    $grand_total_after_disc=collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return');
+                                    $charges_total = strtolower(env('CLIENT_CODE'))=='smc' ? collect($report)->sum('charges') : 0;
+                                    $grand_total_after_disc=collect($report)->sum('total_after_disc') + $charges_total - collect($report)->sum('sale_return');
                                        $grand_total_after_disc= empty($grand_total_after_disc) ? 1 :$grand_total_after_disc;
                                 @endphp
                                 <th title="Gross Margin (%)" scope="col"
                                     class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                    {{number_format(((collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos'))/$grand_total_after_disc)*100,2)}}
+                                    {{number_format(((collect($report)->sum('total_after_disc') + $charges_total - collect($report)->sum('sale_return') - collect($report)->sum('cos'))/$grand_total_after_disc)*100,2)}}
                                     %
                                 </th>
                                 <th scope="col" class="px-3 py-3 text-center text-sm font-medium text-gray-900">

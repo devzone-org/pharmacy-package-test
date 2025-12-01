@@ -83,7 +83,7 @@ class StockNearExpiry extends Component
                 'r.name as rack'
             )
             ->orderBy('p.id', 'ASC')
-            ->paginate(15);
+            ->paginate(100);
 
         $pi_ids = $products->pluck('pi_id')->toArray();
 

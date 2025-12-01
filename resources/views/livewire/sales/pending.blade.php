@@ -83,6 +83,12 @@
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                                     Discount
                                 </th>
+                                @if(strtolower(env('CLIENT_CODE')) == 'smc')
+                                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                                        Nursery Charges
+                                    </th>
+                                @endif
+
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                                     Net Sale
                                 </th>
@@ -141,8 +147,17 @@
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         {{ number_format($h->sub_total - $h->gross_total,2) }}
                                     </td>
+                                    @if(strtolower(env('CLIENT_CODE')) == 'smc')
+                                        <td class="px-3 py-3   text-sm text-gray-500">
+                                            {{ number_format($h->charges,2) }}
+                                        </td>
+                                    @endif
                                     <td class="px-3 py-3 text-sm text-gray-500">
-                                        {{ number_format($h->gross_total,2) }}
+                                        @if(strtolower(env('CLIENT_CODE')) == 'smc')
+                                            {{ number_format($h->gross_total + $h->charges,2) }}
+                                        @else
+                                            {{ number_format($h->gross_total,2) }}
+                                        @endif
                                     </td>
 
                                     <td class="px-3 py-3 text-sm text-gray-500">

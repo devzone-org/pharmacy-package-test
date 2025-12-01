@@ -454,6 +454,22 @@
                                         </th>
                                     </tr>
                                 @endif
+                                @if(env('CLIENT_CODE') == 'smc')
+                                    <tr>
+                                        <th scope="col" colspan="4"
+                                            class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
+                                            Nursery Charges
+                                        </th>
+                                        <th scope="col" colspan="2"
+                                            class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
+                                            <input type="number" wire:model.lazy="charges"
+                                                   onClick="this.select();"
+                                                   id="charges"
+                                                   class="p-0 focus:ring-0 block w-full  text-xl border-0 font-medium text-gray-500 text-center "
+                                                   autocomplete="off">
+                                        </th>
+                                    </tr>
+                                @endif
                                 <tr class="bg-gray-50">
                                     <th scope="col" colspan="{{ $admission==true? '3' : '4' }}"
                                         class="w-7 px-2   border-r py-2 text-right text-xl font-medium text-gray-500  tracking-wider">
@@ -461,7 +477,7 @@
                                     </th>
                                     <th scope="col" colspan="{{ $admission==true? '1' : '2' }}"
                                         class="w-10   px-2 py-2   border-r text-center text-xl font-medium text-gray-500 uppercase tracking-wider">
-                                        {{ number_format(collect($sales)->sum('total_after_disc'),2) }}
+                                        {{ number_format(collect($sales)->sum('total_after_disc') + $charges,2) }}
                                     </th>
                                 </tr>
                                 @if($admission==false && $credit == false)
@@ -478,7 +494,7 @@
                                         @endif
                                     </tr>
                                     <tr>
-                                        <th scope="col" colspan="4"
+                                        <th scope="col" colspan="{{env("CLIENT_CODE") == 'smc' ? '7' : '4' }}"
                                             class="w-7 px-2 text-left border-r py-2 @if($credit==true) bg-red-50 @endif text-xl font-medium text-gray-500  tracking-wider">
 
                                             <div class="ml-3 float-right">

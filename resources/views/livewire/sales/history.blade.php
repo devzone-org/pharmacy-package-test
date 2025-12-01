@@ -147,6 +147,11 @@
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
                                     Discount
                                 </th>
+                                @if(strtolower(env('CLIENT_CODE')) == 'smc')
+                                    <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500   ">
+                                        Nursery Charges
+                                    </th>
+                                @endif
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                                     Net Sale
                                 </th>
@@ -230,8 +235,18 @@
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         {{ number_format($h->sub_total - $h->gross_total,2) }}
                                     </td>
+                                    @if(strtolower(env('CLIENT_CODE')) == 'smc')
+                                        <td class="px-3 py-3   text-sm text-gray-500">
+                                            {{ number_format($h->charges,2) }}
+                                        </td>
+                                    @endif
                                     <td class="px-3 py-3 text-sm text-gray-500">
-                                        {{ number_format($h->gross_total,2) }}
+                                        @if(strtolower(env('CLIENT_CODE')) == 'smc')
+                                            {{ number_format($h->gross_total + $h->charges,2) }}
+                                        @else
+                                            {{ number_format($h->gross_total,2) }}
+                                        @endif
+
                                     </td>
                                     <td class="px-3 py-3 text-sm text-gray-500">
                                         @php
@@ -257,12 +272,28 @@
                                     @php
                                         $val = 0;
                                         $after_roundoff = 0;
+
+                                        // ROUND OFF ONLY
                                         if (!empty($h->rounded_inc)){
                                             $val = $h->rounded_inc;
-                                        }elseif (!empty($h->rounded_dec)){
+                                        } elseif (!empty($h->rounded_dec)){
                                             $val = -1 * $h->rounded_dec;
                                         }
-                                        $after_roundoff = ($h->gross_total + $val);
+                                        $gross_with_round = $h->gross_total + $val;
+
+                                        if (strtolower(env('CLIENT_CODE')) == 'smc') {
+                                            $gross_with_round += $h->charges;
+                                        }
+
+                                        if ($h->is_credit != 'f') {
+                                            $gross_for_credit = $h->gross_total;
+                                            if (strtolower(env('CLIENT_CODE')) == 'smc') {
+                                                $gross_for_credit += $h->charges;
+                                            }
+                                            $after_roundoff = $refunded - $gross_for_credit;
+                                        } else {
+                                            $after_roundoff = $refunded - $gross_with_round;
+                                        }
                                     @endphp
 
                                     <td class="px-3 py-3 text-sm text-gray-500">
@@ -438,14 +469,16 @@
             }
         })
 
-        window.addEventListener('clear',function (){
+        window.addEventListener('clear', function () {
             $('#select2_dropdown_product').val(null).trigger('change');
             $('#select2_dropdown_patient').val(null).trigger('change');
         });
 
-        $('#search').on('click',function (){
-          @this.set('product_id',$('#select2_dropdown_product').select2('data')[0].id);
-          @this.set('patient_id',$('#select2_dropdown_patient').select2('data')[0].id);
+        $('#search').on('click', function () {
+            @this.
+            set('product_id', $('#select2_dropdown_product').select2('data')[0].id);
+            @this.
+            set('patient_id', $('#select2_dropdown_patient').select2('data')[0].id);
         })
 
         let from_date = new Pikaday({

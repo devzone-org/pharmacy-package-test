@@ -83,7 +83,7 @@ class SaleTransaction extends Component
             ->when(!empty($this->time_from), function ($q) {
                 return $q->whereTime('s.sale_at', '>=', date('H:i:s', strtotime($this->time_from)));
             })
-            ->select('s.sale_at', 'e.name as doctor', 's.is_credit', 's.is_paid', 's.id', 'p.name as patient_name', DB::raw('sum(sd.qty*sd.supply_price) as cos'),
+            ->select('s.sale_at', 'e.name as doctor','s.charges' , 's.is_credit', 's.is_paid', 's.id', 'p.name as patient_name', DB::raw('sum(sd.qty*sd.supply_price) as cos'),
                 DB::raw('sum(sd.total) as total'), DB::raw('sum(sd.total_after_disc) as total_after_disc'),
                 'u.name as sale_by')
             ->orderBy('s.id', 'desc')

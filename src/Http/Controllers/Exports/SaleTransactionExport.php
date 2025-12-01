@@ -58,7 +58,7 @@ class SaleTransactionExport
             ->when(!empty($this->from), function ($q) {
                 return $q->whereDate('s.sale_at', '>=', $this->formatDate($this->from));
             })
-            ->select('s.sale_at', 'e.name as doctor', 's.is_credit', 's.is_paid', 's.id', 'p.name as patient_name', DB::raw('sum(sd.qty*sd.supply_price) as cos'),
+            ->select('s.sale_at', 'e.name as doctor', 's.is_credit', 's.is_paid', 's.id', 'p.name as patient_name', 's.charges', DB::raw('sum(sd.qty*sd.supply_price) as cos'),
                 DB::raw('sum(sd.total) as total'), DB::raw('sum(sd.total_after_disc) as total_after_disc'),
                 'u.name as sale_by')
             ->orderBy('s.id', 'desc')
@@ -92,10 +92,14 @@ class SaleTransactionExport
         }
         $loop = 0;
         foreach ($report as $key => $rep) {
-            $total_after_disc = $rep['total_after_disc'] - $rep['sale_return'];
+            $charges_amt = strtolower(env('CLIENT_CODE'))=='smc' ? ($rep['charges'] ?? 0) : 0;
+            $total_after_disc = $rep['total_after_disc'] + $charges_amt - $rep['sale_return'];
             $total_after_disc = empty($total_after_disc) ? 1 : $total_after_disc;
 
             $loop = $loop + 1;
+            $cash_amount = $rep['is_credit'] == 'f' ? number_format($rep['total_after_disc'] + $charges_amt - $rep['sale_return'], 2) : '0.00';
+            $credit_amount = $rep['is_credit'] == 't' ? number_format($rep['total_after_disc'] + $charges_amt - $rep['sale_return'], 2) : '0.00';
+
             $data[] = [
                 'sr_no' => $loop,
                 'status' => ($rep['is_credit'] == 't' ? 'On Credit': 'On Cash').'-'.($rep['is_paid'] == 't' ? 'Paid' : 'UnPaid') ,
@@ -105,19 +109,24 @@ class SaleTransactionExport
                 'patient_name' => $rep['patient_name'] ?? '',
                 'sale' => number_format($rep['total'], 2),
                 'discount' => '(' . number_format($rep['total'] - $rep['total_after_disc'], 2) . ')',
+                'charges' => strtolower(env('CLIENT_CODE'))=='smc' ? number_format($charges_amt, 2) : '',
                 'sale_return' => '(' . number_format($rep['sale_return'], 2) . ')',
-                'net_sale' => number_format($rep['total_after_disc'] - $rep['sale_return'], 2),
-                'cash' => number_format($rep['total_after_disc'] - $rep['sale_return'], 2),
-                'credit' => number_format($rep['total_after_disc'] - $rep['sale_return'], 2),
+                'net_sale' => number_format($total_after_disc, 2),
+                'cash' => $cash_amount,
+                'credit' => $credit_amount,
                 'cos' => number_format($rep['cos'], 2),
-                'gross_profit' => number_format($rep['total_after_disc'] - $rep['sale_return'] - $rep['cos'], 2),
-                'gross_margin' => number_format((($rep['total_after_disc'] - $rep['sale_return'] - $rep['cos']) / $total_after_disc) * 100, 2) . ' %',
+                'gross_profit' => number_format($total_after_disc - $rep['cos'], 2),
+                'gross_margin' => number_format((($total_after_disc - $rep['cos']) / $total_after_disc) * 100, 2) . ' %',
                 'sold_by' => $rep['sale_by']
             ];
         }
 
-        $grand_total_after_disc=collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return');
+        $charges_total = strtolower(env('CLIENT_CODE'))=='smc' ? collect($report)->sum('charges') : 0;
+        $grand_total_after_disc=collect($report)->sum('total_after_disc') + $charges_total - collect($report)->sum('sale_return');
         $grand_total_after_disc= empty($grand_total_after_disc) ? 1 :$grand_total_after_disc;
+
+        $cash_charges = strtolower(env('CLIENT_CODE'))=='smc' ? collect($report)->where('is_credit','f')->sum('charges') : 0;
+        $credit_charges = strtolower(env('CLIENT_CODE'))=='smc' ? collect($report)->where('is_credit','t')->sum('charges') : 0;
 
         $data[]=[
             '',
@@ -128,21 +137,20 @@ class SaleTransactionExport
             '',
             number_format(collect($report)->sum('total'),2),
             '(' . number_format(collect($report)->sum('total') - collect($report)->sum('total_after_disc'),2) . ')',
+            strtolower(env('CLIENT_CODE'))=='smc' ? number_format($charges_total,2) : '',
             '(' . number_format(collect($report)->sum('sale_return'),2) . ')',
-            number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return'),2),
-            number_format(collect($report)->where('is_credit','f')->sum('total_after_disc')-collect($report)->where('is_credit','f')->sum('sale_return'),2),
-            number_format(collect($report)->where('is_credit','t')->sum('total_after_disc')-collect($report)->where('is_credit','t')->sum('sale_return'),2),
+            number_format(collect($report)->sum('total_after_disc') + $charges_total - collect($report)->sum('sale_return'),2),
+            number_format(collect($report)->where('is_credit','f')->sum('total_after_disc') + $cash_charges - collect($report)->where('is_credit','f')->sum('sale_return'),2),
+            number_format(collect($report)->where('is_credit','t')->sum('total_after_disc') + $credit_charges - collect($report)->where('is_credit','t')->sum('sale_return'),2),
             number_format(collect($report)->sum('cos'),2),
-            number_format(collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos'),2),
-            number_format(((collect($report)->sum('total_after_disc')-collect($report)->sum('sale_return')-collect($report)->sum('cos'))/$grand_total_after_disc)*100,2) . '%'
-
-
+            number_format(collect($report)->sum('total_after_disc') + $charges_total - collect($report)->sum('sale_return') - collect($report)->sum('cos'),2),
+            number_format(((collect($report)->sum('total_after_disc') + $charges_total - collect($report)->sum('sale_return') - collect($report)->sum('cos'))/$grand_total_after_disc)*100,2) . '%'
         ];
 
 
         $csv = Writer::createFromFileObject(new SplTempFileObject());
 
-        $csv->insertOne(['Sr#', 'Status', 'Sale Date', 'Invoice #', 'Doctor', 'Patient', 'Sale (PKR)', 'Discount (PKR)', 'Sale Return (PKR)', 'Net Sale (PKR)(A)', 'Cash', 'Credit', 'COS (PKR)(B)', 'Gross Profit (PKR)(A-B)', 'Gross Margin (A-B)/A', 'Sold By']);
+        $csv->insertOne(['Sr#', 'Status', 'Sale Date', 'Invoice #', 'Doctor', 'Patient', 'Sale (PKR)', 'Discount (PKR)', 'Charges (PKR)', 'Sale Return (PKR)', 'Net Sale (PKR)(A)', 'Cash', 'Credit', 'COS (PKR)(B)', 'Gross Profit (PKR)(A-B)', 'Gross Margin (A-B)/A', 'Sold By']);
 
         $csv->insertAll($data);
 

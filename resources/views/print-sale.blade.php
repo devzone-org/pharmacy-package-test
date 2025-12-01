@@ -84,6 +84,9 @@
 
     <p>---------------------------------------------</p>
     <p style="text-align: right">{!! $print['sub_total'] !!}</p>
+    @if (strtolower(env('CLIENT_CODE')) == 'smc')
+        <p style="text-align: right">{!! $print['charges'] !!}</p>
+    @endif
     <p style="text-align: right">{!! $print['discount'] !!}</p>
     <p style="text-align: right">{!! $print['gross_total'] !!}</p>
     <p style="text-align: right">{!! $print['refund'] !!}</p>

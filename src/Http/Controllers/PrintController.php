@@ -56,7 +56,7 @@ class PrintController extends Controller
             ->join('users as u', 'u.id', '=', 's.sale_by')
             ->where('s.id', $sale_id)
             ->select('sd.*', 'p.name as product_name', 's.patient_id', 'e.name as referred_by',
-                'u.name as sale_by', 's.sale_at', 's.is_credit')
+                'u.name as sale_by', 's.sale_at','s.charges', 's.is_credit')
             ->get();
         $first = $sale->first();
         if (!empty($sl->refunded_id)) {
@@ -69,7 +69,7 @@ class PrintController extends Controller
                 ->where('sr.sale_id', $sl->refunded_id)
                 ->where('sr.refunded_id', $sale_id)
                 ->select('sd.*', 'p.name as product_name', 's.patient_id', 'e.name as referred_by',
-                    'u.name as sale_by', 's.sale_at', 's.is_credit', 'sr.refund_qty')
+                    'u.name as sale_by', 's.sale_at','s.charges' , 's.is_credit', 'sr.refund_qty')
                 ->get();
             $first = $refund->first();
             $this->refunds = $refund->toArray();
@@ -170,6 +170,12 @@ class PrintController extends Controller
             $val = -1 * $this->first['rounded_dec'];
         }
         //
+        $gross_with_round = $this->first['gross_total'] + $val;
+
+// ADD CHARGES (ONLY FOR SMC)
+        if (strtolower(env('CLIENT_CODE')) == 'smc') {
+            $gross_with_round += $this->first['charges'];
+        }
 
         $print['inner'] = $inner;
 
@@ -200,10 +206,16 @@ class PrintController extends Controller
             str_pad($add_bracket, 19, " ", STR_PAD_LEFT);
 
         //After Round-off
-        $after_roundoff = 0;
-        $after_roundoff = $refunded - ($this->first['gross_total'] + $val);
+        $after_roundoff = $refunded - $gross_with_round;
         if ($this->first['is_credit'] != 'f') {
-            $after_roundoff = $refunded - $this->first['gross_total'];
+
+            $gross_no_round = $this->first['gross_total'];
+
+            if (strtolower(env('CLIENT_CODE')) == 'smc') {
+                $gross_no_round += $this->first['charges'];
+            }
+
+            $after_roundoff = $refunded - $gross_no_round;
         }
         //
 
@@ -218,11 +230,14 @@ class PrintController extends Controller
 
         $cash_refund = "-";
         $cash_refund_text = "Cash";
-
+        $gross_total = $this->first['gross_total'] + $val;
 
         $print['sub_total'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Sale Sub Total' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($this->first['sub_total'], 2) . "</span>";
+        if (strtolower(env('CLIENT_CODE')) == 'smc') {
+            $print['charges'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Nursery Charges' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($this->first['charges'], 2) . "</span>";
+        }
         $print['discount'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Discount (PKR)' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($this->first['sub_total'] - $this->first['gross_total'], 2) . "</span>";
-        $print['gross_total'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Sale after Discount' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($this->first['gross_total'] + $val, 2) . "</span>";
+        $print['gross_total'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Sale after Discount' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($gross_total, 2) . "</span>";
         $print['refund'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Sale Returns' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . $add_bracket . "</span>";
         $print['net_total'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Net Sales' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . $net_sales . "</span>";
 

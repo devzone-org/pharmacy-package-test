@@ -61,6 +61,7 @@ class Pending extends Component
                 's.id',
                 's.sub_total',
                 's.gross_total',
+                's.charges',
                 's.opd_id',
 
                 'u.name as sale_by',

@@ -40,6 +40,7 @@ class Add extends Component
     public $product_id;
     public $product_name;
     public $discount = 0;
+    public $charges = 0;
     public $received = 0;
     public $payable = 0;
     public $referred_by_id;
@@ -243,7 +244,7 @@ class Add extends Component
                 ->join('products as p', 'p.id', 'psd.product_id')
                 ->join('product_inventories as pi', 'p.id', '=', 'pi.product_id')
                 ->where('ps.id', $this->pending_sale_id)
-                ->select('pi.id',DB::raw('SUM(pi.qty) as qty'),'psd.product_id', 'psd.qty as s_qty', 'ps.sale_by', 'pi.supply_price', 'psd.total_after_disc', 'psd.total', 'p.name as item', 'p.packing', 'p.control_medicine', 'p.retail_price as product_price', 'p.cost_of_price as product_supply_price', 'p.discountable', 'p.max_discount', 'p.type', 'psd.retail_price', 'psd.disc', 'ps.patient_id', 'ps.referred_by')
+                ->select('pi.id', DB::raw('SUM(pi.qty) as qty'), 'psd.product_id', 'psd.qty as s_qty', 'ps.sale_by', 'pi.supply_price', 'psd.total_after_disc', 'psd.total', 'p.name as item', 'p.packing', 'p.control_medicine', 'p.retail_price as product_price', 'p.cost_of_price as product_supply_price', 'p.discountable', 'p.max_discount', 'p.type', 'psd.retail_price', 'psd.disc', 'ps.patient_id', 'ps.referred_by', 'ps.charges')
                 ->groupBy('p.id')
                 ->get();
 
@@ -267,7 +268,9 @@ class Add extends Component
                 $this->referred_by_id = $doctor['id'];
                 $this->referred_by_name = $doctor['name'];
             }
-
+            if (!empty($sales[0]['charges'])) {
+                $this->charges = $sales[0]['charges'];
+            }
         }
     }
 
@@ -449,6 +452,14 @@ class Add extends Component
                 }
             }
         }
+
+    }
+    public function updatedCharges($value)
+    {
+        if (empty($value) || !is_numeric($value)) {
+            $this->charges = 0;
+        }
+        $this->received = collect($this->sales)->sum('total_after_disc') + $this->charges;
 
     }
 
@@ -638,6 +649,7 @@ class Add extends Component
                         'sale_at' => date('Y-m-d H:i:s'),
                         'sub_total' => collect($this->sales)->sum('total'),
                         'gross_total' => collect($this->sales)->sum('total_after_disc'),
+                        'charges' => $this->charges ?? 0,
                     ])->id;
 
                     foreach ($this->sales as $s) {
@@ -786,6 +798,7 @@ class Add extends Component
                     'is_credit' => !empty($this->credit) ? 't' : 'f',
                     'is_paid' => !empty($this->credit) ? 'f' : 't',
                     'on_account' => !empty($this->credit) ? $total_after_disc : 0,
+                    'charges' => $this->charges ?? 0,
                 ])->id;
 
 
@@ -855,12 +868,13 @@ class Add extends Component
                         }
                     }
                 }
-                $accounts = COA::whereIn('reference', ['pharmacy-inventory-5', 'income-pharmacy-5', 'cost-of-sales-pharmacy-5', 'exp-invoice-rounding-off'])->get();
+                $accounts = COA::whereIn('reference', ['pharmacy-inventory-5', 'income-pharmacy-5', 'cost-of-sales-pharmacy-5', 'exp-invoice-rounding-off', 'nursery-charges-5'])->get();
 
                 $amounts = SaleDetail::where('sale_id', $sale_id)->select(DB::raw('SUM(total_after_disc) as sale'), DB::raw('SUM(qty * supply_price) as cost'))->first();
                 $customer_name = $this->patient_name ?? 'walking customer';
+                $charges_text = !empty($this->charges) && $this->charges > 0 ? " with Charges PKR " . number_format($this->charges, 2) : "";
                 $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} sold to Patient {$customer_name}. Cash received PKR " .
-                    number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name . " at " . date('h:i A');
+                    number_format($amounts['sale'] + $this->charges, 2) . $charges_text . " on " . date('d M, Y') . " by " . Auth::user()->name . " at " . date('h:i A');
 
                 $vno = Voucher::instance()->voucher()->get();
 
@@ -900,7 +914,7 @@ class Add extends Component
                         $ipd_medicine_account = COA::where('reference', 'payable-medicine-5')->first();
 
                         $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) .
-                            " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} issued against admission # " . $admission_details->admission_no . " and procedure " . $admission_details->procedure_name . ". Account " . $ipd_medicine_account->name . " debited with PKR " .
+                            " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} issued against admission # " . $admission_details->admission_no . " and procedure " . $admission_details->procedure_name . $charges_text . ". Account " . $ipd_medicine_account->name . " debited with PKR " .
                             number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name;
                         GeneralJournal::instance()->account($ipd_medicine_account->id)->debit($amounts['sale'])->voucherNo($vno)
                             ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
@@ -909,8 +923,8 @@ class Add extends Component
 
                 if ($this->admission == false) {
                     if (!empty($this->credit)) {
-                        $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} sold to Patient {$customer_name}.  on Account {$customer_account->name} : PKR " .
-                            number_format($amounts['sale'], 2) . " on " . date('d M, Y') . " by " . Auth::user()->name . " at " . date('h:i A');
+                        $description = "Being goods worth PKR " . number_format($amounts['sale'], 2) . " receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} sold to Patient {$customer_name}. " . $charges_text . " on Account {$customer_account->name} : PKR " .
+                            number_format($amounts['sale'] + $this->charges, 2) . " on " . date('d M, Y') . " by " . Auth::user()->name . " at " . date('h:i A');
                         GeneralJournal::instance()->account($customer_account->account_id)->debit($amounts['sale'])->voucherNo($vno)
                             ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                     } else {
@@ -961,6 +975,24 @@ class Add extends Component
                             ->date(date('Y-m-d'))->approve()->reference('pharmacy')->description($description)->execute();
                     }
                 }
+
+                // Handle charges accounting entry
+                if (!empty($this->charges) && $this->charges > 0 && strtolower(env('CLIENT_CODE')) == 'smc') {
+                    $charges_account = $accounts->where('reference', 'nursery-charges-5')->first();
+                    if (!empty($charges_account)) {
+                        $charges_description = "Charges for sale receipt # {$sale_id} & invoice # inv-{$sale_receipt_no} from Patient {$customer_name}. Amount PKR " .
+                            number_format($this->charges, 2) . " on " . date('d M, Y') . " by " . Auth::user()->name;
+
+                        // Credit charges account (treating charges as income)
+                        GeneralJournal::instance()->account($charges_account->id)->credit($this->charges)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->reference('nursery-charges')->description($charges_description)->execute();
+
+                        // Debit user's till account (receiving the charges)
+                        GeneralJournal::instance()->account(Auth::user()->account_id)->debit($this->charges)->voucherNo($vno)
+                            ->date(date('Y-m-d'))->approve()->reference('nursery-charges')->description($charges_description)->execute();
+                    }
+                }
+
                 if ($this->admission == true) {
                     SaleIssuance::create([
                         'sale_id' => $sale_id,
@@ -1009,7 +1041,7 @@ class Add extends Component
     public function resetAll()
     {
         $this->reset(['sales', 'referred_by_id', 'pending_sale_id', 'referred_by_name', 'success', 'patient_id', 'patient_name', 'customer_credit_limit',
-            'payable', 'received', 'remarks', 'discount', 'error', 'customer_id_credit', 'customer_id', 'account_id', 'customer_previous_credit', 'customer_name_credit', 'credit']);
+            'payable', 'received', 'remarks', 'discount', 'charges', 'error', 'customer_id_credit', 'customer_id', 'account_id', 'customer_previous_credit', 'customer_name_credit', 'credit']);
     }
 
     public function updatedTillId($value)
