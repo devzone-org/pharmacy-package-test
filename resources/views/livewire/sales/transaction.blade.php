@@ -477,7 +477,12 @@
                                     </th>
                                     <th colspan="3" class="px-2 py-2 text-center border-r text-md text-gray-900">
                                         @if($first['is_credit'] == 't')
-                                            {{ number_format(abs($refunded - $first['gross_total']),2) }}
+                                            @if(strtolower(env('CLIENT_CODE')) == 'smc')
+                                                {{ number_format(abs($refunded - ($first['gross_total'] + $first['charges'])),2) }}
+                                            @else
+                                                {{ number_format(abs($refunded - $first['gross_total']),2) }}
+                                            @endif
+
                                         @else
                                             -
                                         @endif

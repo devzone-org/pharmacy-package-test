@@ -314,7 +314,11 @@
                                     </td>
                                     <td class="px-3 py-3 text-sm text-gray-500">
                                         @if($h->is_credit == 't')
-                                            {{ number_format(abs($refunded - $h->gross_total),2) }}
+                                            @if(strtolower(env('CLIENT_CODE')) == 'smc')
+                                                {{ number_format(abs($refunded - ($h->gross_total + $h->charges)),2) }}
+                                            @else
+                                                {{ number_format(abs($refunded - $h->gross_total),2) }}
+                                            @endif
                                         @else
                                             -
                                         @endif

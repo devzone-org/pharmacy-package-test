@@ -751,7 +751,12 @@ class Add extends Component
                     if ((collect($this->sales)->sum('total_after_disc')) + $balance > Auth::user()->credit_limit) {
                         throw new \Exception('Amount exceeding User credit limit (PKR ' . number_format(Auth::user()->credit_limit) . ')');
                     }
-                    $credit_amount = collect($this->sales)->sum('total_after_disc');
+                    if(strtolower(env('CLIENT_CODE')) == 'smc'){
+                        $credit_amount = collect($this->sales)->sum('total_after_disc') + $this->charges;
+                    }else{
+                        $credit_amount = collect($this->sales)->sum('total_after_disc');
+                    }
+
                     if (!empty($user_limit)) {
                         UserLimit::where('id', $user_limit->id)->update([
                             'balance' => DB::raw('balance +' . $credit_amount)
@@ -778,7 +783,14 @@ class Add extends Component
                     throw new \Exception('Total discount is more than as you given to customer. Please recheck sale.');
                 }
                 //dd(round($sub_total - $total_after_disc, 2), round($total_discount_give, 2));
-
+                $on_account = 0 ;
+                if(!empty($this->credit)){
+                    if(strtolower(env('CLIENT_CODE')) == 'smc'){
+                        $on_account = $total_after_disc + $this->charges;
+                    }else{
+                        $on_account = $total_after_disc;
+                    }
+                }
                 $sale_id = Sale::create([
                     'patient_id' => $this->patient_id,
                     'referred_by' => $this->referred_by_id,
@@ -797,7 +809,7 @@ class Add extends Component
                     'customer_id' => $this->customer_id ?? null,
                     'is_credit' => !empty($this->credit) ? 't' : 'f',
                     'is_paid' => !empty($this->credit) ? 'f' : 't',
-                    'on_account' => !empty($this->credit) ? $total_after_disc : 0,
+                    'on_account' => $on_account,
                     'charges' => $this->charges ?? 0,
                 ])->id;
 

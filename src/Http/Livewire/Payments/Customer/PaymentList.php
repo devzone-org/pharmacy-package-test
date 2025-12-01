@@ -112,7 +112,13 @@ class PaymentList extends Component
                 $customer = Customer::findOrFail($customer_payment->customer_id);
 
 
-                $amount = Sale::whereIn('id', $sales)->sum('gross_total');
+
+                if(strtolower(env('CLIENT_CODE'))== 'smc'){
+                    $amount = Sale::whereIn('id', $sales)
+                        ->sum(DB::raw('gross_total + charges'));
+                }else{
+                    $amount = Sale::whereIn('id', $sales)->sum('gross_total');
+                }
 
                 $refund_entries = \Devzone\Pharmacy\Models\Sale\SaleRefund::from('sale_refunds as sr')
                     ->join('sale_details as sd', 'sd.id', '=', 'sr.sale_detail_id')
