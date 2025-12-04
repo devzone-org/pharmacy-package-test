@@ -54,7 +54,7 @@
                 <div class="col-span-6 sm:col-span-2">
                     <label class="block text-sm font-medium text-gray-700">Expiry Till</label>
                     <input wire:model.lazy="expiry_date" type="text" id="expiry_date" autocomplete="off"
-                            class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                           class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 </div>
                 <div class="col-span-8 sm:col-span-2">
                     <button type="button" wire:click="search" wire:loading.attr="disabled"
@@ -96,118 +96,113 @@
                             <tr>
                                 <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
 
-                                #
+                                    #
                                 </th>
                                 <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
 
-                                Item
+                                    Item
                                 </th>
                                 <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
 
-                                PO #
+                                    PO #
                                 </th>
                                 <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
 
-                                Manufacturer
+                                    Manufacturer
                                 </th>
                                 <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
 
-                                Category
+                                    Category
                                 </th>
                                 <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
 
-                                Rack
+                                    Rack
                                 </th>
                                 <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
 
-                                Supplier
+                                    Supplier
                                 </th>
                                 <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
 
-                                Type
+                                    Type
                                 </th>
                                 <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
 
-                                Stock in Quantity
+                                    Stock in Quantity
                                 </th>
                                 <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
 
-                                Expiry Date
+                                    Expiry Date
                                 </th>
                                 <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
 
-                                Expiring In
+                                    Expiring In
                                 </th>
                                 <th scope="col" class="sticky top-0 z-10 px-3 py-3 text-center text-sm font-medium bg-gray-50 bg-opacity-75 text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8   ">
 
-                                Last Sold
+                                    Last Sold
                                 </th>
                             </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($products as $r)
-                                <tr>                                    <td class="px-3 py-3 text-sm font-medium text-gray-500 text-center">
-                                        {{ $loop->iteration + ($products->currentPage() - 1) * $products->perPage() }}
+                            @foreach($report as $r)
+                                <tr>
+                                    <td class="px-3 py-3   text-sm font-medium text-gray-500">
+                                        {{$loop->iteration}}
                                     </td>
-                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
-                                        {{ $r->name }}
+                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        {{$r['item']}}
                                     </td>
-                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
-                                        {{ $r->po_id }}
+                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        {{$r['po_id']}}
                                     </td>
-                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
-                                        {{ $r->manufacturer ?? '-' }}
+                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        {{!empty($r['manufacturer'])  ? $r['manufacturer'] : '-'}}
                                     </td>
-                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
-                                        {{ $r->category ?? '-' }}
+                                    <td class="px-3 py-3  text-center text-sm text-gray-500">
+                                        {{!empty($r['category']) ? $r['category'] : '-'}}
                                     </td>
-                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
-                                        {{ $r->rack ?? '-' }}
+                                    <td class="px-3 py-3  text-center text-sm text-gray-500">
+                                        {{!empty($r['rack']) ? $r['rack'] : '-'}}
                                     </td>
-                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
-                                        {{ $r->supplier_name }}
+                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        {{$r['supplier']}}
                                     </td>
-                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
-                                        @if($r->type=='s')
-                                            Sound alike
-                                        @elseif($r->type=='l')
-                                            Look alike
+                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        @if($r['type']=='s') Sound alike @elseif($r['type']=='l') Look alike @else - @endif
+                                    </td>
+                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        {{$r['stock_in_hand']}}
+                                    </td>
+                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        {{!empty($r['expiry']) ? date('d M Y',strtotime($r['expiry'])) : 'Not Defined'}}
+                                    </td>
+                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        @if($r['expired'])
+                                            <span class="text-red-600"> Already Expired</span>
                                         @else
-                                            -
+                                            {{$r['expiring_in']}}
                                         @endif
                                     </td>
-                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
-                                        {{ $r->qty }}
-                                    </td>
-                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
-                                        {{ $r->expiry ? date('d M Y', strtotime($r->expiry)) : 'Not Defined' }}
-                                    </td>
-                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
-                                        {!! $r->expired
-                                            ? '<span class="text-red-600">Already Expired</span>'
-                                            : $r->expiring_in !!}
-                                    </td>
-                                    <td class="px-3 py-3 text-center text-sm text-gray-500">
-                                        {{ $r->last_sold ? date('d M Y', strtotime($r->last_sold)) : '-' }}
+                                    <td class="px-3 py-3 text-center  text-sm text-gray-500">
+                                        {{!empty($r['last_sold']) ? date('d M Y',strtotime($r['last_sold'])) : '-'}}
                                     </td>
                                 </tr>
                             @endforeach
-
                             <tr class="bg-gray-50">
-                                <th colspan="8"></th>
-                                <th class="px-3 py-3 text-center text-sm font-medium text-gray-900">
-                                    {{ number_format($products->sum('qty')) }}
+                                <th scope="col" colspan="8"
+                                    class="px-3 py-3 text-left text-sm font-medium text-gray-900">
                                 </th>
-                                <th colspan="3"></th>
+                                <th scope="col"
+                                    class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                    {{number_format(collect($report)->sum('stock_in_hand'))}}
+                                </th>
+                                <th scope="col" colspan="3"
+                                    class="px-3 py-3 text-center text-sm font-medium text-gray-900">
+                                </th>
                             </tr>
                             </tbody>
-
                         </table>
-                        @if($products->hasPages())
-                            <div class="bg-white border-t px-3 py-2">
-                                {{ $products->links() }}
-                            </div>
-                        @endif
                     </div>
                 </div>
 
