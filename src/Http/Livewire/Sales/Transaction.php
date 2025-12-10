@@ -15,6 +15,7 @@ class Transaction extends Component
     public $referred_by;
     public $patient_name;
     public $on_credit = false;
+    public $is_fbr_pos = false;
     public $credit_limit;
     public $closing_balance;
     public $sale_at;
@@ -38,9 +39,12 @@ class Transaction extends Component
                 ->join('users as u', 'u.id', '=', 's.sale_by')
                 ->where('s.id', $sale_id)
                 ->select('sd.*', 'p.name as product_name', 's.patient_id', 'e.name as referred_by',
-                    'u.name as sale_by', 's.sale_at', 's.is_credit', 's.rounded_inc', 's.rounded_dec')
+                    'u.name as sale_by', 's.sale_at', 's.is_credit', 's.rounded_inc', 's.rounded_dec','s.fbr_pos')
                 ->get();
             $this->sales = $sale->toArray();
+            if (!empty($this->sales[0]['fbr_pos'])) {
+                $this->is_fbr_pos = $this->sales[0]['fbr_pos'] === 't';
+            }
 
             $refund = Sale::from('sales as s')
                 ->join('sale_refund_details as sr', 'sr.refunded_id', '=', 's.id')
@@ -51,7 +55,7 @@ class Transaction extends Component
                 ->where('sr.sale_id', $sl->refunded_id)
                 ->where('sr.refunded_id', $sale_id)
                 ->select('sd.*', 'p.name as product_name', 's.patient_id', 'e.name as referred_by',
-                    'u.name as sale_by', 's.sale_at', 's.is_credit', 's.rounded_inc', 's.rounded_dec', 'sr.refund_qty')
+                    'u.name as sale_by', 's.sale_at', 's.is_credit', 's.rounded_inc', 's.rounded_dec', 'sr.refund_qty','s.fbr_pos')
                 ->get();
             $this->refunds = $refund->toArray();
 
