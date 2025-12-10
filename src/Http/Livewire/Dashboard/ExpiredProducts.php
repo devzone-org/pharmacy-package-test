@@ -32,6 +32,7 @@ class ExpiredProducts extends Component
             ->leftJoin('purchases as pur','pur.id','=','pi.po_id')
             ->leftJoin('suppliers as s','s.id','=','pur.supplier_id')
             ->where('pi.expiry','<=',$this->date)
+            ->where('pi.qty','>',0)
             ->select('p.id','p.name as product','s.name as supplier','pi.expiry','pi.qty','sd.id as sd','sl.sale_at')
             ->get()->toArray();
     }
