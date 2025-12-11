@@ -99,6 +99,7 @@ class Add extends Component
     public $patient_age;
     public $has_contact = true;
     public $pending_sale = false;
+    public $is_fbr_pos = false;
     public $pending_and_complete = false;
     public $pending_sale_id;
     public $control_med_check = false;
@@ -243,7 +244,7 @@ class Add extends Component
                 ->join('products as p', 'p.id', 'psd.product_id')
                 ->join('product_inventories as pi', 'p.id', '=', 'pi.product_id')
                 ->where('ps.id', $this->pending_sale_id)
-                ->select('pi.id',DB::raw('SUM(pi.qty) as qty'),'psd.product_id', 'psd.qty as s_qty', 'ps.sale_by', 'pi.supply_price', 'psd.total_after_disc', 'psd.total', 'p.name as item', 'p.packing', 'p.control_medicine', 'p.retail_price as product_price', 'p.cost_of_price as product_supply_price', 'p.discountable', 'p.max_discount', 'p.type', 'psd.retail_price', 'psd.disc', 'ps.patient_id', 'ps.referred_by')
+                ->select('pi.id',DB::raw('SUM(pi.qty) as qty'),'psd.product_id', 'psd.qty as s_qty', 'ps.sale_by', 'pi.supply_price', 'psd.total_after_disc', 'psd.total', 'p.name as item', 'p.packing', 'p.control_medicine', 'p.retail_price as product_price', 'p.cost_of_price as product_supply_price', 'p.discountable', 'p.max_discount', 'p.type', 'psd.retail_price', 'psd.disc', 'ps.patient_id', 'ps.referred_by','ps.fbr_pos')
                 ->groupBy('p.id')
                 ->get();
 
@@ -266,6 +267,9 @@ class Add extends Component
                 $doctor = Employee::find($sales[0]['referred_by']);
                 $this->referred_by_id = $doctor['id'];
                 $this->referred_by_name = $doctor['name'];
+            }
+            if (!empty($sales[0]['fbr_pos'])) {
+                $this->is_fbr_pos = $this->sales[0]['fbr_pos'] === 't';
             }
 
         }
@@ -638,6 +642,7 @@ class Add extends Component
                         'sale_at' => date('Y-m-d H:i:s'),
                         'sub_total' => collect($this->sales)->sum('total'),
                         'gross_total' => collect($this->sales)->sum('total_after_disc'),
+                        'fbr_pos' => $this->is_fbr_pos ? 't' : 'f',
                     ])->id;
 
                     foreach ($this->sales as $s) {
@@ -786,6 +791,7 @@ class Add extends Component
                     'is_credit' => !empty($this->credit) ? 't' : 'f',
                     'is_paid' => !empty($this->credit) ? 'f' : 't',
                     'on_account' => !empty($this->credit) ? $total_after_disc : 0,
+                    'fbr_pos' => $this->is_fbr_pos ? 't' : 'f',
                 ])->id;
 
 
@@ -1009,7 +1015,7 @@ class Add extends Component
     public function resetAll()
     {
         $this->reset(['sales', 'referred_by_id', 'pending_sale_id', 'referred_by_name', 'success', 'patient_id', 'patient_name', 'customer_credit_limit',
-            'payable', 'received', 'remarks', 'discount', 'error', 'customer_id_credit', 'customer_id', 'account_id', 'customer_previous_credit', 'customer_name_credit', 'credit']);
+            'payable', 'received', 'remarks', 'discount', 'error', 'customer_id_credit', 'customer_id', 'account_id', 'customer_previous_credit', 'customer_name_credit', 'credit','is_fbr_pos']);
     }
 
     public function updatedTillId($value)

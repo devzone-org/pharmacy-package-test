@@ -39,6 +39,20 @@
                                                 </p>
                                             </dd>
                                         </div>
+                                        @if(strtolower(env('CLIENT_CODE')) == 'nqh')
+                                                <div>
+                                                    <dt class="text-sm font-medium text-gray-500   sm:flex-shrink-0">
+                                                        FBR Pos
+                                                    </dt>
+                                                    <dd class="mt-1 text-sm font-medium text-gray-900 sm:col-span-2">
+                                                        <p>
+                                                            <input type="checkbox" wire:model="is_fbr_pos"
+                                                                   class="focus:ring-red-500 h-8 w-8 text-red-600 border-gray-300 rounded">
+
+                                                        </p>
+                                                    </dd>
+                                                </div>
+                                        @endif
 
                                         @if(!$pending_sale)
                                             <div>
