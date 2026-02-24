@@ -138,7 +138,15 @@
                                id="opening_balance">
                     </div>
 
-
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="fbr-registered" class="block text-sm font-medium text-gray-700">FBR Registered</label>
+                        <select wire:model="fbr_registered" id="fbr-registered"
+                                class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value="" class="hidden"></option>
+                            <option value="t">Yes</option>
+                            <option value="f">No</option>
+                        </select>
+                    </div>
 
                     <div class="col-span-6 sm:col-span-3">
                         <label for="status" class="block text-sm font-medium text-gray-700">Status</label>

@@ -19,6 +19,7 @@ class SupplierEdit extends Component
 
     public $status = 't';
     public $success = '';
+    public $fbr_registered = '';
     public $primary_id;
 
 
@@ -28,8 +29,8 @@ class SupplierEdit extends Component
         'address' => 'nullable|string',
         'contact_name' => 'nullable|string',
         'contact_phone' => 'nullable|string',
-        'status' => 'required|in:t,f'
-
+        'fbr_registered' => 'required|in:t,f',
+        'status' => 'required|in:t,f',
     ];
 
     public function mount($primary_id)
@@ -41,14 +42,13 @@ class SupplierEdit extends Component
         if (empty($supplier)) {
             return redirect()->to('/pharmacy/master-data/suppliers');
         } else {
-
             $this->name = $supplier['name'];
             $this->phone = $supplier['phone'];
             $this->address = $supplier['address'];
             $this->contact_name = $supplier['contact_name'];
             $this->contact_phone = $supplier['contact_phone'];
             $this->status = $supplier['status'];
-
+            $this->fbr_registered = $supplier['fbr_registered'];
         }
     }
 
@@ -66,7 +66,8 @@ class SupplierEdit extends Component
             'address' => $this->address,
             'contact_name' => $this->contact_name,
             'contact_phone' => $this->contact_phone,
-            'status' => $this->status
+            'status' => $this->status,
+            'fbr_registered' => $this->fbr_registered,
         ]);
 
         $this->success = 'Record has been updated.';

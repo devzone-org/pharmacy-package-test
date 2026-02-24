@@ -92,7 +92,9 @@
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                                     Primary Contact Person Phone
                                 </th>
-
+                                <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
+                                    FBR Registered
+                                </th>
                                 <th scope="col" class="px-3 py-3 text-left text-sm font-medium text-gray-500    ">
                                     Status
                                 </th>
@@ -119,32 +121,35 @@
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         {{ $m->contact_name }}
                                     </td>
-
-
-
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         {{ $m->contact_phone }}
                                     </td>
-
-
-
-
-
+                                    <td class="px-3 py-3   text-sm text-gray-500">
+                                        @if($m->fbr_registered == 't')
+                                            <span
+                                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                              Yes
+                                            </span>
+                                        @else
+                                            <span
+                                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                              No
+                                            </span>
+                                        @endif
+                                    </td>
                                     <td class="px-3 py-3   text-sm text-gray-500">
                                         @if($m->status == 't')
                                             <span
                                                 class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-  Active
-</span>
+                                              Active
+                                            </span>
                                         @else
                                             <span
                                                 class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-  Inactive
-</span>
+                                              Inactive
+                                            </span>
                                         @endif
                                     </td>
-
-
                                     <td class="px-3 py-3   text-right text-sm font-medium">
                                         <a href="{{ url('pharmacy/master-data/suppliers/edit/') }}/{{$m->id}}"
                                            class="text-indigo-600 hover:text-indigo-900">Edit</a>

@@ -19,6 +19,7 @@ class SupplierAdd extends Component
     public $contact_phone;
     public $opening_balance = 0;
     public $status = 't';
+    public $fbr_registered = 'f';
     public $success = '';
 
 
@@ -29,6 +30,7 @@ class SupplierAdd extends Component
         'contact_name' => 'nullable|string',
         'contact_phone' => 'nullable|string',
         'status' => 'required|in:t,f',
+        'fbr_registered' => 'required|in:t,f',
         'opening_balance' => 'nullable|numeric'
     ];
 
@@ -52,12 +54,13 @@ class SupplierAdd extends Component
                 'contact_name' => $this->contact_name,
                 'contact_phone' => $this->contact_phone,
                 'account_id' => $account_id,
-                'status' => $this->status
+                'status' => $this->status,
+                'fbr_registered' => $this->fbr_registered,
             ]);
 
             $this->success = 'Record has been added.';
             DB::commit();
-            $this->reset(['name', 'phone', 'address', 'contact_name', 'contact_phone', 'status']);
+            $this->reset(['name', 'phone', 'address', 'contact_name', 'contact_phone', 'status', 'fbr_registered']);
 
         } catch (\Exception $e) {
 
