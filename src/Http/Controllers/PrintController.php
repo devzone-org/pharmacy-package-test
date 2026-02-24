@@ -35,7 +35,7 @@ class PrintController extends Controller
 //            $this->localPrint($request, $id);
             $print = $this->localPrint($request, $id);
 //            return view('pharmacy::print-close');
-            return view('pharmacy::print-sale', compact('print'));
+            return view('pharmacy::print-sale-fbr', compact('print'));
 
         } else {
             $print = $this->onlinePrint($request, $id);
@@ -100,6 +100,10 @@ class PrintController extends Controller
         $print['developer_phone'] = env('RECEIPT_PRINTER_DEVELOPER_PHONE');
         $print['invoice_no'] = 'SALES INVOICE #' . $id;
         $print['license_no'] = 'LICENSE #' . env('RECEIPT_LICENSE_NO', '');
+
+        $print['ntn_no'] = 'NTN: 1234567-8'; // dummy NTN number;
+        $print['strn_no'] = 'STRN: 12-34-5678-123-45'; // dummy STRN number;
+        $print['pos_id'] = 'POS ID: POS-001'; // dummy pos_id number;
 
         if ($this->on_credit) {
             $print['invoice_no'] = 'CREDIT SALES INVOICE #' . $id;
