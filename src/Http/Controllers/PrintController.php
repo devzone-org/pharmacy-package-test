@@ -51,13 +51,18 @@ class PrintController extends Controller
         $sl = Sale::find($sale_id);
         $sale = Sale::from('sales as s')
             ->join('sale_details as sd', 'sd.sale_id', '=', 's.id')
+            ->leftJoin('product_inventories as pi', 'pi.id', '=', 'sd.product_inventory_id')
+            ->leftJoin('purchases as pu', 'pu.id', '=', 'pi.po_id')
+            ->leftJoin('suppliers as sup', 'sup.id', '=', 'pu.supplier_id')
             ->join('products as p', 'p.id', '=', 'sd.product_id')
             ->leftJoin('employees as e', 'e.id', '=', 's.referred_by')
             ->join('users as u', 'u.id', '=', 's.sale_by')
             ->where('s.id', $sale_id)
             ->select('sd.*', 'p.name as product_name', 's.patient_id', 'e.name as referred_by',
                 'u.name as sale_by', 's.sale_at', 's.is_credit')
+            ->selectRaw("COALESCE(sup.fbr_registered, 'f') as fbr_registered")
             ->get();
+
         $first = $sale->first();
         if (!empty($sl->refunded_id)) {
             $refund = Sale::from('sales as s')
@@ -101,9 +106,9 @@ class PrintController extends Controller
         $print['invoice_no'] = 'SALES INVOICE #' . $id;
         $print['license_no'] = 'LICENSE #' . env('RECEIPT_LICENSE_NO', '');
 
-        $print['ntn_no'] = 'NTN: 1234567-8'; // dummy NTN number;
-        $print['strn_no'] = 'STRN: 12-34-5678-123-45'; // dummy STRN number;
-        $print['pos_id'] = 'POS ID: POS-001'; // dummy pos_id number;
+        $print['ntn_no'] = 'NTN: ';
+        $print['strn_no'] = 'STRN: ';
+        $print['pos_id'] = 'POS ID: ';
 
         if ($this->on_credit) {
             $print['invoice_no'] = 'CREDIT SALES INVOICE #' . $id;
@@ -136,21 +141,40 @@ class PrintController extends Controller
 
 
 //        $print['heading'] = str_pad("#", 3, " ") . str_pad("Item", 25, " ") . str_pad("Qty", 8, " ", STR_PAD_LEFT) . str_pad("Unit", 12, " ", STR_PAD_LEFT) . str_pad("Total", 16, " ", STR_PAD_LEFT);
-        $print['heading'] = "<p>" . "<span style='display:inline-block; width: 5%;'>" . '#' . "</span>" . "<span style='display:inline-block; width: 40%; text-align: left'>" . 'Item' . "</span>" . "<span style='display:inline-block; width: 15%; text-align: center '>" . 'Qty' . "</span>" . " <span style='display:inline-block;width: 15%; text-align: center'>" . 'Unit' . "</span>" . " <span style='display:inline-block;width: 20%; text-align: right'>" . 'Total' . "</span></p>";
+        $print['heading2'] = $print['heading'] = "<p>" . "<span style='display:inline-block; width: 5%;'>" . '#' . "</span>" . "<span style='display:inline-block; width: 30%; text-align: left'>" . 'Item' . "</span>" . "<span style='display:inline-block; width: 10%; text-align: center '>" . 'Qty' . "</span>" . " <span style='display:inline-block;width: 15%; text-align: center'>" . 'Unit' . "</span>" ."<span style='display:inline-block; width: 15%; text-align: center '>" . 'Tax' . "</span>" . " <span style='display:inline-block;width: 20%; text-align: right'>" . 'Total' . "</span></p>";
 
-        $inner = "";
-        foreach ($this->sales as $key => $s) {
-            $product = preg_replace("/[^A-Za-z0-9\s]/", "", $s['product_name']);
-            $sr = str_pad(++$key, 3, " ");
-            $item = substr($product, 0, 25);
-            $item = str_pad($item, 25, " ");
-            $qty = str_pad($s['qty'], 8, " ", STR_PAD_LEFT);
-            $retail = str_pad($s['retail_price'], 12, " ", STR_PAD_LEFT);
-            $total = str_pad($s['total'], 16, " ", STR_PAD_LEFT);
-//            $inner .= $sr . $item . $qty . $retail . $total;
+        $inner2 = $inner = "";
+        $key = 0;
+        $taxable_amount = $sales_tax = $exempt_total = 0;
 
-            $inner .= "<p>" . "</span>" . "<span style='display:inline-block; width: 5%; text-align: center'>" . $sr . "</span>" . "<span style='display:inline-block; width: 40%; white-space: nowrap;  text-overflow: ellipsis !important; overflow: hidden;'>" . $item . "</span>" . "<span style='display:inline-block; width: 15%; text-align: center'>" . $qty . "</span>" . "<span style='display:inline-block; width: 18%; text-align: center'>" . $retail . "</span>" . " <span style='display:inline-block;width: 18%; text-align: right'>" . $total . "</span></p>";
+        foreach (collect($this->sales)->groupBy('fbr_registered')->toArray() as $fbr_registered => $sales_group) {
+            foreach ($sales_group as  $s) {
+                $key++;
 
+                $product = preg_replace("/[^A-Za-z0-9\s]/", "", $s['product_name']);
+                $sr = str_pad(++$key, 3, " ");
+                $item = substr($product, 0, 25);
+                $item = str_pad($item, 25, " ");
+                $qty = str_pad($s['qty'], 8, " ", STR_PAD_LEFT);
+                $retail = str_pad($s['retail_price'], 12, " ", STR_PAD_LEFT);
+                $tax = 0;
+                $total = str_pad($s['total'], 16, " ", STR_PAD_LEFT);
+
+                $temp_inner = "<p>" . "</span>" . "<span style='display:inline-block; width: 5%;'>" . $sr . "</span>" . "<span style='display:inline-block; width: 30%; white-space: nowrap;  text-overflow: ellipsis !important; overflow: hidden;'>" . $item . "</span>" . "<span style='display:inline-block; width: 10%; text-align: center'>" . $qty . "</span>" . "<span style='display:inline-block; width: 15%; text-align: center'>" . $retail . "</span>". "<span style='display:inline-block; width: 15%; text-align: center'>" . number_format($tax ,2) . "</span>" . " <span style='display:inline-block;width: 22%; text-align: right'>" . $total . "</span></p>";
+                if ($fbr_registered == 't') {
+                    $inner .= $temp_inner;
+                } else {
+                    $inner2 .= $temp_inner;
+                }
+            }
+
+            if ($fbr_registered == 't') {
+                $taxable_amount += array_sum(array_column($sales_group , 'total'));
+                $sales_tax += 0;
+
+            } else {
+                $exempt_total += array_sum(array_column($sales_group , 'total'));
+            }
         }
 
         foreach ($this->refunds as $key => $s) {
@@ -176,15 +200,9 @@ class PrintController extends Controller
         //
 
         $print['inner'] = $inner;
+        $print['inner2'] = $inner2;
 
 
-        $print['footer'] = "               ";
-        $print['sub_total'] = str_pad("Sale Sub Total", 45, " ", STR_PAD_LEFT) .
-            str_pad(number_format($this->first['sub_total'], 2), 19, " ", STR_PAD_LEFT);
-        $print['discount'] = str_pad("Discount (PKR)", 45, " ", STR_PAD_LEFT) .
-            str_pad(number_format($this->first['sub_total'] - $this->first['gross_total'], 2), 19, " ", STR_PAD_LEFT);
-        $print['gross_total'] = str_pad("Sale after Discount", 45, " ", STR_PAD_LEFT) .
-            str_pad(number_format($this->first['gross_total'] + $val, 2), 19, " ", STR_PAD_LEFT);
         $refunded = 0;
         if (!empty($this->first['refunded_id'])) {
             $total_refund = SaleRefundDetail::from('sale_refund_details as sr')
@@ -224,6 +242,12 @@ class PrintController extends Controller
         $cash_refund_text = "Cash";
 
 
+        $print['taxable_amount'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Taxable Amount' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($taxable_amount, 2) . "</span>";
+        $print['sales_tax'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Sales Tax' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($sales_tax, 2) . "</span>";
+        $print['total_sales_tax_collected'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Total Sales Tax Collected' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($sales_tax, 2) . "</span>";
+        $print['taxable_total'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Taxable Total' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format(($taxable_amount + $sales_tax), 2) . "</span>";
+        $print['exempt_total'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Exempt Total' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($exempt_total, 2) . "</span>";
+
         $print['sub_total'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Sale Sub Total' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($this->first['sub_total'], 2) . "</span>";
         $print['discount'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Discount (PKR)' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($this->first['sub_total'] - $this->first['gross_total'], 2) . "</span>";
         $print['gross_total'] = "<p>" . "<span style='display:inline-block; width: 75%;!important; text-align: right'>" . 'Sale after Discount' . "</span>" . "<span style='display:inline-block; width: 25%; text-align: right'>" . number_format($this->first['gross_total'] + $val, 2) . "</span>";
@@ -238,7 +262,6 @@ class PrintController extends Controller
 
                 $cash_refund = number_format(abs($after_roundoff), 2);
             }
-
         }
 
         $print['receive_amount'] = str_pad($cash_refund_text, 45, " ", STR_PAD_LEFT) .
@@ -255,73 +278,6 @@ class PrintController extends Controller
             str_pad($credit, 19, " ", STR_PAD_LEFT);
 
         return $print;
-        $connector = new WindowsPrintConnector(config('app.printer_model'));
-//        $connector = new WindowsPrintConnector('POS-80C1');
-        $printer = new Printer($connector);
-
-
-        $printer->feed();
-//        $printer->selectPrintMode();
-        $printer->setFont(Printer::FONT_A);
-        $printer->setJustification(Printer::JUSTIFY_CENTER);
-        $printer->setTextSize(2, 2);
-        $printer->text($print['app_name']);
-        $printer->setFont(Printer::FONT_B);
-        $printer->feed(2);
-        $printer->setTextSize(1, 1);
-        $printer->text($print['address_1']);
-        $printer->feed();
-        $printer->text($print['address_2']);
-        $printer->feed(2);
-        if (!empty(env('RECEIPT_LICENSE_NO'))) {
-            $printer->text($print['license_no']);
-            $printer->feed(2);
-        }
-        $printer->text($print['invoice_no']);
-        $printer->feed();
-        $printer->text($print['reprint']);
-        $printer->feed();
-        $printer->setJustification(Printer::JUSTIFY_LEFT);
-        $printer->text($print['patient_name']);
-        $printer->text($print['father_husband_name']);
-        $printer->text($print['sale_by']);
-
-
-        $printer->text("================================================================");
-        $printer->text($print['heading']);
-        $printer->text("================================================================");
-        $printer->text($print['inner']);
-        $printer->text("----------------------------------------------------------------");
-
-        $printer->text($print['sub_total']);
-        $printer->text($print['discount']);
-
-        $printer->text($print['gross_total']);
-        $printer->text($print['refund']);
-        $printer->text($print['net_total']);
-        $printer->feed(2);
-
-        $printer->text($print['receive_amount']);
-        $printer->text($print['change_returned']);
-        $printer->setJustification(Printer::JUSTIFY_CENTER);
-        $printer->text("-----------------------");
-        $printer->feed();
-
-        $printer->setJustification(Printer::JUSTIFY_LEFT);
-        $printer->text($print['note']);
-        $printer->text($print['note2']);
-        $printer->feed(2);
-
-        $printer->setJustification(Printer::JUSTIFY_CENTER);
-        $printer->text($print['developer'] . " " . $print['developer_phone']);
-
-        $printer->feed(2);
-
-        $printer->cut();
-        $printer->pulse();
-
-        $printer->close();
-
     }
 
     private function onlinePrint($request, $id)
