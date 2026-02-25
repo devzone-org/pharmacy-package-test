@@ -157,7 +157,7 @@ class PrintController extends Controller
                 $tax = 0;
                 $total = str_pad($s['total'], 16, " ", STR_PAD_LEFT);
 
-                $temp_inner = "<p>" . "</span>" . "<span style='display:inline-block; width: 5%;'>" . $sr . "</span>" . "<span style='display:inline-block; width: 30%; white-space: nowrap;  text-overflow: ellipsis !important; overflow: hidden;'>" . $item . "</span>" . "<span style='display:inline-block; width: 10%; text-align: center'>" . $qty . "</span>" . "<span style='display:inline-block; width: 15%; text-align: center'>" . $retail . "</span>". "<span style='display:inline-block; width: 15%; text-align: center'>" . number_format($tax ,2) . "</span>" . " <span style='display:inline-block;width: 22%; text-align: right'>" . $total . "</span></p>";
+                $temp_inner = "<p>" . "</span>" . "<span style='display:inline-block; width: 5%;'>" . $sr . "</span>" . "<span style='display:inline-block; width: 30%; white-space: nowrap;  text-overflow: ellipsis !important; overflow: hidden;'>" . $item . "</span>" . "<span style='display:inline-block; width: 10%; text-align: center'>" . $qty . "</span>" . "<span style='display:inline-block; width: 15%; text-align: center'>" . number_format($retail,2) . "</span>". "<span style='display:inline-block; width: 15%; text-align: center'>" . number_format($tax ,2) . "</span>" . " <span style='display:inline-block;width: 22%; text-align: right'>" . number_format($total, 2) . "</span></p>";
                 if ($fbr_registered == 't') {
                     $inner .= $temp_inner;
                 } else {
@@ -186,7 +186,7 @@ class PrintController extends Controller
             $total = str_pad('-' . $s['refund_qty'] * $s['retail_price'], 16, " ", STR_PAD_LEFT);
 //            $inner .= $sr . $item . $qty . $retail . $total;
 
-            $inner .= "<p>" . "</span>" . "<span style='display:inline-block; width: 5%; text-align: center'>" . $sr . "</span>" . "<span style='display:inline-block; width: 30%; white-space: nowrap;  text-overflow: ellipsis !important; overflow: hidden;'>" . $item . "</span>" . "<span style='display:inline-block; width: 10%; text-align: center'>" . $qty . "</span>" . "<span style='display:inline-block; width: 15%; text-align: center'>" . $retail . "</span>" ."<span style='display:inline-block; width: 15%; text-align: center'></span>". " <span style='display:inline-block;width: 22%; text-align: right'>" . $total . "</span></p>";
+            $inner .= "<p>" . "</span>" . "<span style='display:inline-block; width: 5%; text-align: center'>" . $sr . "</span>" . "<span style='display:inline-block; width: 30%; white-space: nowrap;  text-overflow: ellipsis !important; overflow: hidden;'>" . $item . "</span>" . "<span style='display:inline-block; width: 10%; text-align: center'>" . $qty . "</span>" . "<span style='display:inline-block; width: 15%; text-align: center'>" . number_format($retail,2) . "</span>" ."<span style='display:inline-block; width: 15%; text-align: center'></span>". " <span style='display:inline-block;width: 22%; text-align: right'>" . number_format($total, 2) . "</span></p>";
 
         }
         //Round off
