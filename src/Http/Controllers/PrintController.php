@@ -91,10 +91,7 @@ class PrintController extends Controller
                 ->leftJoin('customers as c', 'c.id', '=', 'p.customer_id')
                 ->where('p.id', $first['patient_id'])
                 ->select('p.name', 'p.mr_no', 'p.gender', 'p.father_husband_name', 'p.account_id', 'c.credit_limit')->first();
-
-
         }
-
 
         $print = [];
         $print['feed'] = "                               ";
@@ -147,12 +144,12 @@ class PrintController extends Controller
         $key = 0;
         $taxable_amount = $sales_tax = $exempt_total = 0;
 
-        foreach (collect($this->sales)->groupBy('fbr_registered')->toArray() as $fbr_registered => $sales_group) {
+        foreach (collect($this->sales)->groupBy('fbr_registered')->sortByDesc(fn($group, $key) => $key)->toArray() as $fbr_registered => $sales_group) {
             foreach ($sales_group as  $s) {
                 $key++;
 
                 $product = preg_replace("/[^A-Za-z0-9\s]/", "", $s['product_name']);
-                $sr = str_pad(++$key, 3, " ");
+                $sr = str_pad($key, 3, " ");
                 $item = substr($product, 0, 25);
                 $item = str_pad($item, 25, " ");
                 $qty = str_pad($s['qty'], 8, " ", STR_PAD_LEFT);
@@ -177,17 +174,19 @@ class PrintController extends Controller
             }
         }
 
-        foreach ($this->refunds as $key => $s) {
-            $sr = str_pad(++$key + count($this->sales), 3, " ");
+        foreach ($this->refunds as $s) {
+            $key++;
+
+            $sr = str_pad($key, 3, " ");
             $product = preg_replace("/[^A-Za-z0-9\s]/", "", $s['product_name']);
             $item = substr('-' . $product, 0, 25);
             $item = str_pad($item, 25, " ");
             $qty = str_pad('-' . $s['refund_qty'], 8, " ", STR_PAD_LEFT);
             $retail = str_pad('-' . $s['retail_price'], 12, " ", STR_PAD_LEFT);
             $total = str_pad('-' . $s['refund_qty'] * $s['retail_price'], 16, " ", STR_PAD_LEFT);
-            $inner .= $sr . $item . $qty . $retail . $total;
+//            $inner .= $sr . $item . $qty . $retail . $total;
 
-            $inner .= "<p>" . "</span>" . "<span style='display:inline-block; width: 5%; text-align: center'>" . $sr . "</span>" . "<span style='display:inline-block; width: 40%; white-space: nowrap;  text-overflow: ellipsis !important; overflow: hidden;'>" . $item . "</span>" . "<span style='display:inline-block; width: 15%; text-align: center'>" . $qty . "</span>" . "<span style='display:inline-block; width: 18%; text-align: center'>" . $retail . "</span>" . " <span style='display:inline-block;width: 18%; text-align: right'>" . $total . "</span></p>";
+            $inner .= "<p>" . "</span>" . "<span style='display:inline-block; width: 5%; text-align: center'>" . $sr . "</span>" . "<span style='display:inline-block; width: 30%; white-space: nowrap;  text-overflow: ellipsis !important; overflow: hidden;'>" . $item . "</span>" . "<span style='display:inline-block; width: 10%; text-align: center'>" . $qty . "</span>" . "<span style='display:inline-block; width: 15%; text-align: center'>" . $retail . "</span>" ."<span style='display:inline-block; width: 15%; text-align: center'></span>". " <span style='display:inline-block;width: 22%; text-align: right'>" . $total . "</span></p>";
 
         }
         //Round off
